@@ -1854,18 +1854,7 @@ textarea:disabled {
     color:
         rgba(255,255,255,.84);
 
-    background:
-        radial-gradient(
-            circle at 16% 18%,
-            rgba(159,212,234,.09),
-            transparent 18rem
-        ),
-        radial-gradient(
-            circle at 82% 70%,
-            rgba(220,127,159,.08),
-            transparent 20rem
-        ),
-        #3d4349;
+    background: #363a3f;
 }
 
 .footer-top {
