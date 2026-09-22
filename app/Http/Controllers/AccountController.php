@@ -20,7 +20,17 @@ class AccountController extends Controller
             ->get();
 
         return view('account', [
+            'user' => $user,
             'orders' => $orders,
+            'statusNames' => [
+                'pending' => 'در انتظار',
+                'confirmed' => 'تأیید شده',
+                'preparing' => 'در حال آماده‌سازی',
+                'shipped' => 'ارسال شده',
+                'delivered' => 'تحویل شده',
+                'cancelled' => 'لغو شده',
+                'returned' => 'مرجوعی',
+            ],
         ]);
     }
 }
