@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
-use App\Models\SiteProfile;
 
 final class SeoService
 {
@@ -126,6 +125,6 @@ final class SeoService
 
     private function brandName(): string
     {
-        return SiteProfile::query()->value('site_name') ?: 'Janan';
+        return (string) env('JANAN_STORE_NAME', 'Janan');
     }
 }
