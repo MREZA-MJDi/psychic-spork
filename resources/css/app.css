@@ -5532,3 +5532,92 @@ body.store-body {
         padding-bottom: 86px;
     }
 }
+
+/* =========================================================
+   JANAN PUBLIC SHELL — FINAL HEADER CONTRACT
+   ========================================================= */
+
+.store-header__inner {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    min-height: 80px;
+    gap: 28px;
+}
+
+.store-header .brand {
+    justify-self: start;
+}
+
+.store-header .store-nav {
+    min-width: 0;
+    justify-self: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(18px, 2.4vw, 32px);
+}
+
+.store-header .store-nav__link {
+    white-space: nowrap;
+}
+
+.store-header .header-actions {
+    justify-self: end;
+}
+
+@media (max-width: 1080px) {
+    .store-header__inner {
+        gap: 18px;
+    }
+
+    .store-header .store-nav {
+        gap: 17px;
+    }
+
+    .store-header .store-nav__link {
+        font-size: 10px;
+    }
+}
+
+@media (max-width: 820px) {
+    .store-header {
+        position: sticky;
+    }
+
+    .store-header__inner {
+        grid-template-columns: auto minmax(0, 1fr);
+        min-height: 68px;
+        gap: 12px;
+    }
+
+    .store-header .brand {
+        justify-self: start;
+    }
+
+    .store-header .brand__latin {
+        font-size: 26px;
+    }
+
+    .store-header .brand__nastaliq {
+        margin-top: 3px;
+        font-size: 14px;
+    }
+
+    .store-header .store-nav,
+    .store-header .mobile-menu-toggle {
+        display: none !important;
+    }
+
+    .store-header .header-actions {
+        justify-self: end;
+        gap: 4px;
+    }
+
+    .store-header .header-account {
+        display: none;
+    }
+
+    .store-header .icon-button {
+        width: 37px;
+        height: 37px;
+    }
+}
