@@ -21,10 +21,10 @@
         @endif
     </title>
 
-    <link
-        rel="stylesheet"
-        href="{{ asset('css/admin.css') }}"
-    >
+    @vite([
+        'resources/css/admin.css',
+        'resources/js/admin.js',
+    ])
 
     @stack('styles')
 </head>
@@ -391,54 +391,6 @@
     id="adminOverlay"
 ></div>
 
-
-<script>
-    (() => {
-        const body = document.body;
-        const toggle = document.getElementById('adminMenuToggle');
-        const overlay = document.getElementById('adminOverlay');
-
-        if (!toggle) {
-            return;
-        }
-
-        const openMenu = () => {
-            body.classList.add('admin-menu-open');
-            toggle.setAttribute('aria-expanded', 'true');
-        };
-
-        const closeMenu = () => {
-            body.classList.remove('admin-menu-open');
-            toggle.setAttribute('aria-expanded', 'false');
-        };
-
-        toggle.addEventListener('click', () => {
-            if (body.classList.contains('admin-menu-open')) {
-                closeMenu();
-            } else {
-                openMenu();
-            }
-        });
-
-        overlay?.addEventListener('click', closeMenu);
-
-        document
-            .querySelectorAll('.admin-nav__link')
-            .forEach((link) => {
-                link.addEventListener('click', () => {
-                    if (window.innerWidth <= 960) {
-                        closeMenu();
-                    }
-                });
-            });
-
-        window.addEventListener('resize', () => {
-            if (window.innerWidth > 960) {
-                closeMenu();
-            }
-        });
-    })();
-</script>
 
 @stack('scripts')
 
