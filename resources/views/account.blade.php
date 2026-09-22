@@ -7,7 +7,7 @@
     <div class="container">
         <span class="eyebrow">MY JANAN</span>
         <h1>حساب کاربری</h1>
-        <p>{{ auth()->user()->name }} عزیز، خوش آمدی. اینجا فضای شخصی جانان برای مدیریت حساب و ادامه خرید توست.</p>
+        <p>{{ $user->name }} عزیز، خوش آمدی. اینجا فضای شخصی جانان برای مدیریت حساب و ادامه خرید توست.</p>
     </div>
 </section>
 
@@ -16,8 +16,8 @@
         <div class="account-card">
             <div>
                 <span class="eyebrow">PROFILE</span>
-                <h2>{{ auth()->user()->name }}</h2>
-                <p>{{ auth()->user()->email }}</p>
+                <h2>{{ $user->name }}</h2>
+                <p>{{ $user->email }}</p>
             </div>
 
             @if(session('success'))
@@ -25,7 +25,7 @@
             @endif
 
             <div class="account-actions">
-                @if(auth()->user()->is_admin)
+                @if($user->isAdmin())
                     <a class="button button--dark" href="{{ route('admin.dashboard') }}">ورود به داشبورد مدیریت</a>
                 @endif
                 <a class="button button--primary" href="{{ url('/products') }}">ادامه خرید</a>
@@ -50,7 +50,7 @@
                             <div>
                                 <b>{{ number_format($order->total) }} تومان</b>
                                 <span>{{ number_format($order->items_count) }} قلم ·
-                                    {{ ['pending'=>'در انتظار','confirmed'=>'تأیید شده','preparing'=>'در حال آماده‌سازی','shipped'=>'ارسال شده','delivered'=>'تحویل شده','cancelled'=>'لغو شده','returned'=>'مرجوعی'][$order->status] ?? $order->status }}
+                                    {{ $statusNames[$order->status] ?? $order->status }}
                                 </span>
                             </div>
                         </article>
