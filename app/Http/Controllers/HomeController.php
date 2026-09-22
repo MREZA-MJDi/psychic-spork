@@ -58,19 +58,30 @@ class HomeController extends Controller
                 ->get();
         }
 
-        $heroSlides = $products
+        $heroProducts = Product::query()
+            ->active()
+            ->with(['brand.logoMedia', 'galleryMedia', 'variants'])
+            ->inRandomOrder()
             ->take(4)
+            ->get();
+
+        $heroSlides = $heroProducts
             ->values()
-            ->map(fn (Product $product, int $index): array => [
-                'image' => $product->galleryMedia->first()?->url,
-                'title' => $product->name,
-                'brand' => $product->brand?->name ?? 'JANAN',
-                'url' => route('products.show', $product),
-                'index' => $index,
-            ])
+            ->map(function (Product $product, int $index): array {
+                $productImage = $product->galleryMedia->first()?->url;
+                $brandImage = $product->brand?->logoMedia?->url;
+
+                return [
+                    'image' => $productImage ?: $brandImage,
+                    'title' => $product->name,
+                    'brand' => $product->brand?->name ?? 'JANAN',
+                    'url' => route('products.show', $product),
+                    'index' => $index,
+                ];
+            })
             ->all();
 
-        return view('welcome', [
+        return view('home.index', [
             'categories' => $categories,
             'brands' => $brands,
             'products' => $products,
