@@ -4,7 +4,7 @@
     $categoryImage = $category?->coverMedia?->url;
 @endphp
 
-<section class="section-block section-block--tight">
+<section class="home-section home-section--banners">
     <div class="container">
         <div class="mini-banner-grid">
             <a class="mini-banner reveal-up" href="{{ route('products.index') }}">
