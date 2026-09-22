@@ -44,7 +44,7 @@ class ProductSeeder extends Seeder
                 continue;
             }
 
-            $product = Product::updateOrCreate(
+            $product = Product::firstOrCreate(
                 ['slug' => $data['slug']],
                 [
                     'category_id' => $categoryId,
@@ -58,7 +58,7 @@ class ProductSeeder extends Seeder
                 ]
             );
 
-            $variant = ProductVariant::updateOrCreate(
+            $variant = ProductVariant::firstOrCreate(
                 ['sku' => $data['sku']],
                 [
                     'product_id' => $product->id,
@@ -80,7 +80,7 @@ class ProductSeeder extends Seeder
                 'JANAN PRODUCT'
             );
 
-            Media::updateOrCreate(
+            Media::firstOrCreate(
                 [
                     'mediable_type' => Product::class,
                     'mediable_id' => $product->id,
