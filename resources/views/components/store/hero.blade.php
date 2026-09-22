@@ -30,7 +30,7 @@
                 data-slot="{{ $slot }}"
                 data-slide-index="{{ $slideIndex }}"
             >
-                @if($slide?->image ?? null)
+                @if(!empty($slide['image'] ?? null))
                     <img
                         class="{{ $slot === 4 ? 'janan-main-image' : '' }}"
                         src="{{ $slide['image'] }}"
