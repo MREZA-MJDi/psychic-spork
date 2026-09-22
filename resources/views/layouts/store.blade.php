@@ -41,6 +41,10 @@
         'resources/js/app.js',
         'resources/js/editorial-hero.js',
     ])
+
+    @if(request()->routeIs('home'))
+        @vite('resources/css/home.css')
+    @endif
 </head>
 <body class="store-body">
 <div class="site-shell">
