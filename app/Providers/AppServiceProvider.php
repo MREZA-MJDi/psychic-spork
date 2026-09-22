@@ -15,6 +15,17 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        View::share([
+            'siteBrandNameLatin' => 'Janan',
+            'siteBrandNameFa' => 'جانان',
+            'siteBrandName' => 'جانان',
+            'siteFooterText' => 'فروشگاه آنلاین جانان؛ انتخاب دقیق، تجربه‌ای ساده و سفارش مطمئن.',
+            'siteStorePhone' => env('JANAN_STORE_PHONE'),
+            'siteStoreEmail' => env('JANAN_STORE_EMAIL'),
+            'siteStoreAddress' => env('JANAN_STORE_ADDRESS'),
+            'siteStoreWorkingHours' => env('JANAN_STORE_WORKING_HOURS'),
+        ]);
+
         View::composer('layouts.store', function ($view): void {
             $cart = auth()->check()
                 ? auth()->user()->cart
@@ -22,17 +33,10 @@ class AppServiceProvider extends ServiceProvider
                     ->where('session_id', request()->session()->getId())
                     ->first();
 
-            $view->with([
-                'cartCount' => (int) ($cart?->items()->sum('quantity') ?? 0),
-                'siteBrandNameLatin' => 'Janan',
-                'siteBrandNameFa' => 'جانان',
-                'siteBrandName' => 'جانان',
-                'siteFooterText' => 'فروشگاه آنلاین جانان؛ انتخاب دقیق، تجربه‌ای ساده و سفارش مطمئن.',
-                'siteStorePhone' => env('JANAN_STORE_PHONE'),
-                'siteStoreEmail' => env('JANAN_STORE_EMAIL'),
-                'siteStoreAddress' => env('JANAN_STORE_ADDRESS'),
-                'siteStoreWorkingHours' => env('JANAN_STORE_WORKING_HOURS'),
-            ]);
+            $view->with(
+                'cartCount',
+                (int) ($cart?->items()->sum('quantity') ?? 0)
+            );
         });
     }
 }
