@@ -85,10 +85,24 @@ class AdminOrderController extends AdminController
             'payments',
         ]);
 
-        return view(
-            'admin.orders.show',
-            compact('order')
-        );
+        return view('admin.orders.show', [
+            'order' => $order,
+            'statusNames' => [
+                'pending' => 'در انتظار',
+                'confirmed' => 'تأیید شده',
+                'preparing' => 'در حال آماده‌سازی',
+                'shipped' => 'ارسال شده',
+                'delivered' => 'تحویل شده',
+                'cancelled' => 'لغو شده',
+                'returned' => 'مرجوعی',
+            ],
+            'paymentStatusNames' => [
+                'pending' => 'در انتظار',
+                'paid' => 'پرداخت شده',
+                'failed' => 'ناموفق',
+                'refunded' => 'بازپرداخت شده',
+            ],
+        ]);
     }
 
     public function update(
