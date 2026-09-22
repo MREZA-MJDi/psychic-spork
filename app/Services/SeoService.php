@@ -125,6 +125,6 @@ final class SeoService
 
     private function brandName(): string
     {
-        return (string) env('JANAN_STORE_NAME', 'Janan');
+        return (string) config('app.store_name', 'Janan');
     }
 }
