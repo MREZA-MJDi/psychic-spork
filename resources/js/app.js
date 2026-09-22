@@ -25,6 +25,45 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    document.querySelectorAll('[data-password-toggle]').forEach((toggle) => {
+        toggle.addEventListener('click', () => {
+            const wrapper = toggle.closest('.auth-password-wrap');
+            const input = wrapper?.querySelector('input[data-password-input]');
+
+            if (!input) return;
+
+            const showing = input.type === 'text';
+            input.type = showing ? 'password' : 'text';
+            toggle.setAttribute('aria-pressed', String(!showing));
+            toggle.setAttribute(
+                'aria-label',
+                showing ? 'نمایش رمز عبور' : 'مخفی کردن رمز عبور'
+            );
+        });
+    });
+
+    const passwordSource = document.querySelector('[data-password-meter-source]');
+    const passwordMeter = document.querySelector('[data-password-meter]');
+
+    if (passwordSource && passwordMeter) {
+        const updatePasswordMeter = () => {
+            const value = passwordSource.value || '';
+            let strength = 0;
+
+            if (value.length >= 8) strength += 25;
+            if (value.length >= 12) strength += 20;
+            if (/[a-z]/.test(value)) strength += 15;
+            if (/[A-Z]/.test(value)) strength += 15;
+            if (/\d/.test(value)) strength += 10;
+            if (/[^a-zA-Z\d]/.test(value)) strength += 15;
+
+            passwordMeter.style.width = Math.min(strength, 100) + '%';
+        };
+
+        passwordSource.addEventListener('input', updatePasswordMeter);
+        updatePasswordMeter();
+    }
+
     const hero = document.querySelector('[data-janan-hero]');
 
     if (hero) {
