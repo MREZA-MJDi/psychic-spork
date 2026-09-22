@@ -90,12 +90,9 @@ class AdminFinancialController extends AdminController
 
         return view('admin.accounting.index', [
             'transactions' => $transactions,
-
-            'summary' => [
-                'income' => $income,
-                'expense' => $expense,
-                'net' => $income - $expense,
-            ],
+            'income' => $income,
+            'expense' => $expense,
+            'net' => $income - $expense,
         ]);
     }
 
