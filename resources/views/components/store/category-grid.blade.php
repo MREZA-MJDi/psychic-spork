@@ -1,5 +1,5 @@
 @php($visibleCategories = $categories->take(5))
-<section class="section-block section-block--no-top home-collections">
+<section class="home-section home-section--collections">
     <div class="container">
         <div class="section-head home-section-head">
             <div><span class="eyebrow">COLLECTIONS / 01</span><h2>دسته‌بندی را انتخاب کن.</h2><p>چند مسیر برای رسیدن به انتخابی که دقیقاً حال تو را دارد.</p></div>
