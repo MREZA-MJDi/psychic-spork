@@ -22,7 +22,7 @@ class BrandSeeder extends Seeder
         ];
 
         foreach ($brands as $data) {
-            $brand = Brand::updateOrCreate(
+            $brand = Brand::firstOrCreate(
                 ['slug' => $data['slug']],
                 [
                     'name' => $data['name'],
@@ -37,7 +37,7 @@ class BrandSeeder extends Seeder
                 'JANAN BRAND'
             );
 
-            Media::updateOrCreate(
+            Media::firstOrCreate(
                 [
                     'mediable_type' => Brand::class,
                     'mediable_id' => $brand->id,
