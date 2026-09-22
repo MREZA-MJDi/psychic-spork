@@ -32,13 +32,18 @@
                 @csrf
 
                 <label>
-                    ایمیل
-                    <input type="email" name="email" value="{{ old('email') }}" placeholder="you@example.com" autocomplete="email" required autofocus>
+                    ایمیل یا نام کاربری
+                    <input type="text" name="identifier" value="{{ old('identifier') }}" placeholder="admin@janan.local یا Janan Admin" autocomplete="username" autocapitalize="none" spellcheck="false" required autofocus>
                 </label>
 
                 <label>
                     رمز عبور
-                    <input type="password" name="password" placeholder="رمز عبور" autocomplete="current-password" required>
+                    <div class="auth-input-wrap auth-password-wrap">
+                        <input type="password" name="password" placeholder="رمز عبور" autocomplete="current-password" required data-password-input>
+                        <button class="auth-password-toggle" type="button" data-password-toggle aria-label="نمایش رمز عبور" aria-pressed="false">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-5 9.5-5 9.5 5 9.5 5-3.5 5-9.5 5-9.5-5-9.5-5Z"/><circle cx="12" cy="12" r="2.5"/></svg>
+                        </button>
+                    </div>
                 </label>
 
                 <div class="auth-form__row">
