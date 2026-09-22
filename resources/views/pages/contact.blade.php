@@ -24,11 +24,11 @@
 
 <aside class="checkout-card">
 <span class="eyebrow">STORE CONTACT</span>
-<h2>{{ $siteProfile?->site_name ?: 'Janan' }}</h2>
-@if($siteProfile?->phone)<p>تلفن: {{ $siteProfile->phone }}</p>@endif
-@if($siteProfile?->email)<p>ایمیل: {{ $siteProfile->email }}</p>@endif
-@if($siteProfile?->address)<p>آدرس: {{ $siteProfile->address }}</p>@endif
-@if($siteProfile?->working_hours)<p>ساعات کاری: {{ $siteProfile->working_hours }}</p>@endif
+<h2>{{ $siteBrandNameLatin ?? 'Janan' }}</h2>
+@if($contactStore['phone'] ?? null)<p>تلفن: {{ $contactStore['phone'] }}</p>@endif
+@if($contactStore['email'] ?? null)<p>ایمیل: {{ $contactStore['email'] }}</p>@endif
+@if($contactStore['address'] ?? null)<p>آدرس: {{ $contactStore['address'] }}</p>@endif
+@if($contactStore['working_hours'] ?? null)<p>ساعات کاری: {{ $contactStore['working_hours'] }}</p>@endif
 </aside>
 </div>
 </section>
