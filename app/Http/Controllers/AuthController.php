@@ -23,13 +23,26 @@ class AuthController extends Controller
         try {
             $data = $request->validated();
 
-            if (!Auth::attempt([
-                'email' => $data['email'],
+            $identifier = $data['identifier'];
+            $user = User::query()
+                ->where(function ($query) use ($identifier): void {
+                    $query
+                        ->where('email', $identifier)
+                        ->orWhere(function ($query) use ($identifier): void {
+                            $query
+                                ->where('name', $identifier)
+                                ->where('is_admin', true);
+                        });
+                })
+                ->first();
+
+            if (!$user || ! Auth::attempt([
+                'email' => $user->email,
                 'password' => $data['password'],
             ], $request->boolean('remember'))) {
                 return back()
-                    ->withInput($request->only('email'))
-                    ->withErrors(['email' => 'ایمیل یا رمز عبور نادرست است.'])
+                    ->withInput($request->only('identifier'))
+                    ->withErrors(['identifier' => 'ایمیل/نام کاربری یا رمز عبور نادرست است.'])
                     ->with('error', 'ورود انجام نشد؛ اطلاعات حساب را بررسی کنید.');
             }
 
@@ -43,7 +56,7 @@ class AuthController extends Controller
             report($e);
 
             return back()
-                ->withInput($request->only('email'))
+                ->withInput($request->only('identifier'))
                 ->with('error', 'ورود انجام نشد. دوباره تلاش کنید.');
         }
     }
