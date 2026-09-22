@@ -41,14 +41,12 @@
                     <div class="visual-placeholder"><span>JANAN</span></div>
                 @endif
 
-                @if($slot === 4)
-                    <div class="janan-main-overlay"></div>
-                    <div class="janan-main-info">
-                        <span class="janan-main-label">JANAN COLLECTION</span>
-                        <h2 class="janan-main-title">{{ $slide['title'] ?? 'کالکشن جانان' }}</h2>
-                        <span class="janan-main-brand">{{ $slide['brand'] ?? 'JANAN' }}</span>
-                    </div>
-                @endif
+                <div class="janan-main-overlay"></div>
+                <div class="janan-main-info">
+                    <span class="janan-main-label">JANAN COLLECTION</span>
+                    <h2 class="janan-main-title">{{ $slide['title'] ?? 'کالکشن جانان' }}</h2>
+                    <span class="janan-main-brand">{{ $slide['brand'] ?? 'JANAN' }}</span>
+                </div>
             </article>
         @endforeach
 
@@ -424,7 +422,7 @@
     }
 
 
-    #jaananSlider .janan-main-overlay {
+    #jaananSlider .janan-main-card .janan-main-overlay {
         position: absolute;
 
         inset: 0;
@@ -440,7 +438,7 @@
     }
 
 
-    #jaananSlider .janan-main-info {
+    #jaananSlider .janan-main-card .janan-main-info {
         position: absolute;
 
         left: 25px;
@@ -903,6 +901,8 @@
         }
 
         slotSlides = nextSlotSlides;
+        cards.forEach(card => card.classList.remove("janan-main-card"));
+        cards[direction === 1 ? 3 : 0].classList.add("janan-main-card");
         renderAll();
         setCurrentFromMain();
 
