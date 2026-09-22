@@ -18,8 +18,8 @@
             <p>بله. صفحات عمومی قیمت، تخفیف و وضعیت موجودی محصولات فعال را از مدل Product می‌خوانند.</p>
         </details>
         <details class="faq-item reveal-up" style="--delay:.06s">
-            <summary><span>آیا Hero هم به محصولات متصل است؟</span><i>+</i></summary>
-            <p>خیر. Hero یک موجودیت مستقل است و بنرهای آن از بخش «تنظیمات Hero Banner» در پنل مدیریت مدیریت می‌شوند؛ تصویر و محتوای Hero از محصول خوانده نمی‌شود.</p>
+            <summary><span>آیا محتوای Hero با محصولات فروشگاه هماهنگ است؟</span><i>+</i></summary>
+            <p>بله. Hero در صفحه اصلی از محصولات فعال و برندهای مرتبط فروشگاه داده می‌گیرد و در هر بار نمایش، ترکیب محصولات به‌صورت پویا انتخاب می‌شود.</p>
         </details>
         <details class="faq-item reveal-up" style="--delay:.12s">
             <summary><span>شرایط ارسال و مرجوعی کجاست؟</span><i>+</i></summary>
