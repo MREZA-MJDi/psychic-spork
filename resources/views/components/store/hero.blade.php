@@ -1,175 +1,69 @@
 <section class="janan-editorial-hero" id="jaananSlider">
-
     <div class="janan-hero-copy">
-
-        <span class="janan-hero-eyebrow">
-            NEW COLLECTION — 2026
-        </span>
-
-        <h1>
-            Feel<br>
-            <em>Beautiful.</em>
-        </h1>
-
-        <p>
-            A delicate collection designed around confidence,
-            comfort and the beauty of everyday femininity.
-        </p>
-
+        <span class="janan-hero-eyebrow">NEW COLLECTION — 2026</span>
+        <h1>Feel<br><em>Beautiful.</em></h1>
+        <p>یک انتخاب نرم و دقیق، ساخته‌شده از محصولات واقعی فروشگاه جانان و برندهای فعال آن.</p>
         <a href="{{ route('products.index') }}" class="janan-hero-btn">
-            Explore Collection
-            <span>↗</span>
+            Explore Collection <span>↗</span>
         </a>
-
     </div>
-
 
     <div class="janan-hero-visual">
-
         <div class="janan-visual-glow"></div>
 
+        @php
+            $slides = array_values($heroSlides ?? []);
+            $slideCount = max(1, count($slides));
+            $slotIndexes = [
+                2 % $slideCount,
+                1 % $slideCount,
+                0,
+                3 % $slideCount,
+                0,
+            ];
+        @endphp
 
-        {{-- =====================================================
-             CARD 01
-        ====================================================== --}}
-        <article
-            class="janan-product-card janan-card-one"
-            data-index="0"
-        >
-            <img
-                src="{{ $heroSlides[2]['image'] ?? '' }}"
-                alt="{{ $heroSlides[2]['title'] ?? 'JANAN Collection' }}"
-                draggable="false"
+        @foreach($slotIndexes as $slot => $slideIndex)
+            @php($slide = $slides[$slideIndex] ?? null)
+            <article
+                class="janan-product-card {{ $slot === 4 ? 'janan-main-card' : 'janan-card-' . ['one','two','three','four'][$slot] }}"
+                data-slot="{{ $slot }}"
+                data-slide-index="{{ $slideIndex }}"
             >
-        </article>
+                @if($slide?->image ?? null)
+                    <img
+                        class="{{ $slot === 4 ? 'janan-main-image' : '' }}"
+                        src="{{ $slide['image'] }}"
+                        alt="{{ $slide['title'] }}"
+                        draggable="false"
+                    >
+                @else
+                    <div class="visual-placeholder"><span>JANAN</span></div>
+                @endif
 
+                @if($slot === 4)
+                    <div class="janan-main-overlay"></div>
+                    <div class="janan-main-info">
+                        <span class="janan-main-label">JANAN COLLECTION</span>
+                        <h2 class="janan-main-title">{{ $slide['title'] ?? 'کالکشن جانان' }}</h2>
+                        <span class="janan-main-brand">{{ $slide['brand'] ?? 'JANAN' }}</span>
+                    </div>
+                @endif
+            </article>
+        @endforeach
 
-        {{-- =====================================================
-             CARD 02
-        ====================================================== --}}
-        <article
-            class="janan-product-card janan-card-two"
-            data-index="1"
-        >
-            <img
-                src="{{ $heroSlides[1]['image'] ?? '' }}"
-                alt="{{ $heroSlides[1]['title'] ?? 'JANAN Collection' }}"
-                draggable="false"
-            >
-        </article>
-
-
-        {{-- =====================================================
-             CARD 03
-        ====================================================== --}}
-        <article
-            class="janan-product-card janan-card-three"
-            data-index="2"
-        >
-            <img
-                src="{{ $heroSlides[0]['image'] ?? '' }}"
-                alt="{{ $heroSlides[0]['title'] ?? 'JANAN Collection' }}"
-                draggable="false"
-            >
-        </article>
-
-
-        {{-- =====================================================
-             CARD 04
-        ====================================================== --}}
-        <article
-            class="janan-product-card janan-card-four"
-            data-index="3"
-        >
-            <img
-                src="{{ $heroSlides[3]['image'] ?? '' }}"
-                alt="{{ $heroSlides[3]['title'] ?? 'JANAN Collection' }}"
-                draggable="false"
-            >
-        </article>
-
-
-        {{-- =====================================================
-             ACTIVE CARD
-        ====================================================== --}}
-        <article
-            class="janan-product-card janan-main-card"
-            data-index="4"
-        >
-
-            <img
-                class="janan-main-image"
-                src="{{ $heroSlides[0]['image'] ?? '' }}"
-                alt="{{ $heroSlides[0]['title'] ?? 'JANAN Collection' }}"
-                draggable="false"
-            >
-
-            <div class="janan-main-overlay"></div>
-
-            <div class="janan-main-info">
-
-                <span class="janan-main-label">
-                    JANAN COLLECTION
-                </span>
-
-                <h2 class="janan-main-title">
-                    {{ $heroSlides[0]['title'] ?? 'کالکشن جانان' }}
-                </h2>
-
-                <span class="janan-main-brand">
-                    {{ $heroSlides[0]['brand'] ?? 'JANAN' }}
-                </span>
-
-            </div>
-
-        </article>
-
-
-        {{-- =====================================================
-             NUMBER
-        ====================================================== --}}
         <div class="janan-slider-number">
-
-            <span class="janan-current">
-                01
-            </span>
-
+            <span class="janan-current">01</span>
             <i></i>
-
-            <span class="janan-total">
-                04
-            </span>
-
+            <span class="janan-total">{{ str_pad((string) $slideCount, 2, '0', STR_PAD_LEFT) }}</span>
         </div>
 
-
-        {{-- =====================================================
-             CONTROLS
-        ====================================================== --}}
         <div class="janan-slider-controls">
-
-            <button
-                type="button"
-                class="janan-slider-arrow janan-prev"
-                aria-label="Previous slide"
-            >
-                <span>←</span>
-            </button>
-
-            <button
-                type="button"
-                class="janan-slider-arrow janan-next"
-                aria-label="Next slide"
-            >
-                <span>→</span>
-            </button>
-
+            <button type="button" class="janan-slider-arrow janan-prev" aria-label="Previous slide"><span>←</span></button>
+            <button type="button" class="janan-slider-arrow janan-next" aria-label="Next slide"><span>→</span></button>
         </div>
-
     </div>
-
 </section>
-
 
 <style>
 
@@ -900,608 +794,151 @@
 </style>
 
 
+
 <script>
+(function () {
+    const root = document.querySelector("#jaananSlider");
+    if (!root) return;
 
-    (function () {
+    const cards = Array.from(root.querySelectorAll(".janan-product-card"));
+    const current = root.querySelector(".janan-current");
+    const next = root.querySelector(".janan-next");
+    const prev = root.querySelector(".janan-prev");
 
-        const root = document.querySelector("#jaananSlider");
+    const slides = @json(array_values($slides ?? []));
+    if (!slides.length) return;
 
-        if (!root) {
-            return;
+    let slotSlides = [
+        2 % slides.length,
+        1 % slides.length,
+        0,
+        3 % slides.length,
+        0
+    ];
+
+    let busy = false;
+    let timer = null;
+
+    function positions() {
+        return [
+            {left:"20px",top:"40px",right:"auto",bottom:"auto",width:"190px",height:"265px",transform:"rotate(-6deg)",z:2},
+            {left:"180px",top:"170px",right:"auto",bottom:"auto",width:"205px",height:"285px",transform:"rotate(3deg)",z:4},
+            {left:"auto",top:"48px",right:"15px",bottom:"auto",width:"185px",height:"255px",transform:"rotate(6deg)",z:2},
+            {left:"auto",top:"auto",right:"70px",bottom:"28px",width:"175px",height:"245px",transform:"rotate(-5deg)",z:3},
+            {left:"50%",top:"50%",right:"auto",bottom:"auto",width:"270px",height:"370px",transform:"translate(-50%, -50%) rotate(-1deg) scale(1)",z:10}
+        ];
+    }
+
+    function applyPosition(card, p) {
+        card.style.left = p.left;
+        card.style.right = p.right;
+        card.style.top = p.top;
+        card.style.bottom = p.bottom;
+        card.style.width = p.width;
+        card.style.height = p.height;
+        card.style.transform = p.transform;
+        card.style.zIndex = p.z;
+    }
+
+    function renderCard(card, slideIndex) {
+        const slide = slides[slideIndex] || {};
+        let image = card.querySelector("img");
+        if (!image && slide.image) {
+            image = document.createElement("img");
+            card.prepend(image);
         }
-
-
-        const cards = Array.from(
-            root.querySelectorAll(".janan-product-card")
-        );
-
-
-        const mainImage =
-            root.querySelector(".janan-main-image");
-
-
-        const current =
-            root.querySelector(".janan-current");
-
-
-        const prev =
-            root.querySelector(".janan-prev");
-
-
-        const next =
-            root.querySelector(".janan-next");
-
-
-        const mainTitle =
-            root.querySelector(".janan-main-title");
-
-
-        const mainBrand =
-            root.querySelector(".janan-main-brand");
-
-
-        const slides = @json($heroSlides);
-
-
-        let activeIndex = 0;
-
-        let busy = false;
-
-
-        /* =========================================================
-           POSITIONS
-        ========================================================== */
-
-        function getPositions() {
-
-            return [
-
-                {
-                    left: "20px",
-                    top: "40px",
-                    right: "auto",
-                    bottom: "auto",
-                    width: "190px",
-                    height: "265px",
-                    transform: "rotate(-6deg)",
-                    z: 2
-                },
-
-                {
-                    left: "180px",
-                    top: "170px",
-                    right: "auto",
-                    bottom: "auto",
-                    width: "205px",
-                    height: "285px",
-                    transform: "rotate(3deg)",
-                    z: 4
-                },
-
-                {
-                    left: "auto",
-                    top: "48px",
-                    right: "15px",
-                    bottom: "auto",
-                    width: "185px",
-                    height: "255px",
-                    transform: "rotate(6deg)",
-                    z: 2
-                },
-
-                {
-                    left: "auto",
-                    top: "auto",
-                    right: "70px",
-                    bottom: "28px",
-                    width: "175px",
-                    height: "245px",
-                    transform: "rotate(-5deg)",
-                    z: 3
-                },
-
-                {
-                    left: "50%",
-                    top: "50%",
-                    right: "auto",
-                    bottom: "auto",
-                    width: "270px",
-                    height: "370px",
-                    transform:
-                        "translate(-50%, -50%) rotate(-1deg) scale(1)",
-                    z: 10
-                }
-
-            ];
-
+        if (image) {
+            image.src = slide.image || "";
+            image.alt = slide.title || "Janan";
         }
+        card.dataset.slideIndex = String(slideIndex);
 
+        const title = card.querySelector(".janan-main-title");
+        const brand = card.querySelector(".janan-main-brand");
+        if (title) title.textContent = slide.title || "کالکشن جانان";
+        if (brand) brand.textContent = slide.brand || "JANAN";
+    }
 
-        /* =========================================================
-           APPLY POSITION
-        ========================================================== */
+    function renderAll() {
+        cards.forEach((card, index) => renderCard(card, slotSlides[index]));
+    }
 
-        function applyPosition(card, position) {
+    function setCurrentFromMain() {
+        const mainIndex = slotSlides[4];
+        current.textContent = String(mainIndex + 1).padStart(2, "0");
+    }
 
-            card.style.left =
-                position.left;
+    function go(direction = 1) {
+        if (busy || cards.length < 5) return;
+        busy = true;
 
-            card.style.right =
-                position.right;
+        const p = positions();
+        cards.forEach(card => card.classList.add("is-moving"));
 
-            card.style.top =
-                position.top;
+        cards.forEach(card => card.style.transition = "none");
+        cards.forEach((card, index) => applyPosition(card, p[index]));
+        void root.offsetWidth;
+        cards.forEach(card => card.style.transition = "");
 
-            card.style.bottom =
-                position.bottom;
+        const nextSlotSlides = direction === 1
+            ? [slotSlides[4], slotSlides[0], slotSlides[1], slotSlides[2], slotSlides[3]]
+            : [slotSlides[1], slotSlides[2], slotSlides[3], slotSlides[4], slotSlides[0]];
 
-            card.style.width =
-                position.width;
-
-            card.style.height =
-                position.height;
-
-            card.style.transform =
-                position.transform;
-
-            card.style.zIndex =
-                position.z;
-
-        }
-
-
-        /* =========================================================
-           INITIAL
-        ========================================================== */
-
-        function setupCards() {
-
-            const positions =
-                getPositions();
-
-            cards.forEach((card, index) => {
-
-                applyPosition(
-                    card,
-                    positions[index]
-                );
-
+        if (direction === 1) {
+            requestAnimationFrame(() => {
+                applyPosition(cards[0], p[1]);
+                applyPosition(cards[1], p[2]);
+                applyPosition(cards[2], p[3]);
+                applyPosition(cards[3], p[4]);
+                applyPosition(cards[4], p[0]);
             });
-
-        }
-
-
-        /* =========================================================
-           CONTENT
-        ========================================================== */
-
-        function updateContent(index) {
-
-            const data =
-                slides[index];
-
-            mainImage.style.opacity = "0";
-
-
-            setTimeout(() => {
-
-                mainImage.src =
-                    data.image;
-
-                mainTitle.innerHTML =
-                    data.title;
-
-                mainBrand.textContent =
-                    data.brand || "JANAN";
-
-
-                mainImage.onload = () => {
-
-                    mainImage.style.opacity = "1";
-
-                };
-
-
-                if (mainImage.complete) {
-
-                    mainImage.style.opacity = "1";
-
-                }
-
-            }, 240);
-
-
-            current.textContent =
-                String(index + 1).padStart(2, "0");
-
-        }
-
-
-        /* =========================================================
-           SLIDE
-        ========================================================== */
-
-        function go(direction) {
-
-            if (busy) {
-                return;
-            }
-
-            busy = true;
-
-
-            const positions =
-                getPositions();
-
-
-            cards.forEach(card => {
-
-                card.classList.add("is-moving");
-
+        } else {
+            requestAnimationFrame(() => {
+                applyPosition(cards[1], p[0]);
+                applyPosition(cards[2], p[1]);
+                applyPosition(cards[3], p[2]);
+                applyPosition(cards[4], p[3]);
+                applyPosition(cards[0], p[4]);
             });
-
-
-            if (direction === 1) {
-
-                const incoming =
-                    cards[3];
-
-
-                incoming.classList.add(
-                    "becoming-main"
-                );
-
-                incoming.style.zIndex = "30";
-
-
-                cards.forEach(card => {
-
-                    card.style.transition =
-                        "none";
-
-                });
-
-
-                applyPosition(
-                    cards[0],
-                    positions[0]
-                );
-
-                applyPosition(
-                    cards[1],
-                    positions[1]
-                );
-
-                applyPosition(
-                    cards[2],
-                    positions[2]
-                );
-
-                applyPosition(
-                    cards[3],
-                    positions[3]
-                );
-
-                applyPosition(
-                    cards[4],
-                    positions[4]
-                );
-
-
-                void root.offsetWidth;
-
-
-                cards.forEach(card => {
-
-                    card.style.transition = "";
-
-                });
-
-
-                requestAnimationFrame(() => {
-
-                    applyPosition(
-                        cards[0],
-                        positions[1]
-                    );
-
-                    applyPosition(
-                        cards[1],
-                        positions[2]
-                    );
-
-                    applyPosition(
-                        cards[2],
-                        positions[3]
-                    );
-
-                    applyPosition(
-                        cards[3],
-                        positions[4]
-                    );
-
-                    applyPosition(
-                        cards[4],
-                        positions[0]
-                    );
-
-                });
-
-
-                activeIndex =
-                    (activeIndex + 1) % slides.length;
-
-            }
-
-
-            else {
-
-                const incoming =
-                    cards[0];
-
-
-                incoming.classList.add(
-                    "becoming-main"
-                );
-
-                incoming.style.zIndex = "30";
-
-
-                cards.forEach(card => {
-
-                    card.style.transition =
-                        "none";
-
-                });
-
-
-                applyPosition(
-                    cards[0],
-                    positions[0]
-                );
-
-                applyPosition(
-                    cards[1],
-                    positions[1]
-                );
-
-                applyPosition(
-                    cards[2],
-                    positions[2]
-                );
-
-                applyPosition(
-                    cards[3],
-                    positions[3]
-                );
-
-                applyPosition(
-                    cards[4],
-                    positions[4]
-                );
-
-
-                void root.offsetWidth;
-
-
-                cards.forEach(card => {
-
-                    card.style.transition = "";
-
-                });
-
-
-                requestAnimationFrame(() => {
-
-                    applyPosition(
-                        cards[1],
-                        positions[0]
-                    );
-
-                    applyPosition(
-                        cards[2],
-                        positions[1]
-                    );
-
-                    applyPosition(
-                        cards[3],
-                        positions[2]
-                    );
-
-                    applyPosition(
-                        cards[4],
-                        positions[3]
-                    );
-
-                    applyPosition(
-                        cards[0],
-                        positions[4]
-                    );
-
-                });
-
-
-                activeIndex =
-                    (activeIndex - 1 + slides.length) %
-                    slides.length;
-
-            }
-
-
-            setTimeout(() => {
-
-                updateContent(activeIndex);
-
-            }, 350);
-
-
-            setTimeout(() => {
-
-                cards.forEach(card => {
-
-                    card.classList.remove(
-                        "is-moving",
-                        "becoming-main"
-                    );
-
-                });
-
-                busy = false;
-
-            }, 950);
-
         }
 
+        slotSlides = nextSlotSlides;
+        renderAll();
+        setCurrentFromMain();
 
-        /* =========================================================
-           BUTTONS
-        ========================================================== */
+        window.setTimeout(() => {
+            cards.forEach(card => card.classList.remove("is-moving"));
+            busy = false;
+        }, 950);
+    }
 
-        next.addEventListener(
-            "click",
-            function () {
-                go(1);
-            }
-        );
+    function restartTimer() {
+        if (timer) window.clearInterval(timer);
+        timer = window.setInterval(() => go(1), 4000);
+    }
 
+    renderAll();
+    cards.forEach((card, index) => applyPosition(card, positions()[index]));
+    setCurrentFromMain();
 
-        prev.addEventListener(
-            "click",
-            function () {
-                go(-1);
-            }
-        );
+    next?.addEventListener("click", () => { go(1); restartTimer(); });
+    prev?.addEventListener("click", () => { go(-1); restartTimer(); });
 
+    root.addEventListener("keydown", (event) => {
+        if (event.key === "ArrowRight") { event.preventDefault(); go(1); restartTimer(); }
+        if (event.key === "ArrowLeft") { event.preventDefault(); go(-1); restartTimer(); }
+    });
+    root.setAttribute("tabindex", "0");
 
-        /* =========================================================
-           KEYBOARD
-        ========================================================== */
+    let touchStartX = 0;
+    root.addEventListener("touchstart", event => { touchStartX = event.touches[0].clientX; }, {passive:true});
+    root.addEventListener("touchend", event => {
+        const distance = event.changedTouches[0].clientX - touchStartX;
+        if (Math.abs(distance) < 45) return;
+        go(distance < 0 ? 1 : -1);
+        restartTimer();
+    }, {passive:true});
 
-        root.setAttribute(
-            "tabindex",
-            "0"
-        );
-
-
-        root.addEventListener(
-            "keydown",
-            function (event) {
-
-                if (event.key === "ArrowRight") {
-
-                    event.preventDefault();
-
-                    go(1);
-                }
-
-
-                if (event.key === "ArrowLeft") {
-
-                    event.preventDefault();
-
-                    go(-1);
-                }
-
-            }
-        );
-
-
-        /* =========================================================
-           CARD CLICK
-        ========================================================== */
-
-        cards.forEach((card, index) => {
-
-            card.addEventListener(
-                "click",
-                function () {
-
-                    if (busy) {
-                        return;
-                    }
-
-
-                    if (index === 4) {
-                        return;
-                    }
-
-
-                    if (index === 0) {
-
-                        go(-1);
-
-                    } else {
-
-                        go(1);
-
-                    }
-
-                }
-            );
-
-        });
-
-
-        /* =========================================================
-           SWIPE
-        ========================================================== */
-
-        let touchStartX = 0;
-
-
-        root.addEventListener(
-            "touchstart",
-            function (event) {
-
-                touchStartX =
-                    event.touches[0].clientX;
-
-            },
-            {
-                passive: true
-            }
-        );
-
-
-        root.addEventListener(
-            "touchend",
-            function (event) {
-
-                const endX =
-                    event.changedTouches[0].clientX;
-
-                const distance =
-                    endX - touchStartX;
-
-
-                if (Math.abs(distance) < 45) {
-                    return;
-                }
-
-
-                if (distance < 0) {
-
-                    go(1);
-
-                } else {
-
-                    go(-1);
-
-                }
-
-            },
-            {
-                passive: true
-            }
-        );
-
-
-        /* =========================================================
-           START
-        ========================================================== */
-
-        setupCards();
-
-    })();
-
+    restartTimer();
+})();
 </script>
