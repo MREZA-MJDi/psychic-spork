@@ -58,11 +58,25 @@ class HomeController extends Controller
                 ->get();
         }
 
+        $heroSlides = $products
+            ->take(4)
+            ->values()
+            ->map(fn (Product $product, int $index): array => [
+                'image' => $product->galleryMedia->first()?->url,
+                'title' => $product->name,
+                'brand' => $product->brand?->name ?? 'JANAN',
+                'url' => route('products.show', $product),
+                'index' => $index,
+            ])
+            ->all();
+
         return view('welcome', [
             'categories' => $categories,
             'brands' => $brands,
             'products' => $products,
             'latestProduct' => $products->first(),
+            'heroSlides' => $heroSlides,
+            'homeTagline' => 'کالکشن‌های منتخب جانان با محصولات واقعی فروشگاه، برای انتخابی دقیق‌تر و شخصی‌تر.',
         ]);
     }
 }
