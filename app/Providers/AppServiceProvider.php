@@ -25,7 +25,13 @@ class AppServiceProvider extends ServiceProvider
             $view->with([
                 'cartCount' => (int) ($cart?->items()->sum('quantity') ?? 0),
                 'siteBrandNameLatin' => 'Janan',
+                'siteBrandNameFa' => 'جانان',
                 'siteBrandName' => 'جانان',
+                'siteFooterText' => 'فروشگاه آنلاین جانان؛ انتخاب دقیق، تجربه‌ای ساده و سفارش مطمئن.',
+                'siteStorePhone' => env('JANAN_STORE_PHONE'),
+                'siteStoreEmail' => env('JANAN_STORE_EMAIL'),
+                'siteStoreAddress' => env('JANAN_STORE_ADDRESS'),
+                'siteStoreWorkingHours' => env('JANAN_STORE_WORKING_HOURS'),
             ]);
         });
     }
