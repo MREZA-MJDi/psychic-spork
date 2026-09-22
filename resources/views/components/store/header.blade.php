@@ -17,12 +17,22 @@
             <span class="brand__nastaliq">{{ $siteBrandNameFa ?? 'جانان' }}</span>
         </a>
 
-        <nav class="store-nav" data-mobile-menu>
-            <a href="{{ route('home') }}" class="store-nav__link {{ $isHome ? 'is-active' : '' }}">خانه</a>
+        <nav class="store-nav" data-mobile-menu aria-label="منوی اصلی">
+            <div class="store-nav__mobile-head">
+                <span>JANAN / MENU</span>
+                <button class="store-nav__close" type="button" data-menu-close aria-label="بستن منو">×</button>
+            </div>
+            <div class="store-nav__links">
+                <a href="{{ route('home') }}" class="store-nav__link {{ $isHome ? 'is-active' : '' }}">خانه</a>
             <a href="{{ route('products.index') }}" class="store-nav__link {{ str_starts_with($path, 'products') ? 'is-active' : '' }}">محصولات</a>
             <a href="{{ route('categories.index') }}" class="store-nav__link {{ str_starts_with($path, 'categories') ? 'is-active' : '' }}">دسته‌بندی‌ها</a>
             <a href="{{ route('about') }}" class="store-nav__link {{ str_starts_with($path, 'about') ? 'is-active' : '' }}">درباره ما</a>
             <a href="{{ route('contact') }}" class="store-nav__link {{ str_starts_with($path, 'contact') ? 'is-active' : '' }}">تماس با ما</a>
+            </div>
+            <div class="store-nav__mobile-meta">
+                <span>PRIVATE STORE / JANAN</span>
+                <a href="{{ $accountUrl }}">حساب کاربری ↗</a>
+            </div>
         </nav>
 
         <div class="header-actions">
