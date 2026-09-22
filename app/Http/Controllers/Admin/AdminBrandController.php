@@ -46,7 +46,7 @@ class AdminBrandController extends AdminController
 
     public function create(): View
     {
-        return view('admin.brands.form', [
+        return view('admin.brands.create', [
             'brand' => new Brand(),
         ]);
     }
@@ -96,7 +96,7 @@ class AdminBrandController extends AdminController
     {
         $brand->load('logoMedia');
 
-        return view('admin.brands.form', compact('brand'));
+        return view('admin.brands.edit', compact('brand'));
     }
 
     public function update(
