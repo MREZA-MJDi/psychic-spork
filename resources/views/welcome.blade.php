@@ -18,7 +18,7 @@
                 <div class="split-callout__copy">
                     <span class="eyebrow">SPECIAL FOR YOU</span>
                     <h2>هر انتخاب، امضای شماست.</h2>
-                    <p>{{ $siteProfile?->tagline ?: 'کالکشن‌های فعال جانان از داده‌های واقعی فروشگاه نمایش داده می‌شوند.' }}</p>
+                    <p>{{ $homeTagline }}</p>
                     <div class="split-callout__actions">
                         <a href="{{ route('products.index') }}" class="button button--primary">مشاهده محصولات</a>
                         <a href="{{ route('categories.index') }}" class="button button--ghost">دسته‌بندی‌ها</a>
