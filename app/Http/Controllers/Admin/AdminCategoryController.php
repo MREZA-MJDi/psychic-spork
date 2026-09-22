@@ -39,7 +39,7 @@ class AdminCategoryController extends AdminController
             ->orderBy('name')
             ->get(['id', 'name']);
 
-        return view('admin.categories.form', [
+        return view('admin.categories.create', [
             'category' => new Category(),
             'parentCategories' => $parentCategories,
         ]);
@@ -93,7 +93,7 @@ class AdminCategoryController extends AdminController
             ->orderBy('name')
             ->get(['id', 'name']);
 
-        return view('admin.categories.form', compact('category', 'parentCategories'));
+        return view('admin.categories.edit', compact('category', 'parentCategories'));
     }
 
     public function update(UpdateCategoryRequest $request, Category $category, MediaService $media): RedirectResponse
