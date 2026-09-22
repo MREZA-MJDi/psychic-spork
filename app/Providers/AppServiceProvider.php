@@ -22,10 +22,11 @@ class AppServiceProvider extends ServiceProvider
                     ->where('session_id', request()->session()->getId())
                     ->first();
 
-            $view->with(
-                'cartCount',
-                (int) ($cart?->items()->sum('quantity') ?? 0)
-            );
+            $view->with([
+                'cartCount' => (int) ($cart?->items()->sum('quantity') ?? 0),
+                'siteBrandNameLatin' => 'Janan',
+                'siteBrandName' => 'جانان',
+            ]);
         });
     }
 }
