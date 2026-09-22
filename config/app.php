@@ -15,6 +15,8 @@ return [
 
     'name' => env('APP_NAME', 'Laravel'),
 
+    'store_name' => env('JANAN_STORE_NAME', 'Janan'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Environment
