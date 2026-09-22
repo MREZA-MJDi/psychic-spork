@@ -63,7 +63,7 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h6v6H5zM13 5h6v6h-6zM5 13h6v6H5zM13 13h6v6h-6z"/></svg>
             <span>دسته‌ها</span>
         </a>
-        <a href="{{ !auth()->check() ? route('login') : (auth()->user()->isAdmin() ? route('admin.dashboard') : route('account')) }}" aria-label="حساب کاربری">
+        <a class="{{ request()->routeIs('account', 'admin.*') ? 'is-active' : '' }}" href="{{ !auth()->check() ? route('login') : (auth()->user()->isAdmin() ? route('admin.dashboard') : route('account')) }}" aria-label="حساب کاربری">
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.2"/><path d="M5.5 20c.8-3.4 3-5.2 6.5-5.2s5.7 1.8 6.5 5.2"/></svg>
             <span>حساب</span>
         </a>
