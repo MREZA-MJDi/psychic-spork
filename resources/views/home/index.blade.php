@@ -1,9 +1,5 @@
 @extends('layouts.store')
 
-@push('styles')
-    @vite('resources/css/home.css')
-@endpush
-
 @section('content')
 <div class="home-page">
 
