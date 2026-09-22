@@ -68,6 +68,17 @@ class AdminProductController extends AdminController
                 $request->input('stock') === 'low',
                 fn ($query) => $query->lowStock()
             )
+            ->when(
+                $request->filled('status'),
+                function ($query) use ($request): void {
+                    match ($request->input('status')) {
+                        'active' => $query->where('is_active', true),
+                        'inactive' => $query->where('is_active', false),
+                        'featured' => $query->where('is_featured', true),
+                        default => null,
+                    };
+                }
+            )
             ->latest('updated_at')
             ->paginate(15)
             ->withQueryString();
@@ -81,7 +92,7 @@ class AdminProductController extends AdminController
 
     public function create(): View
     {
-        return view('admin.products.form', [
+        return view('admin.products.create', [
             'product' => new Product(),
             'variant' => new ProductVariant(),
             'categories' => $this->categories(),
@@ -150,7 +161,7 @@ class AdminProductController extends AdminController
             'galleryMedia',
         ]);
 
-        return view('admin.products.form', [
+        return view('admin.products.edit', [
             'product' => $product,
             'variant' => $product->variants->first()
                 ?? new ProductVariant([
