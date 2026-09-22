@@ -26,20 +26,17 @@ class AdminUserSeeder extends Seeder
 
         $isNew = ! $user->exists;
 
-        if ($isNew) {
-            $user->name = $name;
-            $user->password = $password;
-        }
-
-        // This seeder never downgrades an existing account and never
-        // overwrites an existing admin password on repeated db:seed runs.
+        // .env is the source of truth for the local admin account.
+        // Re-running this seeder intentionally synchronizes the name and password.
+        $user->name = $name;
+        $user->password = $password;
         $user->is_admin = true;
         $user->save();
 
         $this->command?->info(
             $isNew
                 ? "Admin user created: {$email}"
-                : "Admin access confirmed for: {$email}"
+                : "Admin credentials synchronized: {$email}"
         );
     }
 }
