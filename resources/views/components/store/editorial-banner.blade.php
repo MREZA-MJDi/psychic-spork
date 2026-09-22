@@ -4,7 +4,7 @@
     $editorialAlt = $product?->name ?: 'کالکشن جانان';
 @endphp
 
-<section class="section-block section-block--compact">
+<section class="home-section home-section--editorial">
     <div class="container">
         <div class="editorial reveal-up">
             <div class="editorial__image">
