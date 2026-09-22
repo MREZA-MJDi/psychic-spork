@@ -1,24 +1,25 @@
-<section class="section-block section-block--no-top">
+@php($visibleCategories = $categories->take(5))
+<section class="section-block section-block--no-top home-collections">
     <div class="container">
-        <div class="section-head">
-            <div><span class="eyebrow">EXPLORE</span><h2>دسته‌بندی محصولات</h2><p>دسته‌بندی‌های فعال فروشگاه.</p></div>
-            <a href="{{ route('categories.index') }}" class="text-link">مشاهده همه <span>←</span></a>
+        <div class="section-head home-section-head">
+            <div><span class="eyebrow">COLLECTIONS / 01</span><h2>دسته‌بندی را انتخاب کن.</h2><p>چند مسیر برای رسیدن به انتخابی که دقیقاً حال تو را دارد.</p></div>
+            <a href="{{ route('categories.index') }}" class="text-link">همه دسته‌بندی‌ها <span>↗</span></a>
         </div>
-
-        @if($categories->isNotEmpty())
-            <div class="category-grid">
-                @foreach($categories as $category)
-                    <a href="{{ route('categories.show', $category) }}" class="category-card reveal-up">
-                        <div class="category-card__image">
+        @if($visibleCategories->isNotEmpty())
+            <div class="home-category-rail">
+                @foreach($visibleCategories as $category)
+                    <a href="{{ route('categories.show', $category) }}" class="home-category-card">
+                        <div class="home-category-card__media">
                             @if($category->coverMedia?->url)
                                 <img src="{{ $category->coverMedia->url }}" alt="{{ $category->name }}" loading="lazy">
                             @else
                                 <div class="card-image-placeholder"><span>{{ $category->name }}</span></div>
                             @endif
+                            <span class="home-category-card__index">{{ sprintf('%02d', $loop->iteration) }}</span>
                         </div>
-                        <div class="category-card__content">
-                            <div><h3>{{ $category->name }}</h3><span>{{ $category->description ?: 'کالکشن جانان' }}</span></div>
-                            <strong>{{ number_format($category->active_products_count) }}</strong>
+                        <div class="home-category-card__body">
+                            <div><small>{{ number_format($category->active_products_count) }} ITEMS</small><h3>{{ $category->name }}</h3></div>
+                            <b>↗</b>
                         </div>
                     </a>
                 @endforeach
