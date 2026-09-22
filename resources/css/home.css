@@ -713,3 +713,83 @@
         animation-duration: .01ms !important;
     }
 }
+/* =========================================================
+   HOME — SECTION RHYTHM
+   Every homepage section owns its spacing; index adds none.
+   ========================================================= */
+
+.home-page > .home-hero {
+    margin: 0;
+}
+
+.home-page > .home-intro,
+.home-page > .home-proof,
+.home-page > .home-section,
+.home-page > .home-editorial-section {
+    margin: 0;
+}
+
+.home-page .home-section {
+    padding-block: clamp(64px, 7vw, 94px);
+}
+
+.home-page .home-section--collections {
+    padding-top: clamp(74px, 8vw, 104px);
+    padding-bottom: clamp(68px, 7vw, 92px);
+    background: #f7f5f2;
+}
+
+.home-page .home-section--products {
+    background: #faf9f7;
+}
+
+.home-page .home-section--editorial {
+    background: #f6f3f0;
+}
+
+.home-page .home-section--brands {
+    background: #fbfaf8;
+}
+
+.home-page .home-section--banners {
+    padding-top: clamp(30px, 4vw, 52px);
+    padding-bottom: clamp(68px, 7vw, 94px);
+    background: #f6f3f0;
+}
+
+.home-page .section-head {
+    align-items: flex-end;
+    margin-bottom: 28px;
+}
+
+.home-page .section-head h2 {
+    font-size: clamp(25px, 3.2vw, 42px);
+}
+
+.home-page .section-head p {
+    max-width: 580px;
+}
+
+@media (max-width: 720px) {
+    .home-page .home-section {
+        padding-block: 54px;
+    }
+
+    .home-page .home-section--collections {
+        padding-block: 58px 54px;
+    }
+
+    .home-page .home-section--banners {
+        padding-block: 28px 58px;
+    }
+
+    .home-page .section-head {
+        align-items: flex-start;
+        gap: 11px;
+        margin-bottom: 20px;
+    }
+
+    .home-page .section-head h2 {
+        font-size: 27px;
+    }
+}
