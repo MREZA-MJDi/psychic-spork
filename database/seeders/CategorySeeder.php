@@ -21,7 +21,7 @@ class CategorySeeder extends Seeder
         ];
 
         foreach ($categories as $index => $data) {
-            $category = Category::updateOrCreate(
+            $category = Category::firstOrCreate(
                 ['slug' => $data['slug']],
                 [
                     'name' => $data['name'],
@@ -37,7 +37,7 @@ class CategorySeeder extends Seeder
                 'JANAN COLLECTION'
             );
 
-            Media::updateOrCreate(
+            Media::firstOrCreate(
                 [
                     'mediable_type' => Category::class,
                     'mediable_id' => $category->id,
