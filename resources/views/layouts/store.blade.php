@@ -48,29 +48,6 @@
     <main class="site-main">@yield('content')</main>
     <x-store.footer />
 
-    <nav class="store-mobile-bottom" aria-label="منوی سریع فروشگاه">
-        <a class="{{ request()->routeIs('home') ? 'is-active' : '' }}" href="{{ route('home') }}" aria-label="خانه">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10.5 12 4l8 6.5"/><path d="M6.5 9.5V20h11V9.5"/><path d="M10 20v-6h4v6"/></svg>
-            <span>خانه</span>
-        </a>
-        <a class="{{ request()->routeIs('products.*') ? 'is-active' : '' }}" href="{{ route('products.index') }}" aria-label="محصولات">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h10l1 13H6L7 7Z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg>
-            <span>محصولات</span>
-        </a>
-        <a class="{{ request()->routeIs('categories.*') ? 'is-active' : '' }}" href="{{ route('categories.index') }}" aria-label="دسته‌بندی‌ها">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h6v6H5zM13 5h6v6h-6zM5 13h6v6H5zM13 13h6v6h-6z"/></svg>
-            <span>دسته‌ها</span>
-        </a>
-        <a class="{{ request()->routeIs('account') ? 'is-active' : '' }}" href="{{ !auth()->check() ? route('login') : (auth()->user()->isAdmin() ? route('admin.dashboard') : route('account')) }}" aria-label="حساب کاربری">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.2"/><path d="M5.5 20c.8-3.4 3-5.2 6.5-5.2s5.7 1.8 6.5 5.2"/></svg>
-            <span>حساب</span>
-        </a>
-        <a class="{{ request()->routeIs('cart') ? 'is-active' : '' }}" href="{{ route('cart') }}" aria-label="سبد خرید">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l-1.2 11H6.2L5 8Z"/><path d="M9 8a3 3 0 0 1 6 0"/></svg>
-            @if(($cartCount ?? 0) > 0)<b>{{ $cartCount }}</b>@endif
-            <span>سبد</span>
-        </a>
-    </nav>
 </div>
 </body>
 </html>
