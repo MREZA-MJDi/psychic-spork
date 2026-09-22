@@ -37,8 +37,8 @@
             data-index="0"
         >
             <img
-                src="/images/product-3.jpg"
-                alt="JANAN Collection"
+                src="{{ $heroSlides[2]['image'] ?? '' }}"
+                alt="{{ $heroSlides[2]['title'] ?? 'JANAN Collection' }}"
                 draggable="false"
             >
         </article>
@@ -52,8 +52,8 @@
             data-index="1"
         >
             <img
-                src="/images/product-2.jpg"
-                alt="JANAN Collection"
+                src="{{ $heroSlides[1]['image'] ?? '' }}"
+                alt="{{ $heroSlides[1]['title'] ?? 'JANAN Collection' }}"
                 draggable="false"
             >
         </article>
@@ -67,8 +67,8 @@
             data-index="2"
         >
             <img
-                src="/images/product-1.jpg"
-                alt="JANAN Collection"
+                src="{{ $heroSlides[0]['image'] ?? '' }}"
+                alt="{{ $heroSlides[0]['title'] ?? 'JANAN Collection' }}"
                 draggable="false"
             >
         </article>
@@ -82,8 +82,8 @@
             data-index="3"
         >
             <img
-                src="/images/product-4.jpg"
-                alt="JANAN Collection"
+                src="{{ $heroSlides[3]['image'] ?? '' }}"
+                alt="{{ $heroSlides[3]['title'] ?? 'JANAN Collection' }}"
                 draggable="false"
             >
         </article>
@@ -99,8 +99,8 @@
 
             <img
                 class="janan-main-image"
-                src="/images/product-5.jpg"
-                alt="JANAN Soft Essentials"
+                src="{{ $heroSlides[0]['image'] ?? '' }}"
+                alt="{{ $heroSlides[0]['title'] ?? 'JANAN Collection' }}"
                 draggable="false"
             >
 
@@ -113,12 +113,11 @@
                 </span>
 
                 <h2 class="janan-main-title">
-                    Soft<br>
-                    Essentials
+                    {{ $heroSlides[0]['title'] ?? 'کالکشن جانان' }}
                 </h2>
 
                 <span class="janan-main-brand">
-                    JANAN
+                    {{ $heroSlides[0]['brand'] ?? 'JANAN' }}
                 </span>
 
             </div>
@@ -941,33 +940,7 @@
             root.querySelector(".janan-main-brand");
 
 
-        const slides = [
-
-            {
-                image: "/images/janan-hero-01.jpg",
-                title: "Soft<br>Essentials",
-                brand: "JANAN"
-            },
-
-            {
-                image: "/images/janan-hero-02.jpg",
-                title: "Everyday<br>Comfort",
-                brand: "JANAN"
-            },
-
-            {
-                image: "/images/janan-hero-03.jpg",
-                title: "Pure<br>Elegance",
-                brand: "JANAN"
-            },
-
-            {
-                image: "/images/janan-hero-04.jpg",
-                title: "Delicate<br>Details",
-                brand: "JANAN"
-            }
-
-        ];
+        const slides = @json($heroSlides);
 
 
         let activeIndex = 0;
@@ -1119,7 +1092,7 @@
                     data.title;
 
                 mainBrand.textContent =
-                    data.brand;
+                    data.brand || "JANAN";
 
 
                 mainImage.onload = () => {
