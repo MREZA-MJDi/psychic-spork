@@ -5470,7 +5470,7 @@ body.store-body {
     }
 }
 
-@media (max-width: 620px) {
+@media (max-width: 820px) {
     .store-mobile-bottom {
         position: fixed;
         right: 10px;
