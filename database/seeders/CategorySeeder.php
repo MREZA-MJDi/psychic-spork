@@ -5,7 +5,6 @@ namespace Database\Seeders;
 use App\Models\Category;
 use App\Models\Media;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 
 class CategorySeeder extends Seeder
@@ -13,48 +12,12 @@ class CategorySeeder extends Seeder
     public function run(): void
     {
         $categories = [
-            [
-                'name' => 'سوتین',
-                'slug' => 'bras',
-                'description' => 'مدل‌های متنوع سوتین زنانه برای استفاده روزمره و خاص',
-                'image' => 'categories/bras.jpg',
-                'image_url' => 'https://images.unsplash.com/photo-1596755389378-c31d21fd1273?w=1000&q=85',
-            ],
-            [
-                'name' => 'شورت',
-                'slug' => 'panties',
-                'description' => 'شورت‌های زنانه لطیف، راحت و متنوع',
-                'image' => 'categories/panties.jpg',
-                'image_url' => 'https://images.unsplash.com/photo-1541101767792-f9b2b1c4f127?w=1000&q=85',
-            ],
-            [
-                'name' => 'ست لباس زیر',
-                'slug' => 'lingerie-sets',
-                'description' => 'ست‌های هماهنگ و ظریف لباس زیر زنانه',
-                'image' => 'categories/lingerie-sets.jpg',
-                'image_url' => 'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=1000&q=85',
-            ],
-            [
-                'name' => 'لباس خواب',
-                'slug' => 'sleepwear',
-                'description' => 'لباس خواب‌های لطیف، راحت و زنانه',
-                'image' => 'categories/sleepwear.jpg',
-                'image_url' => 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1000&q=85',
-            ],
-            [
-                'name' => 'بادی',
-                'slug' => 'bodysuits',
-                'description' => 'بادی‌های زنانه با طراحی ظریف و مدرن',
-                'image' => 'categories/bodysuits.jpg',
-                'image_url' => 'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=1000&q=85',
-            ],
-            [
-                'name' => 'لباس زیر فانتزی',
-                'slug' => 'fantasy',
-                'description' => 'مدل‌های خاص و فانتزی لباس زیر زنانه',
-                'image' => 'categories/fantasy.jpg',
-                'image_url' => 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1000&q=85',
-            ],
+            ['name' => 'سوتین', 'slug' => 'bras', 'description' => 'مدل‌های متنوع سوتین زنانه برای استفاده روزمره و خاص', 'image' => 'categories/bras.svg'],
+            ['name' => 'شورت', 'slug' => 'panties', 'description' => 'شورت‌های زنانه لطیف، راحت و متنوع', 'image' => 'categories/panties.svg'],
+            ['name' => 'ست لباس زیر', 'slug' => 'lingerie-sets', 'description' => 'ست‌های هماهنگ و ظریف لباس زیر زنانه', 'image' => 'categories/lingerie-sets.svg'],
+            ['name' => 'لباس خواب', 'slug' => 'sleepwear', 'description' => 'لباس خواب‌های لطیف، راحت و زنانه', 'image' => 'categories/sleepwear.svg'],
+            ['name' => 'بادی', 'slug' => 'bodysuits', 'description' => 'بادی‌های زنانه با طراحی ظریف و مدرن', 'image' => 'categories/bodysuits.svg'],
+            ['name' => 'لباس زیر فانتزی', 'slug' => 'fantasy', 'description' => 'مدل‌های خاص و فانتزی لباس زیر زنانه', 'image' => 'categories/fantasy.svg'],
         ];
 
         foreach ($categories as $index => $data) {
@@ -65,14 +28,13 @@ class CategorySeeder extends Seeder
                     'description' => $data['description'],
                     'is_active' => true,
                     'sort_order' => $index + 1,
-                    'meta_title' => $data['name'] . ' | جانان',
-                    'meta_description' => $data['description'] . ' در فروشگاه جانان',
                 ]
             );
 
-            $this->downloadImage(
-                $data['image_url'],
-                $data['image']
+            $this->ensureLocalImage(
+                $data['image'],
+                $data['name'],
+                'JANAN COLLECTION'
             );
 
             Media::updateOrCreate(
@@ -85,7 +47,7 @@ class CategorySeeder extends Seeder
                     'disk' => 'public',
                     'path' => $data['image'],
                     'original_name' => basename($data['image']),
-                    'mime_type' => 'image/jpeg',
+                    'mime_type' => 'image/svg+xml',
                     'alt_text' => $data['name'],
                     'sort_order' => 0,
                 ]
@@ -93,17 +55,45 @@ class CategorySeeder extends Seeder
         }
     }
 
-    private function downloadImage(string $url, string $path): void
-    {
-        if (Storage::disk('public')->exists($path)) {
+    private function ensureLocalImage(
+        string $path,
+        string $title,
+        string $eyebrow
+    ): void {
+        $disk = Storage::disk('public');
+
+        if ($disk->exists($path)) {
             return;
         }
 
-        $response = Http::timeout(30)->get($url);
+        $safeTitle = htmlspecialchars(
+            $title,
+            ENT_QUOTES | ENT_XML1,
+            'UTF-8'
+        );
 
-        if ($response->successful()) {
-            Storage::disk('public')->put($path, $response->body());
-        }
+        $safeEyebrow = htmlspecialchars(
+            $eyebrow,
+            ENT_QUOTES | ENT_XML1,
+            'UTF-8'
+        );
+
+        $svg = <<<SVG
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800">
+    <defs>
+        <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#f8f2ec"/>
+            <stop offset="100%" stop-color="#dbcfc5"/>
+        </linearGradient>
+    </defs>
+    <rect width="1200" height="800" fill="url(#bg)"/>
+    <rect x="90" y="90" width="1020" height="620" rx="36" fill="#ffffff" opacity=".28"/>
+    <text x="600" y="350" text-anchor="middle" font-family="Arial, sans-serif" font-size="34" letter-spacing="6" fill="#6c5c54">{$safeEyebrow}</text>
+    <text x="600" y="440" text-anchor="middle" font-family="Arial, sans-serif" font-size="62" font-weight="700" fill="#2f2925">{$safeTitle}</text>
+    <text x="600" y="510" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" fill="#6c5c54">Janan Lingerie</text>
+</svg>
+SVG;
+
+        $disk->put($path, $svg);
     }
 }
-
