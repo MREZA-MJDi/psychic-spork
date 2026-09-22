@@ -308,6 +308,33 @@
 
                         </div>
 
+                        <div class="admin-field">
+
+                            <label for="payment_status">
+                                وضعیت پرداخت
+                            </label>
+
+                            <select
+                                id="payment_status"
+                                name="payment_status"
+                                required
+                            >
+
+                                @foreach($paymentStatusNames as $paymentStatus => $label)
+
+                                    <option
+                                        value="{{ $paymentStatus }}"
+                                        @selected(old('payment_status', $order->payment_status) === $paymentStatus)
+                                    >
+                                    {{ $label }}
+                                    </option>
+
+                                @endforeach
+
+                            </select>
+
+                        </div>
+
                         <div class="admin-form-actions">
 
                             <button
