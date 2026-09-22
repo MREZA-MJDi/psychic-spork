@@ -1,4 +1,4 @@
-<section class="section-block section-block--products section-block--soft">
+<section class="home-section home-section--products">
     <div class="container">
         <div class="section-head">
             <div>
