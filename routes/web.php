@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\AdminFinancialController;
 use App\Http\Controllers\Admin\AdminInventoryController;
 use App\Http\Controllers\Admin\AdminOrderController;
 use App\Http\Controllers\Admin\AdminProductController;
+use App\Http\Controllers\Admin\AdminProductVariantController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
@@ -188,6 +189,9 @@ Route::prefix('admin')
         */
 
         Route::resource('products', AdminProductController::class)
+            ->except(['show']);
+
+        Route::resource('products.variants', AdminProductVariantController::class)
             ->except(['show']);
 
         Route::resource('categories', AdminCategoryController::class)
