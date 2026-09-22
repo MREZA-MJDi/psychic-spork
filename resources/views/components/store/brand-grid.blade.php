@@ -1,5 +1,5 @@
 @php($visibleBrands = $brands->take(6))
-<section class="section-block section-block--compact home-brands">
+<section class="home-section home-section--brands">
     <div class="container">
         <div class="section-head">
             <div><span class="eyebrow">HOUSES / 02</span><h2>برندهای جانان.</h2><p>نام‌هایی با شخصیت مستقل، انتخاب‌شده برای جهان جانان.</p></div>
