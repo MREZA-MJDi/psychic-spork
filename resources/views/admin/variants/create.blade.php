@@ -32,6 +32,8 @@
     >
         @csrf
 
+        <input type="hidden" name="product_id" value="{{ $product->id }}">
+
         @include('admin.variants._form')
 
         <div class="admin-form-actions">
