@@ -15,8 +15,8 @@ class LoginRequest extends FormRequest
     {
         $data = [];
 
-        if (is_string($this->input('email'))) {
-            $data['email'] = trim($this->input('email'));
+        if (is_string($this->input('identifier'))) {
+            $data['identifier'] = trim($this->input('identifier'));
         }
 
         if ($this->has('remember')) {
@@ -31,19 +31,17 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => [
+            'identifier' => [
                 'bail',
                 'required',
-                'email',
+                'string',
                 'max:255',
             ],
-
             'password' => [
                 'bail',
                 'required',
                 'string',
             ],
-
             'remember' => [
                 'nullable',
                 'boolean',
@@ -54,27 +52,17 @@ class LoginRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'email.required' =>
-                'وارد کردن :attribute الزامی است.',
-
-            'email.email' =>
-                'فرمت ایمیل نامعتبر است.',
-
-            'email.max' =>
-                'مقدار :attribute بیش از حد مجاز است.',
-
-            'password.required' =>
-                'وارد کردن :attribute الزامی است.',
-
-            'password.string' =>
-                ':attribute نامعتبر است.',
+            'identifier.required' => 'وارد کردن :attribute الزامی است.',
+            'identifier.max' => 'مقدار :attribute بیش از حد مجاز است.',
+            'password.required' => 'وارد کردن :attribute الزامی است.',
+            'password.string' => ':attribute نامعتبر است.',
         ];
     }
 
     public function attributes(): array
     {
         return [
-            'email' => 'ایمیل',
+            'identifier' => 'ایمیل یا نام کاربری',
             'password' => 'رمز عبور',
             'remember' => 'مرا به خاطر بسپار',
         ];
