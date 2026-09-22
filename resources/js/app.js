@@ -1,13 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const menuToggle = document.querySelector('[data-menu-toggle]');
-    const mobileMenu = document.querySelector('[data-mobile-menu]');
     const searchToggle = document.querySelector('[data-search-toggle]');
     const searchPanel = document.querySelector('[data-search-panel]');
-
-    menuToggle?.addEventListener('click', () => {
-        const open = mobileMenu?.classList.toggle('is-open') ?? false;
-        menuToggle.setAttribute('aria-expanded', String(open));
-    });
 
     searchToggle?.addEventListener('click', () => {
         const open = searchPanel?.classList.toggle('is-open') ?? false;
@@ -16,13 +9,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (open) {
             searchPanel?.querySelector('input')?.focus();
         }
-    });
-
-    mobileMenu?.querySelectorAll('a').forEach((link) => {
-        link.addEventListener('click', () => {
-            mobileMenu.classList.remove('is-open');
-            menuToggle?.setAttribute('aria-expanded', 'false');
-        });
     });
 
     document.querySelectorAll('[data-password-toggle]').forEach((toggle) => {
