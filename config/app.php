@@ -17,6 +17,12 @@ return [
 
     'store_name' => env('JANAN_STORE_NAME', 'Janan'),
 
+    'admin' => [
+        'name' => env('JANAN_ADMIN_NAME', 'Janan Admin'),
+        'email' => env('JANAN_ADMIN_EMAIL'),
+        'password' => env('JANAN_ADMIN_PASSWORD'),
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Application Environment
