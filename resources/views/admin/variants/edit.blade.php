@@ -35,6 +35,8 @@
         @csrf
         @method('PUT')
 
+        <input type="hidden" name="product_id" value="{{ $product->id }}">
+
         @include('admin.variants._form', [
             'variant' => $variant,
         ])
