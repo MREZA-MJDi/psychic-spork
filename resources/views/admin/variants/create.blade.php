@@ -8,51 +8,38 @@
     <div class="admin-page-head">
 
         <div>
-            <h1 class="admin-page-title">
+
+            <h1 class="admin-page-head__title">
                 افزودن واریانت
             </h1>
 
-            <p class="admin-page-description">
+            <p class="admin-page-head__text">
                 {{ $product->name }}
             </p>
+
         </div>
 
         <a
             href="{{ route('admin.products.variants.index', $product) }}"
-            class="admin-btn admin-btn-light"
+            class="admin-btn admin-btn--ghost"
         >
             بازگشت
         </a>
 
     </div>
 
+
     <form
         method="POST"
         action="{{ route('admin.products.variants.store', $product) }}"
     >
+
         @csrf
 
-        <input type="hidden" name="product_id" value="{{ $product->id }}">
-
-        @include('admin.variants._form')
-
-        <div class="admin-form-actions">
-
-            <button
-                type="submit"
-                class="admin-btn admin-btn-primary"
-            >
-                ذخیره واریانت
-            </button>
-
-            <a
-                href="{{ route('admin.products.variants.index', $product) }}"
-                class="admin-btn admin-btn-light"
-            >
-                انصراف
-            </a>
-
-        </div>
+        @include('admin.variants._form', [
+            'product' => $product,
+            'variant' => $variant ?? new \App\Models\ProductVariant(),
+        ])
 
     </form>
 

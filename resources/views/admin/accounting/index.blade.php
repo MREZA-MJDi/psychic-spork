@@ -1,130 +1,270 @@
 @extends('layouts.admin')
 
 @section('title', 'حسابداری')
+@section('page-title', 'حسابداری')
 
 @section('content')
 
-    <div class="admin-page">
+    {{-- =====================================================
+        PAGE HEADER
+    ====================================================== --}}
 
-        <div class="admin-page-header">
+    <div class="admin-page-head">
+
+        <div>
+
+            <h1 class="admin-page-head__title">
+                حسابداری
+            </h1>
+
+            <p class="admin-page-head__text">
+                ثبت، پیگیری و مشاهده تراکنش‌های مالی فروشگاه
+            </p>
+
+        </div>
+
+    </div>
+
+
+    {{-- =====================================================
+        FINANCIAL SUMMARY
+    ====================================================== --}}
+
+    <div class="admin-dashboard-stats">
+
+        <div class="admin-stat-card admin-stat-card--success">
+
+            <div class="admin-stat-card__label">
+                مجموع درآمد
+            </div>
+
+            <div class="admin-stat-card__value">
+                {{ number_format((float) ($income ?? 0)) }}
+            </div>
+
+            <div class="admin-stat-card__meta">
+                تومان
+            </div>
+
+        </div>
+
+
+        <div class="admin-stat-card admin-stat-card--danger">
+
+            <div class="admin-stat-card__label">
+                مجموع هزینه
+            </div>
+
+            <div class="admin-stat-card__value">
+                {{ number_format((float) ($expense ?? 0)) }}
+            </div>
+
+            <div class="admin-stat-card__meta">
+                تومان
+            </div>
+
+        </div>
+
+
+        <div class="admin-stat-card">
+
+            <div class="admin-stat-card__label">
+                خالص
+            </div>
+
+            <div class="admin-stat-card__value">
+                {{ number_format((float) ($net ?? 0)) }}
+            </div>
+
+            <div class="admin-stat-card__meta">
+                درآمد منهای هزینه · تومان
+            </div>
+
+        </div>
+
+    </div>
+
+
+    {{-- =====================================================
+        FILTERS
+    ====================================================== --}}
+
+    <div class="admin-card admin-filter-card">
+
+        <div class="admin-card-header">
 
             <div>
-                <h1 class="admin-page-title">
-                    حسابداری
-                </h1>
 
-                <p class="admin-page-description">
-                    ثبت و مشاهده تراکنش‌های مالی فروشگاه
+                <h2 class="admin-card-title">
+                    جستجو و فیلتر تراکنش‌ها
+                </h2>
+
+                <p class="admin-card-description">
+                    تراکنش‌ها را بر اساس شرح، نوع یا بازه تاریخ پیدا کنید.
                 </p>
-            </div>
-
-        </div>
-
-
-        {{-- Flash messages --}}
-
-        @if(session('success'))
-            <div class="admin-alert admin-alert-success">
-                {{ session('success') }}
-            </div>
-        @endif
-
-        @if(session('error'))
-            <div class="admin-alert admin-alert-error">
-                {{ session('error') }}
-            </div>
-        @endif
-
-
-        {{-- Validation errors --}}
-
-        @if($errors->any())
-            <div class="admin-alert admin-alert-error">
-
-                <ul>
-                    @foreach($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-
-            </div>
-        @endif
-
-
-        {{-- Financial summary --}}
-
-        <div class="admin-stats-grid">
-
-            <div class="admin-stat-card">
-
-                <div class="admin-stat-label">
-                    مجموع درآمد
-                </div>
-
-                <div class="admin-stat-value">
-                    {{ number_format((float) ($income ?? 0)) }}
-                    <span>تومان</span>
-                </div>
-
-            </div>
-
-
-            <div class="admin-stat-card">
-
-                <div class="admin-stat-label">
-                    مجموع هزینه
-                </div>
-
-                <div class="admin-stat-value">
-                    {{ number_format((float) ($expense ?? 0)) }}
-                    <span>تومان</span>
-                </div>
-
-            </div>
-
-
-            <div class="admin-stat-card">
-
-                <div class="admin-stat-label">
-                    خالص
-                </div>
-
-                <div class="admin-stat-value">
-
-                    {{ number_format((float) (($income ?? 0) - ($expense ?? 0))) }}
-
-                    <span>تومان</span>
-
-                </div>
 
             </div>
 
         </div>
 
 
-        <div class="admin-two-column">
+        <form
+            method="GET"
+            action="{{ route('admin.accounting.index') }}"
+        >
 
+            <div class="admin-filter-grid">
 
-            {{-- Transactions --}}
+                {{-- SEARCH --}}
 
-            <div class="admin-card">
+                <div class="admin-field">
 
-                <div class="admin-card-header">
+                    <label for="q">
+                        جستجو
+                    </label>
 
-                    <div>
-
-                        <h2 class="admin-card-title">
-                            تراکنش‌ها
-                        </h2>
-
-                        <p class="admin-card-description">
-                            {{ $transactions->total() }} تراکنش
-                        </p>
-
-                    </div>
+                    <input
+                        id="q"
+                        type="search"
+                        name="q"
+                        value="{{ request('q') }}"
+                        placeholder="دسته‌بندی یا شرح تراکنش..."
+                    >
 
                 </div>
 
+
+                {{-- TYPE --}}
+
+                <div class="admin-field">
+
+                    <label for="type">
+                        نوع تراکنش
+                    </label>
+
+                    <select
+                        id="type"
+                        name="type"
+                    >
+
+                        <option value="">
+                            همه
+                        </option>
+
+                        <option
+                            value="income"
+                            @selected(request('type') === 'income')
+                        >
+                        درآمد
+                        </option>
+
+                        <option
+                            value="expense"
+                            @selected(request('type') === 'expense')
+                        >
+                        هزینه
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                {{-- FROM --}}
+
+                <div class="admin-field">
+
+                    <label for="from">
+                        از تاریخ
+                    </label>
+
+                    <input
+                        id="from"
+                        type="date"
+                        name="from"
+                        value="{{ request('from') }}"
+                    >
+
+                </div>
+
+
+                {{-- TO --}}
+
+                <div class="admin-field">
+
+                    <label for="to">
+                        تا تاریخ
+                    </label>
+
+                    <input
+                        id="to"
+                        type="date"
+                        name="to"
+                        value="{{ request('to') }}"
+                    >
+
+                </div>
+
+
+                {{-- ACTIONS --}}
+
+                <div class="admin-filter-actions">
+
+                    <button
+                        type="submit"
+                        class="admin-btn admin-btn--secondary"
+                    >
+                        اعمال فیلتر
+                    </button>
+
+                    <a
+                        href="{{ route('admin.accounting.index') }}"
+                        class="admin-btn admin-btn--ghost"
+                    >
+                        پاک کردن
+                    </a>
+
+                </div>
+
+            </div>
+
+        </form>
+
+    </div>
+
+
+    {{-- =====================================================
+        MAIN CONTENT
+    ====================================================== --}}
+
+    <div class="admin-dashboard-grid admin-dashboard-grid--equal">
+
+
+        {{-- =================================================
+            TRANSACTIONS
+        ================================================== --}}
+
+        <div class="admin-card">
+
+            <div class="admin-card-header">
+
+                <div>
+
+                    <h2 class="admin-card-title">
+                        تراکنش‌ها
+                    </h2>
+
+                    <p class="admin-card-description">
+                        {{ number_format($transactions->total()) }}
+                        تراکنش
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            @if($transactions->count())
 
                 <div class="admin-table-wrap">
 
@@ -133,13 +273,35 @@
                         <thead>
 
                         <tr>
-                            <th>تاریخ</th>
-                            <th>نوع</th>
-                            <th>دسته‌بندی</th>
-                            <th>مبلغ</th>
-                            <th>شرح</th>
-                            <th>ثبت‌کننده</th>
-                            <th></th>
+
+                            <th>
+                                تاریخ
+                            </th>
+
+                            <th>
+                                نوع
+                            </th>
+
+                            <th>
+                                دسته‌بندی
+                            </th>
+
+                            <th>
+                                مبلغ
+                            </th>
+
+                            <th>
+                                شرح
+                            </th>
+
+                            <th>
+                                ثبت‌کننده
+                            </th>
+
+                            <th>
+                                عملیات
+                            </th>
+
                         </tr>
 
                         </thead>
@@ -147,74 +309,137 @@
 
                         <tbody>
 
-                        @forelse($transactions as $transaction)
+                        @foreach($transactions as $transaction)
+
+                            @php
+
+                                $isIncome =
+                                    $transaction->type === 'income';
+
+                                $typeLabel = $isIncome
+                                    ? 'درآمد'
+                                    : 'هزینه';
+
+                                $typeClass = $isIncome
+                                    ? 'success'
+                                    : 'danger';
+
+                            @endphp
+
 
                             <tr>
 
-                                {{-- Date --}}
-
-                                <td>
-                                    {{ optional($transaction->transaction_date)->format('Y/m/d') }}
-                                </td>
-
-
-                                {{-- Type --}}
+                                {{-- DATE --}}
 
                                 <td>
 
-                                    @if($transaction->type === 'income')
+                                    @if($transaction->transaction_date)
 
-                                        <span class="admin-badge admin-badge-success">
-                                        درآمد
-                                    </span>
+                                        <span class="admin-muted">
+
+                                            {{
+                                                $transaction
+                                                    ->transaction_date
+                                                    ->format('Y/m/d')
+                                            }}
+
+                                        </span>
 
                                     @else
 
-                                        <span class="admin-badge">
-                                        هزینه
-                                    </span>
+                                        <span class="admin-muted">
+                                            —
+                                        </span>
 
                                     @endif
 
                                 </td>
 
 
-                                {{-- Category --}}
+                                {{-- TYPE --}}
 
                                 <td>
+
+                                    <span
+                                        class="admin-badge admin-badge--{{ $typeClass }}"
+                                    >
+                                        {{ $typeLabel }}
+                                    </span>
+
+                                </td>
+
+
+                                {{-- CATEGORY --}}
+
+                                <td>
+
                                     {{ $transaction->category ?: '—' }}
+
                                 </td>
 
 
-                                {{-- Amount --}}
+                                {{-- AMOUNT --}}
 
                                 <td>
-                                    {{ number_format((float) $transaction->amount) }}
-                                    تومان
+
+                                    <div class="admin-price">
+
+                                        {{ number_format(
+                                            (float) $transaction->amount
+                                        ) }}
+
+                                    </div>
+
+                                    <div class="admin-muted">
+                                        تومان
+                                    </div>
+
                                 </td>
 
 
-                                {{-- Description --}}
+                                {{-- DESCRIPTION --}}
 
                                 <td>
-                                    {{ $transaction->description ?: '—' }}
+
+                                    @if($transaction->description)
+
+                                        <span>
+                                            {{ \Illuminate\Support\Str::limit(
+                                                $transaction->description,
+                                                80
+                                            ) }}
+                                        </span>
+
+                                    @else
+
+                                        <span class="admin-muted">
+                                            —
+                                        </span>
+
+                                    @endif
+
                                 </td>
 
 
-                                {{-- Created by --}}
+                                {{-- CREATED BY --}}
 
                                 <td>
+
                                     {{ $transaction->createdBy?->name ?? '—' }}
+
                                 </td>
 
 
-                                {{-- Details --}}
+                                {{-- ACTION --}}
 
                                 <td>
 
                                     <a
-                                        href="{{ route('admin.accounting.show', $transaction) }}"
-                                        class="admin-btn admin-btn-sm admin-btn-light"
+                                        href="{{ route(
+                                            'admin.accounting.show',
+                                            $transaction
+                                        ) }}"
+                                        class="admin-btn admin-btn--ghost admin-btn--sm"
                                     >
                                         مشاهده
                                     </a>
@@ -223,21 +448,7 @@
 
                             </tr>
 
-                        @empty
-
-                            <tr>
-
-                                <td colspan="7">
-
-                                    <div class="admin-empty">
-                                        تراکنش مالی ثبت نشده است.
-                                    </div>
-
-                                </td>
-
-                            </tr>
-
-                        @endforelse
+                        @endforeach
 
                         </tbody>
 
@@ -246,38 +457,66 @@
                 </div>
 
 
+                {{-- PAGINATION --}}
+
                 @if($transactions->hasPages())
 
                     <div class="admin-pagination">
+
                         {{ $transactions->links() }}
+
                     </div>
 
                 @endif
 
-            </div>
 
+            @else
 
+                <div class="admin-empty">
 
-            {{-- Create transaction --}}
-
-            <div class="admin-card">
-
-                <div class="admin-card-header">
-
-                    <div>
-
-                        <h2 class="admin-card-title">
-                            ثبت تراکنش
-                        </h2>
-
-                        <p class="admin-card-description">
-                            ثبت درآمد یا هزینه جدید
-                        </p>
-
+                    <div class="admin-empty__icon">
+                        —
                     </div>
+
+                    <h3 class="admin-empty__title">
+                        تراکنشی پیدا نشد
+                    </h3>
+
+                    <p class="admin-empty__text">
+                        با فیلترهای فعلی تراکنشی برای نمایش وجود ندارد.
+                    </p>
 
                 </div>
 
+            @endif
+
+        </div>
+
+
+        {{-- =================================================
+            CREATE TRANSACTION
+        ================================================== --}}
+
+        <div class="admin-card">
+
+            <div class="admin-card-header">
+
+                <div>
+
+                    <h2 class="admin-card-title">
+                        ثبت تراکنش
+                    </h2>
+
+                    <p class="admin-card-description">
+                        درآمد یا هزینه جدید را ثبت کنید.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="admin-card-body">
 
                 <form
                     method="POST"
@@ -287,12 +526,12 @@
                     @csrf
 
 
-                    {{-- Type --}}
+                    {{-- TYPE --}}
 
                     <div class="admin-field">
 
                         <label for="type">
-                            نوع *
+                            نوع تراکنش *
                         </label>
 
                         <select
@@ -321,21 +560,27 @@
 
                         </select>
 
+
                         @error('type')
-                        <small class="admin-error">
+
+                        <small
+                            class="admin-help"
+                            style="color:var(--admin-danger);"
+                        >
                             {{ $message }}
                         </small>
+
                         @enderror
 
                     </div>
 
 
-                    {{-- Category --}}
+                    {{-- CATEGORY --}}
 
                     <div class="admin-field">
 
                         <label for="category">
-                            دسته‌بندی
+                            دسته‌بندی *
                         </label>
 
                         <input
@@ -343,21 +588,33 @@
                             type="text"
                             name="category"
                             value="{{ old('category') }}"
-                            maxlength="100"
+                            maxlength="80"
                             autocomplete="off"
-                            placeholder="مثلاً فروش، خرید، تبلیغات..."
+                            placeholder="مثلاً فروش، تبلیغات، خرید..."
+                            required
                         >
 
+
+                        <small class="admin-help">
+                            یک عنوان کوتاه برای دسته‌بندی هزینه یا درآمد.
+                        </small>
+
+
                         @error('category')
-                        <small class="admin-error">
+
+                        <small
+                            class="admin-help"
+                            style="color:var(--admin-danger);"
+                        >
                             {{ $message }}
                         </small>
+
                         @enderror
 
                     </div>
 
 
-                    {{-- Amount --}}
+                    {{-- AMOUNT --}}
 
                     <div class="admin-field">
 
@@ -365,60 +622,72 @@
                             مبلغ *
                         </label>
 
-                        <div class="admin-input-suffix">
+                        <input
+                            id="amount"
+                            type="text"
+                            name="amount"
+                            value="{{ old('amount') }}"
+                            inputmode="numeric"
+                            autocomplete="off"
+                            placeholder="مثلاً ۱٬۵۰۰٬۰۰۰"
+                            required
+                        >
 
-                            <input
-                                id="amount"
-                                type="number"
-                                name="amount"
-                                value="{{ old('amount') }}"
-                                min="1"
-                                step="0.01"
-                                inputmode="decimal"
-                                required
-                            >
 
-                            <span>
-                            تومان
-                        </span>
+                        <small class="admin-help">
+                            مبلغ را به تومان وارد کنید؛ جداکننده هم می‌توانید استفاده کنید.
+                        </small>
 
-                        </div>
 
                         @error('amount')
-                        <small class="admin-error">
+
+                        <small
+                            class="admin-help"
+                            style="color:var(--admin-danger);"
+                        >
                             {{ $message }}
                         </small>
+
                         @enderror
 
                     </div>
 
 
-                    {{-- Transaction date --}}
+                    {{-- DATE --}}
 
                     <div class="admin-field">
 
                         <label for="transaction_date">
-                            تاریخ *
+                            تاریخ تراکنش *
                         </label>
 
                         <input
                             id="transaction_date"
                             type="date"
                             name="transaction_date"
-                            value="{{ old('transaction_date', now()->toDateString()) }}"
+                            value="{{ old(
+                                'transaction_date',
+                                now()->toDateString()
+                            ) }}"
                             required
                         >
 
+
                         @error('transaction_date')
-                        <small class="admin-error">
+
+                        <small
+                            class="admin-help"
+                            style="color:var(--admin-danger);"
+                        >
                             {{ $message }}
                         </small>
+
                         @enderror
 
                     </div>
 
 
-                    {{-- Description --}}
+                    {{-- DESCRIPTION --}}
 
                     <div class="admin-field">
 
@@ -430,25 +699,32 @@
                             id="description"
                             name="description"
                             rows="4"
-                            maxlength="1000"
+                            maxlength="500"
+                            placeholder="مثلاً پرداخت هزینه تبلیغات اینستاگرام..."
                         >{{ old('description') }}</textarea>
 
+
                         @error('description')
-                        <small class="admin-error">
+
+                        <small
+                            class="admin-help"
+                            style="color:var(--admin-danger);"
+                        >
                             {{ $message }}
                         </small>
+
                         @enderror
 
                     </div>
 
 
-                    {{-- Actions --}}
+                    {{-- ACTIONS --}}
 
                     <div class="admin-form-actions">
 
                         <button
                             type="submit"
-                            class="admin-btn admin-btn-primary"
+                            class="admin-btn admin-btn--secondary"
                         >
                             ثبت تراکنش
                         </button>

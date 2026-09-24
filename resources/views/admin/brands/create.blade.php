@@ -8,48 +8,38 @@
     <div class="admin-page-head">
 
         <div>
-            <h1 class="admin-page-title">افزودن برند</h1>
 
-            <p class="admin-page-description">
-                ثبت برند جدید
+            <h1 class="admin-page-head__title">
+                افزودن برند
+            </h1>
+
+            <p class="admin-page-head__text">
+                ثبت یک برند جدید برای فروشگاه
             </p>
+
         </div>
 
         <a
             href="{{ route('admin.brands.index') }}"
-            class="admin-btn admin-btn-light"
+            class="admin-btn admin-btn--ghost"
         >
             بازگشت
         </a>
 
     </div>
 
+
     <form
         method="POST"
         action="{{ route('admin.brands.store') }}"
         enctype="multipart/form-data"
     >
+
         @csrf
 
-        @include('admin.brands._form')
-
-        <div class="admin-form-actions">
-
-            <button
-                type="submit"
-                class="admin-btn admin-btn-primary"
-            >
-                ذخیره برند
-            </button>
-
-            <a
-                href="{{ route('admin.brands.index') }}"
-                class="admin-btn admin-btn-light"
-            >
-                انصراف
-            </a>
-
-        </div>
+        @include('admin.brands._form', [
+            'brand' => $brand,
+        ])
 
     </form>
 

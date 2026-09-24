@@ -1,78 +1,127 @@
 @extends('layouts.admin')
 
 @section('title', 'انبار')
+@section('page-title', 'انبار')
 
 @section('content')
 
-    <div class="admin-page">
+    {{-- =====================================================
+        PAGE HEADER
+    ====================================================== --}}
 
-        {{-- Header --}}
-        <div class="admin-page-header">
+    <div class="admin-page-head">
+
+        <div>
+
+            <h1 class="admin-page-head__title">
+                انبار
+            </h1>
+
+            <p class="admin-page-head__text">
+                مشاهده موجودی و ثبت گردش‌های انبار
+            </p>
+
+        </div>
+
+    </div>
+
+
+    {{-- =====================================================
+        SEARCH
+    ====================================================== --}}
+
+    <div class="admin-card admin-filter-card">
+
+        <div class="admin-card-header">
 
             <div>
-                <h1 class="admin-page-title">
-                    انبار
-                </h1>
 
-                <p class="admin-page-description">
-                    مشاهده موجودی و ثبت گردش‌های انبار
+                <h2 class="admin-card-title">
+                    جستجو
+                </h2>
+
+                <p class="admin-card-description">
+                    محصول یا واریانت موردنظر را پیدا کنید.
                 </p>
+
             </div>
 
         </div>
 
 
-        {{-- Success --}}
-        @if(session('success'))
-            <div class="admin-alert admin-alert-success">
-                {{ session('success') }}
-            </div>
-        @endif
+        <form
+            method="GET"
+            action="{{ route('admin.inventory.index') }}"
+        >
+
+            <div class="admin-filter-grid">
+
+                <div class="admin-field">
+
+                    <label for="q">
+                        جستجوی محصول
+                    </label>
+
+                    <input
+                        id="q"
+                        type="search"
+                        name="q"
+                        value="{{ request('q') }}"
+                        placeholder="نام محصول یا شناسه..."
+                    >
+
+                </div>
 
 
-        {{-- Error --}}
-        @if(session('error'))
-            <div class="admin-alert admin-alert-error">
-                {{ session('error') }}
-            </div>
-        @endif
+                <div class="admin-filter-actions">
 
+                    <button
+                        type="submit"
+                        class="admin-btn admin-btn--secondary"
+                    >
+                        جستجو
+                    </button>
 
-        {{-- Validation --}}
-        @if($errors->any())
-
-            <div class="admin-alert admin-alert-error">
-
-                <ul>
-                    @foreach($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-
-            </div>
-
-        @endif
-
-
-        {{-- Inventory table --}}
-        <div class="admin-card">
-
-            <div class="admin-card-header">
-
-                <div>
-
-                    <h2 class="admin-card-title">
-                        موجودی واریانت‌ها
-                    </h2>
-
-                    <p class="admin-card-description">
-                        موجودی فعلی هر واریانت محصول
-                    </p>
+                    <a
+                        href="{{ route('admin.inventory.index') }}"
+                        class="admin-btn admin-btn--ghost"
+                    >
+                        پاک کردن
+                    </a>
 
                 </div>
 
             </div>
 
+        </form>
+
+    </div>
+
+
+    {{-- =====================================================
+        INVENTORY
+    ====================================================== --}}
+
+    <div class="admin-card">
+
+        <div class="admin-card-header">
+
+            <div>
+
+                <h2 class="admin-card-title">
+                    موجودی واریانت‌ها
+                </h2>
+
+                <p class="admin-card-description">
+                    موجودی فعلی هر گزینه قابل فروش
+                </p>
+
+            </div>
+
+        </div>
+
+
+        @if($variants->count())
 
             <div class="admin-table-wrap">
 
@@ -81,13 +130,35 @@
                     <thead>
 
                     <tr>
-                        <th>محصول</th>
-                        <th>SKU</th>
-                        <th>ویژگی</th>
-                        <th>موجودی</th>
-                        <th>حد هشدار</th>
-                        <th>وضعیت</th>
-                        <th></th>
+
+                        <th>
+                            محصول
+                        </th>
+
+                        <th>
+                            کد کالا
+                        </th>
+
+                        <th>
+                            ویژگی
+                        </th>
+
+                        <th>
+                            موجودی
+                        </th>
+
+                        <th>
+                            حد هشدار
+                        </th>
+
+                        <th>
+                            وضعیت
+                        </th>
+
+                        <th>
+                            عملیات
+                        </th>
+
                     </tr>
 
                     </thead>
@@ -95,33 +166,57 @@
 
                     <tbody>
 
-                    @forelse($variants as $variant)
+                    @foreach($variants as $variant)
 
                         @php
-                            $stock = (int) $variant->stock;
-                            $threshold = (int) $variant->low_stock_threshold;
+
+                            $stock = (int) (
+                                $variant->stock ?? 0
+                            );
+
+                            $threshold = (int) (
+                                $variant->low_stock_threshold ?? 5
+                            );
+
                             $isLowStock = $stock <= $threshold;
+
                         @endphp
+
 
                         <tr>
 
-                            {{-- Product --}}
+                            {{-- PRODUCT --}}
+
                             <td>
 
-                                <div class="admin-table-primary">
+                                <div class="admin-product-name">
                                     {{ $variant->product?->name ?? '—' }}
                                 </div>
+
+                                @if($variant->product?->category)
+
+                                    <div class="admin-product-meta">
+                                        {{ $variant->product->category->name }}
+                                    </div>
+
+                                @endif
 
                             </td>
 
 
                             {{-- SKU --}}
+
                             <td dir="ltr">
-                                {{ $variant->sku }}
+
+                                <span class="admin-muted">
+                                    {{ $variant->sku ?: 'خودکار' }}
+                                </span>
+
                             </td>
 
 
-                            {{-- Variant attributes --}}
+                            {{-- ATTRIBUTES --}}
+
                             <td>
 
                                 @if($variant->size)
@@ -145,62 +240,86 @@
 
 
                                 @if(!$variant->size && !$variant->color)
-                                    —
+
+                                    <span class="admin-muted">
+                                        بدون ویژگی
+                                    </span>
+
                                 @endif
 
                             </td>
 
 
-                            {{-- Stock --}}
+                            {{-- STOCK --}}
+
                             <td>
 
-                                <strong>
+                                <div class="admin-price">
                                     {{ number_format($stock) }}
-                                </strong>
+                                </div>
+
 
                                 @if($isLowStock)
 
-                                    <div class="admin-table-warning">
+                                    <span class="admin-badge admin-badge--warning">
                                         موجودی کم
-                                    </div>
+                                    </span>
+
+                                @else
+
+                                    <span class="admin-muted">
+                                        مناسب
+                                    </span>
 
                                 @endif
 
                             </td>
 
 
-                            {{-- Threshold --}}
+                            {{-- THRESHOLD --}}
+
                             <td>
-                                {{ number_format($threshold) }}
+
+                                <span class="admin-muted">
+
+                                    {{ number_format($threshold) }}
+
+                                </span>
+
                             </td>
 
 
-                            {{-- Status --}}
+                            {{-- STATUS --}}
+
                             <td>
 
                                 @if($variant->is_active)
 
-                                    <span class="admin-badge admin-badge-success">
-                                    فعال
-                                </span>
+                                    <span class="admin-badge admin-badge--success">
+                                        فعال
+                                    </span>
 
                                 @else
 
-                                    <span class="admin-badge">
-                                    غیرفعال
-                                </span>
+                                    <span class="admin-badge admin-badge--neutral">
+                                        غیرفعال
+                                    </span>
 
                                 @endif
 
                             </td>
 
 
-                            {{-- Actions --}}
+                            {{-- ACTIONS --}}
+
                             <td>
 
                                 <a
-                                    href="{{ route('admin.products.variants.edit', [$variant->product, $variant]) }}"
-                                    class="admin-btn admin-btn-sm admin-btn-light"
+                                    href="{{ route(
+                                        'admin.products.variants.edit',
+                                        [$variant->product, $variant]
+                                    ) }}"
+                                    class="admin-btn admin-btn--ghost admin-btn--sm"
                                 >
                                     مدیریت
                                 </a>
@@ -209,21 +328,7 @@
 
                         </tr>
 
-                    @empty
-
-                        <tr>
-
-                            <td colspan="7">
-
-                                <div class="admin-empty">
-                                    واریانتی برای نمایش وجود ندارد.
-                                </div>
-
-                            </td>
-
-                        </tr>
-
-                    @endforelse
+                    @endforeach
 
                     </tbody>
 
@@ -232,7 +337,6 @@
             </div>
 
 
-            {{-- Pagination --}}
             @if($variants->hasPages())
 
                 <div class="admin-pagination">
@@ -241,33 +345,59 @@
 
             @endif
 
-        </div>
 
+        @else
 
+            <div class="admin-empty">
 
-        {{-- Create inventory movement --}}
-        <div class="admin-card admin-form-section">
-
-            <div class="admin-card-header">
-
-                <div>
-
-                    <h2 class="admin-card-title">
-                        ثبت گردش انبار
-                    </h2>
-
-                    <p class="admin-card-description">
-                        هر تغییر موجودی را به‌صورت یک گردش مستقل ثبت کنید.
-                    </p>
-
+                <div class="admin-empty__icon">
+                    —
                 </div>
+
+                <h3 class="admin-empty__title">
+                    موجودی‌ای برای نمایش وجود ندارد
+                </h3>
+
+                <p class="admin-empty__text">
+                    با جستجوی فعلی واریانتی پیدا نشد.
+                </p>
 
             </div>
 
+        @endif
+
+    </div>
+
+
+    {{-- =====================================================
+        CREATE MOVEMENT
+    ====================================================== --}}
+
+    <div class="admin-card admin-form-section">
+
+        <div class="admin-card-header">
+
+            <div>
+
+                <h2 class="admin-card-title">
+                    ثبت گردش انبار
+                </h2>
+
+                <p class="admin-card-description">
+                    ورود، خروج، خرابی یا اصلاح موجودی را ثبت کنید.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="admin-card-body">
 
             <form
                 method="POST"
                 action="{{ route('admin.inventory.store') }}"
+                id="inventory-movement-form"
             >
 
                 @csrf
@@ -275,12 +405,12 @@
 
                 <div class="admin-form-grid">
 
+                    {{-- VARIANT --}}
 
-                    {{-- Variant --}}
-                    <div class="admin-field">
+                    <div class="admin-field admin-field-full">
 
                         <label for="product_variant_id">
-                            واریانت *
+                            محصول و واریانت *
                         </label>
 
                         <select
@@ -290,21 +420,35 @@
                         >
 
                             <option value="">
-                                انتخاب واریانت
+                                انتخاب محصول
                             </option>
 
-                            @foreach($variantOptions as $variant)
+                            @foreach($variantOptions as $variantOption)
 
                                 <option
-                                    value="{{ $variant->id }}"
-                                    @selected(old('product_variant_id') == $variant->id)
+                                    value="{{ $variantOption->id }}"
+                                    @selected(
+                                    old('product_variant_id')
+                                == $variantOption->id
+                                )
                                 >
-                                {{ $variant->product?->name ?? 'محصول' }}
-                                —
-                                {{ $variant->sku }}
-                                —
-                                موجودی فعلی:
-                                {{ $variant->stock }}
+                                {{ $variantOption->product?->name ?? 'محصول' }}
+
+                                @if($variantOption->sku)
+                                    — {{ $variantOption->sku }}
+                                @endif
+
+                                @if($variantOption->size)
+                                    — {{ $variantOption->size }}
+                                @endif
+
+                                @if($variantOption->color)
+                                    — {{ $variantOption->color }}
+                                @endif
+
+                                — موجودی:
+                                {{ number_format((int) $variantOption->stock) }}
+
                                 </option>
 
                             @endforeach
@@ -314,7 +458,10 @@
 
                         @error('product_variant_id')
 
-                        <small class="admin-error">
+                        <small
+                            class="admin-help"
+                            style="color:var(--admin-danger);"
+                        >
                             {{ $message }}
                         </small>
 
@@ -323,8 +470,8 @@
                     </div>
 
 
+                    {{-- TYPE --}}
 
-                    {{-- Movement type --}}
                     <div class="admin-field">
 
                         <label for="type">
@@ -381,7 +528,10 @@
 
                         @error('type')
 
-                        <small class="admin-error">
+                        <small
+                            class="admin-help"
+                            style="color:var(--admin-danger);"
+                        >
                             {{ $message }}
                         </small>
 
@@ -390,34 +540,81 @@
                     </div>
 
 
+                    {{-- DIRECTION FOR ADJUSTMENT --}}
 
-                    {{-- Quantity --}}
+                    <div
+                        class="admin-field"
+                        id="adjustment-direction-field"
+                        style="display:none;"
+                    >
+
+                        <label for="adjustment_direction">
+                            جهت اصلاح
+                        </label>
+
+                        <select
+                            id="adjustment_direction"
+                        >
+
+                            <option value="increase">
+                                افزایش موجودی
+                            </option>
+
+                            <option value="decrease">
+                                کاهش موجودی
+                            </option>
+
+                        </select>
+
+                        <small class="admin-help">
+                            برای اصلاح موجودی مشخص کنید مقدار باید اضافه شود یا کم.
+                        </small>
+
+                    </div>
+
+
+                    {{-- QUANTITY --}}
+
                     <div class="admin-field">
 
-                        <label for="quantity">
-                            تعداد *
+                        <label for="quantity_amount">
+                            مقدار *
                         </label>
 
                         <input
-                            id="quantity"
+                            id="quantity_amount"
                             type="number"
-                            name="quantity"
-                            value="{{ old('quantity') }}"
                             min="1"
                             step="1"
                             inputmode="numeric"
+                            value="{{ old('quantity')
+                                ? abs((int) old('quantity'))
+                                : '' }}"
                             required
                         >
 
+                        <input
+                            type="hidden"
+                            name="quantity"
+                            id="quantity"
+                            value="{{ old('quantity') }}"
+                        >
 
-                        <small class="admin-help">
-                            تعداد تغییر موجودی را وارد کنید.
+
+                        <small
+                            class="admin-help"
+                            id="quantity-help"
+                        >
+                            تعداد موردنظر را بدون علامت مثبت یا منفی وارد کنید.
                         </small>
 
 
                         @error('quantity')
 
-                        <small class="admin-error">
+                        <small
+                            class="admin-help"
+                            style="color:var(--admin-danger);"
+                        >
                             {{ $message }}
                         </small>
 
@@ -426,8 +623,8 @@
                     </div>
 
 
+                    {{-- NOTE --}}
 
-                    {{-- Note --}}
                     <div class="admin-field admin-field-full">
 
                         <label for="note">
@@ -438,14 +635,22 @@
                             id="note"
                             name="note"
                             rows="4"
-                            maxlength="1000"
-                            placeholder="مثلاً خرید از تأمین‌کننده، اصلاح شمارش انبار، کالای آسیب‌دیده..."
+                            maxlength="500"
+                            placeholder="مثلاً خرید از تأمین‌کننده، اصلاح شمارش یا کالای آسیب‌دیده..."
                         >{{ old('note') }}</textarea>
+
+
+                        <small class="admin-help">
+                            توضیحات اختیاری است.
+                        </small>
 
 
                         @error('note')
 
-                        <small class="admin-error">
+                        <small
+                            class="admin-help"
+                            style="color:var(--admin-danger);"
+                        >
                             {{ $message }}
                         </small>
 
@@ -460,7 +665,7 @@
 
                     <button
                         type="submit"
-                        class="admin-btn admin-btn-primary"
+                        class="admin-btn admin-btn--secondary"
                     >
                         ثبت گردش انبار
                     </button>
@@ -472,5 +677,367 @@
         </div>
 
     </div>
+
+
+    {{-- =====================================================
+        RECENT MOVEMENTS
+    ====================================================== --}}
+
+    <div class="admin-card admin-form-section">
+
+        <div class="admin-card-header">
+
+            <div>
+
+                <h2 class="admin-card-title">
+                    آخرین گردش‌ها
+                </h2>
+
+                <p class="admin-card-description">
+                    آخرین تغییرات ثبت‌شده در موجودی
+                </p>
+
+            </div>
+
+        </div>
+
+
+        @if($movements->count())
+
+            <div class="admin-table-wrap">
+
+                <table class="admin-table">
+
+                    <thead>
+
+                    <tr>
+
+                        <th>
+                            محصول
+                        </th>
+
+                        <th>
+                            نوع
+                        </th>
+
+                        <th>
+                            تغییر
+                        </th>
+
+                        <th>
+                            موجودی پس از تغییر
+                        </th>
+
+                        <th>
+                            ثبت‌کننده
+                        </th>
+
+                        <th>
+                            تاریخ
+                        </th>
+
+                    </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                    @foreach($movements as $movement)
+
+                        @php
+
+                            $movementNames = [
+                                'purchase' => 'ورود خرید',
+                                'sale' => 'خروج فروش',
+                                'adjustment' => 'اصلاح موجودی',
+                                'damage' => 'ضایعات / خرابی',
+                                'return' => 'برگشت کالا',
+                            ];
+
+                            $quantity = (int) $movement->quantity;
+
+                            $quantityClass = $quantity > 0
+                                ? 'success'
+                                : 'danger';
+
+                        @endphp
+
+
+                        <tr>
+
+                            <td>
+
+                                <div class="admin-product-name">
+
+                                    {{
+                                        $movement->productVariant?->product?->name
+                                        ?? '—'
+                                    }}
+
+                                </div>
+
+                                @if($movement->productVariant?->sku)
+
+                                    <div class="admin-product-meta" dir="ltr">
+
+                                        {{ $movement->productVariant->sku }}
+
+                                    </div>
+
+                                @endif
+
+                            </td>
+
+
+                            <td>
+
+                                <span class="admin-badge admin-badge--neutral">
+
+                                    {{
+                                        $movementNames[$movement->type]
+                                        ?? $movement->type
+                                    }}
+
+                                </span>
+
+                            </td>
+
+
+                            <td>
+
+                                <span class="admin-badge admin-badge--{{ $quantityClass }}">
+
+                                    {{ $quantity > 0 ? '+' : '' }}
+                                    {{ number_format($quantity) }}
+
+                                </span>
+
+                            </td>
+
+
+                            <td>
+
+                                <span class="admin-price">
+
+                                    {{
+                                        number_format(
+                                            (int) $movement->stock_after
+                                        )
+                                    }}
+
+                                </span>
+
+                            </td>
+
+
+                            <td>
+
+                                {{ $movement->createdBy?->name ?? 'سیستم' }}
+
+                            </td>
+
+
+                            <td>
+
+                                <span class="admin-muted">
+
+                                    {{
+                                        $movement->created_at
+                                            ? $movement->created_at->format('Y/m/d H:i')
+                                            : '—'
+                                    }}
+
+                                </span>
+
+                            </td>
+
+                        </tr>
+
+                    @endforeach
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        @else
+
+            <div class="admin-empty">
+
+                <div class="admin-empty__icon">
+                    —
+                </div>
+
+                <h3 class="admin-empty__title">
+                    گردش انباری ثبت نشده است
+                </h3>
+
+                <p class="admin-empty__text">
+                    اولین تغییر موجودی را از فرم بالا ثبت کنید.
+                </p>
+
+            </div>
+
+        @endif
+
+    </div>
+
+
+    {{-- =====================================================
+        INVENTORY FORM JS
+    ====================================================== --}}
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            const typeInput = document.getElementById('type');
+            const quantityAmountInput =
+                document.getElementById('quantity_amount');
+
+            const quantityInput =
+                document.getElementById('quantity');
+
+            const directionField =
+                document.getElementById('adjustment-direction-field');
+
+            const directionInput =
+                document.getElementById('adjustment_direction');
+
+            const quantityHelp =
+                document.getElementById('quantity-help');
+
+
+            const updateQuantity = () => {
+
+                if (
+                    !typeInput ||
+                    !quantityAmountInput ||
+                    !quantityInput
+                ) {
+                    return;
+                }
+
+                const amount = Math.abs(
+                    Number(quantityAmountInput.value) || 0
+                );
+
+                const type = typeInput.value;
+
+                let signedQuantity = amount;
+
+
+                if (
+                    type === 'sale' ||
+                    type === 'damage'
+                ) {
+                    signedQuantity = -amount;
+                }
+
+
+                if (
+                    type === 'adjustment' &&
+                    directionInput
+                ) {
+                    signedQuantity =
+                        directionInput.value === 'decrease'
+                            ? -amount
+                            : amount;
+                }
+
+
+                quantityInput.value =
+                    amount > 0
+                        ? String(signedQuantity)
+                        : '';
+
+
+
+                if (type === 'purchase') {
+
+                    quantityHelp.textContent =
+                        'این مقدار به موجودی اضافه می‌شود.';
+
+                } else if (type === 'return') {
+
+                    quantityHelp.textContent =
+                        'این مقدار به موجودی اضافه می‌شود.';
+
+                } else if (type === 'sale') {
+
+                    quantityHelp.textContent =
+                        'این مقدار از موجودی کم می‌شود.';
+
+                } else if (type === 'damage') {
+
+                    quantityHelp.textContent =
+                        'این مقدار از موجودی کم می‌شود.';
+
+                } else if (type === 'adjustment') {
+
+                    quantityHelp.textContent =
+                        directionInput?.value === 'decrease'
+                            ? 'این مقدار از موجودی کم می‌شود.'
+                            : 'این مقدار به موجودی اضافه می‌شود.';
+
+                } else {
+
+                    quantityHelp.textContent =
+                        'تعداد موردنظر را وارد کنید.';
+
+                }
+
+            };
+
+
+            const updateDirectionVisibility = () => {
+
+                if (!typeInput || !directionField) {
+                    return;
+                }
+
+                const isAdjustment =
+                    typeInput.value === 'adjustment';
+
+                directionField.style.display =
+                    isAdjustment
+                        ? ''
+                        : 'none';
+
+                updateQuantity();
+
+            };
+
+
+            typeInput?.addEventListener(
+                'change',
+                updateDirectionVisibility
+            );
+
+
+            directionInput?.addEventListener(
+                'change',
+                updateQuantity
+            );
+
+
+            quantityAmountInput?.addEventListener(
+                'input',
+                updateQuantity
+            );
+
+
+            updateDirectionVisibility();
+
+
+            document
+                .getElementById('inventory-movement-form')
+                ?.addEventListener('submit', () => {
+                    updateQuantity();
+                });
+
+        });
+    </script>
 
 @endsection

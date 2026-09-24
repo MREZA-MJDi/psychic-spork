@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Models\FinancialTransaction;
 use App\Models\Order;
 use App\Models\Product;
@@ -10,10 +11,16 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
-class AdminDashboardController extends AdminController
+class AdminDashboardController extends Controller
 {
     public function index(Request $request): View
     {
+        /*
+        |--------------------------------------------------------------------------
+        | Selected period
+        |--------------------------------------------------------------------------
+        */
+
         $period = max(
             7,
             min($request->integer('period', 30), 90)
@@ -25,6 +32,7 @@ class AdminDashboardController extends AdminController
 
         $to = now()->endOfDay();
 
+
         /*
         |--------------------------------------------------------------------------
         | Orders in selected period
@@ -33,6 +41,7 @@ class AdminDashboardController extends AdminController
 
         $baseOrders = Order::query()
             ->whereBetween('placed_at', [$from, $to]);
+
 
         /*
         |--------------------------------------------------------------------------
@@ -52,9 +61,10 @@ class AdminDashboardController extends AdminController
             ])
             ->sum('amount');
 
+
         /*
         |--------------------------------------------------------------------------
-        | Daily chart
+        | Daily sales chart
         |--------------------------------------------------------------------------
         */
 
@@ -80,14 +90,24 @@ class AdminDashboardController extends AdminController
         $daily = collect(range(0, $period - 1))
             ->map(function (int $index) use ($from, $rows): array {
                 $day = $from->copy()->addDays($index);
-                $row = $rows->get($day->toDateString());
+
+                $row = $rows->get(
+                    $day->toDateString()
+                );
 
                 return [
                     'label' => $day->format('m/d'),
-                    'income' => (float) ($row->income ?? 0),
-                    'orders' => (int) ($row->orders ?? 0),
+
+                    'income' => (float) (
+                        $row->income ?? 0
+                    ),
+
+                    'orders' => (int) (
+                        $row->orders ?? 0
+                    ),
                 ];
             });
+
 
         /*
         |--------------------------------------------------------------------------
@@ -122,13 +142,19 @@ class AdminDashboardController extends AdminController
         $inventoryValue = (float) ProductVariant::query()
             ->where('is_active', true)
             ->selectRaw(
-                'COALESCE(SUM(stock * effective_price), 0) as total'
+                'COALESCE(
+                    SUM(
+                        stock * COALESCE(sale_price, price)
+                    ),
+                    0
+                ) as total'
             )
             ->value('total');
 
+
         /*
         |--------------------------------------------------------------------------
-        | Dashboard data
+        | Dashboard calculations
         |--------------------------------------------------------------------------
         */
 
@@ -142,72 +168,157 @@ class AdminDashboardController extends AdminController
             ->count();
 
         $orderBreakdown = (clone $baseOrders)
-            ->selectRaw('status, COUNT(*) as total')
+            ->selectRaw(
+                'status, COUNT(*) as total'
+            )
             ->groupBy('status')
             ->pluck('total', 'status');
 
-        $pendingOrders = (clone $baseOrders)
+
+        /*
+        |--------------------------------------------------------------------------
+        | Current processing orders
+        |
+        | IMPORTANT:
+        | This is intentionally NOT limited to the selected period.
+        | "Current processing" means orders whose current status is
+        | pending / confirmed / preparing, regardless of when they
+        | were originally placed.
+        |--------------------------------------------------------------------------
+        */
+
+        $pendingOrders = Order::query()
             ->activeProcessing()
             ->count();
 
-        return view('admin.dashboard.index', [
-            'period' => $period,
 
-            'revenue' => $revenue,
+        /*
+        |--------------------------------------------------------------------------
+        | Customers
+        |--------------------------------------------------------------------------
+        */
 
-            'expenses' => $expenses,
+        $customers = User::query()
+            ->customers()
+            ->count();
 
-            'netCash' => $revenue - $expenses,
 
-            'paidOrdersCount' => $paidOrdersCount,
+        /*
+        |--------------------------------------------------------------------------
+        | Recent orders
+        |
+        | This is intentionally global/latest, not period-limited.
+        |--------------------------------------------------------------------------
+        */
 
-            'ordersCount' => $ordersCount,
+        $recentOrders = Order::query()
+            ->with('user')
+            ->latest('placed_at')
+            ->latest('id')
+            ->limit(7)
+            ->get();
 
-            'pendingOrders' => $pendingOrders,
 
-            'lowStock' => $lowStock,
+        /*
+        |--------------------------------------------------------------------------
+        | Top products
+        |
+        | NOTE:
+        | Currently calculated across all order items.
+        | We will only make this period-aware after checking OrderItem
+        | so cancelled/returned orders are handled correctly.
+        |--------------------------------------------------------------------------
+        */
+        $topProducts = Product::query()
+            ->with([
+                'category:id,name',
+            ])
+            ->withSum(
+                [
+                    'orderItems as sales_quantity' => function ($query) use ($from, $to) {
+                        $query->whereHas('order', function ($orderQuery) use ($from, $to) {
+                            $orderQuery
+                                ->whereBetween('placed_at', [$from, $to])
+                                ->whereNotIn(
+                                    'status',
+                                    Order::CANCEL_LIKE_STATUSES
+                                )
+                                ->where('payment_status', 'paid');
+                        });
+                    },
+                ],
+                'quantity'
+            )
+            ->having('sales_quantity', '>', 0)
+            ->orderByDesc('sales_quantity')
+            ->orderBy('id')
+            ->limit(6)
+            ->get();
 
-            'inventoryValue' => $inventoryValue,
 
-            'customers' => User::customers()->count(),
+        /*
+        |--------------------------------------------------------------------------
+        | Status labels
+        |--------------------------------------------------------------------------
+        */
 
-            'daily' => $daily,
+        $statusNames = [
+            'pending' => 'در انتظار',
+            'confirmed' => 'تأیید شده',
+            'preparing' => 'در حال آماده‌سازی',
+            'shipped' => 'ارسال شده',
+            'delivered' => 'تحویل شده',
+            'cancelled' => 'لغو شده',
+            'returned' => 'مرجوعی',
+        ];
 
-            'maxIncome' => max(
-                1,
-                $dailyMaxIncome
-            ),
 
-            'orderBreakdown' => $orderBreakdown,
+        /*
+        |--------------------------------------------------------------------------
+        | View
+        |--------------------------------------------------------------------------
+        */
 
-            'statusNames' => [
-                'pending' => 'در انتظار',
-                'confirmed' => 'تأیید شده',
-                'preparing' => 'در حال آماده‌سازی',
-                'shipped' => 'ارسال شده',
-                'delivered' => 'تحویل شده',
-                'cancelled' => 'لغو شده',
-                'returned' => 'مرجوعی',
-            ],
+        return view(
+            'admin.dashboard.index',
+            [
+                'period' => $period,
 
-            'lowStockVariants' => $lowStockVariants,
+                'revenue' => $revenue,
 
-            'recentOrders' => Order::query()
-                ->with('user')
-                ->latest('placed_at')
-                ->latest('id')
-                ->limit(7)
-                ->get(),
+                'expenses' => $expenses,
 
-            'topProducts' => Product::query()
-                ->with([
-                    'category:id,name',
-                ])
-                ->withSum('orderItems', 'quantity')
-                ->orderByDesc('order_items_sum_quantity')
-                ->orderBy('id')
-                ->limit(6)
-                ->get(),
-        ]);
+                'netCash' => $revenue - $expenses,
+
+                'paidOrdersCount' => $paidOrdersCount,
+
+                'ordersCount' => $ordersCount,
+
+                'pendingOrders' => $pendingOrders,
+
+                'customers' => $customers,
+
+                'lowStock' => $lowStock,
+
+                'inventoryValue' => $inventoryValue,
+
+                'daily' => $daily,
+
+                'maxIncome' => max(
+                    1,
+                    $dailyMaxIncome
+                ),
+
+                'orderBreakdown' => $orderBreakdown,
+
+                'statusNames' => $statusNames,
+
+                'lowStockVariants' => $lowStockVariants,
+
+                'recentOrders' => $recentOrders,
+
+                'topProducts' => $topProducts,
+            ]
+        );
     }
 }

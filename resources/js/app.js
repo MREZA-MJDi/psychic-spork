@@ -1,3 +1,9 @@
+import Alpine from 'alpinejs';
+
+window.Alpine = Alpine;
+
+Alpine.start();
+
 document.addEventListener('DOMContentLoaded', () => {
     const menuToggle = document.querySelector('[data-menu-toggle]');
     const mobileMenu = document.querySelector('[data-mobile-menu]');

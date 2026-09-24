@@ -49,8 +49,7 @@ class StoreBrandRequest extends FormRequest
                 'nullable',
                 'image',
                 'mimes:jpeg,jpg,png,webp',
-                'max:1024',
-                'dimensions:max_width=800,max_height=800',
+                'max:2048',
             ],
 
             'is_active' => [
@@ -64,10 +63,27 @@ class StoreBrandRequest extends FormRequest
     {
         return [
             'name' => 'نام برند',
-            'slug' => 'اسلاگ برند',
+            'slug' => 'شناسه برند',
             'description' => 'توضیحات',
             'logo_file' => 'لوگوی برند',
-            'is_active' => 'وضعیت فعال بودن',
+            'is_active' => 'وضعیت برند',
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'name.required' => 'نام برند را وارد کنید.',
+            'name.max' => 'نام برند نمی‌تواند بیشتر از ۱۲۰ کاراکتر باشد.',
+
+            'slug.unique' => 'این شناسه برند قبلاً استفاده شده است.',
+            'slug.max' => 'شناسه برند بیش از حد طولانی است.',
+
+            'description.max' => 'توضیحات برند بیش از حد طولانی است.',
+
+            'logo_file.image' => 'فایل انتخاب‌شده باید یک تصویر باشد.',
+            'logo_file.mimes' => 'فرمت لوگو باید JPG، PNG یا WebP باشد.',
+            'logo_file.max' => 'حجم لوگو نمی‌تواند بیشتر از ۲ مگابایت باشد.',
         ];
     }
 

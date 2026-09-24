@@ -2,14 +2,16 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreProductVariantRequest;
 use App\Http\Requests\Admin\UpdateProductVariantRequest;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
-class AdminProductVariantController extends AdminController
+class AdminProductVariantController extends Controller
 {
     public function index(Product $product): View
     {
@@ -29,7 +31,6 @@ class AdminProductVariantController extends AdminController
         ]);
     }
 
-
     public function create(Product $product): View
     {
         return view('admin.variants.create', [
@@ -37,15 +38,30 @@ class AdminProductVariantController extends AdminController
         ]);
     }
 
-
     public function store(
         StoreProductVariantRequest $request,
         Product $product
     ): RedirectResponse {
         $data = $request->validated();
 
-        $data['product_id'] = $product->id;
-        $data['is_active'] = $request->boolean('is_active');
+        $data['product_id'] = $product->getKey();
+
+        $data['sku'] = filled($data['sku'] ?? null)
+            ? $data['sku']
+            : $this->generateUniqueSku();
+
+        $data['low_stock_threshold'] = (int) (
+            $data['low_stock_threshold'] ?? 5
+        );
+
+        $data['sort_order'] = (int) (
+            $data['sort_order'] ?? 0
+        );
+
+        $data['is_active'] = $request->boolean(
+            'is_active',
+            true
+        );
 
         ProductVariant::create($data);
 
@@ -56,7 +72,6 @@ class AdminProductVariantController extends AdminController
                 'واریانت محصول با موفقیت ایجاد شد.'
             );
     }
-
 
     public function edit(
         Product $product,
@@ -78,7 +93,6 @@ class AdminProductVariantController extends AdminController
         ]);
     }
 
-
     public function update(
         UpdateProductVariantRequest $request,
         Product $product,
@@ -92,14 +106,37 @@ class AdminProductVariantController extends AdminController
         $data = $request->validated();
 
         /*
-         * موجودی از اینجا تغییر نمی‌کند.
-         *
-         * تغییر stock باید فقط از طریق InventoryMovement /
-         * InventoryService انجام شود تا سابقه انبار حفظ شود.
+         * موجودی مستقیم از این فرم تغییر نمی‌کند.
+         * تغییر stock باید از مسیر InventoryMovement / InventoryService
+         * انجام شود تا سابقه گردش موجودی حفظ شود.
          */
         unset($data['stock']);
 
-        $data['is_active'] = $request->boolean('is_active');
+        /*
+         * اگر SKU خالی باشد، خودکار ساخته می‌شود.
+         */
+        $data['sku'] = filled($data['sku'] ?? null)
+            ? $data['sku']
+            : $this->generateUniqueSku(
+                $variant->getKey()
+            );
+
+        $data['low_stock_threshold'] = (int) (
+            $data['low_stock_threshold'] ?? 5
+        );
+
+        $data['sort_order'] = (int) (
+            $data['sort_order'] ?? 0
+        );
+
+        $data['is_active'] = $request->boolean(
+            'is_active'
+        );
+
+        /*
+         * محصول از Route مشخص است و نباید از فرم تغییر کند.
+         */
+        unset($data['product_id']);
 
         $variant->update($data);
 
@@ -111,7 +148,6 @@ class AdminProductVariantController extends AdminController
             );
     }
 
-
     public function destroy(
         Product $product,
         ProductVariant $variant
@@ -122,10 +158,8 @@ class AdminProductVariantController extends AdminController
         );
 
         /*
-         * اگر Variant در سفارش استفاده شده باشد،
-         * حذف فیزیکی آن باعث آسیب به سابقه سفارش می‌شود.
-         *
-         * بنابراین فقط غیرفعال می‌شود.
+         * اگر در سفارش استفاده شده باشد،
+         * به‌جای حذف فیزیکی غیرفعال می‌شود.
          */
         if ($variant->orderItems()->exists()) {
 
@@ -141,12 +175,9 @@ class AdminProductVariantController extends AdminController
                 );
         }
 
-
         /*
-         * اگر سابقه گردش انبار داشته باشد نیز حذف فیزیکی
-         * منطقی نیست؛ چون InventoryMovement به آن وابسته است.
-         *
-         * در این حالت فقط غیرفعال می‌کنیم.
+         * اگر سابقه گردش انبار داشته باشد،
+         * حذف فیزیکی سابقه انبار را مخدوش می‌کند.
          */
         if ($variant->inventoryMovements()->exists()) {
 
@@ -162,7 +193,6 @@ class AdminProductVariantController extends AdminController
                 );
         }
 
-
         $variant->delete();
 
         return redirect()
@@ -173,6 +203,26 @@ class AdminProductVariantController extends AdminController
             );
     }
 
+    private function generateUniqueSku(
+        ?int $ignoreId = null
+    ): string {
+        do {
+            $sku = 'JAN-' . strtoupper(
+                    Str::random(8)
+                );
+
+            $exists = ProductVariant::query()
+                ->where('sku', $sku)
+                ->when(
+                    $ignoreId !== null,
+                    fn ($query) => $query->whereKeyNot($ignoreId)
+                )
+                ->exists();
+
+        } while ($exists);
+
+        return $sku;
+    }
 
     private function ensureVariantBelongsToProduct(
         Product $product,

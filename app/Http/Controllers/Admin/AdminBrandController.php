@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreBrandRequest;
 use App\Http\Requests\Admin\UpdateBrandRequest;
 use App\Models\Brand;
@@ -13,7 +14,7 @@ use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Throwable;
 
-class AdminBrandController extends AdminController
+class AdminBrandController extends Controller
 {
     public function index(Request $request): View
     {
@@ -22,13 +23,15 @@ class AdminBrandController extends AdminController
             ->withCount('products')
             ->when(
                 $request->filled('q'),
-                fn ($query) => $query->where(function ($query) use ($request) {
+                function ($query) use ($request) {
                     $search = $request->string('q')->toString();
 
-                    $query
-                        ->where('name', 'like', '%' . $search . '%')
-                        ->orWhere('slug', 'like', '%' . $search . '%');
-                })
+                    $query->where(function ($query) use ($search) {
+                        $query
+                            ->where('name', 'like', '%' . $search . '%')
+                            ->orWhere('slug', 'like', '%' . $search . '%');
+                    });
+                }
             )
             ->when(
                 $request->has('active') && $request->input('active') !== '',
@@ -59,13 +62,15 @@ class AdminBrandController extends AdminController
             $data = $request->validated();
 
             $brand = DB::transaction(function () use ($data, $request, $media) {
+                $slug = filled($data['slug'] ?? null)
+                    ? $data['slug']
+                    : $this->generateUniqueSlug($data['name']);
+
                 $brand = Brand::create([
                     'name' => $data['name'],
-                    'slug' => filled($data['slug'] ?? null)
-                        ? $data['slug']
-                        : Str::slug($data['name']),
+                    'slug' => $slug,
                     'description' => $data['description'] ?? null,
-                    'is_active' => $request->boolean('is_active'),
+                    'is_active' => $request->boolean('is_active', true),
                 ]);
 
                 if ($request->hasFile('logo_file')) {
@@ -85,10 +90,11 @@ class AdminBrandController extends AdminController
                 ->route('admin.brands.edit', $brand)
                 ->with('success', 'برند با موفقیت ایجاد شد.');
         } catch (Throwable $e) {
-            return $this->failure(
-                $e,
-                'ایجاد برند انجام نشد.'
-            );
+            report($e);
+
+            return back()
+                ->withInput()
+                ->with('error', 'ایجاد برند انجام نشد.');
         }
     }
 
@@ -108,11 +114,16 @@ class AdminBrandController extends AdminController
             $data = $request->validated();
 
             DB::transaction(function () use ($brand, $data, $request, $media) {
+                $slug = filled($data['slug'] ?? null)
+                    ? $data['slug']
+                    : $this->generateUniqueSlug(
+                        $data['name'],
+                        $brand->getKey()
+                    );
+
                 $brand->update([
                     'name' => $data['name'],
-                    'slug' => filled($data['slug'] ?? null)
-                        ? $data['slug']
-                        : Str::slug($data['name']),
+                    'slug' => $slug,
                     'description' => $data['description'] ?? null,
                     'is_active' => $request->boolean('is_active'),
                 ]);
@@ -132,10 +143,11 @@ class AdminBrandController extends AdminController
                 ->route('admin.brands.index')
                 ->with('success', 'برند با موفقیت به‌روزرسانی شد.');
         } catch (Throwable $e) {
-            return $this->failure(
-                $e,
-                'به‌روزرسانی برند انجام نشد.'
-            );
+            report($e);
+
+            return back()
+                ->withInput()
+                ->with('error', 'به‌روزرسانی برند انجام نشد.');
         }
     }
 
@@ -145,10 +157,8 @@ class AdminBrandController extends AdminController
     ): RedirectResponse {
         try {
             if ($brand->products()->exists()) {
-                abort(
-                    422,
-                    'این برند هنوز محصول دارد و قابل حذف نیست.'
-                );
+                return back()
+                    ->with('error', 'این برند هنوز محصول دارد و قابل حذف نیست.');
             }
 
             DB::transaction(function () use ($brand, $media) {
@@ -161,10 +171,39 @@ class AdminBrandController extends AdminController
                 ->route('admin.brands.index')
                 ->with('success', 'برند با موفقیت حذف شد.');
         } catch (Throwable $e) {
-            return $this->failure(
-                $e,
-                'حذف برند انجام نشد.'
-            );
+            report($e);
+
+            return back()
+                ->with('error', 'حذف برند انجام نشد.');
         }
+    }
+
+    private function generateUniqueSlug(
+        string $name,
+        ?int $ignoreId = null
+    ): string {
+        $base = Str::slug($name);
+
+        if ($base === '') {
+            $base = 'brand';
+        }
+
+        $slug = $base;
+        $counter = 2;
+
+        while (
+        Brand::query()
+            ->where('slug', $slug)
+            ->when(
+                $ignoreId,
+                fn ($query) => $query->whereKeyNot($ignoreId)
+            )
+            ->exists()
+        ) {
+            $slug = $base . '-' . $counter;
+            $counter++;
+        }
+
+        return $slug;
     }
 }

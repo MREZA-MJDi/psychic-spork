@@ -1,31 +1,129 @@
 @php
     $latestImage = $latestProduct?->galleryMedia?->first()?->url;
+
     $category = $categories->first();
     $categoryImage = $category?->coverMedia?->url;
+
+    $latestUrl = route('products.index');
+
+    $categoryUrl = $category
+        ? route('categories.show', $category)
+        : route('categories.index');
 @endphp
 
-<section class="section-block section-block--tight">
+<section class="section-block section-block--compact home-mini-banners">
     <div class="container">
+
         <div class="mini-banner-grid">
-            <a class="mini-banner reveal-up" href="{{ route('products.index') }}">
-                @if($latestImage)
-                    <img src="{{ $latestImage }}" alt="{{ $latestProduct->name }}" loading="lazy">
-                @else
-                    <div class="mini-banner__placeholder"><span>JANAN</span></div>
-                @endif
-                <span class="mini-banner__veil"></span>
-                <div><span class="eyebrow">{{ $siteBrandNameLatin ?? 'Janan' }} / NEW IN</span><h3>تازه‌های جانان</h3><span>مشاهده محصولات ←</span></div>
+
+            {{-- New arrivals --}}
+            <a
+                href="{{ $latestUrl }}"
+                class="mini-banner mini-banner--dark"
+            >
+                <div class="mini-banner__media">
+
+                    @if($latestImage)
+                        <img
+                            src="{{ $latestImage }}"
+                            alt="{{ $latestProduct?->name ?? 'محصولات تازه جانان' }}"
+                            loading="lazy"
+                            decoding="async"
+                        >
+                    @else
+                        <div class="mini-banner__placeholder">
+                            <span>JANAN</span>
+                        </div>
+                    @endif
+
+                </div>
+
+                <span
+                    class="mini-banner__veil"
+                    aria-hidden="true"
+                ></span>
+
+                <div class="mini-banner__content">
+
+                    <span class="mini-banner__eyebrow">
+                        {{ $siteBrandNameLatin ?? 'Janan' }} / NEW IN
+                    </span>
+
+                    <h3>
+                        تازه‌های جانان
+                    </h3>
+
+                    <span class="mini-banner__link">
+                        مشاهده محصولات
+                        <b aria-hidden="true">←</b>
+                    </span>
+
+                </div>
+
+                <span
+                    class="mini-banner__number"
+                    aria-hidden="true"
+                >
+                    01
+                </span>
             </a>
 
-            <a class="mini-banner mini-banner--soft reveal-up" style="--delay:.08s" href="{{ $category ? route('categories.show',$category) : route('categories.index') }}">
-                @if($categoryImage)
-                    <img src="{{ $categoryImage }}" alt="{{ $category->name }}" loading="lazy">
-                @else
-                    <div class="mini-banner__placeholder"><span>{{ $category?->name ?: 'JANAN' }}</span></div>
-                @endif
-                <span class="mini-banner__veil"></span>
-                <div><span class="eyebrow">EDITED FOR YOU</span><h3>{{ $category?->name ?: 'انتخاب‌های خاص' }}</h3><span>دیدن انتخاب‌ها ←</span></div>
+
+            {{-- Curated category --}}
+            <a
+                href="{{ $categoryUrl }}"
+                class="mini-banner mini-banner--soft"
+            >
+                <div class="mini-banner__media">
+
+                    @if($categoryImage)
+                        <img
+                            src="{{ $categoryImage }}"
+                            alt="{{ $category?->name ?? 'انتخاب‌های خاص جانان' }}"
+                            loading="lazy"
+                            decoding="async"
+                        >
+                    @else
+                        <div class="mini-banner__placeholder">
+                            <span>
+                                {{ $category?->name ?? 'JANAN' }}
+                            </span>
+                        </div>
+                    @endif
+
+                </div>
+
+                <span
+                    class="mini-banner__veil"
+                    aria-hidden="true"
+                ></span>
+
+                <div class="mini-banner__content">
+
+                    <span class="mini-banner__eyebrow">
+                        EDITED FOR YOU
+                    </span>
+
+                    <h3>
+                        {{ $category?->name ?? 'انتخاب‌های خاص' }}
+                    </h3>
+
+                    <span class="mini-banner__link">
+                        دیدن انتخاب‌ها
+                        <b aria-hidden="true">←</b>
+                    </span>
+
+                </div>
+
+                <span
+                    class="mini-banner__number"
+                    aria-hidden="true"
+                >
+                    02
+                </span>
             </a>
+
         </div>
+
     </div>
 </section>

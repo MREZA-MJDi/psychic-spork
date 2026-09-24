@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreFinancialTransactionRequest;
 use App\Models\FinancialTransaction;
 use Illuminate\Http\RedirectResponse;
@@ -10,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use Throwable;
 
-class AdminFinancialController extends AdminController
+class AdminFinancialController extends Controller
 {
     public function index(Request $request): View
     {
@@ -23,7 +24,11 @@ class AdminFinancialController extends AdminController
 
                     $query->where(function ($query) use ($search): void {
                         $query
-                            ->where('category', 'like', '%' . $search . '%')
+                            ->where(
+                                'category',
+                                'like',
+                                '%' . $search . '%'
+                            )
                             ->orWhere(
                                 'description',
                                 'like',
@@ -124,10 +129,14 @@ class AdminFinancialController extends AdminController
                 'تراکنش مالی با موفقیت ثبت شد.'
             );
         } catch (Throwable $e) {
-            return $this->failure(
-                $e,
-                'ثبت تراکنش مالی انجام نشد.'
-            );
+            report($e);
+
+            return back()
+                ->withInput()
+                ->with(
+                    'error',
+                    'ثبت تراکنش مالی انجام نشد.'
+                );
         }
     }
 }

@@ -1,197 +1,314 @@
 @extends('layouts.admin')
 
 @section('title', 'جزئیات تراکنش')
+@section('page-title', 'جزئیات تراکنش')
 
 @section('content')
 
-    <div class="admin-page">
+    {{-- =====================================================
+        PAGE HEADER
+    ====================================================== --}}
 
-        <div class="admin-page-header">
+    <div class="admin-page-head">
 
-            <div>
+        <div>
 
-                <div class="admin-breadcrumb">
+            <div
+                style="
+                    display:flex;
+                    align-items:center;
+                    gap:8px;
+                    margin-bottom:8px;
+                    font-size:13px;
+                "
+            >
 
-                    <a href="{{ route('admin.accounting.index') }}">
-                        حسابداری
-                    </a>
+                <a
+                    href="{{ route('admin.accounting.index') }}"
+                    class="admin-muted"
+                    style="text-decoration:none;"
+                >
+                    حسابداری
+                </a>
 
-                    <span>/</span>
-
-                    <span>
-                    تراکنش #{{ $transaction->id }}
+                <span class="admin-muted">
+                    /
                 </span>
 
-                </div>
-
-                <h1 class="admin-page-title">
-                    جزئیات تراکنش
-                </h1>
-
-                <p class="admin-page-description">
-                    اطلاعات کامل تراکنش مالی
-                </p>
+                <span class="admin-muted">
+                    تراکنش #{{ $transaction->id }}
+                </span>
 
             </div>
 
 
-            <a
-                href="{{ route('admin.accounting.index') }}"
-                class="admin-btn admin-btn-light"
-            >
-                بازگشت
-            </a>
+            <h1 class="admin-page-head__title">
+                جزئیات تراکنش
+            </h1>
+
+
+            <p class="admin-page-head__text">
+                اطلاعات کامل تراکنش مالی
+            </p>
 
         </div>
 
 
-        <div class="admin-card">
+        <a
+            href="{{ route('admin.accounting.index') }}"
+            class="admin-btn admin-btn--ghost"
+        >
+            بازگشت
+        </a>
 
-            <div class="admin-card-header">
+    </div>
 
-                <div>
 
-                    <h2 class="admin-card-title">
-                        تراکنش #{{ $transaction->id }}
-                    </h2>
+    {{-- =====================================================
+        TRANSACTION
+    ====================================================== --}}
 
-                    <p class="admin-card-description">
-                        ثبت‌شده در
-                        {{ optional($transaction->created_at)->format('Y/m/d H:i') }}
-                    </p>
+    <div class="admin-card">
 
-                </div>
+        <div class="admin-card-header">
+
+            <div>
+
+                <h2 class="admin-card-title">
+                    تراکنش #{{ $transaction->id }}
+                </h2>
+
+                <p class="admin-card-description">
+
+                    ثبت‌شده در
+
+                    @if($transaction->created_at)
+                        {{ $transaction->created_at->format('Y/m/d H:i') }}
+                    @else
+                        —
+                    @endif
+
+                </p>
 
             </div>
 
+        </div>
 
-            <div class="admin-detail-list">
+
+        <div class="admin-card-body">
+
+            @php
+                $isIncome = $transaction->type === 'income';
+
+                $typeLabel = $isIncome
+                    ? 'درآمد'
+                    : 'هزینه';
+
+                $typeClass = $isIncome
+                    ? 'success'
+                    : 'danger';
+            @endphp
 
 
-                {{-- Type --}}
+            <div class="admin-status-list">
 
-                <div class="admin-detail-row">
+                {{-- TYPE --}}
 
-                <span>
-                    نوع
-                </span>
+                <div class="admin-status-row">
 
-                    <strong>
+                    <div>
 
-                        @if($transaction->type === 'income')
+                        <div class="admin-status-row__label">
+                            نوع تراکنش
+                        </div>
 
-                            <span class="admin-badge admin-badge-success">
-                            درآمد
+                    </div>
+
+
+                    <div class="admin-status-row__value">
+
+                        <span
+                            class="admin-badge admin-badge--{{ $typeClass }}"
+                        >
+                            {{ $typeLabel }}
                         </span>
+
+                    </div>
+
+                </div>
+
+
+                {{-- CATEGORY --}}
+
+                <div class="admin-status-row">
+
+                    <div>
+
+                        <div class="admin-status-row__label">
+                            دسته‌بندی
+                        </div>
+
+                    </div>
+
+
+                    <div class="admin-status-row__value">
+
+                        {{ $transaction->category ?: '—' }}
+
+                    </div>
+
+                </div>
+
+
+                {{-- AMOUNT --}}
+
+                <div class="admin-status-row">
+
+                    <div>
+
+                        <div class="admin-status-row__label">
+                            مبلغ
+                        </div>
+
+                    </div>
+
+
+                    <div class="admin-status-row__value">
+
+                        <span class="admin-price">
+
+                            {{ number_format(
+                                (float) $transaction->amount
+                            ) }}
+
+                        </span>
+
+                        <span class="admin-muted">
+                            تومان
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                {{-- TRANSACTION DATE --}}
+
+                <div class="admin-status-row">
+
+                    <div>
+
+                        <div class="admin-status-row__label">
+                            تاریخ تراکنش
+                        </div>
+
+                    </div>
+
+
+                    <div class="admin-status-row__value">
+
+                        @if($transaction->transaction_date)
+
+                            {{ $transaction->transaction_date->format('Y/m/d') }}
 
                         @else
 
-                            <span class="admin-badge">
-                            هزینه
-                        </span>
+                            —
 
                         @endif
 
-                    </strong>
+                    </div>
 
                 </div>
 
 
-                {{-- Category --}}
+                {{-- CREATED BY --}}
 
-                <div class="admin-detail-row">
+                <div class="admin-status-row">
 
-                <span>
-                    دسته‌بندی
-                </span>
+                    <div>
 
-                    <strong>
-                        {{ $transaction->category ?: '—' }}
-                    </strong>
+                        <div class="admin-status-row__label">
+                            ثبت‌کننده
+                        </div>
 
-                </div>
+                    </div>
 
 
-                {{-- Amount --}}
+                    <div class="admin-status-row__value">
 
-                <div class="admin-detail-row">
-
-                <span>
-                    مبلغ
-                </span>
-
-                    <strong>
-                        {{ number_format((float) $transaction->amount) }}
-                        تومان
-                    </strong>
-
-                </div>
-
-
-                {{-- Transaction date --}}
-
-                <div class="admin-detail-row">
-
-                <span>
-                    تاریخ تراکنش
-                </span>
-
-                    <strong>
-                        {{ optional($transaction->transaction_date)->format('Y/m/d') }}
-                    </strong>
-
-                </div>
-
-
-                {{-- Created by --}}
-
-                <div class="admin-detail-row">
-
-                <span>
-                    ثبت‌کننده
-                </span>
-
-                    <strong>
                         {{ $transaction->createdBy?->name ?? '—' }}
-                    </strong>
+
+                    </div>
 
                 </div>
 
 
-                {{-- Reference --}}
+                {{-- REFERENCE --}}
 
-                @if($transaction->reference_type && $transaction->reference_id)
+                @if(
+                    $transaction->reference_type &&
+                    $transaction->reference_id
+                )
 
-                    <div class="admin-detail-row">
+                    <div class="admin-status-row">
 
-                    <span>
-                        مرجع
-                    </span>
+                        <div>
 
-                        <strong dir="ltr">
-                            {{ class_basename($transaction->reference_type) }}
-                            #{{ $transaction->reference_id }}
-                        </strong>
+                            <div class="admin-status-row__label">
+                                مرجع
+                            </div>
+
+                        </div>
+
+
+                        <div
+                            class="admin-status-row__value"
+                            dir="ltr"
+                        >
+
+                            {{ class_basename(
+                                $transaction->reference_type
+                            ) }}
+
+                            #
+
+                            {{ $transaction->reference_id }}
+
+                        </div>
 
                     </div>
 
                 @endif
 
 
-                {{-- Description --}}
+                {{-- DESCRIPTION --}}
 
-                <div class="admin-detail-row admin-detail-row-stack">
+                <div class="admin-status-row">
 
-                <span>
-                    شرح
-                </span>
+                    <div>
 
-                    <strong>
+                        <div class="admin-status-row__label">
+                            شرح
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        class="admin-status-row__value"
+                        style="
+                            max-width:70%;
+                            line-height:2;
+                            text-align:left;
+                        "
+                    >
+
                         {{ $transaction->description ?: 'بدون شرح' }}
-                    </strong>
+
+                    </div>
 
                 </div>
-
 
             </div>
 

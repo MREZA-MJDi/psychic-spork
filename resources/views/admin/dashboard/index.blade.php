@@ -1,292 +1,361 @@
 @extends('layouts.admin')
 
 @section('title', 'داشبورد مدیریت')
-
 @section('page-title', 'داشبورد')
 
 @section('content')
 
-    {{-- =====================================================
-         HEADER
-         ===================================================== --}}
+    @php
+        /*
+        |--------------------------------------------------------------------------
+        | STATUS MAPS
+        |--------------------------------------------------------------------------
+        */
 
-    <div class="admin-page-head">
+        $statusClasses = [
+            'pending' => 'warning',
+            'confirmed' => 'info',
+            'preparing' => 'info',
+            'shipped' => 'success',
+            'delivered' => 'success',
+            'cancelled' => 'danger',
+            'returned' => 'neutral',
+        ];
 
-        <div>
-            <h2 class="admin-page-head__title">
-                نمای کلی فروشگاه
-            </h2>
+        $paymentClasses = [
+            'paid' => 'success',
+            'pending' => 'warning',
+            'failed' => 'danger',
+            'refunded' => 'neutral',
+        ];
+    @endphp
 
-            <p class="admin-page-head__text">
-                وضعیت فروش، سفارش‌ها، موجودی و عملکرد فروشگاه.
-            </p>
-        </div>
 
-        <form
-            method="GET"
-            action="{{ route('admin.dashboard') }}"
-            class="admin-period-form"
-        >
-            <label for="dashboard-period">
-                بازه
-            </label>
+    <div class="admin-dashboard">
 
-            <select
-                id="dashboard-period"
-                name="period"
-                class="admin-select"
-                onchange="this.form.submit()"
+        {{-- =========================================================
+             PAGE HEADER
+        ========================================================== --}}
+
+        <div class="admin-page-head">
+
+            <div>
+
+                <h1 class="admin-page-head__title">
+                    نمای کلی فروشگاه
+                </h1>
+
+                <p class="admin-page-head__text">
+                    وضعیت فروش، سفارش‌ها، موجودی و عملکرد فروشگاه
+                </p>
+
+            </div>
+
+
+            <form
+                method="GET"
+                action="{{ route('admin.dashboard') }}"
+                class="admin-period-form"
             >
-                <option
-                    value="7"
-                    @selected($period === 7)
+
+                <label for="dashboard-period">
+                    بازه
+                </label>
+
+                <select
+                    id="dashboard-period"
+                    name="period"
+                    class="admin-select"
+                    onchange="this.form.submit()"
                 >
-                    ۷ روز اخیر
-                </option>
 
-                <option
-                    value="30"
-                    @selected($period === 30)
-                >
-                    ۳۰ روز اخیر
-                </option>
+                    @foreach([
+                        7 => '۷ روز اخیر',
+                        30 => '۳۰ روز اخیر',
+                        60 => '۶۰ روز اخیر',
+                        90 => '۹۰ روز اخیر',
+                    ] as $days => $label)
 
-                <option
-                    value="60"
-                    @selected($period === 60)
-                >
-                    ۶۰ روز اخیر
-                </option>
+                        <option
+                            value="{{ $days }}"
+                            @selected((int) $period === $days)
+                        >
+                            {{ $label }}
+                        </option>
 
-                <option
-                    value="90"
-                    @selected($period === 90)
-                >
-                    ۹۰ روز اخیر
-                </option>
-            </select>
-        </form>
+                    @endforeach
 
-    </div>
+                </select>
+
+            </form>
+
+        </div>
 
 
-    {{-- =====================================================
-         KPI CARDS
-         ===================================================== --}}
+        {{-- =========================================================
+             KPI
+        ========================================================== --}}
 
-    <div class="admin-dashboard-stats">
+        <section class="admin-dashboard-stats">
 
-        <div class="admin-stat-card">
+            {{-- Revenue --}}
 
-            <div class="admin-stat-card__top">
-                <span class="admin-stat-card__label">
+            <article class="admin-stat-card admin-stat-card--success">
+
+                <div class="admin-stat-card__label">
                     درآمد پرداخت‌شده
-                </span>
-
-                <span class="admin-stat-card__icon">
-                    ر
-                </span>
-            </div>
-
-            <strong class="admin-stat-card__value">
-                {{ number_format($revenue) }}
-            </strong>
-
-            <span class="admin-stat-card__meta">
-                تومان در {{ $period }} روز اخیر
-            </span>
-
-        </div>
-
-
-        <div class="admin-stat-card">
-
-            <div class="admin-stat-card__top">
-                <span class="admin-stat-card__label">
-                    هزینه‌ها
-                </span>
-
-                <span class="admin-stat-card__icon">
-                    −
-                </span>
-            </div>
-
-            <strong class="admin-stat-card__value">
-                {{ number_format($expenses) }}
-            </strong>
-
-            <span class="admin-stat-card__meta">
-                هزینه ثبت‌شده در بازه
-            </span>
-
-        </div>
-
-
-        <div class="admin-stat-card">
-
-            <div class="admin-stat-card__top">
-                <span class="admin-stat-card__label">
-                    خالص جریان نقدی
-                </span>
-
-                <span class="admin-stat-card__icon">
-                    ↗
-                </span>
-            </div>
-
-            <strong class="admin-stat-card__value {{ $netCash < 0 ? 'is-negative' : '' }}">
-                {{ number_format($netCash) }}
-            </strong>
-
-            <span class="admin-stat-card__meta">
-                درآمد منهای هزینه
-            </span>
-
-        </div>
-
-
-        <div class="admin-stat-card">
-
-            <div class="admin-stat-card__top">
-                <span class="admin-stat-card__label">
-                    سفارش‌ها
-                </span>
-
-                <span class="admin-stat-card__icon">
-                    #
-                </span>
-            </div>
-
-            <strong class="admin-stat-card__value">
-                {{ number_format($ordersCount) }}
-            </strong>
-
-            <span class="admin-stat-card__meta">
-                {{ number_format($paidOrdersCount) }} سفارش پرداخت‌شده
-            </span>
-
-        </div>
-
-
-        <div class="admin-stat-card">
-
-            <div class="admin-stat-card__top">
-                <span class="admin-stat-card__label">
-                    سفارش‌های جاری
-                </span>
-
-                <span class="admin-stat-card__icon">
-                    ◷
-                </span>
-            </div>
-
-            <strong class="admin-stat-card__value">
-                {{ number_format($pendingOrders) }}
-            </strong>
-
-            <span class="admin-stat-card__meta">
-                در حال پردازش
-            </span>
-
-        </div>
-
-
-        <div class="admin-stat-card">
-
-            <div class="admin-stat-card__top">
-                <span class="admin-stat-card__label">
-                    مشتریان
-                </span>
-
-                <span class="admin-stat-card__icon">
-                    ♙
-                </span>
-            </div>
-
-            <strong class="admin-stat-card__value">
-                {{ number_format($customers) }}
-            </strong>
-
-            <span class="admin-stat-card__meta">
-                حساب مشتری فعال
-            </span>
-
-        </div>
-
-    </div>
-
-
-    {{-- =====================================================
-         MAIN GRID
-         ===================================================== --}}
-
-    <div class="admin-dashboard-grid">
-
-
-        {{-- =================================================
-             SALES CHART
-             ================================================= --}}
-
-        <section class="admin-card admin-dashboard-chart">
-
-            <div class="admin-card__header">
-
-                <div>
-                    <h3 class="admin-card__title">
-                        فروش روزانه
-                    </h3>
-
-                    <p class="admin-card__subtitle">
-                        درآمد پرداخت‌شده و تعداد سفارش‌ها
-                    </p>
                 </div>
 
-                <span class="admin-dashboard-period">
-                    {{ $period }} روز
-                </span>
+                <div class="admin-stat-card__value">
+                    {{ number_format((float) $revenue) }}
+                </div>
 
-            </div>
+                <div class="admin-stat-card__meta">
+                    تومان در {{ number_format($period) }} روز اخیر
+                </div>
 
-            <div class="admin-card__body">
+            </article>
 
-                @if($daily->isNotEmpty())
 
-                    <div class="admin-chart">
+            {{-- Expenses --}}
 
-                        <div class="admin-chart__bars">
+            <article class="admin-stat-card admin-stat-card--danger">
+
+                <div class="admin-stat-card__label">
+                    هزینه‌ها
+                </div>
+
+                <div class="admin-stat-card__value">
+                    {{ number_format((float) $expenses) }}
+                </div>
+
+                <div class="admin-stat-card__meta">
+                    هزینه ثبت‌شده در بازه
+                </div>
+
+            </article>
+
+
+            {{-- Net Cash --}}
+
+            <article
+                class="admin-stat-card {{ $netCash < 0 ? 'admin-stat-card--danger' : 'admin-stat-card--info' }}"
+            >
+
+                <div class="admin-stat-card__label">
+                    خالص جریان نقدی
+                </div>
+
+                <div class="admin-stat-card__value">
+                    {{ number_format((float) $netCash) }}
+                </div>
+
+                <div class="admin-stat-card__meta">
+                    درآمد منهای هزینه
+                </div>
+
+            </article>
+
+
+            {{-- Orders --}}
+
+            <article class="admin-stat-card">
+
+                <div class="admin-stat-card__label">
+                    سفارش‌ها
+                </div>
+
+                <div class="admin-stat-card__value">
+                    {{ number_format((int) $ordersCount) }}
+                </div>
+
+                <div class="admin-stat-card__meta">
+                    {{ number_format((int) $paidOrdersCount) }}
+                    سفارش پرداخت‌شده
+                </div>
+
+            </article>
+
+
+            {{-- Processing --}}
+
+            <article class="admin-stat-card admin-stat-card--warning">
+
+                <div class="admin-stat-card__label">
+                    سفارش‌های جاری
+                </div>
+
+                <div class="admin-stat-card__value">
+                    {{ number_format((int) $pendingOrders) }}
+                </div>
+
+                <div class="admin-stat-card__meta">
+                    در حال پردازش
+                </div>
+
+            </article>
+
+
+            {{-- Customers --}}
+
+            <article class="admin-stat-card admin-stat-card--info">
+
+                <div class="admin-stat-card__label">
+                    مشتریان
+                </div>
+
+                <div class="admin-stat-card__value">
+                    {{ number_format((int) $customers) }}
+                </div>
+
+                <div class="admin-stat-card__meta">
+                    حساب مشتری
+                </div>
+
+            </article>
+
+        </section>
+
+
+        {{-- =========================================================
+             SALES + ORDER STATUS
+        ========================================================== --}}
+
+        <div class="admin-dashboard-grid">
+
+
+            {{-- =====================================================
+                 SALES
+            ====================================================== --}}
+
+            <section class="admin-card">
+
+                <header class="admin-card-header">
+
+                    <div>
+
+                        <h2 class="admin-card-title">
+                            فروش روزانه
+                        </h2>
+
+                        <p class="admin-card-description">
+                            درآمد پرداخت‌شده در {{ number_format($period) }} روز اخیر
+                        </p>
+
+                    </div>
+
+
+                    <span class="admin-badge admin-badge--neutral">
+                        {{ number_format($period) }} روز
+                    </span>
+
+                </header>
+
+
+                <div class="admin-card-body">
+
+                    @if($daily->isNotEmpty())
+
+                        @php
+                            $chartMax = max((float) $maxIncome, 1);
+                        @endphp
+
+
+                        <div
+                            style="
+                                display:grid;
+                                grid-template-columns:repeat({{ $daily->count() }}, minmax(14px,1fr));
+                                gap:8px;
+                                align-items:end;
+                                min-height:260px;
+                                overflow-x:auto;
+                                padding-top:18px;
+                                "
+                        >
 
                             @foreach($daily as $day)
 
                                 @php
-                                    $height = $day['income'] > 0
-                                        ? max(4, ($day['income'] / $maxIncome) * 100)
-                                        : 2;
+                                    $income = (float) ($day['income'] ?? 0);
+
+                                    $height = $income > 0
+                                        ? max(5, ($income / $chartMax) * 100)
+                                        : 3;
                                 @endphp
 
-                                <div class="admin-chart__item">
 
-                                    <div class="admin-chart__value">
-                                        @if($day['income'] > 0)
-                                            {{ number_format($day['income'] / 1000000, 1) }}M
+                                <div
+                                    style="
+                                        min-width:28px;
+                                        height:230px;
+                                        display:flex;
+                                        flex-direction:column;
+                                        align-items:center;
+                                        justify-content:flex-end;
+                                        gap:6px;
+                                    "
+                                >
+
+                                    <span
+                                        style="
+                                            color:var(--admin-muted);
+                                            font-size:8px;
+                                            white-space:nowrap;
+                                        "
+                                    >
+                                        @if($income > 0)
+                                            {{ number_format($income / 1000000, 1) }}M
+                                        @else
+                                            —
                                         @endif
-                                    </div>
+                                    </span>
 
-                                    <div class="admin-chart__bar-wrap">
+
+                                    <div
+                                        style="
+                                            width:100%;
+                                            max-width:28px;
+                                            height:180px;
+                                            display:flex;
+                                            align-items:flex-end;
+                                            justify-content:center;
+                                        "
+                                    >
 
                                         <div
-                                            class="admin-chart__bar"
-                                            style="height: {{ $height }}%"
-                                            title="{{ number_format($day['income']) }} تومان"
+                                            style="
+                                                width:100%;
+                                                height:{{ $height }}%;
+                                                min-height:{{ $income > 0 ? '6px' : '3px' }};
+                                                border-radius:8px 8px 4px 4px;
+                                                background:var(--admin-dark);
+                                                opacity:{{ $income > 0 ? '1' : '.15' }};
+                                                "
+                                            title="{{ number_format($income) }} تومان"
                                         ></div>
 
                                     </div>
 
-                                    <span class="admin-chart__label">
-                                        {{ $day['label'] }}
+
+                                    <span
+                                        style="
+                                            color:var(--admin-muted);
+                                            font-size:8px;
+                                            white-space:nowrap;
+                                        "
+                                    >
+                                        {{ $day['label'] ?? '—' }}
                                     </span>
 
-                                    <span class="admin-chart__orders">
-                                        {{ $day['orders'] }}
+
+                                    <span
+                                        style="
+                                            color:var(--admin-text);
+                                            font-size:8px;
+                                            font-weight:800;
+                                        "
+                                    >
+                                        {{ number_format((int) ($day['orders'] ?? 0)) }}
                                     </span>
 
                                 </div>
@@ -295,87 +364,97 @@
 
                         </div>
 
-                    </div>
 
-                @else
+                        <div
+                            style="
+                                display:flex;
+                                align-items:center;
+                                justify-content:space-between;
+                                gap:10px;
+                                margin-top:12px;
+                                padding-top:12px;
+                                border-top:1px solid var(--admin-border);
+                            "
+                        >
 
-                    <div class="admin-empty">
-                        <div class="admin-empty__icon">
-                            ∿
+                            <span class="admin-muted">
+                                سفارش در روز
+                            </span>
+
+                            <span class="admin-muted">
+                                مبلغ به میلیون تومان
+                            </span>
+
                         </div>
 
-                        <h3>
-                            هنوز داده‌ای وجود ندارد
-                        </h3>
+                    @else
 
-                        <p>
-                            با ثبت سفارش، نمودار فروش این بخش نمایش داده می‌شود.
-                        </p>
-                    </div>
+                        <div class="admin-empty">
 
-                @endif
+                            <div class="admin-empty__icon">
+                                ∿
+                            </div>
 
-            </div>
+                            <h3 class="admin-empty__title">
+                                هنوز داده‌ای وجود ندارد
+                            </h3>
 
-        </section>
+                            <p class="admin-empty__text">
+                                با ثبت سفارش، اطلاعات فروش این بخش نمایش داده می‌شود.
+                            </p>
 
+                        </div>
 
-        {{-- =================================================
-             ORDER BREAKDOWN
-             ================================================= --}}
+                    @endif
 
-        <section class="admin-card">
-
-            <div class="admin-card__header">
-
-                <div>
-                    <h3 class="admin-card__title">
-                        وضعیت سفارش‌ها
-                    </h3>
-
-                    <p class="admin-card__subtitle">
-                        تعداد سفارش‌ها بر اساس وضعیت
-                    </p>
                 </div>
 
-            </div>
+            </section>
 
-            <div class="admin-card__body">
 
-                @php
-                    $statusClasses = [
-                        'pending' => 'warning',
-                        'confirmed' => 'info',
-                        'preparing' => 'info',
-                        'shipped' => 'success',
-                        'delivered' => 'success',
-                        'cancelled' => 'danger',
-                        'returned' => 'neutral',
-                    ];
-                @endphp
+            {{-- =====================================================
+                 ORDER STATUS
+            ====================================================== --}}
+
+            <section class="admin-card">
+
+                <header class="admin-card-header">
+
+                    <div>
+
+                        <h2 class="admin-card-title">
+                            وضعیت سفارش‌ها
+                        </h2>
+
+                        <p class="admin-card-description">
+                            تعداد سفارش‌ها در بازه انتخاب‌شده
+                        </p>
+
+                    </div>
+
+                </header>
+
 
                 <div class="admin-status-list">
 
                     @foreach($statusNames as $status => $name)
 
                         @php
-                            $count = (int) ($orderBreakdown[$status] ?? 0);
+                            $count = (int) (
+                                $orderBreakdown[$status] ?? 0
+                            );
+
                             $class = $statusClasses[$status] ?? 'neutral';
                         @endphp
 
+
                         <div class="admin-status-row">
 
-                            <div class="admin-status-row__name">
+                            <span class="admin-status-row__label">
+                                {{ $name }}
+                            </span>
 
-                                <span class="admin-status-dot admin-status-dot--{{ $class }}"></span>
-
-                                <span>
-                                    {{ $name }}
-                                </span>
-
-                            </div>
-
-                            <strong>
+                            <strong class="admin-status-row__value">
                                 {{ number_format($count) }}
                             </strong>
 
@@ -385,80 +464,110 @@
 
                 </div>
 
-            </div>
+            </section>
 
-        </section>
-
-
-    </div>
+        </div>
 
 
-    {{-- =====================================================
-         SECOND GRID
-         ===================================================== --}}
+        {{-- =========================================================
+             INVENTORY
+        ========================================================== --}}
 
-    <div class="admin-dashboard-grid admin-dashboard-grid--equal">
+        <div class="admin-dashboard-grid admin-dashboard-grid--equal">
 
 
-        {{-- =================================================
-             LOW STOCK
-             ================================================= --}}
+            {{-- LOW STOCK --}}
 
-        <section class="admin-card">
+            <section class="admin-card">
 
-            <div class="admin-card__header">
+                <header class="admin-card-header">
 
-                <div>
-                    <h3 class="admin-card__title">
-                        موجودی کم
-                    </h3>
+                    <div>
 
-                    <p class="admin-card__subtitle">
-                        {{ number_format($lowStock) }} تنوع محصول نیاز به بررسی دارد.
-                    </p>
-                </div>
+                        <h2 class="admin-card-title">
+                            موجودی کم
+                        </h2>
 
-                <a
-                    href="{{ route('admin.inventory.index') }}"
-                    class="admin-btn admin-btn--ghost admin-btn--sm"
-                >
-                    مشاهده همه
-                </a>
+                        <p class="admin-card-description">
+                            {{ number_format((int) $lowStock) }}
+                            تنوع محصول نیاز به بررسی دارد.
+                        </p>
 
-            </div>
+                    </div>
 
-            <div class="admin-card__body admin-card__body--flush">
 
-                @if($lowStockVariants->isNotEmpty())
+                    <a
+                        href="{{ route('admin.inventory.index') }}"
+                        class="admin-btn admin-btn--ghost admin-btn--sm"
+                    >
+                        مشاهده همه
+                    </a>
 
-                    <div class="admin-mini-list">
+                </header>
+
+
+                <div class="admin-inventory-list">
+
+                    @if($lowStockVariants->isNotEmpty())
 
                         @foreach($lowStockVariants as $variant)
 
-                            <div class="admin-mini-row">
+                            <div class="admin-stock-row">
 
-                                <div class="admin-mini-row__main">
+                                <div class="admin-stock-info">
 
-                                    <strong>
-                                        {{ $variant->product?->name ?? 'محصول حذف‌شده' }}
-                                    </strong>
+                                    <div class="admin-stock-name">
+                                        {{ $variant->product?->name ?? 'محصول' }}
+                                    </div>
 
-                                    <small>
+                                    <div class="admin-stock-meta">
+
                                         SKU:
-                                        {{ $variant->sku ?: '—' }}
-                                    </small>
+
+                                        <span dir="ltr">
+                                            {{ $variant->sku ?: '—' }}
+                                        </span>
+
+                                    </div>
 
                                 </div>
 
-                                <div class="admin-mini-row__stock">
 
-                                    <strong class="{{ $variant->stock <= 0 ? 'is-danger' : '' }}">
-                                        {{ number_format($variant->stock) }}
+                                <div class="admin-stock-bar">
+
+                                    @php
+                                        $threshold =
+                                            max(
+                                                (int) ($variant->low_stock_threshold ?? 5),
+                                                1
+                                            );
+
+                                        $stockPercent =
+                                            min(
+                                                100,
+                                                max(
+                                                    0,
+                                                    (
+                                                        (int) $variant->stock
+                                                        /
+                                                        $threshold
+                                                    ) * 100
+                                                )
+                                            );
+                                    @endphp
+
+                                    <span
+                                        style="width:{{ $stockPercent }}%"
+                                    ></span>
+
+                                </div>
+
+
+                                <div class="admin-stock-count">
+
+                                    <strong>
+                                        {{ number_format((int) $variant->stock) }}
                                     </strong>
-
-                                    <small>
-                                        موجودی
-                                    </small>
 
                                 </div>
 
@@ -466,385 +575,509 @@
 
                         @endforeach
 
-                    </div>
+                    @else
 
-                @else
+                        <div class="admin-empty admin-empty--compact">
 
-                    <div class="admin-empty admin-empty--compact">
+                            <div class="admin-empty__icon">
+                                ✓
+                            </div>
 
-                        <div class="admin-empty__icon">
-                            ✓
+                            <h3 class="admin-empty__title">
+                                موجودی وضعیت خوبی دارد
+                            </h3>
+
+                            <p class="admin-empty__text">
+                                محصولی در محدوده هشدار موجودی نیست.
+                            </p>
+
                         </div>
 
-                        <h3>
-                            موجودی وضعیت خوبی دارد
-                        </h3>
+                    @endif
 
-                        <p>
-                            محصولی در محدوده هشدار موجودی نیست.
+                </div>
+
+            </section>
+
+
+            {{-- INVENTORY VALUE --}}
+
+            <section class="admin-card">
+
+                <header class="admin-card-header">
+
+                    <div>
+
+                        <h2 class="admin-card-title">
+                            خلاصه موجودی
+                        </h2>
+
+                        <p class="admin-card-description">
+                            ارزش فعلی موجودی فعال فروشگاه
                         </p>
 
                     </div>
 
-                @endif
 
-            </div>
+                    <a
+                        href="{{ route('admin.inventory.index') }}"
+                        class="admin-btn admin-btn--secondary admin-btn--sm"
+                    >
+                        مدیریت موجودی
+                    </a>
+
+                </header>
+
+
+                <div class="admin-card-body">
+
+                    <div
+                        style="
+                            display:flex;
+                            flex-direction:column;
+                            gap:18px;
+                        "
+                    >
+
+                        <div>
+
+                            <div class="admin-muted">
+                                ارزش فعلی موجودی
+                            </div>
+
+                            <div
+                                style="
+                                    margin-top:5px;
+                                    color:var(--admin-text);
+                                    font-size:24px;
+                                    font-weight:850;
+                                    line-height:1.4;
+                                "
+                            >
+                                {{ number_format((float) $inventoryValue) }}
+
+                                <span
+                                    style="
+                                        color:var(--admin-muted);
+                                        font-size:9px;
+                                        font-weight:500;
+                                    "
+                                >
+                                    تومان
+                                </span>
+                            </div>
+
+                        </div>
+
+
+                        <div class="admin-divider"></div>
+
+
+                        <div
+                            style="
+                                display:flex;
+                                align-items:center;
+                                justify-content:space-between;
+                                gap:12px;
+                            "
+                        >
+
+                            <span class="admin-muted">
+                                تنوع کم‌موجودی
+                            </span>
+
+                            <strong
+                                style="
+                                    color:var(--admin-text);
+                                    font-size:16px;
+                                "
+                            >
+                                {{ number_format((int) $lowStock) }}
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+        </div>
+
+
+        {{-- =========================================================
+             RECENT ORDERS
+        ========================================================== --}}
+
+        <section class="admin-card">
+
+            <header class="admin-card-header">
+
+                <div>
+
+                    <h2 class="admin-card-title">
+                        آخرین سفارش‌ها
+                    </h2>
+
+                    <p class="admin-card-description">
+                        جدیدترین سفارش‌های ثبت‌شده در فروشگاه
+                    </p>
+
+                </div>
+
+
+                <a
+                    href="{{ route('admin.orders.index') }}"
+                    class="admin-btn admin-btn--secondary admin-btn--sm"
+                >
+                    همه سفارش‌ها
+                </a>
+
+            </header>
+
+
+            @if($recentOrders->isNotEmpty())
+
+                <div class="admin-table-wrap">
+
+                    <table class="admin-table">
+
+                        <thead>
+
+                        <tr>
+
+                            <th>
+                                سفارش
+                            </th>
+
+                            <th>
+                                مشتری
+                            </th>
+
+                            <th>
+                                مبلغ
+                            </th>
+
+                            <th>
+                                وضعیت
+                            </th>
+
+                            <th>
+                                پرداخت
+                            </th>
+
+                            <th>
+                                تاریخ
+                            </th>
+
+                            <th>
+                                عملیات
+                            </th>
+
+                        </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                        @foreach($recentOrders as $order)
+
+                            @php
+                                $customerName =
+                                    $order->user?->name
+                                    ?? $order->customer_name
+                                    ?? 'مشتری';
+
+                                $customerPhone =
+                                    $order->user?->phone
+                                    ?? $order->customer_phone
+                                    ?? null;
+                            @endphp
+
+
+                            <tr>
+
+                                {{-- ORDER --}}
+
+                                <td>
+
+                                    <strong>
+                                        {{ $order->order_number }}
+                                    </strong>
+
+                                </td>
+
+
+                                {{-- CUSTOMER --}}
+
+                                <td>
+
+                                    <div>
+
+                                        <strong>
+                                            {{ $customerName }}
+                                        </strong>
+
+                                        @if($customerPhone)
+
+                                            <div class="admin-product-meta">
+                                                {{ $customerPhone }}
+                                            </div>
+
+                                        @endif
+
+                                    </div>
+
+                                </td>
+
+
+                                {{-- TOTAL --}}
+
+                                <td>
+
+                                    <strong>
+                                        {{ number_format((float) $order->total) }}
+                                    </strong>
+
+                                    <span class="admin-muted">
+                                            تومان
+                                        </span>
+
+                                </td>
+
+
+                                {{-- STATUS --}}
+
+                                <td>
+
+                                        <span
+                                            class="admin-badge admin-badge--{{ $statusClasses[$order->status] ?? 'neutral' }}"
+                                        >
+                                            {{ $statusNames[$order->status] ?? $order->status }}
+                                        </span>
+
+                                </td>
+
+
+                                {{-- PAYMENT --}}
+
+                                <td>
+
+                                        <span
+                                            class="admin-badge admin-badge--{{ $paymentClasses[$order->payment_status] ?? 'neutral' }}"
+                                        >
+
+                                            @switch($order->payment_status)
+
+                                                @case('paid')
+                                                پرداخت‌شده
+                                                @break
+
+                                                @case('pending')
+                                                در انتظار پرداخت
+                                                @break
+
+                                                @case('failed')
+                                                ناموفق
+                                                @break
+
+                                                @case('refunded')
+                                                بازپرداخت‌شده
+                                                @break
+
+                                                @default
+                                                {{ $order->payment_status }}
+
+                                            @endswitch
+
+                                        </span>
+
+                                </td>
+
+
+                                {{-- DATE --}}
+
+                                <td>
+
+                                        <span class="admin-muted">
+                                            {{ optional($order->placed_at)->format('Y/m/d H:i') }}
+                                        </span>
+
+                                </td>
+
+
+                                {{-- ACTION --}}
+
+                                <td>
+
+                                    <a
+                                        href="{{ route('admin.orders.show', $order) }}"
+                                        class="admin-btn admin-btn--ghost admin-btn--sm"
+                                    >
+                                        جزئیات
+                                    </a>
+
+                                </td>
+
+                            </tr>
+
+                        @endforeach
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            @else
+
+                <div class="admin-empty">
+
+                    <div class="admin-empty__icon">
+                        #
+                    </div>
+
+                    <h3 class="admin-empty__title">
+                        هنوز سفارشی ثبت نشده
+                    </h3>
+
+                    <p class="admin-empty__text">
+                        آخرین سفارش‌های فروشگاه پس از ثبت در این بخش نمایش داده می‌شوند.
+                    </p>
+
+                </div>
+
+            @endif
 
         </section>
 
 
-        {{-- =================================================
-             INVENTORY SUMMARY
-             ================================================= --}}
+        {{-- =========================================================
+             TOP PRODUCTS
+        ========================================================== --}}
 
         <section class="admin-card">
 
-            <div class="admin-card__header">
+            <header class="admin-card-header">
 
                 <div>
-                    <h3 class="admin-card__title">
-                        خلاصه موجودی
-                    </h3>
 
-                    <p class="admin-card__subtitle">
-                        ارزش فعلی موجودی فعال فروشگاه
+                    <h2 class="admin-card-title">
+                        پرفروش‌ترین محصولات
+                    </h2>
+
+                    <p class="admin-card-description">
+                        بر اساس تعداد اقلام فروخته‌شده
                     </p>
+
                 </div>
+
 
                 <a
-                    href="{{ route('admin.inventory.index') }}"
+                    href="{{ route('admin.products.index') }}"
                     class="admin-btn admin-btn--secondary admin-btn--sm"
                 >
-                    مدیریت موجودی
+                    مدیریت محصولات
                 </a>
 
-            </div>
+            </header>
 
-            <div class="admin-card__body">
 
-                <div class="admin-inventory-summary">
+            @if($topProducts->isNotEmpty())
 
-                    <div class="admin-inventory-summary__main">
+                <div class="admin-top-products">
 
-                        <span>
-                            ارزش موجودی
-                        </span>
+                    @foreach($topProducts as $index => $product)
 
-                        <strong>
-                            {{ number_format($inventoryValue) }}
-                            <small>تومان</small>
-                        </strong>
+                        @php
+                            $salesQuantity =
+                                $product->sales_quantity
+                                ?? $product->order_items_sum_quantity
+                                ?? 0;
 
-                    </div>
+                            $productImage =
+                                $product->galleryMedia?->first();
+                        @endphp
 
-                    <div class="admin-inventory-summary__divider"></div>
 
-                    <div class="admin-inventory-summary__item">
+                        <article class="admin-top-product">
 
-                        <span>
-                            تنوع کم‌موجودی
-                        </span>
+                            <div class="admin-top-product__rank">
+                                {{ $index + 1 }}
+                            </div>
 
-                        <strong>
-                            {{ number_format($lowStock) }}
-                        </strong>
 
-                    </div>
+                            @if($productImage?->url)
+
+                                <img
+                                    src="{{ $productImage->url }}"
+                                    alt="{{ $product->name }}"
+                                    class="admin-top-product__image"
+                                    loading="lazy"
+                                >
+
+                            @else
+
+                                <div class="admin-top-product__image">
+                                    —
+                                </div>
+
+                            @endif
+
+
+                            <div class="admin-top-product__content">
+
+                                <div class="admin-top-product__name">
+                                    {{ $product->name }}
+                                </div>
+
+                                <div class="admin-top-product__meta">
+                                    {{ $product->category?->name ?? 'بدون دسته‌بندی' }}
+                                </div>
+
+                            </div>
+
+
+                            <div class="admin-top-product__value">
+
+                                {{ number_format((int) $salesQuantity) }}
+
+                                <div class="admin-top-product__meta">
+                                    عدد
+                                </div>
+
+                            </div>
+
+                        </article>
+
+                    @endforeach
 
                 </div>
 
-            </div>
+            @else
+
+                <div class="admin-empty">
+
+                    <div class="admin-empty__icon">
+                        ★
+                    </div>
+
+                    <h3 class="admin-empty__title">
+                        هنوز داده فروش وجود ندارد
+                    </h3>
+
+                    <p class="admin-empty__text">
+                        بعد از ثبت سفارش‌های واقعی، محصولات پرفروش اینجا نمایش داده می‌شوند.
+                    </p>
+
+                </div>
+
+            @endif
 
         </section>
 
     </div>
-
-
-    {{-- =====================================================
-         RECENT ORDERS
-         ===================================================== --}}
-
-    <section class="admin-card admin-dashboard-section">
-
-        <div class="admin-card__header">
-
-            <div>
-                <h3 class="admin-card__title">
-                    آخرین سفارش‌ها
-                </h3>
-
-                <p class="admin-card__subtitle">
-                    جدیدترین سفارش‌های ثبت‌شده در فروشگاه
-                </p>
-            </div>
-
-            <a
-                href="{{ route('admin.orders.index') }}"
-                class="admin-btn admin-btn--secondary admin-btn--sm"
-            >
-                همه سفارش‌ها
-            </a>
-
-        </div>
-
-        @if($recentOrders->isNotEmpty())
-
-            <div class="admin-table-wrap admin-table-wrap--plain">
-
-                <table class="admin-table">
-
-                    <thead>
-                    <tr>
-                        <th>
-                            سفارش
-                        </th>
-
-                        <th>
-                            مشتری
-                        </th>
-
-                        <th>
-                            مبلغ
-                        </th>
-
-                        <th>
-                            وضعیت
-                        </th>
-
-                        <th>
-                            پرداخت
-                        </th>
-
-                        <th>
-                            تاریخ
-                        </th>
-
-                        <th>
-                        </th>
-                    </tr>
-                    </thead>
-
-                    <tbody>
-
-                    @foreach($recentOrders as $order)
-
-                        @php
-                            $orderStatusClasses = [
-                                'pending' => 'warning',
-                                'confirmed' => 'info',
-                                'preparing' => 'info',
-                                'shipped' => 'success',
-                                'delivered' => 'success',
-                                'cancelled' => 'danger',
-                                'returned' => 'neutral',
-                            ];
-
-                            $paymentClasses = [
-                                'paid' => 'success',
-                                'pending' => 'warning',
-                                'failed' => 'danger',
-                                'refunded' => 'neutral',
-                            ];
-                        @endphp
-
-                        <tr>
-
-                            <td>
-                                    <span class="admin-table__primary">
-                                        {{ $order->order_number }}
-                                    </span>
-                            </td>
-
-                            <td>
-                                    <span class="admin-table__primary">
-                                        {{ $order->customer_name }}
-                                    </span>
-
-                                @if($order->customer_phone)
-                                    <span class="admin-table__muted">
-                                            {{ $order->customer_phone }}
-                                        </span>
-                                @endif
-                            </td>
-
-                            <td>
-                                {{ number_format($order->total) }}
-                                تومان
-                            </td>
-
-                            <td>
-
-                                    <span class="admin-badge admin-badge--{{ $orderStatusClasses[$order->status] ?? 'neutral' }}">
-                                        {{ $statusNames[$order->status] ?? $order->status }}
-                                    </span>
-
-                            </td>
-
-                            <td>
-
-                                    <span class="admin-badge admin-badge--{{ $paymentClasses[$order->payment_status] ?? 'neutral' }}">
-                                        @switch($order->payment_status)
-
-                                            @case('paid')
-                                            پرداخت‌شده
-                                            @break
-
-                                            @case('pending')
-                                            در انتظار پرداخت
-                                            @break
-
-                                            @case('failed')
-                                            ناموفق
-                                            @break
-
-                                            @case('refunded')
-                                            بازپرداخت‌شده
-                                            @break
-
-                                            @default
-                                            {{ $order->payment_status }}
-
-                                        @endswitch
-                                    </span>
-
-                            </td>
-
-                            <td>
-                                {{ optional($order->placed_at)->format('Y/m/d H:i') }}
-                            </td>
-
-                            <td>
-                                <a
-                                    href="{{ route('admin.orders.show', $order) }}"
-                                    class="admin-btn admin-btn--ghost admin-btn--sm"
-                                >
-                                    جزئیات
-                                </a>
-                            </td>
-
-                        </tr>
-
-                    @endforeach
-
-                    </tbody>
-
-                </table>
-
-            </div>
-
-        @else
-
-            <div class="admin-empty">
-
-                <div class="admin-empty__icon">
-                    #
-                </div>
-
-                <h3>
-                    هنوز سفارشی ثبت نشده
-                </h3>
-
-                <p>
-                    آخرین سفارش‌های فروشگاه پس از ثبت در این بخش نمایش داده می‌شوند.
-                </p>
-
-            </div>
-
-        @endif
-
-    </section>
-
-
-    {{-- =====================================================
-         TOP PRODUCTS
-         ===================================================== --}}
-
-    <section class="admin-card admin-dashboard-section">
-
-        <div class="admin-card__header">
-
-            <div>
-                <h3 class="admin-card__title">
-                    پرفروش‌ترین محصولات
-                </h3>
-
-                <p class="admin-card__subtitle">
-                    بر اساس تعداد اقلام ثبت‌شده در سفارش‌ها
-                </p>
-            </div>
-
-            <a
-                href="{{ route('admin.products.index') }}"
-                class="admin-btn admin-btn--secondary admin-btn--sm"
-            >
-                مدیریت محصولات
-            </a>
-
-        </div>
-
-        @if($topProducts->isNotEmpty())
-
-            <div class="admin-top-products">
-
-                @foreach($topProducts as $index => $product)
-
-                    <div class="admin-top-product">
-
-                        <span class="admin-top-product__rank">
-                            {{ $index + 1 }}
-                        </span>
-
-                        <div class="admin-top-product__main">
-
-                            <strong>
-                                {{ $product->name }}
-                            </strong>
-
-                            <small>
-                                {{ $product->category?->name ?? 'بدون دسته‌بندی' }}
-                            </small>
-
-                        </div>
-
-                        <div class="admin-top-product__sales">
-
-                            <strong>
-                                {{ number_format((int) ($product->order_items_sum_quantity ?? 0)) }}
-                            </strong>
-
-                            <small>
-                                عدد فروخته‌شده
-                            </small>
-
-                        </div>
-
-                    </div>
-
-                @endforeach
-
-            </div>
-
-        @else
-
-            <div class="admin-empty">
-
-                <div class="admin-empty__icon">
-                    ★
-                </div>
-
-                <h3>
-                    هنوز داده فروش وجود ندارد
-                </h3>
-
-                <p>
-                    پس از ثبت سفارش، محصولات پرفروش اینجا نمایش داده می‌شوند.
-                </p>
-
-            </div>
-
-        @endif
-
-    </section>
-
 
 @endsection

@@ -10,12 +10,13 @@ class UpdateProductRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return auth()->check() && auth()->user()->isAdmin();
+        return auth()->check()
+            && (bool) auth()->user()->is_admin;
     }
 
     protected function prepareForValidation(): void
     {
-        $this->merge([
+        $data = [
             'name' => $this->trimValue($this->input('name')),
             'slug' => $this->trimValue($this->input('slug')),
             'short_description' => $this->trimValue($this->input('short_description')),
@@ -24,24 +25,47 @@ class UpdateProductRequest extends FormRequest
             'size' => $this->trimValue($this->input('size')),
             'color' => $this->trimValue($this->input('color')),
             'color_code' => $this->trimValue($this->input('color_code')),
-        ]);
+        ];
+
+        $price = $this->input('price');
+        $salePrice = $this->input('sale_price');
+
+        if (
+            is_numeric($price) &&
+            is_numeric($salePrice) &&
+            (float) $salePrice >= (float) $price
+        ) {
+            $data['sale_price'] = null;
+        }
+
+        $colorCode = $data['color_code'] ?? null;
+
+        if (
+            $colorCode !== null &&
+            $colorCode !== '' &&
+            !preg_match(
+                '/^#?[0-9A-Fa-f]{3}(?:[0-9A-Fa-f]{3})?$/',
+                $colorCode
+            )
+        ) {
+            $data['color_code'] = null;
+        }
+
+        $this->merge($data);
     }
 
     public function rules(): array
     {
+        /** @var Product|null $product */
         $product = $this->route('product');
 
-        $productId = $product instanceof Product
-            ? $product->getKey()
-            : $product;
-
-        $variantId = $product instanceof Product
-            ? $product->variants()->value('id')
-            : null;
+        $variantId = $product?->variants()
+            ->orderBy('id')
+            ->value('id');
 
         return [
             'category_id' => [
-                'nullable',
+                'required',
                 'integer',
                 Rule::exists('categories', 'id')
                     ->whereNull('deleted_at'),
@@ -62,12 +86,11 @@ class UpdateProductRequest extends FormRequest
             ],
 
             'slug' => [
-                'bail',
                 'nullable',
                 'string',
                 'max:200',
                 Rule::unique('products', 'slug')
-                    ->ignore($productId),
+                    ->ignore($product?->id),
             ],
 
             'short_description' => [
@@ -84,7 +107,7 @@ class UpdateProductRequest extends FormRequest
 
             'attributes_json' => [
                 'nullable',
-                'json',
+                'string',
             ],
 
             'is_active' => [
@@ -105,8 +128,7 @@ class UpdateProductRequest extends FormRequest
             ],
 
             'sku' => [
-                'bail',
-                'required',
+                'nullable',
                 'string',
                 'max:120',
                 Rule::unique('product_variants', 'sku')
@@ -129,7 +151,6 @@ class UpdateProductRequest extends FormRequest
                 'nullable',
                 'string',
                 'max:20',
-                'regex:/^#?[0-9A-Fa-f]{3}(?:[0-9A-Fa-f]{3})?$/',
             ],
 
             'price' => [
@@ -144,7 +165,6 @@ class UpdateProductRequest extends FormRequest
                 'nullable',
                 'numeric',
                 'min:0',
-                'lte:price',
                 'max:999999999999.99',
             ],
 
@@ -185,10 +205,10 @@ class UpdateProductRequest extends FormRequest
             'is_active' => 'وضعیت فعال بودن',
             'is_featured' => 'محصول ویژه',
             'sort_order' => 'ترتیب نمایش',
-            'sku' => 'SKU',
+            'sku' => 'کد کالا',
             'size' => 'سایز',
             'color' => 'رنگ',
-            'color_code' => 'کد رنگ',
+            'color_code' => 'رنگ',
             'price' => 'قیمت',
             'sale_price' => 'قیمت فروش ویژه',
             'stock' => 'موجودی',

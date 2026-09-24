@@ -5,84 +5,138 @@
 
 @section('content')
 
+    {{-- =====================================================
+        PAGE HEADER
+    ====================================================== --}}
+
     <div class="admin-page-head">
 
         <div>
-            <h1 class="admin-page-title">برندها</h1>
-            <p class="admin-page-description">
+
+            <h1 class="admin-page-head__title">
+                برندها
+            </h1>
+
+            <p class="admin-page-head__text">
                 مدیریت برندهای فروشگاه
             </p>
+
         </div>
 
-        <a href="{{ route('admin.brands.create') }}" class="admin-btn admin-btn-primary">
+        <a
+            href="{{ route('admin.brands.create') }}"
+            class="admin-btn admin-btn--secondary"
+        >
             + افزودن برند
         </a>
 
     </div>
 
+
+    {{-- =====================================================
+        FILTERS
+    ====================================================== --}}
+
     <div class="admin-card admin-filter-card">
+
+        <div class="admin-card-header">
+
+            <div>
+
+                <h2 class="admin-card-title">
+                    جستجو و فیلتر
+                </h2>
+
+                <p class="admin-card-description">
+                    برند را با نام، شناسه یا وضعیت پیدا کنید.
+                </p>
+
+            </div>
+
+        </div>
+
 
         <form
             method="GET"
             action="{{ route('admin.brands.index') }}"
-            class="admin-filter-grid"
         >
 
-            <div class="admin-field">
+            <div class="admin-filter-grid">
 
-                <label for="q">
-                    جستجو
-                </label>
+                {{-- SEARCH --}}
 
-                <input
-                    id="q"
-                    type="text"
-                    name="q"
-                    value="{{ request('q') }}"
-                    placeholder="نام یا slug..."
-                >
+                <div class="admin-field">
 
-            </div>
+                    <label for="q">
+                        جستجو
+                    </label>
 
-            <div class="admin-field">
+                    <input
+                        id="q"
+                        type="search"
+                        name="q"
+                        value="{{ request('q') }}"
+                        placeholder="نام برند یا شناسه..."
+                    >
 
-                <label for="status">
-                    وضعیت
-                </label>
+                </div>
 
-                <select id="status" name="status">
 
-                    <option value="">
-                        همه
-                    </option>
+                {{-- STATUS --}}
 
-                    <option value="active" @selected(request('status') === 'active')>
-                    فعال
-                    </option>
+                <div class="admin-field">
 
-                    <option value="inactive" @selected(request('status') === 'inactive')>
-                    غیرفعال
-                    </option>
+                    <label for="active">
+                        وضعیت
+                    </label>
 
-                </select>
+                    <select
+                        id="active"
+                        name="active"
+                    >
 
-            </div>
+                        <option value="">
+                            همه وضعیت‌ها
+                        </option>
 
-            <div class="admin-filter-actions">
+                        <option
+                            value="1"
+                            @selected(request('active') === '1')
+                        >
+                        فعال
+                        </option>
 
-                <button
-                    type="submit"
-                    class="admin-btn admin-btn-primary"
-                >
-                    جستجو
-                </button>
+                        <option
+                            value="0"
+                            @selected(request('active') === '0')
+                        >
+                        غیرفعال
+                        </option>
 
-                <a
-                    href="{{ route('admin.brands.index') }}"
-                    class="admin-btn admin-btn-light"
-                >
-                    پاک کردن
-                </a>
+                    </select>
+
+                </div>
+
+
+                {{-- ACTIONS --}}
+
+                <div class="admin-filter-actions">
+
+                    <button
+                        type="submit"
+                        class="admin-btn admin-btn--secondary"
+                    >
+                        اعمال فیلتر
+                    </button>
+
+                    <a
+                        href="{{ route('admin.brands.index') }}"
+                        class="admin-btn admin-btn--ghost"
+                    >
+                        پاک کردن
+                    </a>
+
+                </div>
 
             </div>
 
@@ -90,155 +144,268 @@
 
     </div>
 
+
+    {{-- =====================================================
+        BRANDS TABLE
+    ====================================================== --}}
+
     <div class="admin-card">
 
-        <div class="admin-table-wrap">
+        <div class="admin-card-header">
 
-            <table class="admin-table">
+            <div>
 
-                <thead>
-                <tr>
-                    <th>برند</th>
-                    <th>Slug</th>
-                    <th>محصولات</th>
-                    <th>وضعیت</th>
-                    <th>عملیات</th>
-                </tr>
-                </thead>
+                <h2 class="admin-card-title">
+                    فهرست برندها
+                </h2>
 
-                <tbody>
+                <p class="admin-card-description">
+                    {{ number_format($brands->total()) }}
+                    برند
+                </p>
 
-                @forelse($brands as $brand)
-
-                    @php
-                        $logo = $brand->logoMedia;
-                    @endphp
-
-                    <tr>
-
-                        <td>
-
-                            <div class="admin-product-cell">
-
-                                @if($logo?->url)
-
-                                    <img
-                                        src="{{ $logo->url }}"
-                                        alt="{{ $brand->name }}"
-                                        class="admin-product-thumb"
-                                    >
-
-                                @else
-
-                                    <div class="admin-product-thumb admin-product-thumb-empty">
-                                        {{ mb_substr($brand->name, 0, 1) }}
-                                    </div>
-
-                                @endif
-
-                                <div>
-
-                                    <div class="admin-product-name">
-                                        {{ $brand->name }}
-                                    </div>
-
-                                    @if($brand->description)
-                                        <div class="admin-product-meta">
-                                            {{ \Illuminate\Support\Str::limit($brand->description, 70) }}
-                                        </div>
-                                    @endif
-
-                                </div>
-
-                            </div>
-
-                        </td>
-
-                        <td dir="ltr">
-                            {{ $brand->slug }}
-                        </td>
-
-                        <td>
-                            {{ number_format($brand->products_count ?? 0) }}
-                        </td>
-
-                        <td>
-
-                            @if($brand->is_active)
-
-                                <span class="admin-badge admin-badge-success">
-                                    فعال
-                                </span>
-
-                            @else
-
-                                <span class="admin-badge admin-badge-danger">
-                                    غیرفعال
-                                </span>
-
-                            @endif
-
-                        </td>
-
-                        <td>
-
-                            <div class="admin-actions">
-
-                                <a
-                                    href="{{ route('admin.brands.edit', $brand) }}"
-                                    class="admin-btn admin-btn-sm admin-btn-light"
-                                >
-                                    ویرایش
-                                </a>
-
-                                <form
-                                    method="POST"
-                                    action="{{ route('admin.brands.destroy', $brand) }}"
-                                    onsubmit="return confirm('آیا از حذف این برند مطمئن هستید؟');"
-                                >
-
-                                    @csrf
-                                    @method('DELETE')
-
-                                    <button
-                                        type="submit"
-                                        class="admin-btn admin-btn-sm admin-btn-danger"
-                                    >
-                                        حذف
-                                    </button>
-
-                                </form>
-
-                            </div>
-
-                        </td>
-
-                    </tr>
-
-                @empty
-
-                    <tr>
-                        <td colspan="5">
-
-                            <div class="admin-empty">
-                                برندی پیدا نشد.
-                            </div>
-
-                        </td>
-                    </tr>
-
-                @endforelse
-
-                </tbody>
-
-            </table>
+            </div>
 
         </div>
 
-        @if($brands->hasPages())
 
-            <div class="admin-pagination">
-                {{ $brands->links() }}
+        @if($brands->count())
+
+            <div class="admin-table-wrap">
+
+                <table class="admin-table">
+
+                    <thead>
+
+                    <tr>
+
+                        <th>
+                            برند
+                        </th>
+
+                        <th>
+                            شناسه
+                        </th>
+
+                        <th>
+                            محصولات
+                        </th>
+
+                        <th>
+                            وضعیت
+                        </th>
+
+                        <th>
+                            عملیات
+                        </th>
+
+                    </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                    @foreach($brands as $brand)
+
+                        @php
+                            $logo = $brand->logoMedia;
+                        @endphp
+
+                        <tr>
+
+                            {{-- BRAND --}}
+
+                            <td>
+
+                                <div class="admin-product-cell">
+
+                                    @if($logo?->url)
+
+                                        <img
+                                            src="{{ $logo->url }}"
+                                            alt="{{ $brand->name }}"
+                                            class="admin-product-thumb"
+                                            loading="lazy"
+                                        >
+
+                                    @else
+
+                                        <div class="admin-product-thumb-empty">
+
+                                            {{ mb_substr($brand->name, 0, 1) }}
+
+                                        </div>
+
+                                    @endif
+
+
+                                    <div>
+
+                                        <div class="admin-product-name">
+                                            {{ $brand->name }}
+                                        </div>
+
+                                        @if($brand->description)
+
+                                            <div class="admin-product-meta">
+
+                                                {{ \Illuminate\Support\Str::limit(
+                                                    $brand->description,
+                                                    70
+                                                ) }}
+
+                                            </div>
+
+                                        @endif
+
+                                    </div>
+
+                                </div>
+
+                            </td>
+
+
+                            {{-- SLUG --}}
+
+                            <td dir="ltr">
+
+                                @if($brand->slug)
+
+                                    <span class="admin-muted">
+                                        {{ $brand->slug }}
+                                    </span>
+
+                                @else
+
+                                    <span class="admin-muted">
+                                        —
+                                    </span>
+
+                                @endif
+
+                            </td>
+
+
+                            {{-- PRODUCTS COUNT --}}
+
+                            <td>
+
+                                <span class="admin-price">
+                                    {{ number_format($brand->products_count ?? 0) }}
+                                </span>
+
+                            </td>
+
+
+                            {{-- STATUS --}}
+
+                            <td>
+
+                                @if($brand->is_active)
+
+                                    <span class="admin-badge admin-badge--success">
+                                        فعال
+                                    </span>
+
+                                @else
+
+                                    <span class="admin-badge admin-badge--neutral">
+                                        غیرفعال
+                                    </span>
+
+                                @endif
+
+                            </td>
+
+
+                            {{-- ACTIONS --}}
+
+                            <td>
+
+                                <div class="admin-actions">
+
+                                    <a
+                                        href="{{ route('admin.brands.edit', $brand) }}"
+                                        class="admin-btn admin-btn--ghost admin-btn--sm"
+                                    >
+                                        ویرایش
+                                    </a>
+
+
+                                    <form
+                                        method="POST"
+                                        action="{{ route('admin.brands.destroy', $brand) }}"
+                                        onsubmit="return confirm('آیا از حذف این برند مطمئن هستید؟');"
+                                    >
+
+                                        @csrf
+                                        @method('DELETE')
+
+                                        <button
+                                            type="submit"
+                                            class="admin-btn admin-btn--danger admin-btn--sm"
+                                        >
+                                            حذف
+                                        </button>
+
+                                    </form>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                    @endforeach
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+            {{-- PAGINATION --}}
+
+            @if($brands->hasPages())
+
+                <div class="admin-pagination">
+
+                    {{ $brands->links() }}
+
+                </div>
+
+            @endif
+
+
+        @else
+
+            <div class="admin-empty">
+
+                <div class="admin-empty__icon">
+                    —
+                </div>
+
+                <h3 class="admin-empty__title">
+                    برندی پیدا نشد
+                </h3>
+
+                <p class="admin-empty__text">
+                    با فیلترهای فعلی برندی وجود ندارد.
+                </p>
+
+                <div style="margin-top:16px;">
+
+                    <a
+                        href="{{ route('admin.brands.create') }}"
+                        class="admin-btn admin-btn--secondary"
+                    >
+                        افزودن برند
+                    </a>
+
+                </div>
+
             </div>
 
         @endif

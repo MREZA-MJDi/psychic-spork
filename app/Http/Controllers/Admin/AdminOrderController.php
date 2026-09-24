@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\UpdateOrderRequest;
 use App\Models\Order;
 use App\Services\OrderService;
@@ -10,7 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Throwable;
 
-class AdminOrderController extends AdminController
+class AdminOrderController extends Controller
 {
     public function index(Request $request): View
     {
@@ -63,15 +64,7 @@ class AdminOrderController extends AdminController
         return view('admin.orders.index', [
             'orders' => $orders,
 
-            'statusNames' => [
-                'pending' => 'در انتظار',
-                'confirmed' => 'تأیید شده',
-                'preparing' => 'در حال آماده‌سازی',
-                'shipped' => 'ارسال شده',
-                'delivered' => 'تحویل شده',
-                'cancelled' => 'لغو شده',
-                'returned' => 'مرجوعی',
-            ],
+            'statusNames' => $this->statusNames(),
         ]);
     }
 
@@ -87,21 +80,8 @@ class AdminOrderController extends AdminController
 
         return view('admin.orders.show', [
             'order' => $order,
-            'statusNames' => [
-                'pending' => 'در انتظار',
-                'confirmed' => 'تأیید شده',
-                'preparing' => 'در حال آماده‌سازی',
-                'shipped' => 'ارسال شده',
-                'delivered' => 'تحویل شده',
-                'cancelled' => 'لغو شده',
-                'returned' => 'مرجوعی',
-            ],
-            'paymentStatusNames' => [
-                'pending' => 'در انتظار',
-                'paid' => 'پرداخت شده',
-                'failed' => 'ناموفق',
-                'refunded' => 'بازپرداخت شده',
-            ],
+            'statusNames' => $this->statusNames(),
+            'paymentStatusNames' => $this->paymentStatusNames(),
         ]);
     }
 
@@ -126,10 +106,37 @@ class AdminOrderController extends AdminController
                 "سفارش {$order->order_number} با موفقیت به‌روزرسانی شد."
             );
         } catch (Throwable $e) {
-            return $this->failure(
-                $e,
-                'به‌روزرسانی سفارش انجام نشد.'
-            );
+            report($e);
+
+            return back()
+                ->withInput()
+                ->with(
+                    'error',
+                    'به‌روزرسانی سفارش انجام نشد.'
+                );
         }
+    }
+
+    private function statusNames(): array
+    {
+        return [
+            'pending' => 'در انتظار',
+            'confirmed' => 'تأیید شده',
+            'preparing' => 'در حال آماده‌سازی',
+            'shipped' => 'ارسال شده',
+            'delivered' => 'تحویل شده',
+            'cancelled' => 'لغو شده',
+            'returned' => 'مرجوعی',
+        ];
+    }
+
+    private function paymentStatusNames(): array
+    {
+        return [
+            'pending' => 'در انتظار',
+            'paid' => 'پرداخت شده',
+            'failed' => 'ناموفق',
+            'refunded' => 'بازپرداخت شده',
+        ];
     }
 }

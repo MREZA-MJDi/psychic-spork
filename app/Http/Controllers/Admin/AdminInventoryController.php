@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreInventoryMovementRequest;
 use App\Models\InventoryMovement;
 use App\Models\ProductVariant;
@@ -11,7 +12,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use Throwable;
 
-class AdminInventoryController extends AdminController
+class AdminInventoryController extends Controller
 {
     public function index(Request $request): View
     {
@@ -23,11 +24,22 @@ class AdminInventoryController extends AdminController
                 function ($query) use ($request): void {
                     $search = $request->string('q')->toString();
 
-                    $query->whereHas('product', function ($query) use ($search): void {
-                        $query
-                            ->where('name', 'like', '%' . $search . '%')
-                            ->orWhere('slug', 'like', '%' . $search . '%');
-                    });
+                    $query->whereHas(
+                        'product',
+                        function ($query) use ($search): void {
+                            $query
+                                ->where(
+                                    'name',
+                                    'like',
+                                    '%' . $search . '%'
+                                )
+                                ->orWhere(
+                                    'slug',
+                                    'like',
+                                    '%' . $search . '%'
+                                );
+                        }
+                    );
                 }
             )
             ->orderBy('stock')
@@ -36,14 +48,29 @@ class AdminInventoryController extends AdminController
             ->withQueryString();
 
         $movements = InventoryMovement::query()
-            ->with(['productVariant.product', 'createdBy'])
+            ->with([
+                'productVariant.product',
+                'createdBy',
+            ])
             ->latest()
             ->limit(20)
             ->get();
 
+        $variantOptions = ProductVariant::query()
+            ->with('product')
+            ->whereHas('product')
+            ->orderBy('product_id')
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get();
+
         return view(
             'admin.inventory.index',
-            compact('variants', 'movements')
+            compact(
+                'variants',
+                'movements',
+                'variantOptions'
+            )
         );
     }
 
@@ -56,7 +83,9 @@ class AdminInventoryController extends AdminController
             DB::transaction(function () use ($data): void {
                 $variant = ProductVariant::query()
                     ->lockForUpdate()
-                    ->findOrFail($data['product_variant_id']);
+                    ->findOrFail(
+                        $data['product_variant_id']
+                    );
 
                 $quantity = (int) $data['quantity'];
 
@@ -86,10 +115,14 @@ class AdminInventoryController extends AdminController
                 'گردش موجودی با موفقیت ثبت شد.'
             );
         } catch (Throwable $e) {
-            return $this->failure(
-                $e,
-                'ثبت گردش موجودی انجام نشد.'
-            );
+            report($e);
+
+            return back()
+                ->withInput()
+                ->with(
+                    'error',
+                    'ثبت گردش موجودی انجام نشد.'
+                );
         }
     }
 }

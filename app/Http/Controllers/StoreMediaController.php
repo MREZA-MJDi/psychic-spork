@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Services\MediaService;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\Response;
 
 class StoreMediaController extends Controller
 {

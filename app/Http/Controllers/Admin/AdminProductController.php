@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreProductRequest;
 use App\Http\Requests\Admin\UpdateProductRequest;
 use App\Models\Brand;
@@ -12,12 +13,17 @@ use App\Services\MediaService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Throwable;
 
-class AdminProductController extends AdminController
+class AdminProductController extends Controller
 {
+    /*
+    |--------------------------------------------------------------------------
+    | INDEX
+    |--------------------------------------------------------------------------
+    */
+
     public function index(Request $request): View
     {
         $products = Product::query()
@@ -27,41 +33,33 @@ class AdminProductController extends AdminController
                 'variants',
                 'galleryMedia',
             ])
-            ->when(
-                $request->filled('q'),
-                function ($query) use ($request): void {
-                    $search = $request->string('q')->toString();
+            ->when($request->filled('q'), function ($query) use ($request) {
+                $search = trim((string) $request->input('q'));
 
-                    $query->where(function ($query) use ($search): void {
-                        $query
-                            ->where(
-                                'name',
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('slug', 'like', "%{$search}%")
+                        ->orWhereHas('variants', function ($variantQuery) use ($search) {
+                            $variantQuery->where(
+                                'sku',
                                 'like',
-                                '%' . $search . '%'
-                            )
-                            ->orWhereHas(
-                                'variants',
-                                fn ($variant) => $variant->where(
-                                    'sku',
-                                    'like',
-                                    '%' . $search . '%'
-                                )
+                                "%{$search}%"
                             );
-                    });
-                }
-            )
+                        });
+                });
+            })
             ->when(
                 $request->filled('category_id'),
                 fn ($query) => $query->where(
                     'category_id',
-                    $request->integer('category_id')
+                    $request->input('category_id')
                 )
             )
             ->when(
                 $request->filled('brand_id'),
                 fn ($query) => $query->where(
                     'brand_id',
-                    $request->integer('brand_id')
+                    $request->input('brand_id')
                 )
             )
             ->when(
@@ -70,11 +68,16 @@ class AdminProductController extends AdminController
             )
             ->when(
                 $request->filled('status'),
-                function ($query) use ($request): void {
+                function ($query) use ($request) {
                     match ($request->input('status')) {
                         'active' => $query->where('is_active', true),
+
                         'inactive' => $query->where('is_active', false),
-                        'featured' => $query->where('is_featured', true),
+
+                        'featured' => $query
+                            ->where('is_active', true)
+                            ->where('is_featured', true),
+
                         default => null,
                     };
                 }
@@ -90,6 +93,12 @@ class AdminProductController extends AdminController
         ]);
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | CREATE
+    |--------------------------------------------------------------------------
+    */
+
     public function create(): View
     {
         return view('admin.products.create', [
@@ -100,6 +109,12 @@ class AdminProductController extends AdminController
         ]);
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | STORE
+    |--------------------------------------------------------------------------
+    */
+
     public function store(
         StoreProductRequest $request,
         MediaService $media
@@ -107,38 +122,43 @@ class AdminProductController extends AdminController
         try {
             $data = $request->validated();
 
-            $product = DB::transaction(
-                function () use ($data, $request, $media): Product {
-                    $product = Product::create(
-                        $this->productData($data, $request)
+            $product = DB::transaction(function () use (
+                $data,
+                $request,
+                $media
+            ) {
+                $product = Product::create(
+                    $this->productData($data)
+                );
+
+                $product->variants()->create([
+                    'sku' => $data['sku']  ,
+                    'size' => $data['size'] ?? null,
+                    'color' => $data['color'] ?? null,
+                    'color_code' => $data['color_code'] ?? null,
+                    'price' => $data['price'],
+                    'sale_price' => $data['sale_price'] ?? null,
+                    'stock' => (int) ($data['stock'] ?? 0),
+                    'low_stock_threshold' => (int) (
+                        $data['low_stock_threshold'] ?? 5
+                    ),
+                    'is_active' => (bool) (
+                        $data['is_active'] ?? true
+                    ),
+                ]);
+
+                if ($request->hasFile('image_file')) {
+                    $media->attach(
+                        $product,
+                        'gallery',
+                        $request->file('image_file'),
+                        'products',
+                        $product->name
                     );
-
-                    $product->variants()->create([
-                        'sku' => $data['sku'],
-                        'size' => $data['size'] ?? null,
-                        'color' => $data['color'] ?? null,
-                        'color_code' => $data['color_code'] ?? null,
-                        'price' => $data['price'],
-                        'sale_price' => $data['sale_price'] ?? null,
-                        'stock' => $data['stock'],
-                        'low_stock_threshold' => $data['low_stock_threshold'],
-                        'is_active' => $request->boolean('is_active'),
-                        'sort_order' => 0,
-                    ]);
-
-                    if ($request->hasFile('image_file')) {
-                        $media->attach(
-                            $product,
-                            'gallery',
-                            $request->file('image_file'),
-                            'products',
-                            $product->name
-                        );
-                    }
-
-                    return $product;
                 }
-            );
+
+                return $product;
+            });
 
             return redirect()
                 ->route('admin.products.edit', $product)
@@ -147,12 +167,22 @@ class AdminProductController extends AdminController
                     'محصول با موفقیت ایجاد شد.'
                 );
         } catch (Throwable $e) {
-            return $this->failure(
-                $e,
-                'ایجاد محصول انجام نشد.'
-            );
+            report($e);
+
+            return back()
+                ->withInput()
+                ->with(
+                    'error',
+                    'ایجاد محصول انجام نشد.'
+                );
         }
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | EDIT
+    |--------------------------------------------------------------------------
+    */
 
     public function edit(Product $product): View
     {
@@ -163,14 +193,17 @@ class AdminProductController extends AdminController
 
         return view('admin.products.edit', [
             'product' => $product,
-            'variant' => $product->variants->first()
-                ?? new ProductVariant([
-                    'product_id' => $product->id,
-                ]),
+            'variant' => $product->variants->first(),
             'categories' => $this->categories(),
             'brands' => $this->brands(),
         ]);
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | UPDATE
+    |--------------------------------------------------------------------------
+    */
 
     public function update(
         UpdateProductRequest $request,
@@ -181,22 +214,36 @@ class AdminProductController extends AdminController
             $data = $request->validated();
 
             DB::transaction(function () use (
-                $product,
-                $request,
                 $data,
+                $request,
+                $product,
                 $media
-            ): void {
+            ) {
+                /*
+                |--------------------------------------------------------------------------
+                | PRODUCT
+                |--------------------------------------------------------------------------
+                */
+
                 $product->update(
-                    $this->productData($data, $request)
+                    $this->productData(
+                        $data,
+                        $product
+                    )
                 );
+
+                /*
+                |--------------------------------------------------------------------------
+                | MAIN VARIANT
+                |--------------------------------------------------------------------------
+                */
 
                 $variant = $product->variants()
                     ->lockForUpdate()
-                    ->orderBy('sort_order')
                     ->orderBy('id')
                     ->first();
 
-                if (! $variant) {
+                if (!$variant) {
                     $variant = $product->variants()->create([
                         'sku' => $data['sku'],
                         'size' => $data['size'] ?? null,
@@ -204,37 +251,37 @@ class AdminProductController extends AdminController
                         'color_code' => $data['color_code'] ?? null,
                         'price' => $data['price'],
                         'sale_price' => $data['sale_price'] ?? null,
-                        'stock' => 0,
-                        'low_stock_threshold' => $data['low_stock_threshold'],
-                        'is_active' => $request->boolean('is_active'),
-                        'sort_order' => 0,
+                        'stock' => (int) ($data['stock'] ?? 0),
+                        'low_stock_threshold' => (int) (
+                            $data['low_stock_threshold'] ?? 5
+                        ),
+                        'is_active' => (bool) (
+                            $data['is_active'] ?? true
+                        ),
+                    ]);
+                } else {
+                    $variant->update([
+                        'sku' => $data['sku'],
+                        'size' => $data['size'] ?? null,
+                        'color' => $data['color'] ?? null,
+                        'color_code' => $data['color_code'] ?? null,
+                        'price' => $data['price'],
+                        'sale_price' => $data['sale_price'] ?? null,
+                        'stock' => (int) ($data['stock'] ?? 0),
+                        'low_stock_threshold' => (int) (
+                            $data['low_stock_threshold'] ?? 5
+                        ),
+                        'is_active' => (bool) (
+                            $data['is_active'] ?? true
+                        ),
                     ]);
                 }
 
-                $oldStock = (int) $variant->stock;
-                $newStock = (int) $data['stock'];
-
-                $variant->update([
-                    'sku' => $data['sku'],
-                    'size' => $data['size'] ?? null,
-                    'color' => $data['color'] ?? null,
-                    'color_code' => $data['color_code'] ?? null,
-                    'price' => $data['price'],
-                    'sale_price' => $data['sale_price'] ?? null,
-                    'stock' => $newStock,
-                    'low_stock_threshold' => $data['low_stock_threshold'],
-                    'is_active' => $request->boolean('is_active'),
-                ]);
-
-                if ($oldStock !== $newStock) {
-                    $variant->inventoryMovements()->create([
-                        'type' => 'adjustment',
-                        'quantity' => $newStock - $oldStock,
-                        'stock_after' => $newStock,
-                        'note' => 'اصلاح موجودی از فرم محصول',
-                        'created_by' => auth()->id(),
-                    ]);
-                }
+                /*
+                |--------------------------------------------------------------------------
+                | IMAGE
+                |--------------------------------------------------------------------------
+                */
 
                 if ($request->hasFile('image_file')) {
                     $media->replace(
@@ -251,15 +298,25 @@ class AdminProductController extends AdminController
                 ->route('admin.products.index')
                 ->with(
                     'success',
-                    'محصول با موفقیت به‌روزرسانی شد.'
+                    'محصول با موفقیت ویرایش شد.'
                 );
         } catch (Throwable $e) {
-            return $this->failure(
-                $e,
-                'به‌روزرسانی محصول انجام نشد.'
-            );
+            report($e);
+
+            return back()
+                ->withInput()
+                ->with(
+                    'error',
+                    'ویرایش محصول انجام نشد.'
+                );
         }
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | DESTROY
+    |--------------------------------------------------------------------------
+    */
 
     public function destroy(
         Product $product,
@@ -269,93 +326,129 @@ class AdminProductController extends AdminController
             DB::transaction(function () use (
                 $product,
                 $media
-            ): void {
+            ) {
+                /*
+                | Remove product gallery
+                */
+
                 $media->removeCollection(
                     $product,
                     'gallery'
                 );
 
-                $product->update([
-                    'is_active' => false,
-                ]);
+                /*
+                | Deactivate variants
+                */
 
                 $product->variants()->update([
                     'is_active' => false,
                 ]);
 
+                /*
+                | Soft delete product
+                */
+
                 $product->delete();
             });
 
-            return back()->with(
-                'success',
-                'محصول با موفقیت حذف شد.'
-            );
+            return redirect()
+                ->route('admin.products.index')
+                ->with(
+                    'success',
+                    'محصول با موفقیت حذف شد.'
+                );
         } catch (Throwable $e) {
-            return $this->failure(
-                $e,
+            report($e);
+
+            return back()->with(
+                'error',
                 'حذف محصول انجام نشد.'
             );
         }
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | PRODUCT DATA
+    |--------------------------------------------------------------------------
+    */
+
     private function productData(
         array $data,
-        StoreProductRequest|UpdateProductRequest $request
+        ?Product $product = null,
+        ?string $generatedSlug = null
     ): array {
         $attributes = null;
 
-        if (filled($data['attributes_json'] ?? null)) {
-            $attributes = json_decode(
+        if (!empty($data['attributes_json'])) {
+
+            $decoded = json_decode(
                 $data['attributes_json'],
                 true
             );
 
-            if (json_last_error() !== JSON_ERROR_NONE) {
-                abort(
-                    422,
-                    'ویژگی‌های محصول JSON معتبر ندارند.'
-                );
+            if (is_array($decoded)) {
+                $attributes = $decoded;
             }
         }
 
         return [
-            'category_id' => $data['category_id'] ?? null,
+            'category_id' => $data['category_id'],
             'brand_id' => $data['brand_id'] ?? null,
+
             'name' => $data['name'],
-            'slug' => filled($data['slug'] ?? null)
-                ? $data['slug']
-                : Str::slug($data['name']),
-            'short_description' => $data['short_description'] ?? null,
-            'description' => $data['description'] ?? null,
+
+            'slug' =>
+                $data['slug']
+                    ?: $generatedSlug
+                    ?: $product?->slug
+                        ?: $this->generateSlug($data['name']),
+
+            'short_description' =>
+                $data['short_description'] ?? null,
+
+            'description' =>
+                $data['description'] ?? null,
+
             'attributes' => $attributes,
-            'is_active' => $request->boolean('is_active'),
-            'is_featured' => $request->boolean('is_featured'),
-            'sort_order' => (int) (
-                $data['sort_order'] ?? 0
-            ),
+
+            'is_active' =>
+                (bool) ($data['is_active'] ?? false),
+
+            'is_featured' =>
+                (bool) ($data['is_featured'] ?? false),
+
+            'sort_order' =>
+                (int) ($data['sort_order'] ?? 0),
         ];
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | CATEGORIES
+    |--------------------------------------------------------------------------
+    */
 
     private function categories()
     {
         return Category::query()
-            ->active()
+            ->where('is_active', true)
             ->orderBy('sort_order')
             ->orderBy('name')
-            ->get([
-                'id',
-                'name',
-            ]);
+            ->get();
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | BRANDS
+    |--------------------------------------------------------------------------
+    */
 
     private function brands()
     {
         return Brand::query()
-            ->active()
+            ->where('is_active', true)
             ->orderBy('name')
-            ->get([
-                'id',
-                'name',
-            ]);
+            ->get();
     }
 }
