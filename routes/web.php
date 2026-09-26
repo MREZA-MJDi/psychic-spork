@@ -145,7 +145,6 @@ Route::get(
     '/payment/zarinpal/callback/{order}',
     [PaymentController::class, 'zarinpalCallback']
 )
-    ->middleware('signed')
     ->name('payment.zarinpal.callback');
 
 /*
