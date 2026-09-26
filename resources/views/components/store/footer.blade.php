@@ -43,6 +43,27 @@
                     <span>پشتیبانی</span>
                     <b aria-hidden="true">↗</b>
                 </a>
+            <div
+                class="footer-social footer-social--networks"
+                aria-label="شبکه‌های اجتماعی"
+            >
+                @if($siteInstagram)
+                    <a href="{{ $siteInstagram }}" target="_blank" rel="noopener noreferrer">
+                        Instagram
+                    </a>
+                @endif
+
+                @if($siteTelegram)
+                    <a href="{{ $siteTelegram }}" target="_blank" rel="noopener noreferrer">
+                        Telegram
+                    </a>
+                @endif
+
+                @if($siteWhatsapp)
+                    <a href="{{ $siteWhatsapp }}" target="_blank" rel="noopener noreferrer">
+                        WhatsApp
+                    </a>
+                @endif
             </div>
 
         </div>
@@ -184,6 +205,31 @@
 
         </div>
 
+    </div>
+
+
+        <div class="container footer-legal">
+        <span>اطلاعات فروشگاه و شرایط خرید</span>
+
+        <a href="{{ route('returns') }}">
+            شرایط مرجوعی
+        </a>
+
+        <a href="{{ route('shipping') }}">
+            روش ارسال
+        </a>
+
+        @if($siteEnamad)
+            <a href="{{ $siteEnamad }}" target="_blank" rel="noopener noreferrer">
+                مجوز فروشگاه
+            </a>
+        @endif
+
+        @if($siteLicense)
+            <a href="{{ $siteLicense }}" target="_blank" rel="noopener noreferrer">
+                مجوزها
+            </a>
+        @endif
     </div>
 
 
