@@ -6,7 +6,9 @@ export default defineConfig({
         laravel({
             input: [
                 'resources/css/app.css',
+                'resources/css/home.css',
                 'resources/css/editorial-hero.css',
+                'resources/css/auth.css',
                 'resources/js/app.js',
                 'resources/js/editorial-hero.js',
                 'resources/css/admin.css',
