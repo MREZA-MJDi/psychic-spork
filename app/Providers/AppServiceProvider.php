@@ -37,6 +37,11 @@ class AppServiceProvider extends ServiceProvider
             'siteStoreEmail' => env('JANAN_STORE_EMAIL'),
             'siteStoreAddress' => env('JANAN_STORE_ADDRESS'),
             'siteStoreWorkingHours' => env('JANAN_STORE_WORKING_HOURS'),
+            'siteInstagram' => env('JANAN_INSTAGRAM_URL'),
+            'siteTelegram' => env('JANAN_TELEGRAM_URL'),
+            'siteWhatsapp' => env('JANAN_WHATSAPP_URL'),
+            'siteEnamad' => env('JANAN_ENAMAD_URL'),
+            'siteLicense' => env('JANAN_LICENSE_URL'),
         ]);
 
         View::composer('layouts.store', function ($view): void {
