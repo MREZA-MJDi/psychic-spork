@@ -14,6 +14,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\SeoController;
 use App\Http\Controllers\StoreBrandController;
 use App\Http\Controllers\StoreCategoryController;
@@ -136,6 +137,19 @@ Route::get('/checkout/success', [CheckoutController::class, 'success'])
 
 /*
 |--------------------------------------------------------------------------
+| Online payment callbacks
+|--------------------------------------------------------------------------
+*/
+
+Route::get(
+    '/payment/zarinpal/callback/{order}',
+    [PaymentController::class, 'zarinpalCallback']
+)
+    ->middleware('signed')
+    ->name('payment.zarinpal.callback');
+
+/*
+|--------------------------------------------------------------------------
 | Authentication
 |--------------------------------------------------------------------------
 */
@@ -182,12 +196,6 @@ Route::prefix('admin')
         Route::get('/', [AdminDashboardController::class, 'index'])
             ->name('dashboard');
 
-        /*
-        |--------------------------------------------------------------------------
-        | Catalog
-        |--------------------------------------------------------------------------
-        */
-
         Route::resource('products', AdminProductController::class)
             ->except(['show']);
 
@@ -200,20 +208,8 @@ Route::prefix('admin')
         Route::resource('brands', AdminBrandController::class)
             ->except(['show']);
 
-        /*
-        |--------------------------------------------------------------------------
-        | Customers
-        |--------------------------------------------------------------------------
-        */
-
         Route::get('customers', [AdminCustomerController::class, 'index'])
             ->name('customers.index');
-
-        /*
-        |--------------------------------------------------------------------------
-        | Orders
-        |--------------------------------------------------------------------------
-        */
 
         Route::get('orders', [AdminOrderController::class, 'index'])
             ->name('orders.index');
@@ -224,30 +220,18 @@ Route::prefix('admin')
         Route::put('orders/{order}', [AdminOrderController::class, 'update'])
             ->name('orders.update');
 
-        /*
-        |--------------------------------------------------------------------------
-        | Inventory
-        |--------------------------------------------------------------------------
-        */
-
         Route::get('inventory', [AdminInventoryController::class, 'index'])
             ->name('inventory.index');
 
         Route::post('inventory', [AdminInventoryController::class, 'store'])
-            ->name('inventory.store');
+            ->name('admin.inventory.store');
 
-        /*
-        |--------------------------------------------------------------------------
-        | Accounting
-        |--------------------------------------------------------------------------
-        */
-
-        Route::get('accounting', [AdminFinancialController::class, 'index'])
-            ->name('accounting.index');
+        Route::get('accounting', [AdminFinancialController::class, 'show'])
+            ->name('admin.accounting.show');
 
         Route::post('accounting', [AdminFinancialController::class, 'store'])
-            ->name('accounting.store');
+            ->name('admin.accounting.store');
 
         Route::get('accounting/{transaction}', [AdminFinancialController::class, 'show'])
-            ->name('accounting.show');
+            ->name('admin.accounting.transaction');
     });
