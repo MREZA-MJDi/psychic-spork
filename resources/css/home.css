@@ -587,6 +587,54 @@ animation: none !important;
 }
 }
 
+.janan-trust {
+position:
+        relative;
+
+    display:
+        grid;
+
+    grid-template-columns:
+        minmax(220px, .7fr)
+        minmax(0, 1.9fr);
+
+    min-height:
+        138px;
+
+    overflow:
+        hidden;
+
+    border:
+        1px solid rgba(255, 255, 255, .10);
+
+    border-radius:
+        20px;
+
+    background:
+        radial-gradient(
+            circle at 68% 50%,
+            rgba(159, 212, 234, .08),
+            transparent 28%
+        ),
+        radial-gradient(
+            circle at 90% 85%,
+            rgba(231, 178, 197, .09),
+            transparent 22%
+        ),
+        linear-gradient(
+            135deg,
+            #20262b 0%,
+            #252c32 52%,
+            #20252a 100%
+        );
+
+    box-shadow:
+        0 22px 55px rgba(47, 60, 69, .12);
+
+    isolation:
+        isolate;
+}
+
 .janan-trust::before {
 content:
         "";
@@ -616,322 +664,6 @@ content:
 
     pointer-events:
         none;
-}
-
-.janan-trust__intro {
-position:
-        relative;
-
-    z-index:
-        2;
-
-    display:
-        flex;
-
-    flex-direction:
-        column;
-
-    justify-content:
-        center;
-
-    padding:
-        24px 28px;
-
-    border-inline-end:
-        1px solid rgba(255, 255, 255, .08);
-}
-
-.janan-trust__eyebrow {
-color:
-        #9fd4ea;
-
-    font-size:
-        7px;
-
-    font-weight:
-        800;
-
-    letter-spacing:
-        .20em;
-}
-
-.janan-trust__intro strong {
-max-width:
-        240px;
-
-    margin-top:
-        11px;
-
-    color:
-        #f7f9fa;
-
-    font-size:
-        18px;
-
-    font-weight:
-        580;
-
-    letter-spacing:
-        -.035em;
-
-    line-height:
-        1.4;
-}
-
-.janan-trust__intro strong em {
-display:
-        block;
-
-    margin-top:
-        2px;
-
-    color:
-        #e4a9bf;
-
-    font-family:
-        Georgia,
-        "Times New Roman",
-        serif;
-
-    font-size:
-        20px;
-
-    font-style:
-        italic;
-
-    font-weight:
-        400;
-}
-
-.janan-trust__line {
-width:
-        42px;
-
-    height:
-        1px;
-
-    margin-top:
-        16px;
-
-    background:
-        linear-gradient(
-            90deg,
-            #8bc9e1,
-            #dca1b8
-        );
-}
-
-.janan-trust__rail {
-position:
-        relative;
-
-    z-index:
-        2;
-
-    display:
-        grid;
-
-    grid-template-columns:
-        repeat(4, minmax(0, 1fr));
-}
-
-.janan-trust__item {
-position:
-        relative;
-
-    min-width:
-        0;
-
-    display:
-        grid;
-
-    grid-template-columns:
-        auto
-        38px
-        1fr
-        auto;
-
-    align-items:
-        center;
-
-    gap:
-        11px;
-
-    padding:
-        20px 16px;
-
-    border-inline-start:
-        1px solid rgba(255, 255, 255, .07);
-
-    transition:
-        background .28s ease;
-}
-
-.janan-trust__item:first-child {
-border-inline-start:
-        0;
-}
-
-.janan-trust__item:hover {
-background:
-        linear-gradient(
-            145deg,
-            rgba(159, 212, 234, .055),
-            rgba(231, 178, 197, .055)
-        );
-}
-
-.janan-trust__index {
-align-self:
-        start;
-
-    padding-top:
-        3px;
-
-    color:
-        rgba(255, 255, 255, .22);
-
-    font:
-        9px Georgia, serif;
-
-    letter-spacing:
-        .08em;
-}
-
-.janan-trust__icon {
-width:
-        38px;
-
-    height:
-        38px;
-
-    display:
-        grid;
-
-    place-items:
-        center;
-
-    border:
-        1px solid rgba(159, 212, 234, .14);
-
-    border-radius:
-        50%;
-
-    color:
-        #9fd4ea;
-
-    background:
-        rgba(159, 212, 234, .06);
-
-    box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, .035);
-
-    transition:
-        color .25s ease,
-        border-color .25s ease,
-        background .25s ease,
-        transform .3s var(--janan-ease);
-}
-
-.janan-trust__item:nth-child(even) .janan-trust__icon {
-color:
-        #e7b1c5;
-
-    border-color:
-        rgba(231, 177, 197, .14);
-
-    background:
-        rgba(231, 177, 197, .055);
-}
-
-.janan-trust__item:hover .janan-trust__icon {
-transform:
-        scale(1.06);
-
-    border-color:
-        rgba(159, 212, 234, .32);
-
-    background:
-        rgba(159, 212, 234, .10);
-}
-
-.janan-trust__icon svg {
-width:
-        17px;
-
-    height:
-        17px;
-}
-
-.janan-trust__copy {
-min-width:
-        0;
-
-    display:
-        grid;
-
-    gap:
-        3px;
-}
-
-.janan-trust__copy strong {
-overflow:
-        hidden;
-
-    color:
-        #f1f4f5;
-
-    font-size:
-        9px;
-
-    font-weight:
-        700;
-
-    white-space:
-        nowrap;
-
-    text-overflow:
-        ellipsis;
-}
-
-.janan-trust__copy span {
-overflow:
-        hidden;
-
-    color:
-        rgba(255, 255, 255, .40);
-
-    font-size:
-        7px;
-
-    line-height:
-        1.7;
-
-    white-space:
-        nowrap;
-
-    text-overflow:
-        ellipsis;
-}
-
-.janan-trust__arrow {
-color:
-        rgba(255, 255, 255, .24);
-
-    font-size:
-        15px;
-
-    transition:
-        color .25s ease,
-        transform .30s var(--janan-ease);
-}
-
-.janan-trust__item:hover .janan-trust__arrow {
-color:
-        #9fd4ea;
-
-    transform:
-        translate(-3px, -2px);
 }
 
 .home-collections {
@@ -3620,70 +3352,9 @@ position:
             1;
 }
 
-.janan-trust__intro {
-padding:
-            20px;
-}
-
-.janan-trust__intro strong {
-max-width:
-            290px;
-
-        font-size:
+.janan-trust {
+border-radius:
             16px;
-}
-
-.janan-trust__intro strong em {
-display:
-            inline;
-
-        margin-inline-start:
-            5px;
-
-        font-size:
-            17px;
-}
-
-.janan-trust__rail {
-grid-template-columns:
-            1fr;
-}
-
-.janan-trust__item,
-.janan-trust__item:nth-child(3),
-.janan-trust__item:nth-child(4) {
-grid-template-columns:
-            auto
-            38px
-            1fr
-            auto;
-
-        min-height:
-            77px;
-
-        padding:
-            13px 15px;
-
-        border-inline-start:
-            0;
-
-        border-top:
-            1px solid rgba(255, 255, 255, .07);
-}
-
-.janan-trust__item:first-child {
-border-top:
-            0;
-}
-
-.janan-trust__copy strong {
-font-size:
-            9px;
-}
-
-.janan-trust__copy span {
-font-size:
-            7px;
 }
 
 .home-category-rail {
