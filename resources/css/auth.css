@@ -1,3 +1,5 @@
+@import './core.css';
+
 /* =========================================================
    JANAN AUTH / PRIVATE CLIENT AREA
    Editorial luxury: ink, pearl, wine, muted rose.
@@ -125,7 +127,7 @@
     margin: 58px 0 31px;
 }
 
-.eyebrow {
+.auth-page .eyebrow {
     display: inline-flex;
     align-items: center;
     gap: 10px;
