@@ -102,17 +102,18 @@
         </script>
     @endif
 
-    {{-- Global storefront assets --}}
+    {{-- Shared storefront shell --}}
     @vite([
-    'resources/css/app.css',
-    'resources/js/app.js',
+        'resources/css/app.css',
+        'resources/js/app.js',
     ])
 
-    {{-- Homepage-only assets --}}
+    {{-- Homepage-only styles and hero behavior --}}
     @if($isHome)
         @vite([
-        'resources/css/editorial-hero.css',
-        'resources/js/editorial-hero.js',
+            'resources/css/home.css',
+            'resources/css/editorial-hero.css',
+            'resources/js/editorial-hero.js',
         ])
     @endif
 
