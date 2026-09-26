@@ -21,6 +21,15 @@ class PaymentController extends Controller
         OrderService $orders,
         CartService $cart
     ): View|RedirectResponse {
+        abort_unless(
+            $request->hasValidSignatureWhileIgnoring([
+                'Authority',
+                'Status',
+            ]),
+            403,
+            'آدرس بازگشت پرداخت معتبر نیست.'
+        );
+
         $orderModel = \App\Models\Order::query()
             ->with(['payments', 'items'])
             ->findOrFail($order);
