@@ -105,7 +105,9 @@
     {{-- Global storefront assets --}}
     @vite([
     'resources/css/app.css',
+    'resources/css/store-structure.css',
     'resources/js/app.js',
+    'resources/js/store-cart.js',
     ])
 
     {{-- Homepage-only assets --}}
@@ -130,6 +132,8 @@
     </main>
 
     <x-store.footer />
+
+    <x-store.cart-drawer />
 
     <nav
         class="store-mobile-bottom"
