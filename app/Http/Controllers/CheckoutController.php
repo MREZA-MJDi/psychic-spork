@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Contracts\PaymentGateway;
 use App\Http\Requests\CheckoutRequest;
 use App\Services\CartService;
 use App\Services\OrderService;
+use Illuminate\Cache\LockTimeoutException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 use Throwable;
 
@@ -37,37 +40,81 @@ class CheckoutController extends Controller
     public function store(
         CheckoutRequest $request,
         OrderService $orders,
-        CartService $cart
+        CartService $cart,
+        PaymentGateway $gateway
     ): RedirectResponse {
+        $lockKey = $request->user()
+            ? 'janan:checkout:user:' . $request->user()->id
+            : 'janan:checkout:session:' . $request->session()->getId();
+
         try {
-            $order = $orders->createFromCart(
-                $cart->current($request),
-                $request->validated(),
-                $request->user()
+            return Cache::lock($lockKey, 30)->block(
+                10,
+                function () use (
+                    $request,
+                    $orders,
+                    $cart,
+                    $gateway
+                ): RedirectResponse {
+                    $order = null;
+
+                    try {
+                        $order = $orders->createFromCart(
+                            $cart->current($request),
+                            $request->validated(),
+                            $request->user()
+                        );
+
+                        $payment = $gateway->purchase($order);
+
+                        $redirectUrl = data_get(
+                            $payment->metadata,
+                            'redirect_url'
+                        );
+
+                        abort_if(
+                            blank($redirectUrl),
+                            500,
+                            'آدرس انتقال به درگاه ایجاد نشد.'
+                        );
+
+                        return redirect()->away($redirectUrl);
+                    } catch (Throwable $e) {
+                        if ($order) {
+                            try {
+                                if (
+                                    $order->status !== 'cancelled'
+                                    && $order->payment_status !== 'paid'
+                                ) {
+                                    $orders->updateStatus(
+                                        $order,
+                                        'cancelled',
+                                        'failed',
+                                        'ایجاد تراکنش پرداخت ناموفق بود.'
+                                    );
+
+                                    $cart->restoreFromOrder(
+                                        $cart->current($request),
+                                        $order
+                                    );
+                                }
+                            } catch (Throwable $rollbackError) {
+                                report($rollbackError);
+                            }
+                        }
+
+                        throw $e;
+                    }
+                }
             );
+        } catch (LockTimeoutException $e) {
+            report($e);
 
-            if ($request->user()) {
-                return redirect()
-                    ->route('account')
-                    ->with(
-                        'success',
-                        "سفارش {$order->order_number} با موفقیت ثبت شد."
-                    );
-            }
-
-            $request->session()->put(
-                'completed_order',
-                [
-                    'orderNumber' => $order->order_number,
-                    'total' => (float) $order->total,
-                ]
-            );
-
-            return redirect()
-                ->route('checkout.success')
+            return back()
+                ->withInput()
                 ->with(
-                    'success',
-                    'سفارش شما با موفقیت ثبت شد.'
+                    'error',
+                    'درخواست پرداخت دیگری برای این سبد در حال پردازش است.'
                 );
         } catch (Throwable $e) {
             report($e);
@@ -78,7 +125,7 @@ class CheckoutController extends Controller
                     'error',
                     $this->message(
                         $e,
-                        'ثبت سفارش انجام نشد.'
+                        'شروع فرآیند پرداخت انجام نشد.'
                     )
                 );
         }
