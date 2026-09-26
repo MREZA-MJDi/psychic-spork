@@ -69,17 +69,41 @@
 
                         <div class="home-product-stage__feature-bottom">
                             @if($variant)
-                                <strong>
-                                    {{ number_format($variant->effective_price) }}
+                                <div class="home-product-stage__price">
+                                    <strong>
+                                        {{ number_format($variant->effective_price) }}
+                                    </strong>
                                     <span>تومان</span>
-                                </strong>
+
+                                    <small class="{{ $variant->stock > 0 ? '' : 'is-out' }}">
+                                        {{ $variant->stock > 0 ? 'موجود' : 'ناموجود' }}
+                                    </small>
+                                </div>
+
+                                <form
+                                    method="POST"
+                                    action="{{ route('cart.store', $variant) }}"
+                                    class="quick-add-form home-product-stage__add"
+                                    data-cart-add
+                                >
+                                    @csrf
+                                    <input type="hidden" name="quantity" value="1">
+
+                                    <button
+                                        class="button button--dark"
+                                        type="submit"
+                                        @disabled($variant->stock < 1)
+                                    >
+                                        افزودن به سبد
+                                    </button>
+                                </form>
                             @endif
 
                             <a
                                 href="{{ route('products.show', $featured) }}"
-                                class="button button--dark"
+                                class="home-product-stage__detail"
                             >
-                                جزئیات محصول
+                                جزئیات
                                 <span aria-hidden="true">↗</span>
                             </a>
                         </div>
