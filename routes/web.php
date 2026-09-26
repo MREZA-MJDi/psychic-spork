@@ -196,6 +196,12 @@ Route::prefix('admin')
         Route::get('/', [AdminDashboardController::class, 'index'])
             ->name('dashboard');
 
+        /*
+        |--------------------------------------------------------------------------
+        | Catalog
+        |--------------------------------------------------------------------------
+        */
+
         Route::resource('products', AdminProductController::class)
             ->except(['show']);
 
@@ -208,8 +214,20 @@ Route::prefix('admin')
         Route::resource('brands', AdminBrandController::class)
             ->except(['show']);
 
+        /*
+        |--------------------------------------------------------------------------
+        | Customers
+        |--------------------------------------------------------------------------
+        */
+
         Route::get('customers', [AdminCustomerController::class, 'index'])
             ->name('customers.index');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Orders
+        |--------------------------------------------------------------------------
+        */
 
         Route::get('orders', [AdminOrderController::class, 'index'])
             ->name('orders.index');
@@ -220,18 +238,30 @@ Route::prefix('admin')
         Route::put('orders/{order}', [AdminOrderController::class, 'update'])
             ->name('orders.update');
 
+        /*
+        |--------------------------------------------------------------------------
+        | Inventory
+        |--------------------------------------------------------------------------
+        */
+
         Route::get('inventory', [AdminInventoryController::class, 'index'])
             ->name('inventory.index');
 
         Route::post('inventory', [AdminInventoryController::class, 'store'])
-            ->name('admin.inventory.store');
+            ->name('inventory.store');
 
-        Route::get('accounting', [AdminFinancialController::class, 'show'])
-            ->name('admin.accounting.show');
+        /*
+        |--------------------------------------------------------------------------
+        | Accounting
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get('accounting', [AdminFinancialController::class, 'index'])
+            ->name('accounting.index');
 
         Route::post('accounting', [AdminFinancialController::class, 'store'])
-            ->name('admin.accounting.store');
+            ->name('accounting.store');
 
         Route::get('accounting/{transaction}', [AdminFinancialController::class, 'show'])
-            ->name('admin.accounting.transaction');
+            ->name('accounting.show');
     });
