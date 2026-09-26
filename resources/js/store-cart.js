@@ -209,16 +209,14 @@ document.addEventListener('click', async (event) => {
     const closeTrigger = event.target.closest('[data-cart-close]');
     const qtyTrigger = event.target.closest('[data-cart-qty]');
     const removeTrigger = event.target.closest('[data-cart-remove]');
+    const checkoutTrigger = event.target.closest('[data-cart-checkout]');
+
+    if (checkoutTrigger?.dataset.disabled === 'true') {
+        event.preventDefault();
+        return;
+    }
 
     if (openTrigger) {
-        if (
-            openTrigger === drawer?.querySelector('[data-cart-checkout]')
-            && openTrigger.dataset.disabled === 'true'
-        ) {
-            event.preventDefault();
-            return;
-        }
-
         event.preventDefault();
         await openDrawer();
         return;
