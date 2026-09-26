@@ -114,12 +114,10 @@ class PaymentController extends Controller
         } catch (Throwable $e) {
             report($e);
 
-            return $this->cancel(
+            return $this->finish(
                 $request,
-                $orderModel,
-                $orders,
-                $cart,
-                'ثبت نهایی پرداخت در فروشگاه انجام نشد.'
+                $orderModel->fresh(),
+                'پرداخت توسط درگاه تأیید شد؛ ثبت نهایی سفارش نیاز به تکمیل دارد.'
             );
         }
 
@@ -173,6 +171,8 @@ class PaymentController extends Controller
             [
                 'orderNumber' => $order->order_number,
                 'total' => (float) $order->total,
+                'orderStatus' => $order->status,
+                'paymentStatus' => $order->payment_status,
             ]
         );
 
