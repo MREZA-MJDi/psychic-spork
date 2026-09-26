@@ -223,6 +223,7 @@
             class="{{ request()->routeIs('cart') ? 'is-active' : '' }}"
             href="{{ route('cart') }}"
             aria-label="سبد خرید"
+            data-cart-open
         >
             <svg
                 viewBox="0 0 24 24"
