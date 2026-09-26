@@ -1,24 +1,28 @@
+@props([
+    'variant' => 'default',
+])
+
 @php
-    $variant = $product->variants->first();
+    $productVariant = $product->variants->first();
     $image = $product->galleryMedia->first()?->url;
 
-    $isOnSale = $variant?->is_on_sale;
-    $stock = (int) ($variant?->stock ?? 0);
+    $isOnSale = $productVariant?->is_on_sale;
+    $stock = (int) ($productVariant?->stock ?? 0);
 
     $discount = $isOnSale
         ? max(
             1,
             round(
                 (1 - (
-                    $variant->effective_price /
-                    max(1, (float) $variant->price)
+                    $productVariant->effective_price /
+                    max(1, (float) $productVariant->price)
                 )) * 100
             )
         )
         : 0;
 @endphp
 
-<article class="product-card">
+<article class="product-card product-card--{{ $variant }}">
 
     <div class="product-card__media">
 
@@ -50,26 +54,27 @@
             @endif
         </a>
 
-        @if($variant)
+        @if($productVariant)
             <form
                 method="POST"
-                action="{{ route('cart.store', $variant) }}"
+                action="{{ route('cart.store', $productVariant) }}"
                 class="quick-add-form"
+                data-cart-add
             >
                 @csrf
+                <input type="hidden" name="quantity" value="1">
 
                 <button
                     type="submit"
                     class="quick-add"
                     @disabled($stock < 1)
                 >
-                {{ $stock > 0 ? 'افزودن به سبد' : 'ناموجود' }}
+                    {{ $stock > 0 ? 'افزودن به سبد' : 'ناموجود' }}
                 </button>
             </form>
         @endif
 
     </div>
-
 
     <div class="product-card__body">
 
@@ -86,38 +91,35 @@
             {{ $product->name }}
         </a>
 
-        @if($variant)
+        @if($productVariant)
             <div class="product-price">
-
                 <strong>
-                    {{ number_format($variant->effective_price) }}
+                    {{ number_format($productVariant->effective_price) }}
                 </strong>
 
                 <span>تومان</span>
 
                 @if($isOnSale)
                     <del>
-                        {{ number_format($variant->price) }}
+                        {{ number_format($productVariant->price) }}
                     </del>
                 @endif
-
             </div>
 
             <div
                 class="product-card__stock {{ match (true) {
                     $stock < 1 => 'is-out',
-                    $variant->is_low_stock => 'is-low',
+                    $productVariant->is_low_stock => 'is-low',
                     default => ''
                 } }}"
             >
                 {{ match (true) {
                     $stock < 1 => 'ناموجود',
-                    $variant->is_low_stock => 'موجودی محدود',
+                    $productVariant->is_low_stock => 'موجودی محدود',
                     default => 'موجود'
                 } }}
             </div>
         @endif
 
     </div>
-
 </article>
