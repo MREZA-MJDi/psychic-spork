@@ -16,7 +16,7 @@ class HomeController extends Controller
             ->with('coverMedia')
             ->withCount([
                 'products as active_products_count' => fn ($query) =>
-                $query->where('is_active', true),
+                    $query->where('is_active', true),
             ])
             ->orderBy('sort_order')
             ->orderBy('name')
@@ -28,7 +28,7 @@ class HomeController extends Controller
             ->with('logoMedia')
             ->withCount([
                 'products as active_products_count' => fn ($query) =>
-                $query->where('is_active', true),
+                    $query->where('is_active', true),
             ])
             ->orderBy('name')
             ->take(8)
@@ -47,20 +47,31 @@ class HomeController extends Controller
             ->featured()
             ->latest('updated_at')
             ->latest('id')
-            ->take(8)
+            ->take(12)
             ->get();
 
-        if ($products->isEmpty()) {
-            $products = $productsQuery
+        if ($products->count() < 12) {
+            $remaining = 12 - $products->count();
+
+            $fallback = $productsQuery
+                ->whereNotIn('id', $products->pluck('id'))
                 ->latest('updated_at')
                 ->latest('id')
-                ->take(8)
+                ->take($remaining)
                 ->get();
+
+            $products = $products
+                ->concat($fallback)
+                ->values();
         }
 
         $heroProducts = Product::query()
             ->active()
-            ->with(['brand.logoMedia', 'galleryMedia', 'variants'])
+            ->with([
+                'brand.logoMedia',
+                'galleryMedia',
+                'variants',
+            ])
             ->inRandomOrder()
             ->take(4)
             ->get();
