@@ -5,7 +5,7 @@
 @endphp
 
 <section
-    class="section-block section-block--compact editorial-banner-section"
+    class="section-block section-block--compact editorial-banner-section editorial-banner-section--compact"
     aria-labelledby="editorial-banner-title"
 >
     <div class="container">
