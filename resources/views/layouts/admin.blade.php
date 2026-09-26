@@ -8,14 +8,14 @@
     <title>@yield('title', 'پنل مدیریت جانان')</title>
 
     @vite([
-    'resources/css/admin.css',
-    'resources/js/app.js',
+        'resources/css/admin.css',
+        'resources/js/admin.js',
     ])
 
     @stack('styles')
 </head>
 
-<body>
+<body class="admin-body">
 
 <div class="admin-shell">
 
