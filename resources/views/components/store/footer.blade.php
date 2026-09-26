@@ -43,6 +43,8 @@
                     <span>پشتیبانی</span>
                     <b aria-hidden="true">↗</b>
                 </a>
+            </div>
+
             <div
                 class="footer-social footer-social--networks"
                 aria-label="شبکه‌های اجتماعی"
