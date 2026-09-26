@@ -233,9 +233,13 @@
                 <path d="M9 8a3 3 0 0 1 6 0"/>
             </svg>
 
-            @if(($cartCount ?? 0) > 0)
-                <b>{{ $cartCount }}</b>
-            @endif
+            <b
+                class="cart-count"
+                data-cart-count
+                @if(($cartCount ?? 0) < 1) hidden @endif
+            >
+                {{ $cartCount ?? 0 }}
+            </b>
 
             <span>سبد</span>
         </a>
