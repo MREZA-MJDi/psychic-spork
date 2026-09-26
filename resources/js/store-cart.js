@@ -52,7 +52,10 @@ const renderCart = (payload) => {
         empty.append(title, link);
         body.appendChild(empty);
 
-        if (checkout) checkout.setAttribute('aria-disabled', 'true');
+        if (checkout) {
+            checkout.setAttribute('aria-disabled', 'true');
+            checkout.dataset.disabled = 'true';
+        }
     } else {
         body.innerHTML = '';
         const items = document.createElement('div');
@@ -123,7 +126,10 @@ const renderCart = (payload) => {
 
         body.appendChild(items);
 
-        if (checkout) checkout.removeAttribute('aria-disabled');
+        if (checkout) {
+            checkout.removeAttribute('aria-disabled');
+            checkout.dataset.disabled = 'false';
+        }
     }
 
     if (total) total.textContent = formatMoney(cartState.total);
@@ -167,7 +173,7 @@ const mutateCart = async (url, method = 'POST', body = null) => {
     renderCart(payload);
 };
 
-const openDrawer = async () => {
+const openDrawer = async (refresh = true) => {
     if (!drawer) return;
 
     drawer.classList.add('is-open');
@@ -178,6 +184,8 @@ const openDrawer = async () => {
     if (body) {
         body.innerHTML = '<div class="cart-drawer__loading">در حال دریافت سبد خرید...</div>';
     }
+
+    if (!refresh) return;
 
     try {
         await fetchCart();
@@ -203,6 +211,14 @@ document.addEventListener('click', async (event) => {
     const removeTrigger = event.target.closest('[data-cart-remove]');
 
     if (openTrigger) {
+        if (
+            openTrigger === drawer?.querySelector('[data-cart-checkout]')
+            && openTrigger.dataset.disabled === 'true'
+        ) {
+            event.preventDefault();
+            return;
+        }
+
         event.preventDefault();
         await openDrawer();
         return;
@@ -286,7 +302,7 @@ document.addEventListener('submit', async (event) => {
         }
 
         renderCart(payload);
-        await openDrawer();
+        await openDrawer(false);
     } catch (error) {
         window.alert(error.message);
     } finally {
