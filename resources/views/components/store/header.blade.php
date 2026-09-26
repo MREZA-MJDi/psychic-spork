@@ -133,6 +133,7 @@
                 href="{{ route('cart') }}"
                 class="icon-button cart-button"
                 aria-label="سبد خرید"
+                data-cart-open
             >
                 <svg
                     viewBox="0 0 24 24"
