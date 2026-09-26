@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\Payment;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\URL;
 use RuntimeException;
 
 final class ZarinPalPaymentGateway implements PaymentGateway
@@ -32,9 +33,10 @@ final class ZarinPalPaymentGateway implements PaymentGateway
             'status' => 'pending',
         ]);
 
-        $callbackUrl = route('payment.zarinpal.callback', [
-            'order' => $order,
-        ]);
+        $callbackUrl = URL::signedRoute(
+            'payment.zarinpal.callback',
+            ['order' => $order->id]
+        );
 
         $amountRial = (int) round(
             ((float) $order->total) * 10
