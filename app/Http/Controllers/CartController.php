@@ -7,6 +7,7 @@ use App\Http\Requests\CartUpdateRequest;
 use App\Models\CartItem;
 use App\Models\ProductVariant;
 use App\Services\CartService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -27,19 +28,35 @@ class CartController extends Controller
         ]);
     }
 
+    public function summary(
+        Request $request,
+        CartService $cart
+    ): JsonResponse {
+        return response()->json(
+            $this->payload($cart->current($request), $cart)
+        );
+    }
+
     public function store(
         CartStoreRequest $request,
         ProductVariant $variant,
         CartService $cart
-    ): RedirectResponse {
+    ): JsonResponse|RedirectResponse {
         try {
             $data = $request->validated();
+            $current = $cart->current($request);
 
             $cart->add(
-                $cart->current($request),
+                $current,
                 $variant,
                 (int) ($data['quantity'] ?? 1)
             );
+
+            if ($request->expectsJson()) {
+                return response()->json(
+                    $this->payload($current, $cart)
+                );
+            }
 
             return back()->with(
                 'success',
@@ -47,6 +64,15 @@ class CartController extends Controller
             );
         } catch (Throwable $e) {
             report($e);
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => $this->message(
+                        $e,
+                        'افزودن محصول به سبد انجام نشد.'
+                    ),
+                ], $this->status($e));
+            }
 
             return back()
                 ->withInput()
@@ -64,15 +90,22 @@ class CartController extends Controller
         CartUpdateRequest $request,
         CartItem $item,
         CartService $cart
-    ): RedirectResponse {
+    ): JsonResponse|RedirectResponse {
         try {
             $data = $request->validated();
+            $current = $cart->current($request);
 
             $cart->update(
-                $cart->current($request),
+                $current,
                 $item,
                 (int) $data['quantity']
             );
+
+            if ($request->expectsJson()) {
+                return response()->json(
+                    $this->payload($current, $cart)
+                );
+            }
 
             return back()->with(
                 'success',
@@ -80,6 +113,15 @@ class CartController extends Controller
             );
         } catch (Throwable $e) {
             report($e);
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => $this->message(
+                        $e,
+                        'به‌روزرسانی سبد خرید انجام نشد.'
+                    ),
+                ], $this->status($e));
+            }
 
             return back()
                 ->withInput()
@@ -97,12 +139,20 @@ class CartController extends Controller
         Request $request,
         CartItem $item,
         CartService $cart
-    ): RedirectResponse {
+    ): JsonResponse|RedirectResponse {
         try {
+            $current = $cart->current($request);
+
             $cart->remove(
-                $cart->current($request),
+                $current,
                 $item
             );
+
+            if ($request->expectsJson()) {
+                return response()->json(
+                    $this->payload($current, $cart)
+                );
+            }
 
             return back()->with(
                 'success',
@@ -110,6 +160,15 @@ class CartController extends Controller
             );
         } catch (Throwable $e) {
             report($e);
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => $this->message(
+                        $e,
+                        'حذف محصول از سبد انجام نشد.'
+                    ),
+                ], $this->status($e));
+            }
 
             return back()->with(
                 'error',
@@ -119,6 +178,37 @@ class CartController extends Controller
                 )
             );
         }
+    }
+
+    private function payload(
+        $cartModel,
+        CartService $cart
+    ): array {
+        $items = $cart->items($cartModel);
+
+        return [
+            'count' => (int) $items->sum('quantity'),
+            'total' => (float) $items->sum('line_total'),
+            'items' => $items->map(function (array $item): array {
+                return [
+                    'id' => $item['id'],
+                    'name' => $item['product']->name,
+                    'variant_name' => $item['variant']->display_name,
+                    'quantity' => (int) $item['quantity'],
+                    'stock' => (int) $item['variant']->stock,
+                    'unit_price' => (float) $item['unit_price'],
+                    'line_total' => (float) $item['line_total'],
+                    'image' => $item['image'],
+                ];
+            })->values()->all(),
+        ];
+    }
+
+    private function status(Throwable $e): int
+    {
+        return $e instanceof \Symfony\Component\HttpKernel\Exception\HttpException
+            ? $e->getStatusCode()
+            : 422;
     }
 
     private function message(
