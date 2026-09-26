@@ -6,8 +6,10 @@ export default defineConfig({
         laravel({
             input: [
                 'resources/css/app.css',
+                'resources/css/store-structure.css',
                 'resources/css/editorial-hero.css',
                 'resources/js/app.js',
+                'resources/js/store-cart.js',
                 'resources/js/editorial-hero.js',
                 'resources/css/admin.css',
                 'resources/js/admin.js',
