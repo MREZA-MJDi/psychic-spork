@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>ثبت‌نام — JANAN</title>
-    @vite(['resources/css/app.css', 'resources/css/auth.css', 'resources/js/app.js'])
+    @vite(['resources/css/auth.css', 'resources/js/app.js'])
 </head>
 <body class="auth-page" data-auth-page>
 <main class="auth-shell">
