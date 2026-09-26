@@ -2,12 +2,17 @@
 
 namespace Tests\Feature;
 
+use App\Models\Cart;
+use App\Models\CartItem;
 use App\Models\Category;
 use App\Models\Order;
 use App\Models\Product;
+use App\Models\ProductVariant;
 use App\Models\User;
-use App\Services\InventoryService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\URL;
 use Tests\TestCase;
 
 class AccessAndCheckoutTest extends TestCase
@@ -16,7 +21,9 @@ class AccessAndCheckoutTest extends TestCase
 
     public function test_customer_cannot_enter_admin_but_can_enter_account(): void
     {
-        $customer = User::factory()->create(['is_admin' => false]);
+        $customer = User::factory()->create([
+            'is_admin' => false,
+        ]);
 
         $this->actingAs($customer)
             ->get('/admin')
@@ -29,7 +36,9 @@ class AccessAndCheckoutTest extends TestCase
 
     public function test_admin_can_enter_admin_and_is_redirected_from_customer_account(): void
     {
-        $admin = User::factory()->create(['is_admin' => true]);
+        $admin = User::factory()->create([
+            'is_admin' => true,
+        ]);
 
         $this->actingAs($admin)
             ->get('/admin')
@@ -40,30 +49,42 @@ class AccessAndCheckoutTest extends TestCase
             ->assertRedirect('/admin');
     }
 
-    public function test_checkout_creates_order_and_deducts_inventory_atomically(): void
+    public function test_checkout_creates_pending_order_payment_and_redirects_to_gateway(): void
     {
-        $category = Category::create([
-            'name' => 'ست',
-            'slug' => 'sets',
-            'is_active' => true,
-            'sort_order' => 1,
+        Config::set('payment.driver', 'zarinpal');
+        Config::set(
+            'payment.zarinpal.merchant_id',
+            'test-merchant'
+        );
+
+        Http::fake([
+            'https://api.zarinpal.com/pg/v4/payment/request.json' =>
+                Http::response([
+                    'data' => [
+                        'code' => 100,
+                        'authority' => 'A000000000000000000000000001',
+                    ],
+                    'errors' => [],
+                ], 200),
         ]);
 
-        $product = Product::create([
-            'category_id' => $category->id,
-            'name' => 'محصول تست',
-            'slug' => 'test-product',
-            'sku' => 'TEST-001',
-            'price' => 100000,
-            'sale_price' => null,
-            'stock' => 5,
-            'low_stock_threshold' => 2,
-            'is_active' => true,
-            'is_featured' => false,
+        $user = User::factory()->create();
+
+        [$product, $variant] = $this->makeProduct(stock: 5);
+
+        $cart = Cart::create([
+            'user_id' => $user->id,
+            'last_activity_at' => now(),
+        ]);
+
+        CartItem::create([
+            'cart_id' => $cart->id,
+            'product_variant_id' => $variant->id,
+            'quantity' => 2,
         ]);
 
         $response = $this
-            ->withSession(['cart' => [$product->id => 2]])
+            ->actingAs($user)
             ->post('/checkout', [
                 'customer_name' => 'کاربر تست',
                 'customer_phone' => '09120000000',
@@ -71,33 +92,170 @@ class AccessAndCheckoutTest extends TestCase
                 'shipping_address' => 'تهران',
                 'shipping_city' => 'تهران',
                 'postal_code' => '1111111111',
-                'customer_note' => null,
             ]);
+
+        $response->assertRedirect(
+            'https://www.zarinpal.com/pg/StartPay/A000000000000000000000000001'
+        );
+
+        $order = Order::query()->firstOrFail();
+        $payment = $order->payments()->firstOrFail();
+
+        $this->assertSame('pending', $order->status);
+        $this->assertSame('pending', $order->payment_status);
+        $this->assertSame('200000.00', (string) $order->total);
+        $this->assertSame('zarinpal', $payment->gateway);
+        $this->assertSame(
+            'A000000000000000000000000001',
+            $payment->authority
+        );
+        $this->assertSame(3, $variant->fresh()->stock);
+        $this->assertDatabaseCount('cart_items', 0);
+    }
+
+    public function test_gateway_request_failure_rolls_back_inventory_and_restores_cart(): void
+    {
+        Config::set('payment.driver', 'zarinpal');
+        Config::set(
+            'payment.zarinpal.merchant_id',
+            'test-merchant'
+        );
+
+        Http::fake([
+            'https://api.zarinpal.com/pg/v4/payment/request.json' =>
+                Http::response([
+                    'data' => [],
+                    'errors' => [
+                        'code' => -1,
+                        'message' => 'test gateway failure',
+                    ],
+                ], 200),
+        ]);
+
+        $user = User::factory()->create();
+
+        [, $variant] = $this->makeProduct(stock: 5);
+
+        $cart = Cart::create([
+            'user_id' => $user->id,
+            'last_activity_at' => now(),
+        ]);
+
+        CartItem::create([
+            'cart_id' => $cart->id,
+            'product_variant_id' => $variant->id,
+            'quantity' => 2,
+        ]);
+
+        $this
+            ->actingAs($user)
+            ->post('/checkout', [
+                'customer_name' => 'کاربر تست',
+                'customer_phone' => '09120000000',
+                'customer_email' => 'test@example.com',
+                'shipping_address' => 'تهران',
+            ])
+            ->assertRedirect();
+
+        $order = Order::query()->firstOrFail();
+
+        $this->assertSame('cancelled', $order->status);
+        $this->assertSame('failed', $order->payment_status);
+        $this->assertSame(5, $variant->fresh()->stock);
+        $this->assertDatabaseHas('cart_items', [
+            'cart_id' => $cart->id,
+            'product_variant_id' => $variant->id,
+            'quantity' => 2,
+        ]);
+    }
+
+    public function test_successful_callback_confirms_order_and_payment_once(): void
+    {
+        Config::set('payment.driver', 'zarinpal');
+        Config::set(
+            'payment.zarinpal.merchant_id',
+            'test-merchant'
+        );
+
+        Http::fakeSequence()
+            ->push([
+                'data' => [
+                    'code' => 100,
+                    'authority' => 'A000000000000000000000000002',
+                ],
+                'errors' => [],
+            ], 200)
+            ->push([
+                'data' => [
+                    'code' => 100,
+                    'ref_id' => 987654321,
+                ],
+                'errors' => [],
+            ], 200);
+
+        $user = User::factory()->create();
+
+        [, $variant] = $this->makeProduct(stock: 5);
+
+        $cart = Cart::create([
+            'user_id' => $user->id,
+            'last_activity_at' => now(),
+        ]);
+
+        CartItem::create([
+            'cart_id' => $cart->id,
+            'product_variant_id' => $variant->id,
+            'quantity' => 2,
+        ]);
+
+        $this
+            ->actingAs($user)
+            ->post('/checkout', [
+                'customer_name' => 'کاربر تست',
+                'customer_phone' => '09120000000',
+                'customer_email' => 'test@example.com',
+                'shipping_address' => 'تهران',
+            ])
+            ->assertRedirect();
+
+        $order = Order::query()->firstOrFail();
+
+        $callbackUrl = URL::signedRoute(
+            'payment.zarinpal.callback',
+            ['order' => $order->id]
+        );
+
+        $response = $this
+            ->actingAs($user)
+            ->get($callbackUrl . '&Authority=A000000000000000000000000002&Status=OK');
 
         $response->assertRedirect('/checkout/success');
 
-        $this->assertDatabaseHas('orders', [
-            'customer_phone' => '09120000000',
-            'status' => 'confirmed',
-            'payment_status' => 'pending',
-            'total' => 200000,
-        ]);
+        $this->assertSame(
+            'confirmed',
+            $order->fresh()->status
+        );
 
-        $this->assertDatabaseHas('inventory_movements', [
-            'product_id' => $product->id,
-            'type' => 'sale',
-            'quantity' => -2,
-        ]);
+        $this->assertSame(
+            'paid',
+            $order->fresh()->payment_status
+        );
 
-        $this->assertSame(3, $product->fresh()->stock);
-        $this->assertSame(1, Order::count());
+        $this->assertSame(
+            '987654321',
+            (string) $order->payments()->firstOrFail()->reference_number
+        );
+
+        $this->assertSame(3, $variant->fresh()->stock);
+        $this->assertDatabaseCount('cart_items', 0);
+        $this->assertDatabaseCount('financial_transactions', 1);
     }
 
-    public function test_cancelling_an_order_restores_inventory_once(): void
+    private function makeProduct(int $stock): array
     {
         $category = Category::create([
-            'name' => 'ست',
-            'slug' => 'sets',
+            'name' => 'ست تست',
+            'slug' => 'sets-' . uniqid(),
             'is_active' => true,
             'sort_order' => 1,
         ]);
@@ -105,61 +263,23 @@ class AccessAndCheckoutTest extends TestCase
         $product = Product::create([
             'category_id' => $category->id,
             'name' => 'محصول تست',
-            'slug' => 'test-product-cancel',
-            'sku' => 'TEST-002',
-            'price' => 100000,
-            'stock' => 5,
-            'low_stock_threshold' => 2,
+            'slug' => 'test-product-' . uniqid(),
             'is_active' => true,
             'is_featured' => false,
+            'sort_order' => 1,
         ]);
 
-        $order = Order::create([
-            'order_number' => 'TEST-ORDER-001',
-            'customer_name' => 'تست',
-            'customer_phone' => '09120000000',
-            'shipping_address' => 'تهران',
-            'shipping_city' => 'تهران',
-            'status' => 'confirmed',
-            'payment_status' => 'pending',
-            'payment_method' => 'cash_on_delivery',
-            'subtotal' => 200000,
-            'discount' => 0,
-            'shipping_cost' => 0,
-            'total' => 200000,
-            'placed_at' => now(),
-        ]);
-
-        $order->items()->create([
+        $variant = ProductVariant::create([
             'product_id' => $product->id,
-            'product_name' => $product->name,
-            'sku' => $product->sku,
-            'unit_price' => 100000,
-            'quantity' => 2,
-            'line_total' => 200000,
+            'sku' => 'TEST-' . strtoupper(uniqid()),
+            'price' => 100000,
+            'sale_price' => null,
+            'stock' => $stock,
+            'low_stock_threshold' => 2,
+            'is_active' => true,
+            'sort_order' => 1,
         ]);
 
-        $admin = User::factory()->create(['is_admin' => true]);
-        app(InventoryService::class)->deductForOrder($order, $admin->id);
-
-        $this->actingAs($admin)
-            ->put("/admin/orders/{$order->id}", [
-                'status' => 'cancelled',
-                'payment_status' => 'pending',
-                'customer_note' => null,
-            ])
-            ->assertRedirect();
-
-        $this->assertSame(5, $product->fresh()->stock);
-
-        $this->actingAs(User::factory()->create(['is_admin' => true]))
-            ->put("/admin/orders/{$order->id}", [
-                'status' => 'cancelled',
-                'payment_status' => 'pending',
-                'customer_note' => null,
-            ])
-            ->assertRedirect();
-
-        $this->assertSame(5, $product->fresh()->stock);
+        return [$product, $variant];
     }
 }

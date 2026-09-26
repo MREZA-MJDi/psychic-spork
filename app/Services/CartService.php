@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Cart;
 use App\Models\CartItem;
+use App\Models\Order;
 use App\Models\ProductVariant;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -306,6 +307,62 @@ final class CartService
     {
         DB::transaction(function () use ($cart): void {
             $cart->items()->delete();
+
+            $cart->update([
+                'last_activity_at' => now(),
+            ]);
+        });
+    }
+
+    public function restoreFromOrder(
+        Cart $cart,
+        Order $order
+    ): void {
+        DB::transaction(function () use ($cart, $order): void {
+            $order->load('items');
+
+            foreach ($order->items as $orderItem) {
+                $variant = ProductVariant::query()
+                    ->lockForUpdate()
+                    ->find($orderItem->product_variant_id);
+
+                if (
+                    ! $variant
+                    || ! $variant->is_active
+                    || $variant->stock < 1
+                ) {
+                    continue;
+                }
+
+                $existing = $cart->items()
+                    ->where(
+                        'product_variant_id',
+                        $variant->id
+                    )
+                    ->lockForUpdate()
+                    ->first();
+
+                $quantity = min(
+                    (int) $variant->stock,
+                    (int) ($existing?->quantity ?? 0)
+                    + (int) $orderItem->quantity
+                );
+
+                if ($quantity < 1) {
+                    continue;
+                }
+
+                if ($existing) {
+                    $existing->update([
+                        'quantity' => $quantity,
+                    ]);
+                } else {
+                    $cart->items()->create([
+                        'product_variant_id' => $variant->id,
+                        'quantity' => $quantity,
+                    ]);
+                }
+            }
 
             $cart->update([
                 'last_activity_at' => now(),

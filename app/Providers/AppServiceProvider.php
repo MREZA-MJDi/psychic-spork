@@ -2,15 +2,28 @@
 
 namespace App\Providers;
 
+use App\Contracts\PaymentGateway;
 use App\Models\Cart;
+use App\Services\ZarinPalPaymentGateway;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
+use RuntimeException;
 
 class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        //
+        $this->app->singleton(
+            PaymentGateway::class,
+            function (): PaymentGateway {
+                return match (config('payment.driver')) {
+                    'zarinpal' => app(ZarinPalPaymentGateway::class),
+                    default => throw new RuntimeException(
+                        'Payment gateway driver is not configured.'
+                    ),
+                };
+            }
+        );
     }
 
     public function boot(): void

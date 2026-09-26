@@ -14,6 +14,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\SeoController;
 use App\Http\Controllers\StoreBrandController;
 use App\Http\Controllers\StoreCategoryController;
@@ -133,6 +134,18 @@ Route::post('/checkout', [CheckoutController::class, 'store'])
 
 Route::get('/checkout/success', [CheckoutController::class, 'success'])
     ->name('checkout.success');
+
+/*
+|--------------------------------------------------------------------------
+| Online payment callbacks
+|--------------------------------------------------------------------------
+*/
+
+Route::get(
+    '/payment/zarinpal/callback/{order}',
+    [PaymentController::class, 'zarinpalCallback']
+)
+    ->name('payment.zarinpal.callback');
 
 /*
 |--------------------------------------------------------------------------
