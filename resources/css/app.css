@@ -5241,6 +5241,27 @@ display:
 .store-nav.is-open {
 display:
             flex;
+
+        grid-column:
+            1 / -1;
+
+        width:
+            100%;
+
+        flex-wrap:
+            wrap;
+
+        justify-content:
+            center;
+
+        gap:
+            6px 16px;
+
+        padding:
+            10px 0 4px;
+
+        border-top:
+            1px solid var(--janan-line);
 }
 
 .section-head {
