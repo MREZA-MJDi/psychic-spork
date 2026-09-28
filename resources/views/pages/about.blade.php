@@ -1,458 +1,131 @@
 @extends('layouts.store')
 
-@section('title', 'درباره جانان — Janan')
-
 @section('content')
+<div class="store-page">
 
-    <div class="about-page">
+    <section class="page-hero page-hero--premium">
+        <div class="container page-hero__layout">
+            <div>
+                <span class="eyebrow">JANAN / ABOUT</span>
+                <h1>انتخابی که<br><em>شبیه خودت باشد.</em></h1>
+                <p>
+                    جانان برای تجربه‌ای روشن، آرام و دقیق ساخته شده؛
+                    از دیدن محصول تا انتخاب و ثبت سفارش.
+                </p>
 
-        {{-- =====================================================
-             01. EDITORIAL HERO
-        ====================================================== --}}
-
-        <section class="about-hero">
-            <div class="container about-hero__inner">
-
-                <div class="about-hero__meta">
-                <span class="eyebrow">
-                    THE HOUSE OF {{ $siteBrandNameLatin ?? 'JANAN' }}
-                </span>
-
-                    <span class="about-hero__edition">
-                    03 / 05
-                </span>
-                </div>
-
-                <div class="about-hero__copy">
-
-                    <h1>
-                        انتخابی که
-                        <br>
-                        <em>شبیه خودت باشد.</em>
-                    </h1>
-
-                    <p>
-                        جانان برای انتخاب‌هایی ساخته شده که لازم نیست بلند حرف بزنند
-                        تا دیده شوند؛ ترکیبی از کیفیت، لطافت، فرم و جزئیاتی که
-                        شخصیت خودشان را دارند.
-                    </p>
-
-                    <a
-                        href="{{ route('products.index') }}"
-                        class="about-hero__link"
-                    >
-                        کشف کالکشن
+                <div class="store-page__actions">
+                    <a class="button button--primary" href="{{ route('products.index') }}">
+                        کشف محصولات
                         <span aria-hidden="true">↗</span>
                     </a>
 
+                    <a class="button button--ghost" href="{{ route('contact') }}">
+                        ارتباط با جانان
+                    </a>
                 </div>
-
-                <div
-                    class="about-hero__mark"
-                    aria-hidden="true"
-                >
-                    J
-                </div>
-
             </div>
-        </section>
 
-
-        {{-- =====================================================
-             02. BRAND STATEMENT
-        ====================================================== --}}
-
-        <section
-            class="section-block about-statement"
-            aria-labelledby="about-statement-title"
-        >
-            <div class="container">
-
-                <div class="about-statement__grid">
-
-                    <div class="about-statement__label">
-                        <span>JANAN / 01</span>
-                    </div>
-
-                    <div class="about-statement__copy">
-
-                    <span class="eyebrow">
-                        A QUIET POINT OF VIEW
-                    </span>
-
-                        <h2 id="about-statement-title">
-                            زیبایی،
-                            <br>
-                            وقتی دقیق انتخاب شود،
-                            <em>آرام می‌شود.</em>
-                        </h2>
-
-                        <p>
-                            ما باور داریم تجربه خرید نباید پر سر و صدا باشد.
-                            باید واضح، خوش‌ساخت و دقیق باشد؛ از اولین نگاه
-                            تا لحظه‌ای که انتخابت را ثبت می‌کنی.
-                        </p>
-
-                    </div>
-
-                    <div
-                        class="about-statement__side"
-                        aria-hidden="true"
-                    >
-                        <span>01</span>
-                        <i></i>
-                        <span>05</span>
-                    </div>
-
-                </div>
-
+            <div class="page-hero__stat">
+                <b>01</b>
+                <span>THE HOUSE / JANAN</span>
             </div>
-        </section>
+        </div>
+    </section>
 
+    <section class="store-page__section">
+        <div class="container">
 
-        {{-- =====================================================
-             03. VISUAL STORY
-        ====================================================== --}}
+            <div class="store-page__intro">
+                <span class="eyebrow">A QUIET POINT OF VIEW</span>
 
-        <section
-            class="section-block section-block--soft about-story"
-            aria-labelledby="about-story-title"
-        >
-            <div class="container">
+                <h2>
+                    تجربه خرید باید ساده باشد؛
+                    نه ساده‌انگارانه.
+                </h2>
 
-                <div class="about-story__layout">
-
-                    <div class="about-story__visual">
-
-                        @if($latestProduct?->galleryMedia?->first()?->url)
-
-                            <img
-                                src="{{ $latestProduct->galleryMedia->first()->url }}"
-                                alt="{{ $latestProduct->name }}"
-                                loading="lazy"
-                                decoding="async"
-                            >
-
-                        @else
-
-                            <div class="about-story__placeholder">
-                                <span>JANAN</span>
-                                <strong>THE ART OF DETAILS</strong>
-                            </div>
-
-                        @endif
-
-                        <span
-                            class="about-story__stamp"
-                            aria-hidden="true"
-                        >
-                        JANAN / DETAILS MATTER
-                    </span>
-
-                    </div>
-
-                    <div class="about-story__content">
-
-                    <span class="eyebrow">
-                        THE HOUSE / 02
-                    </span>
-
-                        <h2 id="about-story-title">
-                            هیچ جزئیاتی
-                            <br>
-                            <em>تصادفی نیست.</em>
-                        </h2>
-
-                        <p>
-                            از فرم و تصویر تا فاصله میان عناصر و نحوه ارائه
-                            محصولات، همه‌چیز در جانان برای ساختن یک تجربه
-                            منسجم کنار هم قرار گرفته است.
-                        </p>
-
-                        <div class="about-story__facts">
-
-                            <div>
-                                <strong>01</strong>
-                                <span>انتخاب دقیق</span>
-                            </div>
-
-                            <div>
-                                <strong>02</strong>
-                                <span>ارائه روشن</span>
-                            </div>
-
-                            <div>
-                                <strong>03</strong>
-                                <span>جزئیات ماندگار</span>
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
+                <p>
+                    ساختار جانان بر پایه انتخاب دقیق، ارائه روشن و مسیر خرید قابل فهم طراحی شده است.
+                    اطلاعات محصول از داده‌های واقعی فروشگاه می‌آید و هر بخش برای کاهش اصطکاک در تصمیم‌گیری ساخته شده است.
+                </p>
             </div>
-        </section>
 
+            <div class="store-page__grid">
 
-        {{-- =====================================================
-             04. PRINCIPLES
-        ====================================================== --}}
-
-        <section
-            class="section-block about-principles"
-            aria-labelledby="about-principles-title"
-        >
-            <div class="container">
-
-                <header class="section-head about-section-head">
-
-                    <div>
-                    <span class="eyebrow">
-                        JANAN / PRINCIPLES
-                    </span>
-
-                        <h2 id="about-principles-title">
-                            سه چیز که برای ما مهم است.
-                        </h2>
-
-                        <p>
-                            پایه‌ای که انتخاب‌های جانان روی آن ساخته می‌شوند.
-                        </p>
-                    </div>
-
-                    <span class="about-section-number" aria-hidden="true">
-                    03
-                </span>
-
-                </header>
-
-
-                <div class="about-principles__grid">
-
-                    <article class="about-principle">
-
-                    <span class="about-principle__number">
-                        01
-                    </span>
-
-                        <div class="about-principle__symbol">
-                            <span></span>
-                        </div>
-
-                        <h3>
-                            انتخاب
-                        </h3>
-
-                        <p>
-                            هر محصول قرار نیست فقط موجود باشد؛
-                            باید دلیلی برای حضورش در جهان جانان داشته باشد.
-                        </p>
-
-                    </article>
-
-
-                    <article class="about-principle about-principle--pink">
-
-                    <span class="about-principle__number">
-                        02
-                    </span>
-
-                        <div class="about-principle__symbol">
-                            <span></span>
-                        </div>
-
-                        <h3>
-                            جزئیات
-                        </h3>
-
-                        <p>
-                            کیفیت تجربه از جزئیات کوچک شکل می‌گیرد؛
-                            از تصویر محصول تا متن، فاصله‌ها و نحوه ارائه.
-                        </p>
-
-                    </article>
-
-
-                    <article class="about-principle about-principle--dark">
-
-                    <span class="about-principle__number">
-                        03
-                    </span>
-
-                        <div class="about-principle__symbol">
-                            <span></span>
-                        </div>
-
-                        <h3>
-                            تجربه
-                        </h3>
-
-                        <p>
-                            خرید باید ساده باشد، اما ساده به معنای معمولی نیست؛
-                            هر مرحله باید واضح و خوش‌ساخت احساس شود.
-                        </p>
-
-                    </article>
-
-                </div>
-
-            </div>
-        </section>
-
-
-        {{-- =====================================================
-             05. SYSTEM / REAL STORE
-        ====================================================== --}}
-
-        <section class="about-system">
-
-            <div class="container about-system__inner">
-
-                <div class="about-system__top">
-
-                <span class="eyebrow">
-                    JANAN / SYSTEM
-                </span>
-
-                    <span class="about-system__code">
-                    LIVE / 04
-                </span>
-
-                </div>
-
-                <div class="about-system__main">
-
-                    <h2>
-                        چیزی که می‌بینی،
-                        <br>
-                        <em>بخشی از یک فروشگاه واقعی است.</em>
-                    </h2>
-
+                <article class="store-page__card">
+                    <span class="store-page__number">01</span>
+                    <h3>انتخاب</h3>
                     <p>
-                        قیمت، موجودی، دسته‌بندی، برند و محصولات از داده‌های
-                        واقعی فروشگاه می‌آیند؛ تا تجربه‌ای که می‌بینی فقط
-                        یک تصویر زیبا نباشد، بلکه به خرید واقعی متصل باشد.
+                        محصولات، دسته‌بندی‌ها و برندها در یک ساختار مشخص قرار گرفته‌اند تا پیدا کردن گزینه مناسب سریع و قابل مقایسه باشد.
                     </p>
+                </article>
 
-                </div>
+                <article class="store-page__card">
+                    <span class="store-page__number">02</span>
+                    <h3>شفافیت</h3>
+                    <p>
+                        قیمت، موجودی، مشخصات و مسیر خرید تا حد امکان در همان صفحه‌ای که تصمیم می‌گیری در دسترس است.
+                    </p>
+                </article>
 
-                <div class="about-system__rail">
-
-                    <div>
-                        <strong>PRODUCT</strong>
-                        <span>محصول واقعی</span>
-                    </div>
-
-                    <div>
-                        <strong>COLLECTION</strong>
-                        <span>دسته‌بندی واقعی</span>
-                    </div>
-
-                    <div>
-                        <strong>HOUSE</strong>
-                        <span>برندهای واقعی</span>
-                    </div>
-
-                    <div>
-                        <strong>ORDER</strong>
-                        <span>مسیر خرید واقعی</span>
-                    </div>
-
-                </div>
+                <article class="store-page__card store-page__card--dark">
+                    <span class="store-page__number">03</span>
+                    <h3>تجربه</h3>
+                    <p>
+                        ظاهر لوکس فقط برای نمایش نیست؛ باید همراه با رفتار درست، سرعت مناسب و دسترسی واضح به خرید باشد.
+                    </p>
+                </article>
 
             </div>
+        </div>
+    </section>
 
-        </section>
+    <section class="store-page__section store-page__section--soft">
+        <div class="container">
 
-
-        {{-- =====================================================
-             06. QUOTE
-        ====================================================== --}}
-
-        <section class="about-quote">
-
-            <div class="container">
-
-                <div class="about-quote__inner">
-
-                <span
-                    class="about-quote__mark"
-                    aria-hidden="true"
-                >
-                    “
-                </span>
-
-                    <blockquote>
-                        چیزی که واقعاً برای شماست،
-                        <br>
-                        نیازی به توضیح اضافه ندارد.
-                    </blockquote>
-
-                    <span class="about-quote__caption">
-                    — JANAN
-                </span>
-
-                </div>
-
+            <div class="store-page__intro">
+                <span class="eyebrow">JANAN / SYSTEM</span>
+                <h2>فروشگاه واقعی، نه فقط یک ویترین.</h2>
+                <p>
+                    قیمت و موجودی از Backend می‌آیند و مسیرهای دسته‌بندی، برند، سبد خرید و پرداخت به همان داده‌ها متصل هستند.
+                </p>
             </div>
 
-        </section>
-
-
-        {{-- =====================================================
-             07. FINAL CTA
-        ====================================================== --}}
-
-        <section class="section-block about-final">
-
-            <div class="container">
-
-                <div class="about-final__inner">
-
-                    <div>
-
-                    <span class="eyebrow">
-                        DISCOVER JANAN
-                    </span>
-
-                        <h2>
-                            حالا انتخابت را
-                            <em>شروع کن.</em>
-                        </h2>
-
+            @if($latestProduct)
+                <div class="store-page__grid store-page__grid--two">
+                    <article class="store-page__card">
+                        <span class="store-page__number">LIVE PRODUCT</span>
+                        <h3>{{ $latestProduct->name }}</h3>
                         <p>
-                            وارد کالکشن شو و چیزی را پیدا کن که واقعاً
-                            با تو حرف می‌زند.
+                            آخرین محصول در دسترس فروشگاه، با همان داده‌ای که در مسیر خرید استفاده می‌شود.
                         </p>
+                        <div class="store-page__facts">
+                            <div class="store-page__fact">
+                                <strong>{{ $latestProduct->category?->name ?? 'Janan' }}</strong>
+                                <span>دسته</span>
+                            </div>
+                            <div class="store-page__fact">
+                                <strong>{{ $latestProduct->brand?->name ?? '—' }}</strong>
+                                <span>برند</span>
+                            </div>
+                        </div>
+                    </article>
 
-                    </div>
-
-                    <div class="about-final__actions">
-
-                        <a
-                            href="{{ route('products.index') }}"
-                            class="button button--primary"
-                        >
-                            مشاهده محصولات
-                        </a>
-
-                        <a
-                            href="{{ route('categories.index') }}"
-                            class="button button--ghost"
-                        >
-                            کشف دسته‌بندی‌ها
-                        </a>
-
-                    </div>
-
+                    <article class="store-page__card store-page__card--dark">
+                        <span class="store-page__number">DISCOVER</span>
+                        <h3>از یک انتخاب درست شروع کن.</h3>
+                        <p>
+                            وارد کالکشن شو، محصول‌ها را مقایسه کن و در صورت نیاز مستقیماً به سبد خرید اضافه کن.
+                        </p>
+                        <div class="store-page__actions">
+                            <a class="button button--primary" href="{{ route('products.index') }}">
+                                مشاهده کالکشن
+                            </a>
+                        </div>
+                    </article>
                 </div>
+            @endif
 
-            </div>
-
-        </section>
-
-    </div>
-
+        </div>
+    </section>
+</div>
 @endsection
