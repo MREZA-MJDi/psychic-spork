@@ -393,7 +393,10 @@
 
                                 @if($placedAt)
 
-                                    <span class="admin-muted">
+                                    <span
+                                        class="admin-muted admin-local-date"
+                                        data-admin-date="{{ $placedAt?->toIso8601String() }}"
+                                    >
                                         {{ $placedAt->format('Y/m/d H:i') }}
                                     </span>
 
