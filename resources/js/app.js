@@ -15,12 +15,45 @@ document.addEventListener('DOMContentLoaded', () => {
         menuToggle.setAttribute('aria-expanded', String(open));
     });
 
-    searchToggle?.addEventListener('click', () => {
-        const open = searchPanel?.classList.toggle('is-open') ?? false;
+    const setSearchOpen = (open) => {
+        if (!searchPanel || !searchToggle) return;
+
+        searchPanel.classList.toggle('is-open', open);
         searchToggle.setAttribute('aria-expanded', String(open));
 
         if (open) {
-            searchPanel?.querySelector('input')?.focus();
+            window.requestAnimationFrame(() => {
+                searchPanel.querySelector('input')?.focus();
+            });
+        }
+    };
+
+    searchToggle?.addEventListener('click', () => {
+        const open = !searchPanel?.classList.contains('is-open');
+        setSearchOpen(open);
+    });
+
+    document.addEventListener('click', (event) => {
+        if (
+            searchPanel?.classList.contains('is-open') &&
+            !searchPanel.contains(event.target) &&
+            !searchToggle?.contains(event.target)
+        ) {
+            setSearchOpen(false);
+        }
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && searchPanel?.classList.contains('is-open')) {
+            setSearchOpen(false);
+        }
+
+        if (
+            (event.ctrlKey || event.metaKey) &&
+            event.key.toLowerCase() === 'k'
+        ) {
+            event.preventDefault();
+            setSearchOpen(true);
         }
     });
 
