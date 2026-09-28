@@ -18,9 +18,24 @@ return [
     'store_name' => env('JANAN_STORE_NAME', 'Janan'),
 
     'admin' => [
-        'name' => env('JANAN_ADMIN_NAME', 'Janan Admin'),
-        'email' => env('JANAN_ADMIN_EMAIL'),
-        'password' => env('JANAN_ADMIN_PASSWORD'),
+        'name' => env(
+            'JANAN_ADMIN_NAME',
+            env('APP_ENV', 'production') === 'local'
+                ? 'Janan Admin'
+                : null
+        ),
+        'email' => env(
+            'JANAN_ADMIN_EMAIL',
+            env('APP_ENV', 'production') === 'local'
+                ? 'admin@janan.local'
+                : null
+        ),
+        'password' => env(
+            'JANAN_ADMIN_PASSWORD',
+            env('APP_ENV', 'production') === 'local'
+                ? 'password'
+                : null
+        ),
     ],
 
     'trust' => [
