@@ -1,132 +1,242 @@
 @extends('layouts.store')
 
 @section('content')
-<div class="store-page">
+<div class="store-page contact-page">
 
-    <section class="page-hero page-hero--premium">
+    <section class="page-hero page-hero--premium contact-page__hero">
         <div class="container page-hero__layout">
             <div>
                 <span class="eyebrow">JANAN / CONTACT</span>
-                <h1>با جانان<br><em>در ارتباط باش.</em></h1>
+                <h1>
+                    یک پیام،
+                    <br>
+                    <em>یک شروع خوب.</em>
+                </h1>
                 <p>
-                    برای پشتیبانی، پیگیری یا ارسال پیام، فرم زیر را کامل کن.
-                    اطلاعات تماس فروشگاه فقط از تنظیمات واقعی نمایش داده می‌شود.
+                    سوالی درباره سفارش داری، قبل از خرید نیاز به راهنمایی داری یا می‌خواهی موضوعی را با پشتیبانی در میان بگذاری؟
+                    از همین‌جا پیام بفرست.
                 </p>
             </div>
 
-            <div class="page-hero__stat">
-                <b>04</b>
-                <span>CONTACT / SUPPORT</span>
+            <div class="about-page__mark contact-page__mark" aria-hidden="true">
+                <span>↗</span>
+                <small>SUPPORT<br>CHANNEL</small>
             </div>
         </div>
     </section>
 
     <section class="store-page__section">
-        <div class="container store-page__grid store-page__grid--two">
+        <div class="container">
 
-            <section class="store-page__card">
-                <span class="eyebrow">CONTACT FORM</span>
-                <h2>پیامت را بفرست.</h2>
+            @if(session('success'))
+                <div class="contact-alert contact-alert--success" role="status">
+                    <strong>پیام ثبت شد.</strong>
+                    <span>{{ session('success') }}</span>
+                </div>
+            @endif
 
-                <form
-                    method="POST"
-                    action="{{ route('contact.submit') }}"
-                    class="checkout-form"
-                >
-                    @csrf
+            @if(session('error'))
+                <div class="contact-alert contact-alert--error" role="alert">
+                    <strong>ارسال انجام نشد.</strong>
+                    <span>{{ session('error') }}</span>
+                </div>
+            @endif
 
-                    <div class="form-grid">
-                        <label>
-                            نام و نام خانوادگی
-                            <input name="name" value="{{ old('name', auth()->user()?->name) }}" required>
-                        </label>
+            @if($errors->any())
+                <div class="contact-alert contact-alert--error" role="alert">
+                    <strong>اطلاعات فرم را بررسی کن.</strong>
+                    <ul>
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
 
-                        <label>
-                            ایمیل
-                            <input type="email" name="email" value="{{ old('email', auth()->user()?->email) }}">
-                        </label>
+            <div class="contact-layout">
 
-                        <label>
-                            شماره تماس
-                            <input name="phone" value="{{ old('phone', auth()->user()?->phone) }}">
-                        </label>
+                <section class="contact-form-card">
+                    <div class="contact-form-card__head">
+                        <div>
+                            <span class="eyebrow">SEND A MESSAGE</span>
+                            <h2>در چه موردی کمکت کنیم؟</h2>
+                            <p>
+                                اطلاعات تماس را کامل کن تا پیام بدون واسطه وارد سیستم پشتیبانی جانان شود.
+                            </p>
+                        </div>
 
-                        <label>
-                            موضوع
-                            <input name="subject" value="{{ old('subject') }}">
-                        </label>
-
-                        <label class="form-grid__full">
-                            پیام
-                            <textarea name="message" rows="7" required>{{ old('message') }}</textarea>
-                        </label>
+                        <span class="contact-form-card__count">01</span>
                     </div>
 
-                    <button class="button button--primary" type="submit">
-                        ارسال پیام
+                    <form
+                        method="POST"
+                        action="{{ route('contact.submit') }}"
+                        class="contact-form"
+                    >
+                        @csrf
+
+                        <div class="contact-form__grid">
+                            <label class="contact-field">
+                                <span>نام و نام خانوادگی <b>*</b></span>
+                                <input
+                                    type="text"
+                                    name="name"
+                                    value="{{ old('name', auth()->user()?->name) }}"
+                                    autocomplete="name"
+                                    required
+                                >
+                            </label>
+
+                            <label class="contact-field">
+                                <span>ایمیل</span>
+                                <input
+                                    type="email"
+                                    name="email"
+                                    value="{{ old('email', auth()->user()?->email) }}"
+                                    autocomplete="email"
+                                >
+                            </label>
+
+                            <label class="contact-field">
+                                <span>شماره تماس</span>
+                                <input
+                                    type="tel"
+                                    name="phone"
+                                    value="{{ old('phone', auth()->user()?->phone) }}"
+                                    autocomplete="tel"
+                                    dir="ltr"
+                                >
+                            </label>
+
+                            <label class="contact-field">
+                                <span>موضوع</span>
+                                <input
+                                    type="text"
+                                    name="subject"
+                                    value="{{ old('subject') }}"
+                                    autocomplete="off"
+                                >
+                            </label>
+
+                            <label class="contact-field contact-field--full">
+                                <span>پیام <b>*</b></span>
+                                <textarea
+                                    name="message"
+                                    rows="8"
+                                    maxlength="5000"
+                                    required
+                                >{{ old('message') }}</textarea>
+                            </label>
+                        </div>
+
+                        <div class="contact-form__foot">
+                            <p>
+                                اطلاعات ارسالی فقط برای پیگیری همین درخواست استفاده می‌شود.
+                            </p>
+
+                            <button class="button button--primary" type="submit">
+                                ارسال پیام
+                                <span aria-hidden="true">↗</span>
+                            </button>
+                        </div>
+                    </form>
+                </section>
+
+                <aside class="contact-info-card">
+                    <div>
+                        <span class="eyebrow">JANAN / SUPPORT</span>
+                        <h2>راه‌های ارتباط</h2>
+                        <p>
+                            هر روشی که برایت راحت‌تر است، از همان مسیر با جانان در ارتباط باش.
+                        </p>
+                    </div>
+
+                    <div class="contact-info-list">
+
+                        <div class="contact-info-item">
+                            <span>01</span>
+                            <div>
+                                <small>PHONE</small>
+                                @if($contactStore['phone'] ?? null)
+                                    <a href="tel:{{ preg_replace('/s+/', '', $contactStore['phone']) }}" dir="ltr">
+                                        {{ $contactStore['phone'] }}
+                                    </a>
+                                @else
+                                    <strong>شماره تماس ثبت نشده</strong>
+                                @endif
+                            </div>
+                        </div>
+
+                        <div class="contact-info-item">
+                            <span>02</span>
+                            <div>
+                                <small>EMAIL</small>
+                                @if($contactStore['email'] ?? null)
+                                    <a href="mailto:{{ $contactStore['email'] }}" dir="ltr">
+                                        {{ $contactStore['email'] }}
+                                    </a>
+                                @else
+                                    <strong>ایمیل ثبت نشده</strong>
+                                @endif
+                            </div>
+                        </div>
+
+                        <div class="contact-info-item">
+                            <span>03</span>
+                            <div>
+                                <small>ADDRESS</small>
+                                @if($contactStore['address'] ?? null)
+                                    <strong>{{ $contactStore['address'] }}</strong>
+                                @else
+                                    <strong>آدرس ثبت نشده</strong>
+                                @endif
+                            </div>
+                        </div>
+
+                        <div class="contact-info-item">
+                            <span>04</span>
+                            <div>
+                                <small>WORKING HOURS</small>
+                                @if($contactStore['working_hours'] ?? null)
+                                    <strong>{{ $contactStore['working_hours'] }}</strong>
+                                @else
+                                    <strong>ساعات پاسخگویی ثبت نشده</strong>
+                                @endif
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="contact-info-card__note">
                         <span aria-hidden="true">↗</span>
-                    </button>
-                </form>
-            </section>
+                        <p>
+                            اگر درباره یک سفارش مشخص پیام می‌دهی، موضوع یا شماره سفارش را هم بنویس تا پیگیری سریع‌تر شود.
+                        </p>
+                    </div>
+                </aside>
 
-            <aside class="store-page__card store-page__card--dark">
-                <span class="eyebrow">JANAN / STUDIO</span>
-                <h2>راه‌های ارتباط</h2>
-
-                <div class="store-page__steps">
-                    @if($contactStore['phone'] ?? null)
-                        <div class="store-page__step">
-                            <b>01</b>
-                            <div>
-                                <strong>تلفن</strong>
-                                <p dir="ltr">{{ $contactStore['phone'] }}</p>
-                            </div>
-                        </div>
-                    @endif
-
-                    @if($contactStore['email'] ?? null)
-                        <div class="store-page__step">
-                            <b>02</b>
-                            <div>
-                                <strong>ایمیل</strong>
-                                <p dir="ltr">{{ $contactStore['email'] }}</p>
-                            </div>
-                        </div>
-                    @endif
-
-                    @if($contactStore['address'] ?? null)
-                        <div class="store-page__step">
-                            <b>03</b>
-                            <div>
-                                <strong>آدرس</strong>
-                                <p>{{ $contactStore['address'] }}</p>
-                            </div>
-                        </div>
-                    @endif
-
-                    @if($contactStore['working_hours'] ?? null)
-                        <div class="store-page__step">
-                            <b>04</b>
-                            <div>
-                                <strong>ساعات پاسخگویی</strong>
-                                <p>{{ $contactStore['working_hours'] }}</p>
-                            </div>
-                        </div>
-                    @endif
-
-                    @if(!array_filter($contactStore ?? []))
-                        <div class="store-page__step">
-                            <b>—</b>
-                            <div>
-                                <strong>اطلاعات تماس هنوز پیکربندی نشده است.</strong>
-                                <p>مقادیر واقعی را در تنظیمات محیطی فروشگاه ثبت کن.</p>
-                            </div>
-                        </div>
-                    @endif
-                </div>
-            </aside>
-
+            </div>
         </div>
     </section>
+
+    <section class="store-page__section store-page__section--soft">
+        <div class="container">
+            <div class="contact-next">
+                <div>
+                    <span class="eyebrow">BEFORE YOU SEND</span>
+                    <h2>برای پاسخ بهتر، دقیق بنویس.</h2>
+                    <p>
+                        موضوع کوتاه، توضیح روشن و شماره سفارش در صورت وجود، کمک می‌کند درخواستت سریع‌تر بررسی شود.
+                    </p>
+                </div>
+
+                <a class="button button--dark" href="{{ route('faq') }}">
+                    سوالات متداول
+                    <span aria-hidden="true">↗</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
 </div>
 @endsection
