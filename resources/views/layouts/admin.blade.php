@@ -32,7 +32,7 @@
         <nav class="admin-menu">
 
             <a href="{{ route('admin.dashboard') }}"
-               class="admin-link">
+               class="admin-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
 
                 <span>⌂</span>
                 داشبورد
@@ -41,7 +41,7 @@
 
 
             <a href="{{ route('admin.products.index') }}"
-               class="admin-link">
+               class="admin-link {{ request()->routeIs('admin.products.*') ? 'active' : '' }}">
 
                 <span>◈</span>
                 محصولات
@@ -50,7 +50,7 @@
 
 
             <a href="{{ route('admin.categories.index') }}"
-               class="admin-link">
+               class="admin-link {{ request()->routeIs('admin.categories.*') ? 'active' : '' }}">
 
                 <span>▣</span>
                 دسته‌بندی‌ها
@@ -59,7 +59,7 @@
 
 
             <a href="{{ route('admin.brands.index') }}"
-               class="admin-link">
+               class="admin-link {{ request()->routeIs('admin.brands.*') ? 'active' : '' }}">
 
                 <span>◇</span>
                 برندها
@@ -68,7 +68,7 @@
 
 
             <a href="{{ route('admin.orders.index') }}"
-               class="admin-link">
+               class="admin-link {{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">
 
                 <span>🛒</span>
                 سفارش‌ها
@@ -77,7 +77,7 @@
 
 
             <a href="{{ route('admin.inventory.index') }}"
-               class="admin-link">
+               class="admin-link {{ request()->routeIs('admin.inventory.*') ? 'active' : '' }}">
 
                 <span>▤</span>
                 انبار
@@ -86,7 +86,7 @@
 
 
             <a href="{{ route('admin.accounting.index') }}"
-               class="admin-link">
+               class="admin-link {{ request()->routeIs('admin.accounting.*') ? 'active' : '' }}">
 
                 <span>₮</span>
                 حسابداری
@@ -163,7 +163,7 @@
 
 
 {{-- Mobile bottom navigation --}}
-<nav class="mobile-bottom">
+<nav class="admin-mobile-nav">
 
 
     <a href="{{ route('admin.dashboard') }}">
@@ -181,8 +181,8 @@
     </a>
 
 
-    <a href="#">
-        من
+    <a href="{{ route('admin.brands.index') }}">
+        برند
     </a>
 
 
