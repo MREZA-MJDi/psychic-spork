@@ -15,7 +15,7 @@
         <header class="cart-drawer__head">
             <div>
                 <span class="eyebrow">JANAN / BAG</span>
-                <h2 id="cart-drawer-title">سبد خرید</h2>
+                <h2 id="cart-drawer-title">سبد خرید شما</h2>
             </div>
 
             <button
