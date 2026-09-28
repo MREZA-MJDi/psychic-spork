@@ -3204,3 +3204,214 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* =========================================================
+   JANAN / ADMIN FORM UX + CONTENT MANAGEMENT
+========================================================= */
+
+.admin-page-stack {
+    display: grid;
+    gap: 16px;
+}
+
+.admin-header-back {
+    min-height: 34px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-inline-end: 8px;
+    padding-inline: 10px;
+    border: 1px solid var(--admin-border);
+    border-radius: 9px;
+    color: var(--admin-text-soft);
+    background: var(--admin-surface);
+    font-size: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background .18s ease, color .18s ease, transform .18s ease;
+}
+
+.admin-header-back:hover {
+    color: var(--admin-text);
+    background: var(--admin-surface-soft);
+    transform: translateX(2px);
+}
+
+.admin-user--link {
+    padding: 3px;
+    border-radius: 12px;
+    transition: background .18s ease;
+}
+
+.admin-user--link:hover {
+    background: var(--admin-surface-soft);
+}
+
+.admin-money-input,
+.admin-jalali-input {
+    width: 100% !important;
+    min-height: 44px;
+    padding: 10px 12px;
+    color: var(--admin-text);
+    background: var(--admin-surface);
+    border: 1px solid var(--admin-border);
+    border-radius: 11px;
+    outline: none;
+    font-size: 10px;
+    transition: border-color var(--admin-transition), box-shadow var(--admin-transition);
+}
+
+.admin-money-input:focus,
+.admin-jalali-input:focus {
+    border-color: #b9b2a7;
+    box-shadow: 0 0 0 3px rgba(17,17,17,.045);
+}
+
+.admin-money-input {
+    text-align: left;
+    font-variant-numeric: tabular-nums;
+}
+
+.admin-jalali-input {
+    text-align: left;
+    letter-spacing: .02em;
+}
+
+.admin-seo-preview {
+    display: grid;
+    gap: 5px;
+    padding: 16px;
+    border: 1px solid rgba(49,102,71,.16);
+    border-radius: 14px;
+    background: #fbfffc;
+}
+
+.admin-seo-preview > span {
+    color: #7c877f;
+    font-size: 6px;
+    font-weight: 800;
+    letter-spacing: .14em;
+}
+
+.admin-seo-preview > strong {
+    color: #165a2f;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.admin-seo-preview > small {
+    color: #538c66;
+    font-size: 7px;
+    direction: ltr;
+    text-align: left;
+}
+
+.admin-seo-preview > p {
+    margin: 0;
+    color: #67726b;
+    font-size: 8px;
+    line-height: 1.9;
+}
+
+.admin-message-copy {
+    min-height: 240px;
+    padding: 18px;
+    border: 1px solid var(--admin-border);
+    border-radius: 14px;
+    color: var(--admin-text-soft);
+    background: var(--admin-surface-soft);
+    font-size: 10px;
+    line-height: 2.3;
+    white-space: pre-wrap;
+}
+
+.admin-detail-stack {
+    display: grid;
+    gap: 0;
+}
+
+.admin-detail-stack > div {
+    display: grid;
+    grid-template-columns: 100px minmax(0,1fr);
+    gap: 12px;
+    padding: 13px 0;
+    border-bottom: 1px solid var(--admin-border);
+}
+
+.admin-detail-stack > div:last-child {
+    border-bottom: 0;
+}
+
+.admin-detail-stack span {
+    color: var(--admin-muted);
+    font-size: 8px;
+}
+
+.admin-detail-stack strong {
+    color: var(--admin-text);
+    font-size: 9px;
+    overflow-wrap: anywhere;
+}
+
+.admin-status-choice {
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border: 1px solid var(--admin-border);
+    border-radius: 10px;
+    color: var(--admin-text-soft);
+    background: var(--admin-surface);
+    font-size: 8px;
+    cursor: pointer;
+}
+
+.admin-status-choice input {
+    accent-color: var(--admin-dark);
+}
+
+.admin-status-choice:has(input:checked) {
+    border-color: var(--admin-text);
+    background: var(--admin-surface-soft);
+    color: var(--admin-text);
+}
+
+.admin-local-date {
+    white-space: nowrap;
+}
+
+.dashboard-v2__bar-column {
+    position: relative;
+}
+
+.dashboard-v2__bar-orders {
+    display: block;
+    color: var(--admin-text);
+    font-size: 6px;
+    font-weight: 800;
+    text-align: center;
+}
+
+.dashboard-v2__panel-head .admin-btn {
+    flex: 0 0 auto;
+}
+
+@media (max-width: 700px) {
+    .admin-header-back {
+        padding-inline: 8px;
+    }
+
+    .admin-header-back span {
+        display: none;
+    }
+
+    .admin-detail-stack > div {
+        grid-template-columns: 82px minmax(0,1fr);
+    }
+
+    .admin-status-choice {
+        flex: 1 1 100%;
+        justify-content: center;
+    }
+}
