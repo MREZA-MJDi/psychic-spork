@@ -38,7 +38,7 @@
 
     {{-- 06. Editorial --}}
     <x-store.editorial-banner
-        :product="$latestProduct"
+        :products="$products"
     />
 
     {{-- 07. Brands --}}
