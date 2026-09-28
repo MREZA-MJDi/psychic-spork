@@ -20,6 +20,8 @@ class StoreProductRequest extends FormRequest
             'slug' => $this->trimValue($this->input('slug')),
             'short_description' => $this->trimValue($this->input('short_description')),
             'description' => $this->trimValue($this->input('description')),
+            'meta_title' => $this->trimValue($this->input('meta_title')),
+            'meta_description' => $this->trimValue($this->input('meta_description')),
             'sku' => $this->trimValue($this->input('sku')),
             'size' => $this->trimValue($this->input('size')),
             'color' => $this->trimValue($this->input('color')),
@@ -116,6 +118,18 @@ class StoreProductRequest extends FormRequest
                 'nullable',
                 'string',
                 'max:10000',
+            ],
+
+            'meta_title' => [
+                'nullable',
+                'string',
+                'max:180',
+            ],
+
+            'meta_description' => [
+                'nullable',
+                'string',
+                'max:320',
             ],
 
             /*
@@ -226,6 +240,8 @@ class StoreProductRequest extends FormRequest
             'slug' => 'اسلاگ محصول',
             'short_description' => 'توضیح کوتاه',
             'description' => 'توضیحات محصول',
+            'meta_title' => 'عنوان سئو',
+            'meta_description' => 'توضیحات سئو',
             'attributes_json' => 'ویژگی‌های محصول',
             'is_active' => 'وضعیت فعال بودن',
             'is_featured' => 'محصول ویژه',
