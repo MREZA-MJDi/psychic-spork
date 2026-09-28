@@ -8,7 +8,7 @@
 @endphp
 
 <section
-    class="section-block section-block--no-top home-collections"
+    class="home-collections"
     aria-labelledby="{{ $titleId }}"
 >
     <div class="container">
