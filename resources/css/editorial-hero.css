@@ -10,7 +10,7 @@
     overflow: hidden;
     isolation: isolate;
 
-    min-height: 720px;
+    min-height: clamp(680px, calc(100svh - 80px), 820px);
 
     color: #f8fafb;
 
@@ -149,7 +149,7 @@
     max-width: 100%;
     min-width: 0;
 
-    min-height: 720px;
+    min-height: clamp(680px, calc(100svh - 80px), 820px);
 
     margin-inline: auto;
 
@@ -463,7 +463,7 @@
 
     min-width: 0;
 
-    height: 650px;
+    height: clamp(560px, calc(100svh - 210px), 650px);
 
     isolation: isolate;
 }
