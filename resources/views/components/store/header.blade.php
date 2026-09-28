@@ -97,6 +97,7 @@
                 class="mobile-menu-toggle"
                 aria-label="باز کردن منوی فروشگاه"
                 aria-expanded="false"
+                aria-controls="store-mobile-menu"
                 data-menu-toggle
             >
                 <span></span>
