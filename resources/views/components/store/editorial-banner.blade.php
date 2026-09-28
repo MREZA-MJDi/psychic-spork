@@ -1,13 +1,22 @@
+@props([
+    'product' => null,
+])
+
 @php
     $editorialMedia = $product?->galleryMedia?->first();
     $editorialImage = $editorialMedia?->url;
     $editorialAlt = $product?->name ?: 'کالکشن جانان';
-    $editorialVariant = $product?->variants?->first();
+
+    $editorialVariant = $product?->variants?->first(
+        fn ($variant) => (bool) $variant->is_active
+    );
+
     $editorialCategory = $product?->category?->name ?? 'Janan Collection';
     $editorialBrand = $product?->brand?->name ?? ($siteBrandNameLatin ?? 'Janan');
     $editorialPrice = $editorialVariant?->effective_price;
     $editorialStock = (int) ($editorialVariant?->stock ?? 0);
-    $editorialSale = $editorialVariant?->is_on_sale ?? false;
+    $editorialSale = (bool) ($editorialVariant?->is_on_sale ?? false);
+
     $editorialDiscount = $editorialSale
         ? max(
             1,
@@ -29,6 +38,7 @@
         <article class="editorial-tech">
 
             <div class="editorial-tech__visual">
+
                 <div class="editorial-tech__media">
                     @if($editorialImage)
                         <img
@@ -47,23 +57,43 @@
 
                 <div class="editorial-tech__veil" aria-hidden="true"></div>
 
-                <div class="editorial-tech__topline" aria-hidden="true">
+                <div class="editorial-tech__topline">
                     <span>JANAN / EDIT</span>
                     <span>01 — 04</span>
                 </div>
 
+                <div class="editorial-tech__visual-index" aria-hidden="true">
+                    <strong>03</strong>
+                    <span>EDITORIAL</span>
+                </div>
+
                 <div class="editorial-tech__floating-card">
-                    <span class="editorial-tech__floating-label">CURRENT EDIT</span>
+                    <span class="editorial-tech__floating-label">
+                        CURRENT EDIT
+                    </span>
 
                     <div class="editorial-tech__floating-main">
-                        <strong>{{ $editorialBrand }}</strong>
+                        <div>
+                            <strong>{{ $editorialBrand }}</strong>
+
+                            <span>
+                                {{ $editorialCategory }}
+                            </span>
+                        </div>
+
                         @if($editorialPrice)
-                            <span>{{ number_format($editorialPrice) }} تومان</span>
+                            <b>
+                                {{ number_format($editorialPrice) }}
+                                <small>تومان</small>
+                            </b>
                         @endif
                     </div>
 
                     <div class="editorial-tech__floating-meta">
-                        <span>{{ $editorialCategory }}</span>
+                        <span>
+                            {{ $editorialVariant?->sku ?: 'JANAN EDIT' }}
+                        </span>
+
                         <span class="{{ $editorialStock > 0 ? 'is-available' : 'is-out' }}">
                             {{ $editorialStock > 0 ? 'AVAILABLE' : 'SOLD OUT' }}
                         </span>
@@ -82,13 +112,18 @@
             </div>
 
             <div class="editorial-tech__content">
-                <div class="editorial-tech__content-top">
-                    <span class="eyebrow">
-                        {{ $siteBrandNameLatin ?? 'Janan' }} / THE ART OF DETAILS
-                    </span>
 
-                    <span class="editorial-tech__counter" aria-hidden="true">
-                        04 <i></i> 08
+                <div class="editorial-tech__content-top">
+                    <div class="editorial-tech__eyebrow">
+                        <span class="eyebrow">
+                            {{ $siteBrandNameLatin ?? 'Janan' }} / THE ART OF DETAILS
+                        </span>
+
+                        <span class="editorial-tech__line"></span>
+                    </div>
+
+                    <span class="editorial-tech__counter">
+                        03 <i></i> 08
                     </span>
                 </div>
 
@@ -107,7 +142,10 @@
                     </p>
                 </div>
 
+                <div class="editorial-tech__rule" aria-hidden="true"></div>
+
                 <div class="editorial-tech__footer">
+
                     <div class="editorial-tech__metrics">
                         <div>
                             <strong>01</strong>
