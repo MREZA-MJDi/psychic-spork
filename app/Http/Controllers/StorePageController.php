@@ -1,24 +1,39 @@
 <?php
 
-namespace AppHttpControllers;
+namespace App\Http\Controllers;
 
-use AppModelsContactMessage;
-use AppServicesSeoService;
-use IlluminateHttpRedirectResponse;
-use IlluminateHttpRequest;
-use IlluminateViewView;
+use App\Models\Brand;
+use App\Models\Category;
+use App\Models\ContactMessage;
+use App\Models\Product;
+use App\Services\SeoService;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\View\View;
 use Throwable;
 
 class StorePageController extends Controller
 {
     public function about(SeoService $seo): View
     {
+        $latestProduct = Product::query()
+            ->active()
+            ->with(['category', 'brand'])
+            ->latest('id')
+            ->first();
+
         return view('pages.about', [
             'seo' => $seo->page(
                 'درباره جانان — ' . config('app.store_name', 'Janan'),
-                'آشنایی با فلسفه، ساختار و تجربه فروشگاه آنلاین جانان.',
+                'با فلسفه، ساختار و تجربه فروشگاه آنلاین جانان آشنا شوید.',
                 route('about')
             ),
+            'latestProduct' => $latestProduct,
+            'aboutStats' => [
+                'products' => Product::query()->active()->count(),
+                'categories' => Category::query()->active()->count(),
+                'brands' => Brand::query()->active()->count(),
+            ],
         ]);
     }
 
@@ -55,13 +70,13 @@ class StorePageController extends Controller
                 'status' => ContactMessage::STATUS_NEW,
             ]);
 
-            return back()->with('success', 'پیام شما با موفقیت برای جانان ارسال شد.');
+            return back()->with('success', 'پیامت با موفقیت ثبت شد. تیم جانان بعد از بررسی با تو در ارتباط می‌شود.');
         } catch (Throwable $e) {
             report($e);
 
             return back()
                 ->withInput()
-                ->with('error', 'ارسال پیام انجام نشد. دوباره تلاش کنید.');
+                ->with('error', 'ثبت پیام انجام نشد. لطفاً دوباره تلاش کن.');
         }
     }
 
