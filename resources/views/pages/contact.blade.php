@@ -158,7 +158,7 @@
                             <div>
                                 <small>PHONE</small>
                                 @if($contactStore['phone'] ?? null)
-                                    <a href="tel:{{ preg_replace('/s+/', '', $contactStore['phone']) }}" dir="ltr">
+                                    <a href="tel:{{ preg_replace('/\\s+/', '', $contactStore['phone']) }}" dir="ltr">
                                         {{ $contactStore['phone'] }}
                                     </a>
                                 @else
