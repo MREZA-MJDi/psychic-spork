@@ -25,9 +25,7 @@
     />
 
     {{-- 05. Dynamic editorial product intelligence --}}
-    <x-store.home-intelligence
-        :products="$products"
-    />
+    <x-store.home-discovery :products="$products" />
 
     {{-- 06. Live store signals: new + popular --}}
     <x-store.home-signals
