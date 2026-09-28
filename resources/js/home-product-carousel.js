@@ -52,10 +52,9 @@
         if (!card) return;
 
         /*
-         * Do not use Element.scrollIntoView() here.
+         * Keep document scrolling out of the carousel.
          * It is allowed to move every scrollable ancestor, including the
-         * document itself, which made clicking/autoplay jump the page back
-         * to the Product section.
+         * Programmatic movement is scoped to the carousel viewport only.
          */
         const left = Math.max(
             0,
