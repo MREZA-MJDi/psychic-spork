@@ -51,6 +51,9 @@ Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])
 Route::get('/products', [StoreProductController::class, 'index'])
     ->name('products.index');
 
+Route::get('/search/suggestions', [StoreProductController::class, 'suggestions'])
+    ->name('search.suggestions');
+
 Route::get('/products/{product:slug}', [StoreProductController::class, 'show'])
     ->name('products.show');
 
