@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\ModelsBrand;
-use App\ModelsProduct;
-use App\ServicesSeoService;
+use App\Models\Brand;
+use App\Models\Product;
+use App\Services\SeoService;
 use Illuminate\View\View;
 
 class StoreBrandController extends Controller
