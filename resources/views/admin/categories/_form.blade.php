@@ -390,6 +390,67 @@
         {{ $category->exists ? 'ذخیره تغییرات' : 'ایجاد دسته‌بندی' }}
     </button>
 
+    @php
+        $categoryMetaTitle = old(
+            'meta_title',
+            $category?->meta_title ?: (
+                filled($category?->name)
+                    ? $category->name . ' | Janan'
+                    : ''
+            )
+        );
+
+        $categoryMetaDescription = old(
+            'meta_description',
+            $category?->meta_description ?: (
+                $category?->description
+                    ?: 'مشاهده محصولات مرتبط با ' . ($category?->name ?: 'این دسته‌بندی') . ' در فروشگاه جانان.'
+            )
+        );
+    @endphp
+
+    <section class="admin-card admin-form-section admin-form-section-full">
+        <div class="admin-card-header">
+            <div>
+                <h2 class="admin-card-title">نمایش دسته‌بندی در گوگل</h2>
+                <p class="admin-card-description">
+                    اگر این دو فیلد را خالی بگذاری، مقدار پیشنهادی بر اساس نام و توضیحات دسته‌بندی استفاده می‌شود.
+                </p>
+            </div>
+        </div>
+
+        <div class="admin-form-grid">
+            <div class="admin-field admin-field-full">
+                <label for="meta_title">عنوان SEO</label>
+                <input
+                    id="meta_title"
+                    type="text"
+                    name="meta_title"
+                    maxlength="180"
+                    value="{{ $categoryMetaTitle }}"
+                    placeholder="مثلاً مراقبت از پوست | Janan"
+                >
+                <small class="admin-help">
+                    عنوانی که برای صفحه این دسته در عنوان مرورگر و نتیجه جستجو استفاده می‌شود.
+                </small>
+            </div>
+
+            <div class="admin-field admin-field-full">
+                <label for="meta_description">توضیحات SEO</label>
+                <textarea
+                    id="meta_description"
+                    name="meta_description"
+                    rows="4"
+                    maxlength="320"
+                    placeholder="توضیح کوتاه و روشن درباره محتوای این دسته..."
+                >{{ $categoryMetaDescription }}</textarea>
+                <small class="admin-help">
+                    توضیح کوتاهی که کاربر قبل از ورود به صفحه دسته‌بندی می‌تواند در نتایج جستجو ببیند.
+                </small>
+            </div>
+        </div>
+    </section>
+
 </div>
 
 
