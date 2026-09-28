@@ -2950,3 +2950,123 @@
         width: 100%;
     }
 }
+
+
+/* =========================================================
+   PUBLIC MOBILE CONTRACT
+   Final responsive pass for storefront pages.
+========================================================= */
+
+@media (max-width: 820px) {
+    .store-page__grid,
+    .store-page__grid--two,
+    .store-page__facts,
+    .brand-profile__intro,
+    .brand-profile__comparison,
+    .brand-profile__grid,
+    .brand-profile__market-grid,
+    .product-buy-benefits {
+        grid-template-columns: 1fr;
+    }
+
+    .store-page__intro {
+        max-width: 100%;
+    }
+
+    .store-page__card,
+    .store-page__step,
+    .product-detail__panel,
+    .catalog-filter-panel,
+    .store-filter-bar {
+        min-width: 0;
+    }
+
+    .store-page__actions,
+    .product-detail__actions {
+        width: 100%;
+    }
+
+    .store-page__actions .button,
+    .product-detail__actions .button {
+        flex: 1 1 180px;
+        min-height: 44px;
+    }
+
+    .brand-profile__logo,
+    .brand-profile__intro,
+    .brand-profile__comparison {
+        min-width: 0;
+    }
+
+    .product-detail__panel {
+        padding: 24px 20px;
+    }
+
+    .product-detail__summary h1,
+    .brand-profile__intro h1 {
+        font-size: clamp(28px, 8vw, 42px);
+        line-height: 1.22;
+    }
+
+    .contact-form__foot,
+    .contact-next {
+        min-width: 0;
+    }
+}
+
+@media (max-width: 620px) {
+    .store-page__section {
+        padding-block: 46px;
+    }
+
+    .store-page__card,
+    .store-page__step {
+        padding: 20px 17px;
+        border-radius: 16px;
+    }
+
+    .store-page__actions {
+        flex-direction: column;
+    }
+
+    .store-page__actions .button,
+    .product-detail__actions .button {
+        width: 100%;
+    }
+
+    .product-detail__panel {
+        padding: 22px 17px;
+        border-radius: 18px;
+    }
+
+    .product-detail__quantity {
+        grid-template-columns: 1fr;
+        align-items: stretch;
+    }
+
+    .product-detail__quantity input {
+        width: 100%;
+    }
+
+    .product-detail__facts > div {
+        grid-template-columns: 1fr;
+        gap: 6px;
+    }
+
+    .store-filter-bar {
+        padding: 14px;
+        border-radius: 16px;
+    }
+
+    .store-result-count {
+        white-space: normal;
+    }
+
+    .contact-form__foot {
+        gap: 12px;
+    }
+
+    .footer-trust__grid {
+        grid-template-columns: 1fr;
+    }
+}
