@@ -474,12 +474,12 @@
 
                     <div class="admin-field">
 
-                        <label for="type">
+                        <label for="movement-type">
                             نوع گردش *
                         </label>
 
                         <select
-                            id="type"
+                            id="movement-type"
                             name="type"
                             required
                         >
@@ -892,7 +892,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
 
-            const typeInput = document.getElementById('type');
+            const typeInput = document.getElementById('movement-type');
             const quantityAmountInput =
                 document.getElementById('quantity_amount');
 
