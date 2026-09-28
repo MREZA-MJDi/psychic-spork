@@ -88,6 +88,22 @@
                 <span>سفارش‌ها</span>
             </a>
 
+            <a
+                href="{{ route('admin.contact.index') }}"
+                class="admin-link {{ request()->routeIs('admin.contact.*') ? 'active' : '' }}"
+            >
+                <span class="admin-link-icon">✉</span>
+                <span>پیام‌ها</span>
+            </a>
+
+            <a
+                href="{{ route('admin.content.about') }}"
+                class="admin-link {{ request()->routeIs('admin.content.*') ? 'active' : '' }}"
+            >
+                <span class="admin-link-icon">✎</span>
+                <span>محتوای سایت</span>
+            </a>
+
             <span class="admin-menu-label">عملیات</span>
 
             <a
@@ -139,6 +155,16 @@
                     <span></span>
                 </button>
 
+                <button
+                    type="button"
+                    class="admin-header-back"
+                    onclick="if (history.length > 1) history.back(); else window.location='{{ route('admin.dashboard') }}';"
+                    aria-label="بازگشت"
+                >
+                    ←
+                    <span>بازگشت</span>
+                </button>
+
                 <div>
                     <div class="admin-header__title">
                         @yield('page-title', 'مدیریت فروشگاه')
@@ -156,7 +182,11 @@
                     <span aria-hidden="true">↗</span>
                 </a>
 
-                <div class="admin-user">
+                <a
+                    href="{{ route('admin.profile.edit') }}"
+                    class="admin-user admin-user--link"
+                    title="پروفایل مدیر"
+                >
                     <div class="admin-user__avatar" aria-hidden="true">
                         {{ mb_substr(auth()->user()->name ?? 'A', 0, 1) }}
                     </div>
@@ -167,7 +197,7 @@
                         </span>
                         <span class="admin-user__role">مدیر فروشگاه</span>
                     </div>
-                </div>
+                </a>
             </div>
         </header>
 
@@ -215,11 +245,19 @@
     </a>
 
     <a
-        href="{{ route('admin.inventory.index') }}"
-        class="{{ request()->routeIs('admin.inventory.*') ? 'active' : '' }}"
+        href="{{ route('admin.contact.index') }}"
+        class="{{ request()->routeIs('admin.contact.*') ? 'active' : '' }}"
     >
-        <span class="admin-mobile-nav__icon">▤</span>
-        <span>انبار</span>
+        <span class="admin-mobile-nav__icon">✉</span>
+        <span>پیام</span>
+    </a>
+
+    <a
+        href="{{ route('admin.profile.edit') }}"
+        class="{{ request()->routeIs('admin.profile.*') ? 'active' : '' }}"
+    >
+        <span class="admin-mobile-nav__icon">◉</span>
+        <span>پروفایل</span>
     </a>
 </nav>
 
