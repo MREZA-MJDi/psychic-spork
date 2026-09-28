@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>@yield('title', 'پنل مدیریت جانان')</title>
 
@@ -19,176 +20,208 @@
 
 <div class="admin-shell">
 
+    <aside class="admin-sidebar" data-admin-sidebar>
+        <div class="admin-brand">
+            <a href="{{ route('admin.dashboard') }}" class="admin-brand__main">
+                <span class="admin-brand__name">جانان</span>
+                <span class="admin-brand__sub">ADMIN / STORE</span>
+            </a>
 
-    {{-- Sidebar --}}
-    <aside class="admin-sidebar">
-
-        <div class="admin-logo">
-            <span>جانان</span>
-            <small>ADMIN</small>
+            <span class="admin-brand__status">
+                <i aria-hidden="true"></i>
+                LIVE
+            </span>
         </div>
 
+        <nav class="admin-menu" aria-label="منوی مدیریت">
 
-        <nav class="admin-menu">
+            <span class="admin-menu-label">نمای کلی</span>
 
-            <a href="{{ route('admin.dashboard') }}"
-               class="admin-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-
-                <span>⌂</span>
-                داشبورد
-
+            <a
+                href="{{ route('admin.dashboard') }}"
+                class="admin-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}"
+                @if(request()->routeIs('admin.dashboard')) aria-current="page" @endif
+            >
+                <span class="admin-link-icon">⌂</span>
+                <span>داشبورد</span>
             </a>
 
+            <span class="admin-menu-label">فروشگاه</span>
 
-            <a href="{{ route('admin.products.index') }}"
-               class="admin-link {{ request()->routeIs('admin.products.*') ? 'active' : '' }}">
-
-                <span>◈</span>
-                محصولات
-
+            <a
+                href="{{ route('admin.products.index') }}"
+                class="admin-link {{ request()->routeIs('admin.products.*') ? 'active' : '' }}"
+            >
+                <span class="admin-link-icon">◈</span>
+                <span>محصولات</span>
             </a>
 
-
-            <a href="{{ route('admin.categories.index') }}"
-               class="admin-link {{ request()->routeIs('admin.categories.*') ? 'active' : '' }}">
-
-                <span>▣</span>
-                دسته‌بندی‌ها
-
+            <a
+                href="{{ route('admin.categories.index') }}"
+                class="admin-link {{ request()->routeIs('admin.categories.*') ? 'active' : '' }}"
+            >
+                <span class="admin-link-icon">▦</span>
+                <span>دسته‌بندی‌ها</span>
             </a>
 
-
-            <a href="{{ route('admin.brands.index') }}"
-               class="admin-link {{ request()->routeIs('admin.brands.*') ? 'active' : '' }}">
-
-                <span>◇</span>
-                برندها
-
+            <a
+                href="{{ route('admin.brands.index') }}"
+                class="admin-link {{ request()->routeIs('admin.brands.*') ? 'active' : '' }}"
+            >
+                <span class="admin-link-icon">◇</span>
+                <span>برندها</span>
             </a>
 
-
-            <a href="{{ route('admin.orders.index') }}"
-               class="admin-link {{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">
-
-                <span>🛒</span>
-                سفارش‌ها
-
+            <a
+                href="{{ route('admin.customers.index') }}"
+                class="admin-link {{ request()->routeIs('admin.customers.*') ? 'active' : '' }}"
+            >
+                <span class="admin-link-icon">◉</span>
+                <span>مشتریان</span>
             </a>
 
-
-            <a href="{{ route('admin.inventory.index') }}"
-               class="admin-link {{ request()->routeIs('admin.inventory.*') ? 'active' : '' }}">
-
-                <span>▤</span>
-                انبار
-
+            <a
+                href="{{ route('admin.orders.index') }}"
+                class="admin-link {{ request()->routeIs('admin.orders.*') ? 'active' : '' }}"
+            >
+                <span class="admin-link-icon">◫</span>
+                <span>سفارش‌ها</span>
             </a>
 
+            <span class="admin-menu-label">عملیات</span>
 
-            <a href="{{ route('admin.accounting.index') }}"
-               class="admin-link {{ request()->routeIs('admin.accounting.*') ? 'active' : '' }}">
-
-                <span>₮</span>
-                حسابداری
-
+            <a
+                href="{{ route('admin.inventory.index') }}"
+                class="admin-link {{ request()->routeIs('admin.inventory.*') ? 'active' : '' }}"
+            >
+                <span class="admin-link-icon">▤</span>
+                <span>انبار</span>
             </a>
 
-
+            <a
+                href="{{ route('admin.accounting.index') }}"
+                class="admin-link {{ request()->routeIs('admin.accounting.*') ? 'active' : '' }}"
+            >
+                <span class="admin-link-icon">₮</span>
+                <span>حسابداری</span>
+            </a>
         </nav>
 
+        <div class="admin-sidebar-footer">
+            <a href="{{ route('home') }}" class="admin-side-action">
+                <span>↗</span>
+                مشاهده فروشگاه
+            </a>
 
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button type="submit" class="admin-side-action admin-side-action--logout">
+                    <span>↪</span>
+                    خروج از حساب
+                </button>
+            </form>
+        </div>
     </aside>
 
-
-
-    {{-- Main --}}
     <main class="admin-main">
 
-
         <header class="admin-header">
+            <div class="admin-header__right">
+                <button
+                    type="button"
+                    class="admin-menu-toggle"
+                    data-admin-menu
+                    aria-label="باز کردن منوی مدیریت"
+                    aria-expanded="false"
+                >
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
 
-            <div>
-                <h1>
-                    @yield('page-title','مدیریت فروشگاه')
-                </h1>
+                <div>
+                    <div class="admin-header__title">
+                        @yield('page-title', 'مدیریت فروشگاه')
+                    </div>
+
+                    <div class="admin-header__subtitle">
+                        کنترل، تحلیل و مدیریت جانان
+                    </div>
+                </div>
             </div>
 
+            <div class="admin-header__left">
+                <a href="{{ route('home') }}" class="admin-header-link">
+                    فروشگاه
+                    <span aria-hidden="true">↗</span>
+                </a>
 
-            <div class="admin-user">
+                <div class="admin-user">
+                    <div class="admin-user__avatar" aria-hidden="true">
+                        {{ mb_substr(auth()->user()->name ?? 'A', 0, 1) }}
+                    </div>
 
-                <span>
-                    {{ auth()->user()->name ?? 'Admin' }}
-                </span>
-
+                    <div class="admin-user__meta">
+                        <span class="admin-user__name">
+                            {{ auth()->user()->name ?? 'Admin' }}
+                        </span>
+                        <span class="admin-user__role">مدیر فروشگاه</span>
+                    </div>
+                </div>
             </div>
-
-
         </header>
 
-
-
         @if(session('success'))
-
             <div class="alert success">
                 {{ session('success') }}
             </div>
-
         @endif
 
-
         @if(session('error'))
-
             <div class="alert error">
                 {{ session('error') }}
             </div>
-
         @endif
 
-
-
         <section class="admin-content">
-
             @yield('content')
-
         </section>
-
-
-
     </main>
-
-
-
 </div>
 
-
-
-{{-- Mobile bottom navigation --}}
-<nav class="admin-mobile-nav">
-
-
-    <a href="{{ route('admin.dashboard') }}">
-        خانه
+<nav class="admin-mobile-nav" aria-label="دسترسی سریع موبایل">
+    <a
+        href="{{ route('admin.dashboard') }}"
+        class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}"
+    >
+        <span class="admin-mobile-nav__icon">⌂</span>
+        <span>خانه</span>
     </a>
 
-
-    <a href="{{ route('admin.products.index') }}">
-        محصول
+    <a
+        href="{{ route('admin.products.index') }}"
+        class="{{ request()->routeIs('admin.products.*') ? 'active' : '' }}"
+    >
+        <span class="admin-mobile-nav__icon">◈</span>
+        <span>محصول</span>
     </a>
 
-
-    <a href="{{ route('admin.orders.index') }}">
-        سفارش
+    <a
+        href="{{ route('admin.orders.index') }}"
+        class="{{ request()->routeIs('admin.orders.*') ? 'active' : '' }}"
+    >
+        <span class="admin-mobile-nav__icon">◫</span>
+        <span>سفارش</span>
     </a>
 
-
-    <a href="{{ route('admin.brands.index') }}">
-        برند
+    <a
+        href="{{ route('admin.inventory.index') }}"
+        class="{{ request()->routeIs('admin.inventory.*') ? 'active' : '' }}"
+    >
+        <span class="admin-mobile-nav__icon">▤</span>
+        <span>انبار</span>
     </a>
-
-
 </nav>
-
-
 
 @stack('scripts')
 
