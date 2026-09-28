@@ -91,6 +91,19 @@
         {{-- Header Actions --}}
         <div class="header-actions">
 
+            {{-- Mobile navigation --}}
+            <button
+                type="button"
+                class="mobile-menu-toggle"
+                aria-label="باز کردن منوی فروشگاه"
+                aria-expanded="false"
+                data-menu-toggle
+            >
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
             {{-- Search --}}
             <button
                 type="button"
