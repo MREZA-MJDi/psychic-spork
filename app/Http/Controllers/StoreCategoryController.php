@@ -1,11 +1,11 @@
 <?php
 
-namespace AppHttpControllers;
+namespace App\Http\Controllers;
 
-use AppModelsCategory;
-use AppModelsProduct;
-use AppServicesSeoService;
-use IlluminateViewView;
+use App\ModelsCategory;
+use App\ModelsProduct;
+use App\ServicesSeoService;
+use Illuminate\View\View;
 
 class StoreCategoryController extends Controller
 {
