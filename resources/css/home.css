@@ -2659,7 +2659,7 @@ width:
 
 /* =========================================================
    HOMEPAGE FINAL LAYOUT CONTRACT
-   One width system for every Home section.
+   One width, spacing and responsive system for every Home section.
 ========================================================= */
 
 .home-page {
@@ -2696,6 +2696,14 @@ width:
     max-width: 100%;
 }
 
+.home-collections,
+.home-product-section,
+.home-discovery-section,
+.home-signals-section,
+.home-brands {
+    padding-block: clamp(60px, 6vw, 84px);
+}
+
 .home-proof .container,
 .home-collections .container,
 .home-product-section .container,
@@ -2727,6 +2735,7 @@ width:
 .home-signals__head,
 .home-brands__head {
     min-width: 0;
+    margin-bottom: 24px;
 }
 
 .home-section-head > *,
@@ -2740,25 +2749,16 @@ width:
 
 @media (max-width: 1100px) {
     .home-page .container {
-        width: min(
-            calc(100% - 40px),
-            var(--janan-container)
-        );
+        width: min(calc(100% - 40px), var(--janan-container));
     }
 }
 
 @media (max-width: 900px) {
     .home-page .container {
-        width: min(
-            calc(100% - 32px),
-            var(--janan-container)
-        );
+        width: min(calc(100% - 32px), var(--janan-container));
     }
 
-    .home-signals__grid {
-        grid-template-columns: 1fr;
-    }
-
+    .home-signals__grid,
     .home-discovery__grid {
         grid-template-columns: 1fr;
     }
@@ -2776,14 +2776,23 @@ width:
         flex-direction: column;
         gap: 12px;
     }
+
+    .home-collections,
+    .home-product-section,
+    .home-discovery-section,
+    .home-signals-section,
+    .home-brands {
+        padding-block: 54px;
+    }
+
+    .home-proof {
+        padding-block: 20px 30px;
+    }
 }
 
 @media (max-width: 760px) {
     .home-page .container {
-        width: min(
-            calc(100% - 28px),
-            var(--janan-container)
-        );
+        width: min(calc(100% - 28px), var(--janan-container));
     }
 
     .home-category-rail,
@@ -2794,10 +2803,6 @@ width:
     .home-brand-rail {
         grid-template-rows: none;
     }
-
-    .home-discovery-section {
-        padding-block: 48px;
-    }
 }
 
 @media (max-width: 560px) {
@@ -2806,13 +2811,19 @@ width:
     }
 
     .home-proof {
-        padding-block: 22px 32px;
+        padding-block: 18px 26px;
     }
 
+    .home-proof .janan-trust {
+        min-height: 84px;
+    }
+
+    .home-collections,
     .home-product-section,
     .home-discovery-section,
-    .home-signals-section {
-        padding-block: 46px;
+    .home-signals-section,
+    .home-brands {
+        padding-block: 44px;
     }
 
     .home-signals__grid {
