@@ -1,6 +1,6 @@
 <div class="janan-trust">
     <div class="janan-trust__intro">
-        <span class="janan-trust__eyebrow">JANAN / SYSTEM</span>
+        <span class="janan-trust__eyebrow">JANAN / TRUST / 02</span>
 
         <strong>
             تجربه‌ای دقیق،
