@@ -293,17 +293,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
 document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('[data-product-index]').forEach((page) => {
-        const modal = page.querySelector('[data-product-preview-modal]');
-        const image = modal?.querySelector('[data-preview-image]');
-        const title = modal?.querySelector('[data-preview-name]');
-        const closeButton = modal?.querySelector('[data-preview-close]');
+        const dialog = page.querySelector('[data-product-preview-modal]');
+        const image = dialog?.querySelector('[data-preview-image]');
+        const title = dialog?.querySelector('[data-preview-name]');
+        const closeButton = dialog?.querySelector('[data-preview-close]');
 
-        if (!modal || !image || !title) return;
+        if (!dialog || !image || !title) return;
 
         const close = () => {
-            modal.hidden = true;
-            document.body.classList.remove('admin-modal-open');
-            image.src = '';
+            if (dialog.open) dialog.close();
+            image.removeAttribute('src');
             image.alt = '';
             title.textContent = '';
         };
@@ -318,19 +317,30 @@ document.addEventListener('DOMContentLoaded', () => {
                 image.src = url;
                 image.alt = name;
                 title.textContent = name;
-                modal.hidden = false;
-                document.body.classList.add('admin-modal-open');
+
+                if (typeof dialog.showModal === 'function') {
+                    dialog.showModal();
+                }
             });
         });
 
         closeButton?.addEventListener('click', close);
 
-        modal.addEventListener('click', (event) => {
-            if (event.target === modal) close();
+        dialog.addEventListener('click', (event) => {
+            if (event.target === dialog) {
+                close();
+            }
         });
 
-        document.addEventListener('keydown', (event) => {
-            if (event.key === 'Escape' && !modal.hidden) close();
+        dialog.addEventListener('cancel', (event) => {
+            event.preventDefault();
+            close();
+        });
+
+        dialog.addEventListener('close', () => {
+            image.removeAttribute('src');
+            image.alt = '';
+            title.textContent = '';
         });
     });
 });
