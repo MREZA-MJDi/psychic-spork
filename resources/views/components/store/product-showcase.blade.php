@@ -40,6 +40,7 @@
                 class="home-product-carousel"
                 data-product-carousel
                 data-autoplay="4200"
+                role="region"
                 aria-roledescription="carousel"
                 aria-label="محصولات منتخب جانان"
             >
@@ -74,6 +75,7 @@
                     class="home-product-carousel__viewport"
                     data-product-viewport
                     tabindex="0"
+                    aria-live="polite"
                 >
                     <div
                         class="home-product-carousel__track"
