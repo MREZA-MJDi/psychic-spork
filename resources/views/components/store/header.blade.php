@@ -202,6 +202,7 @@
             <form
                 class="search-panel__form"
                 data-store-search
+                data-suggestions-url="{{ route('search.suggestions') }}"
                 action="{{ route('products.index') }}"
                 method="GET"
                 role="search"
