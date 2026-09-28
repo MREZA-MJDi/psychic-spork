@@ -21,7 +21,7 @@ class HomeController extends Controller
             ])
             ->orderBy('sort_order')
             ->orderBy('name')
-            ->take(12)
+            ->take(8)
             ->get();
 
         $brands = Brand::query()
@@ -48,14 +48,14 @@ class HomeController extends Controller
             ->featured()
             ->latest('updated_at')
             ->latest('id')
-            ->take(8)
+            ->take(12)
             ->get();
 
         if ($products->isEmpty()) {
             $products = $productsQuery
                 ->latest('updated_at')
                 ->latest('id')
-                ->take(8)
+                ->take(12)
                 ->get();
         }
 
