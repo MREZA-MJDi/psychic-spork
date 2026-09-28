@@ -10,6 +10,8 @@ use App\Http\Controllers\Admin\AdminInventoryController;
 use App\Http\Controllers\Admin\AdminOrderController;
 use App\Http\Controllers\Admin\AdminProductController;
 use App\Http\Controllers\Admin\AdminProductVariantController;
+use App\Http\Controllers\Admin\AdminProfileController;
+use App\Http\Controllers\Admin\AdminSiteContentController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
@@ -254,6 +256,42 @@ Route::prefix('admin')
 
         Route::post('inventory', [AdminInventoryController::class, 'store'])
             ->name('inventory.store');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Store content / support
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get('content/about', [AdminSiteContentController::class, 'about'])
+            ->name('content.about');
+
+        Route::post('content/about', [AdminSiteContentController::class, 'updateAbout'])
+            ->name('content.about.update');
+
+        Route::get('contact', [AdminSiteContentController::class, 'contact'])
+            ->name('contact.index');
+
+        Route::post('contact/settings', [AdminSiteContentController::class, 'updateContact'])
+            ->name('content.contact.update');
+
+        Route::get('contact/{message}', [AdminSiteContentController::class, 'showContact'])
+            ->name('contact.show');
+
+        Route::patch('contact/{message}/status', [AdminSiteContentController::class, 'updateContactStatus'])
+            ->name('contact.status');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Admin profile
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get('profile', [AdminProfileController::class, 'edit'])
+            ->name('profile.edit');
+
+        Route::patch('profile', [AdminProfileController::class, 'update'])
+            ->name('profile.update');
 
         /*
         |--------------------------------------------------------------------------
