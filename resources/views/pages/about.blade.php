@@ -8,13 +8,10 @@
             <div>
                 <span class="eyebrow">JANAN / ABOUT</span>
                 <h1>
-                    انتخاب خوب،
-                    <br>
-                    <em>از شناخت شروع می‌شود.</em>
+{!! nl2br(e($about['hero_title'] ?? 'انتخاب خوب،\nاز شناخت شروع می‌شود.')) !!}
                 </h1>
                 <p>
-                    جانان یک فروشگاه آنلاین برای انتخاب آگاهانه‌تر است؛
-                    محصول را واضح می‌بینی، اطلاعاتش را مقایسه می‌کنی و بدون پیچیدگی به خرید می‌رسی.
+                    {{ $about['hero_description'] ?? '' }}
                 </p>
 
                 <div class="store-page__actions">
@@ -43,21 +40,17 @@
                 <div class="about-story__lead">
                     <span class="eyebrow">A CLEARER WAY TO SHOP</span>
                     <h2>
-                        قرار نیست برای پیدا کردن یک محصول خوب،
-                        بین صفحه‌های شلوغ گم شوی.
+                        {{ $about['story_title'] ?? '' }}
                     </h2>
                 </div>
 
                 <div class="about-story__copy">
                     <p>
-                        جانان با یک ایده ساده ساخته شده: تجربه خرید باید سریع، قابل فهم و قابل اعتماد باشد.
-                        برای همین ساختار فروشگاه حول سه چیز می‌چرخد؛
-                        ارائه روشن اطلاعات، مسیر ساده انتخاب و اتصال مستقیم به داده‌های واقعی فروشگاه.
+                        {{ $about['story_text_1'] ?? '' }}
                     </p>
 
                     <p>
-                        از محصول و دسته‌بندی تا برند، سبد خرید و پرداخت، هر بخش بخشی از یک مسیر واحد است؛
-                        نه چند صفحه جدا از هم.
+                        {{ $about['story_text_2'] ?? '' }}
                     </p>
                 </div>
             </div>
@@ -108,30 +101,24 @@
                 <article class="about-principle">
                     <span>01</span>
                     <div>
-                        <h3>شفافیت</h3>
-                        <p>
-                            نام، قیمت، موجودی، مشخصات و مسیر خرید باید همان‌جایی دیده شوند که کاربر به آن‌ها نیاز دارد.
-                        </p>
+                        <h3>{{ $about['principle_1_title'] ?? 'شفافیت' }}</h3>
+                        <p>{{ $about['principle_1_text'] ?? '' }}</p>
                     </div>
                 </article>
 
                 <article class="about-principle">
                     <span>02</span>
                     <div>
-                        <h3>سادگی</h3>
-                        <p>
-                            کم کردن مراحل اضافه، پیدا کردن محصول را سریع‌تر می‌کند و تصمیم‌گیری را سبک‌تر نگه می‌دارد.
-                        </p>
+                        <h3>{{ $about['principle_2_title'] ?? 'سادگی' }}</h3>
+                        <p>{{ $about['principle_2_text'] ?? '' }}</p>
                     </div>
                 </article>
 
                 <article class="about-principle">
                     <span>03</span>
                     <div>
-                        <h3>جزئیات</h3>
-                        <p>
-                            فاصله‌ها، تایپوگرافی، حالت‌های تعاملی و بازخوردهای کوچک بخشی از خود محصول دیجیتال هستند.
-                        </p>
+                        <h3>{{ $about['principle_3_title'] ?? 'جزئیات' }}</h3>
+                        <p>{{ $about['principle_3_text'] ?? '' }}</p>
                     </div>
                 </article>
             </div>
@@ -189,10 +176,8 @@
             <div class="page-cta-panel about-page__cta">
                 <div>
                     <span class="eyebrow">START HERE</span>
-                    <h2>از کشف شروع کن.</h2>
-                    <p>
-                        محصولی که دنبالش هستی را پیدا کن یا مستقیم با تیم جانان در ارتباط باش.
-                    </p>
+                    <h2>{{ $about['cta_title'] ?? 'از کشف شروع کن.' }}</h2>
+                    <p>{{ $about['cta_text'] ?? '' }}</p>
                 </div>
 
                 <div class="store-page__actions">
