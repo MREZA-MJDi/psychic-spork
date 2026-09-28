@@ -8,6 +8,7 @@ export default defineConfig({
                 'resources/css/app.css',
                 'resources/css/store-structure.css',
                 'resources/css/store-polish.css',
+                'resources/css/responsive-shell.css',
                 'resources/css/home.css',
                 'resources/css/editorial-hero.css',
                 'resources/css/auth.css',
