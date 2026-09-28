@@ -14,15 +14,10 @@
     </section>
 
     {{-- 03. Collections --}}
-    <section
-        class="home-section home-section--collections"
-        aria-labelledby="home-collections-title"
-    >
-        <x-store.category-grid
-            :categories="$categories"
-            title-id="home-collections-title"
-        />
-    </section>
+    <x-store.category-grid
+        :categories="$categories"
+        title-id="home-collections-title"
+    />
 
     {{-- 04. Live store signals --}}
     <x-store.home-signals
