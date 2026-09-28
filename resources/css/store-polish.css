@@ -1553,6 +1553,11 @@
     border-radius: 14px;
 }
 
+.catalog-command > .search-suggestions {
+    grid-column: 2;
+    margin-top: 0;
+}
+
 .store-filter-bar {
     padding: 11px 13px;
     margin-top: 0;
@@ -2170,6 +2175,10 @@
 
     .catalog-command {
         grid-template-columns: 1fr;
+    }
+
+    .catalog-command > .search-suggestions {
+        grid-column: auto;
     }
 }
 
