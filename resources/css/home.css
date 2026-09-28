@@ -1221,11 +1221,14 @@ min-height:
 display:
         block;
 
+    width:
+        min(82%, 280px);
+
     max-width:
-        min(72%, 220px);
+        min(82%, 280px);
 
     max-height:
-        92px;
+        132px;
 
     object-fit:
         contain;
@@ -1244,11 +1247,14 @@ display:
 }
 
 .home-brand-tile.is-featured .home-brand-tile__logo img {
-max-width:
-        min(74%, 300px);
+width:
+        min(86%, 360px);
+
+    max-width:
+        min(86%, 360px);
 
     max-height:
-        125px;
+        165px;
 }
 
 .home-brand-tile__initial {
@@ -1800,19 +1806,25 @@ min-height:
 }
 
 .home-brand-tile__logo img {
-max-width:
-            70%;
+width:
+            84%;
+
+        max-width:
+            84%;
 
         max-height:
-            78px;
+            112px;
 }
 
 .home-brand-tile.is-featured .home-brand-tile__logo img {
-max-width:
-            74%;
+width:
+            90%;
+
+        max-width:
+            90%;
 
         max-height:
-            105px;
+            145px;
 }
 
 .home-brand-tile__footer {
