@@ -2189,7 +2189,7 @@ width:
 ========================================================= */
 
 .home-product-section {
-    padding-block: clamp(52px, 6vw, 78px);
+    padding-block: clamp(64px, 7vw, 88px);
     background:
         linear-gradient(
             180deg,
@@ -2199,7 +2199,32 @@ width:
 }
 
 .home-product-section__head {
-    margin-bottom: 20px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 28px;
+    margin-bottom: 26px;
+}
+
+.home-product-section__head > div {
+    min-width: 0;
+}
+
+.home-product-section__head h2 {
+    margin: 9px 0 0;
+    color: var(--janan-ink-strong);
+    font-size: clamp(28px, 3.6vw, 46px);
+    font-weight: 620;
+    letter-spacing: -.05em;
+    line-height: 1.2;
+}
+
+.home-product-section__head p {
+    max-width: 620px;
+    margin: 10px 0 0;
+    color: var(--janan-muted);
+    font-size: 10px;
+    line-height: 2;
 }
 
 .home-product-carousel {
