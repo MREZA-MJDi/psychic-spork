@@ -136,7 +136,7 @@ min-width: 320px;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
 
-    overflow-x: hidden;
+    overflow-x: clip;
 }
 
 img {
