@@ -350,7 +350,7 @@ document.addEventListener('click', async (event) => {
 });
 
 document.addEventListener('submit', async (event) => {
-    const form = event.target.closest('.quick-add-form');
+    const form = event.target.closest('.quick-add-form, .product-purchase-form');
 
     if (!form) return;
 
@@ -366,7 +366,7 @@ document.addEventListener('submit', async (event) => {
                 {
                     name: form.dataset.productName || 'محصول',
                     image: form.dataset.productImage || '',
-                    quantity: 1,
+                    quantity: Number(formData.get('quantity') || 1),
                     line_total: 0,
                 },
             ],

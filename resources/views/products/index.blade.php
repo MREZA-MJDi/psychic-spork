@@ -7,9 +7,9 @@
         <div class="container page-hero__layout">
             <div>
                 <span class="eyebrow">JANAN / CATALOG</span>
-                <h1>محصولات</h1>
+                <h1>محصولات جانان</h1>
                 <p>
-                    مجموعه کامل محصولات فعال جانان با جستجو، فیلتر و مسیر روشن برای خرید.
+                    بین محصولات واقعی فروشگاه جستجو کن، فیلترها را ترکیب کن و سریع به انتخابت برس.
                 </p>
             </div>
 
@@ -23,22 +23,68 @@
     <section class="section-block catalog-page__content">
         <div class="container">
 
+            <div class="catalog-command">
+                <div class="catalog-command__intro">
+                    <span class="eyebrow">FIND YOUR PRODUCT</span>
+                    <h2>دقیق‌تر جستجو کن.</h2>
+                    <p>
+                        جستجو روی نام محصول، SKU، برند، دسته و توضیحات انجام می‌شود.
+                    </p>
+                </div>
+
+                <form
+                    class="catalog-search"
+                    data-store-search
+                    data-suggestions-url="{{ route('search.suggestions') }}"
+                    method="GET"
+                    action="{{ route('products.index') }}"
+                    role="search"
+                >
+                    <div class="catalog-search__field">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <circle cx="11" cy="11" r="6.5"/>
+                            <path d="m16 16 4.5 4.5"/>
+                        </svg>
+
+                        <input
+                            type="search"
+                            name="q"
+                            value="{{ request('q') }}"
+                            placeholder="نام محصول، برند یا SKU…"
+                            autocomplete="off"
+                            data-search-input
+                            minlength="2"
+                        >
+
+                        <button
+                            type="button"
+                            class="catalog-search__clear"
+                            data-search-clear
+                            aria-label="پاک کردن"
+                            @if(!request('q')) hidden @endif
+                        >
+                            ×
+                        </button>
+                    </div>
+
+                    <button class="button button--primary" type="submit">
+                        جستجو
+                        <span aria-hidden="true">↵</span>
+                    </button>
+                </form>
+            </div>
+
             <div class="store-filter-bar">
                 <form
                     class="store-filter-form"
                     method="GET"
                     action="{{ route('products.index') }}"
                 >
-                    <label class="store-filter-form__search">
-                        <span>جستجوی محصول</span>
-                        <input
-                            type="search"
-                            name="q"
-                            value="{{ request('q') }}"
-                            placeholder="نام محصول یا SKU"
-                            autocomplete="off"
-                        >
-                    </label>
+                    <input
+                        type="hidden"
+                        name="q"
+                        value="{{ request('q') }}"
+                    >
 
                     <label>
                         <span>دسته‌بندی</span>
@@ -74,11 +120,8 @@
                         </select>
                     </label>
 
-                    <button
-                        class="button button--primary"
-                        type="submit"
-                    >
-                        فیلتر
+                    <button class="button button--ghost" type="submit">
+                        اعمال فیلتر
                     </button>
 
                     @if(request()->hasAny(['q', 'category', 'brand']))
@@ -98,7 +141,7 @@
 
             @if($products->isNotEmpty())
 
-                <div class="catalog-toolbar">
+                <div class="catalog-toolbar catalog-toolbar--modern">
                     <div>
                         <span class="eyebrow">CURATED CATALOG</span>
                         <strong>
@@ -108,7 +151,7 @@
                     </div>
 
                     <span class="catalog-toolbar__hint">
-                        برای خرید مستقیم، دکمه «افزودن به سبد خرید» زیر هر محصول قرار دارد.
+                        {{ request('q') ? 'نتیجه جستجوی «' . request('q') . '»' : 'محصولات فعال فروشگاه' }}
                     </span>
                 </div>
 
@@ -129,23 +172,32 @@
 
             @else
 
-                <div class="empty-state">
+                <div class="empty-state empty-state--search">
                     <span class="eyebrow">NO RESULT</span>
 
-                    <h2>
-                        محصولی با این فیلتر پیدا نشد.
-                    </h2>
+                    <h2>چیزی با این مشخصات پیدا نشد.</h2>
 
                     <p>
-                        عبارت جستجو یا فیلترها را تغییر بده و دوباره تلاش کن.
+                        عبارت کوتاه‌تری امتحان کن یا فیلترها را بردار تا گزینه‌های بیشتری ببینی.
                     </p>
 
-                    <a
-                        class="button button--primary"
-                        href="{{ route('products.index') }}"
-                    >
-                        بازگشت به همه محصولات
-                    </a>
+                    <div class="empty-state__actions">
+                        <a
+                            class="button button--primary"
+                            href="{{ route('products.index') }}"
+                        >
+                            بازگشت به همه محصولات
+                        </a>
+
+                        @if(request('q'))
+                            <a
+                                class="button button--ghost"
+                                href="{{ route('products.index', ['q' => request('q')]) }}"
+                            >
+                                فقط همین عبارت
+                            </a>
+                        @endif
+                    </div>
                 </div>
 
             @endif

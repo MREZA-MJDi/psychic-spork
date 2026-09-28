@@ -108,6 +108,7 @@
         'resources/css/store-structure.css',
         'resources/js/app.js',
         'resources/js/store-cart.js',
+        'resources/js/store-search.js',
     ])
 
     {{-- Production/local storefront refinements --}}
@@ -116,6 +117,12 @@
             'resources/css/store-polish.css',
         ])
     @endunless
+
+    @if(request()->routeIs('products.show'))
+        @unless(app()->environment('testing'))
+            @vite(['resources/js/product-show.js'])
+        @endunless
+    @endif
 
     {{-- Homepage-only styles and behavior --}}
     @if($isHome)

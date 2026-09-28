@@ -115,7 +115,7 @@ class HomeController extends Controller
             ])
             ->withSum(
                 [
-                    'orderItems as sales_quantity' => function ($query) {
+                    'orderItems as sales_quantity' => function ($query) use ($signalFrom, $signalTo) {
                         $query->whereHas('order', function ($orderQuery) use ($signalFrom, $signalTo) {
                             $orderQuery
                                 ->whereBetween('placed_at', [$signalFrom, $signalTo])
