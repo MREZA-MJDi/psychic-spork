@@ -344,3 +344,276 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 });
+
+/* =========================================================
+   ADMIN / LOCALIZED FORM INPUTS
+========================================================= */
+(() => {
+    const MONEY_NAMES = new Set([
+        'price',
+        'sale_price',
+        'amount',
+        'shipping_cost',
+        'discount_amount',
+        'total_amount',
+    ]);
+
+    const faNumber = new Intl.NumberFormat('fa-IR');
+
+    const normalizeDigits = (value) => String(value ?? '')
+        .replace(/[۰-۹]/g, (digit) => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(digit)))
+        .replace(/[٠-٩]/g, (digit) => String('٠١٢٣٤٥٦٧٨٩'.indexOf(digit)));
+
+    const rawMoney = (value) => normalizeDigits(value)
+        .replace(/[٬,،\s]/g, '')
+        .replace(/[^0-9.-]/g, '');
+
+    const formatMoney = (value) => {
+        const raw = rawMoney(value);
+        if (!raw || raw === '-') return '';
+        const number = Number(raw);
+        if (!Number.isFinite(number)) return '';
+        return faNumber.format(Math.max(0, Math.round(number)));
+    };
+
+    const isMoneyInput = (input) => {
+        const name = input.getAttribute('name') || '';
+        return input.hasAttribute('data-money-input') || MONEY_NAMES.has(name);
+    };
+
+    const enhanceMoneyInput = (input) => {
+        if (input.dataset.moneyReady === '1') return;
+        input.dataset.moneyReady = '1';
+
+        const originalName = input.name;
+        const wasRequired = input.required;
+
+        input.type = 'hidden';
+        input.required = false;
+
+        const visible = document.createElement('input');
+        visible.type = 'text';
+        visible.className = 'admin-money-input';
+        visible.inputMode = 'numeric';
+        visible.autocomplete = 'off';
+        visible.name = originalName + '_display';
+        visible.value = formatMoney(input.value);
+        visible.placeholder = 'مثلاً ۱٬۵۰۰٬۰۰۰';
+        visible.dir = 'ltr';
+        visible.required = wasRequired;
+
+        input.parentNode.insertBefore(visible, input);
+
+        const sync = () => {
+            input.value = rawMoney(visible.value);
+            visible.value = formatMoney(input.value);
+        };
+
+        visible.addEventListener('input', () => {
+            input.value = rawMoney(visible.value);
+        });
+
+        visible.addEventListener('blur', sync);
+        input.closest('form')?.addEventListener('submit', sync);
+    };
+
+    const gregorianToJalali = (gy, gm, gd) => {
+        const gdm = [0,31,59,90,120,151,181,212,243,273,304,334];
+        let jy;
+
+        if (gy > 1600) {
+            jy = 979;
+            gy -= 1600;
+        } else {
+            jy = 0;
+            gy -= 621;
+        }
+
+        const gy2 = gm > 2 ? gy + 1 : gy;
+        let days =
+            (365 * gy) +
+            Math.floor((gy2 + 3) / 4) -
+            Math.floor((gy2 + 99) / 100) +
+            Math.floor((gy2 + 399) / 400) -
+            80 +
+            gd +
+            gdm[gm - 1];
+
+        jy += 33 * Math.floor(days / 12053);
+        days %= 12053;
+        jy += 4 * Math.floor(days / 1461);
+        days %= 1461;
+
+        if (days > 365) {
+            jy += Math.floor((days - 1) / 365);
+            days = (days - 1) % 365;
+        }
+
+        const jm = days < 186
+            ? 1 + Math.floor(days / 31)
+            : 7 + Math.floor((days - 186) / 30);
+
+        const jd = 1 + (days < 186 ? days % 31 : (days - 186) % 30);
+        return [jy, jm, jd];
+    };
+
+    const jalaliToGregorian = (jy, jm, jd) => {
+        jy += 1597;
+
+        let days =
+            -355668 +
+            (365 * jy) +
+            Math.floor(jy / 33) * 8 +
+            Math.floor(((jy % 33) + 3) / 4) +
+            jd +
+            (jm < 7 ? (jm - 1) * 31 : ((jm - 7) * 30) + 186);
+
+        let gy = 400 * Math.floor(days / 146097);
+        days %= 146097;
+
+        if (days > 36524) {
+            gy += 100 * Math.floor(--days / 36524);
+            days %= 36524;
+
+            if (days >= 365) {
+                days++;
+            }
+        }
+
+        gy += 4 * Math.floor(days / 1461);
+        days %= 1461;
+
+        if (days > 365) {
+            gy += Math.floor((days - 1) / 365);
+            days = (days - 1) % 365;
+        }
+
+        const gd = days + 1;
+        const leap = (gy % 4 === 0 && gy % 100 !== 0) || gy % 400 === 0;
+        const monthDays = [0,31,leap ? 29 : 28,31,30,31,30,31,31,30,31,30,31];
+
+        let month = 1;
+        let day = gd;
+
+        while (day > monthDays[month]) {
+            day -= monthDays[month];
+            month++;
+        }
+
+        return [gy, month, day];
+    };
+
+    const formatJalali = (iso) => {
+        if (!iso) return '';
+        const match = String(iso).match(/^(\\d{4})-(\\d{2})-(\\d{2})/);
+        if (!match) return '';
+
+        const [jy, jm, jd] = gregorianToJalali(
+            Number(match[1]),
+            Number(match[2]),
+            Number(match[3])
+        );
+
+        return jy + '/' + String(jm).padStart(2, '0') + '/' + String(jd).padStart(2, '0');
+    };
+
+    const jalaliToIso = (value) => {
+        const normalized = normalizeDigits(value).replace(/-/g, '/');
+        const match = normalized.match(/^(\\d{4})\\/(\\d{1,2})\\/(\\d{1,2})$/);
+
+        if (!match) return '';
+
+        const [gy, gm, gd] = jalaliToGregorian(
+            Number(match[1]),
+            Number(match[2]),
+            Number(match[3])
+        );
+
+        return gy + '-' + String(gm).padStart(2, '0') + '-' + String(gd).padStart(2, '0');
+    };
+
+    const enhanceDateInput = (input) => {
+        if (input.dataset.jalaliReady === '1') return;
+        input.dataset.jalaliReady = '1';
+
+        const wasRequired = input.required;
+        const originalValue = input.value;
+
+        input.type = 'hidden';
+        input.required = false;
+
+        const visible = document.createElement('input');
+        visible.type = 'text';
+        visible.className = 'admin-jalali-input';
+        visible.inputMode = 'numeric';
+        visible.autocomplete = 'off';
+        visible.name = input.name + '_jalali';
+        visible.placeholder = '۱۴۰۵/۰۷/۰۶';
+        visible.value = formatJalali(originalValue);
+        visible.dir = 'ltr';
+        visible.required = wasRequired;
+
+        const hint = document.createElement('small');
+        hint.className = 'admin-help';
+        hint.textContent = 'تاریخ را شمسی وارد کن؛ سیستم قبل از ذخیره آن را به فرمت استاندارد تبدیل می‌کند.';
+
+        input.parentNode.insertBefore(visible, input);
+        visible.insertAdjacentElement('afterend', hint);
+
+        const sync = () => {
+            const iso = jalaliToIso(visible.value);
+
+            if (iso) {
+                input.value = iso;
+                visible.value = formatJalali(iso);
+                visible.setCustomValidity('');
+            } else if (visible.value.trim() !== '') {
+                visible.setCustomValidity('تاریخ شمسی معتبر وارد کنید.');
+            }
+        };
+
+        visible.addEventListener('blur', sync);
+        visible.addEventListener('change', sync);
+        input.closest('form')?.addEventListener('submit', (event) => {
+            sync();
+
+            if (wasRequired && !input.value) {
+                event.preventDefault();
+                visible.setCustomValidity('تاریخ شمسی معتبر وارد کنید.');
+                visible.reportValidity();
+            }
+        });
+    };
+
+    const formatLocalDates = () => {
+        document.querySelectorAll('[data-admin-date]').forEach((element) => {
+            const iso = element.dataset.adminDate;
+            if (!iso) return;
+
+            const date = new Date(iso);
+            if (Number.isNaN(date.getTime())) return;
+
+            element.textContent = new Intl.DateTimeFormat(
+                'fa-IR-u-ca-persian',
+                {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                }
+            ).format(date);
+        });
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.admin-main input').forEach((input) => {
+            if (input instanceof HTMLInputElement && isMoneyInput(input)) {
+                enhanceMoneyInput(input);
+            }
+        });
+
+        document.querySelectorAll('.admin-main input[type="date"]').forEach(enhanceDateInput);
+        formatLocalDates();
+    });
+})();
