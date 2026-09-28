@@ -58,10 +58,7 @@ class CartController extends Controller
                 );
             }
 
-            return back()->with(
-                'success',
-                'محصول به سبد خرید اضافه شد.'
-            );
+            return back()->with('success', 'محصول به سبد خرید اضافه شد.');
         } catch (Throwable $e) {
             report($e);
 
@@ -123,15 +120,13 @@ class CartController extends Controller
                 ], $this->status($e));
             }
 
-            return back()
-                ->withInput()
-                ->with(
-                    'error',
-                    $this->message(
-                        $e,
-                        'به‌روزرسانی سبد خرید انجام نشد.'
-                    )
-                );
+            return back()->with(
+                'error',
+                $this->message(
+                    $e,
+                    'به‌روزرسانی سبد خرید انجام نشد.'
+                )
+            );
         }
     }
 
@@ -143,10 +138,7 @@ class CartController extends Controller
         try {
             $current = $cart->current($request);
 
-            $cart->remove(
-                $current,
-                $item
-            );
+            $cart->remove($current, $item);
 
             if ($request->expectsJson()) {
                 return response()->json(
@@ -180,10 +172,8 @@ class CartController extends Controller
         }
     }
 
-    private function payload(
-        $cartModel,
-        CartService $cart
-    ): array {
+    private function payload($cartModel, CartService $cart): array
+    {
         $items = $cart->items($cartModel);
 
         return [
@@ -199,6 +189,10 @@ class CartController extends Controller
                     'unit_price' => (float) $item['unit_price'],
                     'line_total' => (float) $item['line_total'],
                     'image' => $item['image'],
+                    'product_url' => route(
+                        'products.show',
+                        $item['product']
+                    ),
                 ];
             })->values()->all(),
         ];

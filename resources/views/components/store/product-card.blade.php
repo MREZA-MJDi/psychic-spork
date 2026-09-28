@@ -8,11 +8,17 @@
     $image = $product->galleryMedia->first()?->url;
     $stock = (int) ($productVariant?->stock ?? 0);
     $isOnSale = (bool) ($productVariant?->is_on_sale ?? false);
+
     $discount = $isOnSale
-        ? max(1, round((1 - (
-            $productVariant->effective_price /
-            max(1, (float) $productVariant->price)
-        )) * 100))
+        ? max(
+            1,
+            round(
+                (1 - (
+                    $productVariant->effective_price /
+                    max(1, (float) $productVariant->price)
+                )) * 100
+            )
+        )
         : 0;
 @endphp
 

@@ -133,6 +133,7 @@
                 href="{{ route('cart') }}"
                 class="icon-button cart-button"
                 aria-label="سبد خرید"
+                data-cart-open
             >
                 <svg
                     viewBox="0 0 24 24"
@@ -143,11 +144,9 @@
                     <path d="M9 8a3 3 0 0 1 6 0"/>
                 </svg>
 
-                @if(($cartCount ?? 0) > 0)
-                    <span class="cart-count">
-                        {{ $cartCount }}
-                    </span>
-                @endif
+                <span class="cart-count" data-cart-count @if(($cartCount ?? 0) < 1) hidden @endif>
+                    {{ $cartCount ?? 0 }}
+                </span>
             </a>
 
         </div>
