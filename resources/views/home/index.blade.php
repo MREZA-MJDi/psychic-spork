@@ -24,24 +24,24 @@
         />
     </section>
 
-    {{-- 04. Featured products --}}
-    <x-store.product-showcase
-        :products="$products"
-    />
-
-    {{-- 05. Live store signals --}}
+    {{-- 04. Live store signals --}}
     <x-store.home-signals
         :recent-products="$recentProducts"
         :popular-products="$popularProducts"
     />
 
-    {{-- 06. Brands --}}
+    {{-- 05. Brands --}}
     <x-store.brand-grid
         :brands="$brands"
     />
 
-    {{-- 07. Closing CTA --}}
+    {{-- 06. Closing CTA --}}
     <x-store.home-closing />
+
+    {{-- 07. Recommendations: immediately before the storefront footer --}}
+    <x-store.home-recommendations
+        :products="$recommendedProducts"
+    />
 
 </div>
 @endsection
