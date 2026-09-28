@@ -1236,7 +1236,7 @@
 
 .search-panel__field {
     min-width: 0;
-    height: 48px;
+    height: 50px;
     display: flex;
     align-items: center;
     padding-inline: 13px;
