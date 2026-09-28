@@ -105,7 +105,9 @@
     {{-- Shared storefront shell --}}
     @vite([
         'resources/css/app.css',
+        'resources/css/store-structure.css',
         'resources/js/app.js',
+        'resources/js/store-cart.js',
     ])
 
     {{-- Homepage-only styles and hero behavior --}}
@@ -131,6 +133,8 @@
     </main>
 
     <x-store.footer />
+
+    <x-store.cart-drawer />
 
     <nav
         class="store-mobile-bottom"
@@ -220,6 +224,7 @@
             class="{{ request()->routeIs('cart') ? 'is-active' : '' }}"
             href="{{ route('cart') }}"
             aria-label="سبد خرید"
+            data-cart-open
         >
             <svg
                 viewBox="0 0 24 24"
@@ -229,9 +234,13 @@
                 <path d="M9 8a3 3 0 0 1 6 0"/>
             </svg>
 
-            @if(($cartCount ?? 0) > 0)
-                <b>{{ $cartCount }}</b>
-            @endif
+            <b
+                class="cart-count"
+                data-cart-count
+                @if(($cartCount ?? 0) < 1) hidden @endif
+            >
+                {{ $cartCount ?? 0 }}
+            </b>
 
             <span>سبد</span>
         </a>
