@@ -1,28 +1,52 @@
 @php
     $latestImage = $latestProduct?->galleryMedia?->first()?->url;
-
     $category = $categories->first();
     $categoryImage = $category?->coverMedia?->url;
 
-    $latestUrl = route('products.index');
+    $latestUrl = $latestProduct
+        ? route('products.show', $latestProduct)
+        : route('products.index');
 
     $categoryUrl = $category
         ? route('categories.show', $category)
         : route('categories.index');
 @endphp
 
-<section class="section-block section-block--compact home-mini-banners">
+<section
+    class="home-discovery-section"
+    aria-labelledby="home-discovery-title"
+>
     <div class="container">
 
-        <div class="mini-banner-grid">
+        <header class="home-discovery__head">
+            <div>
+                <span class="eyebrow">JANAN / DISCOVER</span>
 
-            {{-- New arrivals --}}
+                <h2 id="home-discovery-title">
+                    برای انتخاب بعدی، دو مسیر روشن.
+                </h2>
+
+                <p>
+                    تازه‌ترین محصول یا یک کالکشن مشخص را انتخاب کن و مستقیم ادامه بده.
+                </p>
+            </div>
+
+            <a
+                href="{{ route('products.index') }}"
+                class="text-link"
+            >
+                همه محصولات
+                <span aria-hidden="true">↗</span>
+            </a>
+        </header>
+
+        <div class="home-discovery__grid">
+
             <a
                 href="{{ $latestUrl }}"
-                class="mini-banner mini-banner--dark"
+                class="discovery-card discovery-card--featured"
             >
-                <div class="mini-banner__media">
-
+                <div class="discovery-card__media">
                     @if($latestImage)
                         <img
                             src="{{ $latestImage }}"
@@ -31,96 +55,87 @@
                             decoding="async"
                         >
                     @else
-                        <div class="mini-banner__placeholder">
+                        <div class="discovery-card__placeholder" aria-hidden="true">
                             <span>JANAN</span>
                         </div>
                     @endif
-
                 </div>
 
-                <span
-                    class="mini-banner__veil"
-                    aria-hidden="true"
-                ></span>
+                <span class="discovery-card__overlay" aria-hidden="true"></span>
 
-                <div class="mini-banner__content">
-
-                    <span class="mini-banner__eyebrow">
-                        {{ $siteBrandNameLatin ?? 'Janan' }} / NEW IN
-                    </span>
-
-                    <h3>
-                        تازه‌های جانان
-                    </h3>
-
-                    <span class="mini-banner__link">
-                        مشاهده محصولات
-                        <b aria-hidden="true">←</b>
-                    </span>
-
+                <div class="discovery-card__top">
+                    <span>01</span>
+                    <span>{{ $siteBrandNameLatin ?? 'JANAN' }} / NEW IN</span>
                 </div>
 
-                <span
-                    class="mini-banner__number"
-                    aria-hidden="true"
-                >
-                    01
-                </span>
+                <div class="discovery-card__body">
+                    <div>
+                        <span class="discovery-card__kicker">
+                            تازه‌های جانان
+                        </span>
+
+                        <h3>
+                            {{ $latestProduct?->name ?? 'انتخاب‌های تازه' }}
+                        </h3>
+
+                        <p>
+                            محصولات فعال و تازه‌ای که همین حالا آماده‌ی کشف‌اند.
+                        </p>
+                    </div>
+
+                    <span class="discovery-card__action">
+                        مشاهده محصول
+                        <b aria-hidden="true">↗</b>
+                    </span>
+                </div>
             </a>
 
-
-            {{-- Curated category --}}
             <a
                 href="{{ $categoryUrl }}"
-                class="mini-banner mini-banner--soft"
+                class="discovery-card discovery-card--category"
             >
-                <div class="mini-banner__media">
-
+                <div class="discovery-card__media">
                     @if($categoryImage)
                         <img
                             src="{{ $categoryImage }}"
-                            alt="{{ $category?->name ?? 'انتخاب‌های خاص جانان' }}"
+                            alt="{{ $category?->name ?? 'کالکشن جانان' }}"
                             loading="lazy"
                             decoding="async"
                         >
                     @else
-                        <div class="mini-banner__placeholder">
-                            <span>
-                                {{ $category?->name ?? 'JANAN' }}
-                            </span>
+                        <div class="discovery-card__placeholder" aria-hidden="true">
+                            <span>{{ $category?->name ?? 'JANAN' }}</span>
                         </div>
                     @endif
-
                 </div>
 
-                <span
-                    class="mini-banner__veil"
-                    aria-hidden="true"
-                ></span>
+                <span class="discovery-card__overlay" aria-hidden="true"></span>
 
-                <div class="mini-banner__content">
-
-                    <span class="mini-banner__eyebrow">
-                        EDITED FOR YOU
-                    </span>
-
-                    <h3>
-                        {{ $category?->name ?? 'انتخاب‌های خاص' }}
-                    </h3>
-
-                    <span class="mini-banner__link">
-                        دیدن انتخاب‌ها
-                        <b aria-hidden="true">←</b>
-                    </span>
-
+                <div class="discovery-card__top">
+                    <span>02</span>
+                    <span>CURATED / COLLECTION</span>
                 </div>
 
-                <span
-                    class="mini-banner__number"
-                    aria-hidden="true"
-                >
-                    02
-                </span>
+                <div class="discovery-card__body">
+                    <div>
+                        <span class="discovery-card__kicker">
+                            کالکشن منتخب
+                        </span>
+
+                        <h3>
+                            {{ $category?->name ?? 'انتخاب‌های خاص' }}
+                        </h3>
+
+                        <p>
+                            {{ $category?->description ?? 'مسیر مستقیم برای دیدن محصولات این کالکشن.' }}
+                        </p>
+                    </div>
+
+                    <span class="discovery-card__action">
+                        ورود به کالکشن
+                        <b aria-hidden="true">↗</b>
+                    </span>
+                </div>
             </a>
 
         </div>
