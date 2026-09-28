@@ -16,7 +16,7 @@ class AdminUserSeeder extends Seeder
 
         if ($email === '' || $password === '') {
             throw new RuntimeException(
-                'JANAN_ADMIN_EMAIL and JANAN_ADMIN_PASSWORD must be set in your .env before seeding the admin user.'
+                'Set JANAN_ADMIN_EMAIL and JANAN_ADMIN_PASSWORD before creating an admin account.'
             );
         }
 
