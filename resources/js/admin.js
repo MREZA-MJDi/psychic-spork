@@ -3,11 +3,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const menu = document.querySelector('[data-admin-menu]');
 
     menu?.addEventListener('click', () => {
-        sidebar?.classList.toggle('is-open');
+        const isOpen = sidebar?.classList.toggle('is-open') ?? false;
+        menu.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
     });
 
     sidebar?.querySelectorAll('a').forEach((link) => {
-        link.addEventListener('click', () => sidebar.classList.remove('is-open'));
+        link.addEventListener('click', () => {
+            sidebar.classList.remove('is-open');
+            menu?.setAttribute('aria-expanded', 'false');
+        });
     });
 
     document.addEventListener('click', (event) => {
@@ -15,6 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!sidebar?.classList.contains('is-open')) return;
         if (sidebar.contains(event.target) || menu?.contains(event.target)) return;
         sidebar.classList.remove('is-open');
+        menu?.setAttribute('aria-expanded', 'false');
     });
 });
 
@@ -523,11 +528,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (!match) return '';
 
-        const [gy, gm, gd] = jalaliToGregorian(
-            Number(match[1]),
-            Number(match[2]),
-            Number(match[3])
-        );
+        const jy = Number(match[1]);
+        const jm = Number(match[2]);
+        const jd = Number(match[3]);
+
+        if (jm < 1 || jm > 12 || jd < 1 || jd > 31) {
+            return '';
+        }
+
+        const [gy, gm, gd] = jalaliToGregorian(jy, jm, jd);
 
         return gy + '-' + String(gm).padStart(2, '0') + '-' + String(gd).padStart(2, '0');
     };
