@@ -889,3 +889,133 @@
         min-height: 56px;
     }
 }
+
+
+/* =========================================================
+   AUTH REFINEMENT / LOGIN SYSTEM
+========================================================= */
+
+.auth-card__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.auth-card__edition {
+    color: #aa9da3;
+    font-size: 7px;
+    font-weight: 700;
+    letter-spacing: .16em;
+}
+
+.auth-demo {
+    margin: 0 0 22px;
+    padding: 13px 14px;
+    border: 1px solid rgba(111,57,79,.13);
+    border-radius: 14px;
+    background:
+        linear-gradient(135deg, rgba(111,57,79,.055), rgba(183,152,114,.055)),
+        #fffdfc;
+}
+
+.auth-demo__head {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin-bottom: 11px;
+}
+
+.auth-demo__badge {
+    display: inline-flex;
+    min-height: 20px;
+    align-items: center;
+    padding: 0 7px;
+    border-radius: 999px;
+    color: var(--auth-wine);
+    background: var(--auth-rose-soft);
+    font-size: 6px;
+    font-weight: 900;
+    letter-spacing: .11em;
+}
+
+.auth-demo__head strong {
+    color: var(--auth-ink);
+    font-size: 9px;
+}
+
+.auth-demo__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.auth-demo__grid > div {
+    display: grid;
+    gap: 4px;
+    min-width: 0;
+    padding: 9px 10px;
+    border: 1px solid rgba(39,33,38,.07);
+    border-radius: 10px;
+    background: rgba(255,255,255,.72);
+}
+
+.auth-demo__grid small {
+    color: #aa9da3;
+    font-size: 6px;
+    font-weight: 800;
+    letter-spacing: .11em;
+}
+
+.auth-demo__grid code {
+    overflow: hidden;
+    color: var(--auth-ink);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 9px;
+    direction: ltr;
+    text-align: left;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.auth-divider {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 10px;
+    margin-top: 19px;
+}
+
+.auth-divider span {
+    height: 1px;
+    background: var(--auth-line);
+}
+
+.auth-divider small {
+    color: #aa9da3;
+    font-size: 7px;
+    letter-spacing: .16em;
+}
+
+@media (max-width: 600px) {
+    .auth-card__top {
+        align-items: flex-start;
+    }
+
+    .auth-card__edition {
+        padding-top: 8px;
+    }
+
+    .auth-demo__grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .auth-demo *,
+    .auth-divider,
+    .auth-card__top {
+        animation: none !important;
+        transition: none !important;
+    }
+}
