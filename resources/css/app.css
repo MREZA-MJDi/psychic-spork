@@ -2028,7 +2028,7 @@ position:
         hidden;
 
     padding:
-        clamp(56px, 7vw, 82px) 0;
+        clamp(52px, 6vw, 76px) 0;
 
     border-bottom:
         1px solid rgba(57, 65, 74, .07);
@@ -2067,7 +2067,7 @@ position:
 
 .page-hero--premium {
 min-height:
-        360px;
+        clamp(340px, 48svh, 430px);
 
     display:
         flex;
