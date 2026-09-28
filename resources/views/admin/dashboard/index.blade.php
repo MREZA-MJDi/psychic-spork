@@ -171,7 +171,12 @@
                                     ></span>
                                 </div>
 
-                                <small>{{ $day['label'] ?? '—' }}</small>
+                                <small
+                                    data-admin-date="{{ $day['date'] ?? '' }}"
+                                    data-admin-date-format="day"
+                                >
+                                    {{ $day['label'] ?? '—' }}
+                                </small>
                                 <b class="dashboard-v2__bar-orders">
                                     {{ number_format((int) ($day['orders'] ?? 0)) }}
                                 </b>
@@ -427,7 +432,12 @@
 
                                 <td>
                                     <span class="dashboard-v2__muted">
-                                        {{ optional($order->placed_at)->format('Y/m/d H:i') }}
+                                        <span
+                                            class="admin-local-date"
+                                            data-admin-date="{{ optional($order->placed_at)->toIso8601String() }}"
+                                        >
+                                            {{ optional($order->placed_at)->format('Y/m/d H:i') }}
+                                        </span>
                                     </span>
                                 </td>
 
