@@ -32,7 +32,7 @@
     />
 
     {{-- 05. Products --}}
-    <x-store.product-section
+    <x-store.product-showcase
         :products="$products"
     />
 
