@@ -3,6 +3,12 @@ const csrfToken = document
     ?.getAttribute('content') || '';
 
 const drawer = document.querySelector('[data-cart-drawer]');
+const quickPreview = document.querySelector('[data-cart-quick-preview]');
+const quickPreviewImage = quickPreview?.querySelector('[data-cart-preview-image]');
+const quickPreviewName = quickPreview?.querySelector('[data-cart-preview-name]');
+const quickPreviewMeta = quickPreview?.querySelector('[data-cart-preview-meta]');
+
+let quickPreviewTimer = null;
 
 const cartState = {
     count: 0,
@@ -21,6 +27,69 @@ const setCartCount = (count) => {
         node.textContent = count;
         node.hidden = count < 1;
     });
+};
+
+const showQuickPreview = (payload, fallbackForm = null) => {
+    if (!quickPreview) return;
+
+    const item = Array.isArray(payload.items) && payload.items.length
+        ? payload.items[payload.items.length - 1]
+        : null;
+
+    const fallbackName = fallbackForm?.dataset.productName || 'محصول';
+    const fallbackImage = fallbackForm?.dataset.productImage || '';
+
+    if (quickPreviewImage) {
+        quickPreviewImage.innerHTML = '';
+
+        if (item?.image || fallbackImage) {
+            const img = document.createElement('img');
+            img.src = item?.image || fallbackImage;
+            img.alt = '';
+            quickPreviewImage.appendChild(img);
+        } else {
+            const placeholder = document.createElement('span');
+            placeholder.textContent = 'JANAN';
+            quickPreviewImage.appendChild(placeholder);
+        }
+    }
+
+    if (quickPreviewName) {
+        quickPreviewName.textContent = item?.name || fallbackName;
+    }
+
+    if (quickPreviewMeta) {
+        const quantity = Number(item?.quantity || 1);
+        quickPreviewMeta.textContent =
+            quantity > 1
+                ? quantity + ' عدد · ' + formatMoney(item?.line_total || 0)
+                : '۱ عدد · ' + formatMoney(item?.line_total || 0);
+    }
+
+    quickPreview.hidden = false;
+    quickPreview.classList.remove('is-visible');
+
+    requestAnimationFrame(() => {
+        quickPreview.classList.add('is-visible');
+    });
+
+    window.clearTimeout(quickPreviewTimer);
+    quickPreviewTimer = window.setTimeout(() => {
+        hideQuickPreview();
+    }, 5200);
+};
+
+const hideQuickPreview = () => {
+    if (!quickPreview) return;
+
+    quickPreview.classList.remove('is-visible');
+    window.clearTimeout(quickPreviewTimer);
+
+    window.setTimeout(() => {
+        if (!quickPreview.classList.contains('is-visible')) {
+            quickPreview.hidden = true;
+        }
+    }, 180);
 };
 
 const renderCart = (payload) => {
@@ -215,14 +284,22 @@ document.addEventListener('click', async (event) => {
     const qtyTrigger = event.target.closest('[data-cart-qty]');
     const removeTrigger = event.target.closest('[data-cart-remove]');
     const checkoutTrigger = event.target.closest('[data-cart-checkout]');
+    const previewCloseTrigger = event.target.closest('[data-cart-preview-close]');
 
     if (checkoutTrigger?.dataset.disabled === 'true') {
         event.preventDefault();
         return;
     }
 
+    if (previewCloseTrigger) {
+        event.preventDefault();
+        hideQuickPreview();
+        return;
+    }
+
     if (openTrigger) {
         event.preventDefault();
+        hideQuickPreview();
         await openDrawer();
         return;
     }
@@ -282,6 +359,21 @@ document.addEventListener('submit', async (event) => {
     const button = form.querySelector('button[type="submit"]');
     const formData = new FormData(form);
 
+    // بازخورد فوری قبل از برگشت پاسخ شبکه.
+    showQuickPreview(
+        {
+            items: [
+                {
+                    name: form.dataset.productName || 'محصول',
+                    image: form.dataset.productImage || '',
+                    quantity: 1,
+                    line_total: 0,
+                },
+            ],
+        },
+        form
+    );
+
     if (button) {
         button.disabled = true;
         button.dataset.originalText = button.textContent.trim();
@@ -304,8 +396,14 @@ document.addEventListener('submit', async (event) => {
             throw new Error(payload.message || 'افزودن به سبد انجام نشد.');
         }
 
-        renderCart(payload);
-        await openDrawer(false);
+        setCartCount(payload.count);
+
+        // نمایش فوری کنار آیکن سبد؛ رندر کامل Drawer بعد از آن انجام می‌شود.
+        showQuickPreview(payload, form);
+
+        window.setTimeout(() => {
+            renderCart(payload);
+        }, 0);
     } catch (error) {
         window.alert(error.message);
     } finally {
@@ -316,8 +414,20 @@ document.addEventListener('submit', async (event) => {
     }
 });
 
+document.addEventListener('click', (event) => {
+    if (
+        quickPreview &&
+        !quickPreview.hidden &&
+        !quickPreview.contains(event.target) &&
+        !event.target.closest('[data-cart-open]')
+    ) {
+        hideQuickPreview();
+    }
+});
+
 document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') {
+        hideQuickPreview();
         closeDrawer();
     }
 });

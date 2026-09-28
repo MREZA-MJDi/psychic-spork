@@ -24,33 +24,24 @@
         />
     </section>
 
-    {{-- 04. Two promotional cards between collections and products --}}
-    <x-store.promo-stack
-        :latest-product="$latestProduct"
-        :category="$categories->first()"
-        label="JANAN / DISCOVER"
-    />
-
-    {{-- 05. Products --}}
+    {{-- 04. Featured products --}}
     <x-store.product-showcase
         :products="$products"
     />
 
-    {{-- 06. Editorial --}}
-    <x-store.editorial-banner
-        :products="$products"
+    {{-- 05. Live store signals --}}
+    <x-store.home-signals
+        :recent-products="$recentProducts"
+        :popular-products="$popularProducts"
     />
 
-    {{-- 07. Brands --}}
+    {{-- 06. Brands --}}
     <x-store.brand-grid
         :brands="$brands"
     />
 
-    {{-- 08. Final discovery --}}
-    <x-store.mini-banners
-        :latest-product="$latestProduct"
-        :categories="$categories"
-    />
+    {{-- 07. Closing CTA --}}
+    <x-store.home-closing />
 
 </div>
 @endsection

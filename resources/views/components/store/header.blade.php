@@ -129,12 +129,13 @@
 
 
             {{-- Cart --}}
-            <a
-                href="{{ route('cart') }}"
-                class="icon-button cart-button"
-                aria-label="سبد خرید"
-                data-cart-open
-            >
+            <span class="cart-trigger-wrap">
+                <a
+                    href="{{ route('cart') }}"
+                    class="icon-button cart-button"
+                    aria-label="سبد خرید"
+                    data-cart-open
+                >
                 <svg
                     viewBox="0 0 24 24"
                     aria-hidden="true"
@@ -144,10 +145,47 @@
                     <path d="M9 8a3 3 0 0 1 6 0"/>
                 </svg>
 
-                <span class="cart-count" data-cart-count @if(($cartCount ?? 0) < 1) hidden @endif>
-                    {{ $cartCount ?? 0 }}
-                </span>
-            </a>
+                    <span class="cart-count" data-cart-count @if(($cartCount ?? 0) < 1) hidden @endif>
+                        {{ $cartCount ?? 0 }}
+                    </span>
+                </a>
+
+                <div
+                        class="cart-quick-preview"
+                    data-cart-quick-preview
+                    hidden
+                    aria-live="polite"
+                >
+                <span class="cart-quick-preview__caret" aria-hidden="true"></span>
+
+                <div class="cart-quick-preview__media" data-cart-preview-image>
+                    <span>JANAN</span>
+                </div>
+
+                <div class="cart-quick-preview__copy">
+                    <small>به سبد خرید اضافه شد</small>
+                    <strong data-cart-preview-name></strong>
+                    <span data-cart-preview-meta></span>
+                </div>
+
+                <a
+                    href="{{ route('cart') }}"
+                    class="cart-quick-preview__link"
+                >
+                    <span>مشاهده سبد</span>
+                    <i aria-hidden="true">←</i>
+                </a>
+
+                <button
+                    type="button"
+                    class="cart-quick-preview__close"
+                    data-cart-preview-close
+                    aria-label="بستن پیش‌نمایش"
+                >
+                    ×
+                    </button>
+                </div>
+            </span>
 
         </div>
 

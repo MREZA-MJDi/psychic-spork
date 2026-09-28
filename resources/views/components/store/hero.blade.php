@@ -162,6 +162,9 @@
                                     data-card-image
                                     src="{{ $slide['image'] }}"
                                     alt="{{ $slide['title'] ?? 'محصول جانان' }}"
+                                    loading="{{ $slot === 4 ? 'eager' : 'lazy' }}"
+                                    fetchpriority="{{ $slot === 4 ? 'high' : 'low' }}"
+                                    decoding="async"
                                     draggable="false"
                                 >
                             </picture>

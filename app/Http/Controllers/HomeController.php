@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Brand;
 use App\Models\Category;
+use App\Models\Order;
 use App\Models\Product;
 use App\Services\SeoService;
 use Illuminate\View\View;
@@ -74,6 +75,66 @@ class HomeController extends Controller
                 ->values();
         }
 
+        /*
+        |--------------------------------------------------------------------------
+        | Home signals
+        |--------------------------------------------------------------------------
+        |
+        | These values mirror the catalog signals used in Admin Dashboard:
+        | recent catalog additions + paid, non-cancelled top sellers.
+        | They are filtered to active products before reaching the storefront.
+        |--------------------------------------------------------------------------
+        */
+
+        $recentProducts = Product::query()
+            ->active()
+            ->with([
+                'category:id,name',
+                'brand:id,name',
+                'galleryMedia',
+                'variants',
+            ])
+            ->latest('created_at')
+            ->latest('id')
+            ->limit(4)
+            ->get();
+
+        $signalFrom = now()
+            ->startOfDay()
+            ->subDays(29);
+
+        $signalTo = now()->endOfDay();
+
+        $popularProducts = Product::query()
+            ->active()
+            ->with([
+                'category:id,name',
+                'brand:id,name',
+                'galleryMedia',
+                'variants',
+            ])
+            ->withSum(
+                [
+                    'orderItems as sales_quantity' => function ($query) {
+                        $query->whereHas('order', function ($orderQuery) use ($signalFrom, $signalTo) {
+                            $orderQuery
+                                ->whereBetween('placed_at', [$signalFrom, $signalTo])
+                                ->whereNotIn(
+                                    'status',
+                                    Order::CANCEL_LIKE_STATUSES
+                                )
+                                ->where('payment_status', 'paid');
+                        });
+                    },
+                ],
+                'quantity'
+            )
+            ->having('sales_quantity', '>', 0)
+            ->orderByDesc('sales_quantity')
+            ->orderByDesc('id')
+            ->limit(4)
+            ->get();
+
         $heroProducts = Product::query()
             ->active()
             ->with(['brand.logoMedia', 'galleryMedia', 'variants'])
@@ -103,6 +164,8 @@ class HomeController extends Controller
             'brands' => $brands,
             'products' => $products,
             'latestProduct' => $products->first(),
+            'recentProducts' => $recentProducts,
+            'popularProducts' => $popularProducts,
             'heroSlides' => $heroSlides,
             'homeTagline' => 'کالکشن‌های منتخب جانان با محصولات واقعی فروشگاه، برای انتخابی دقیق‌تر و شخصی‌تر.',
         ]);
