@@ -658,91 +658,40 @@
 
 
         {{-- =====================================================
-            IMAGE PREVIEW MODAL
+            IMAGE PREVIEW DIALOG
         ====================================================== --}}
 
-        <div
+        <dialog
+            class="admin-product-preview"
             data-product-preview-modal
-            hidden
-            style="
-                position:fixed;
-                inset:0;
-                z-index:9999;
-                display:flex;
-                align-items:center;
-                justify-content:center;
-                padding:20px;
-                background:rgba(0,0,0,.72);
-                backdrop-filter:blur(5px);
-            "
+            aria-labelledby="product-preview-name"
         >
-
-            <div
-                style="
-                    position:relative;
-                    width:min(92vw,700px);
-                    max-height:90vh;
-                    overflow:hidden;
-                    border-radius:20px;
-                    background:#fff;
-                    box-shadow:0 30px 80px rgba(0,0,0,.3);
-                "
-            >
+            <div class="admin-product-preview__inner">
 
                 <button
                     type="button"
                     data-preview-close
-                    class="admin-btn admin-btn--ghost admin-btn--sm"
-                    style="
-                        position:absolute;
-                        top:12px;
-                        left:12px;
-                        z-index:2;
-                        width:36px;
-                        min-width:36px;
-                        padding:0;
-                        background:rgba(255,255,255,.94);
-                    "
+                    class="admin-btn admin-btn--ghost admin-btn--sm admin-product-preview__close"
                     aria-label="بستن"
                 >
                     ×
                 </button>
 
-
                 <img
                     data-preview-image
                     src=""
                     alt=""
-                    style="
-                        display:block;
-                        width:100%;
-                        max-height:78vh;
-                        object-fit:contain;
-                        background:#f6f4f0;
-                    "
                 >
 
-
-                <div
-                    style="
-                        padding:14px 18px;
-                        border-top:1px solid var(--admin-border);
-                    "
-                >
-
+                <div class="admin-product-preview__caption">
                     <strong
+                        id="product-preview-name"
                         data-preview-name
-                        style="
-                            display:block;
-                            color:var(--admin-text);
-                            font-size:11px;
-                        "
                     ></strong>
-
                 </div>
 
             </div>
-
+        </dialog>
         </div>
 
     </div>
