@@ -2576,3 +2576,117 @@ font-size:
             9px;
 }
 }
+
+
+/* =========================================================
+   HOME PRODUCT GRID
+   Standard catalog-sized product section for homepage.
+========================================================= */
+
+.home-product-section {
+    padding-block: clamp(58px, 7vw, 96px);
+    background: #fff;
+}
+
+.home-product-section__head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 28px;
+    margin-bottom: 28px;
+}
+
+.home-product-section__head > div {
+    min-width: 0;
+}
+
+.home-product-section__head h2 {
+    margin: 9px 0 0;
+    color: var(--janan-ink-strong);
+    font-size: clamp(28px, 3.6vw, 46px);
+    font-weight: 620;
+    letter-spacing: -.05em;
+    line-height: 1.2;
+}
+
+.home-product-section__head p {
+    max-width: 620px;
+    margin: 10px 0 0;
+    color: var(--janan-muted);
+    font-size: 10px;
+    line-height: 2;
+}
+
+.home-product-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.home-product-grid .product-card {
+    min-width: 0;
+}
+
+.home-product-grid .product-card__media {
+    aspect-ratio: .86;
+}
+
+.home-product-grid .product-card__body {
+    min-height: 138px;
+}
+
+.home-product-section__footer {
+    display: flex;
+    justify-content: center;
+    margin-top: 28px;
+}
+
+.home-product-section__footer .button {
+    min-width: 190px;
+}
+
+@media (max-width: 1080px) {
+    .home-product-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 760px) {
+    .home-product-section {
+        padding-block: 48px;
+    }
+
+    .home-product-section__head {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .home-product-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    .home-product-grid .product-card__media {
+        aspect-ratio: .82;
+    }
+
+    .home-product-grid .product-card__body {
+        min-height: 126px;
+        padding: 13px 13px 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .home-product-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .home-product-grid .product-card__media {
+        aspect-ratio: 1 / 1.06;
+    }
+
+    .home-product-section__footer .button {
+        width: 100%;
+    }
+}
