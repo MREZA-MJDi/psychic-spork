@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Contracts\PaymentGateway;
 use App\Models\Cart;
+use App\Models\SiteSetting;
 use App\Services\ZarinPalPaymentGateway;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -28,15 +29,24 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        $contactSettings = SiteSetting::query()
+            ->whereIn('key', [
+                'contact.phone',
+                'contact.email',
+                'contact.address',
+                'contact.working_hours',
+            ])
+            ->pluck('value', 'key');
+
         View::share([
             'siteBrandNameLatin' => 'Janan',
             'siteBrandNameFa' => 'جانان',
             'siteBrandName' => 'جانان',
             'siteFooterText' => 'فروشگاه آنلاین جانان؛ انتخاب دقیق، تجربه‌ای ساده و سفارش مطمئن.',
-            'siteStorePhone' => env('JANAN_STORE_PHONE'),
-            'siteStoreEmail' => env('JANAN_STORE_EMAIL'),
-            'siteStoreAddress' => env('JANAN_STORE_ADDRESS'),
-            'siteStoreWorkingHours' => env('JANAN_STORE_WORKING_HOURS'),
+            'siteStorePhone' => $contactSettings['contact.phone'] ?? env('JANAN_STORE_PHONE'),
+            'siteStoreEmail' => $contactSettings['contact.email'] ?? env('JANAN_STORE_EMAIL'),
+            'siteStoreAddress' => $contactSettings['contact.address'] ?? env('JANAN_STORE_ADDRESS'),
+            'siteStoreWorkingHours' => $contactSettings['contact.working_hours'] ?? env('JANAN_STORE_WORKING_HOURS'),
         ]);
 
         View::composer('layouts.store', function ($view): void {
