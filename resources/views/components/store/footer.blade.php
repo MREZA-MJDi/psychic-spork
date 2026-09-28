@@ -188,6 +188,109 @@
 
 
     {{-- =====================================================
+         TRUST / LEGAL
+    ====================================================== --}}
+
+    @php
+        $trust = config('app.trust', []);
+    @endphp
+
+    <div class="container footer-trust">
+        <div class="footer-trust__head">
+            <div>
+                <span class="footer-col__index">04</span>
+                <h3>اعتبار، اطلاعات و مسیرهای رسمی</h3>
+            </div>
+
+            <p>
+                اطلاعات قانونی و نشان‌های رسمی فروشگاه باید از مقادیر واقعی محیط production تأمین شوند.
+                هیچ مجوز یا نمادی بدون اتصال اطلاعات معتبر نمایش داده نمی‌شود.
+            </p>
+        </div>
+
+        <div class="footer-trust__grid">
+
+            @if(!empty($trust['enamad_url']))
+                <a
+                    href="{{ $trust['enamad_url'] }}"
+                    class="footer-trust__item"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    <span class="footer-trust__label">VERIFIED TRUST</span>
+
+                    @if(!empty($trust['enamad_image']))
+                        <img
+                            src="{{ $trust['enamad_image'] }}"
+                            alt="نماد اعتماد الکترونیکی"
+                            loading="lazy"
+                        >
+                    @endif
+
+                    <strong>نماد اعتماد الکترونیکی</strong>
+                    <span>مشاهده اطلاعات رسمی</span>
+                </a>
+            @else
+                <div class="footer-trust__item">
+                    <span class="footer-trust__label">VERIFIED TRUST</span>
+                    <strong>نماد اعتماد</strong>
+                    <span>پس از ثبت اطلاعات رسمی فعال می‌شود</span>
+                </div>
+            @endif
+
+            @if(!empty($trust['license_url']))
+                <a
+                    href="{{ $trust['license_url'] }}"
+                    class="footer-trust__item"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    <span class="footer-trust__label">LEGAL</span>
+                    <strong>مجوزها و اطلاعات قانونی</strong>
+                    <span>مشاهده جزئیات رسمی</span>
+                </a>
+            @else
+                <div class="footer-trust__item">
+                    <span class="footer-trust__label">LEGAL</span>
+                    <strong>مجوزها و اطلاعات قانونی</strong>
+                    <span>اطلاعات رسمی از تنظیمات فروشگاه</span>
+                </div>
+            @endif
+
+            <div class="footer-trust__item">
+                <span class="footer-trust__label">SECURE CHECKOUT</span>
+                <strong>پرداخت آنلاین</strong>
+                <span>اتصال به درگاه پرداخت پیکربندی‌شده فروشگاه</span>
+            </div>
+
+            <div class="footer-trust__item">
+                <span class="footer-trust__label">SOCIAL / SUPPORT</span>
+                <strong>شبکه‌های اجتماعی</strong>
+
+                <span>
+                    @if(!empty($trust['social_instagram']))
+                        <a href="{{ $trust['social_instagram'] }}" target="_blank" rel="noopener noreferrer">Instagram</a>
+                    @endif
+
+                    @if(!empty($trust['social_instagram']) && !empty($trust['social_telegram']))
+                        ·
+                    @endif
+
+                    @if(!empty($trust['social_telegram']))
+                        <a href="{{ $trust['social_telegram'] }}" target="_blank" rel="noopener noreferrer">Telegram</a>
+                    @endif
+
+                    @if(empty($trust['social_instagram']) && empty($trust['social_telegram']))
+                        لینک‌های اجتماعی از تنظیمات محیطی اضافه می‌شوند.
+                    @endif
+                </span>
+            </div>
+
+        </div>
+    </div>
+
+
+    {{-- =====================================================
          FOOTER BOTTOM
     ====================================================== --}}
 
