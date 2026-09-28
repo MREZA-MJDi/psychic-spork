@@ -1,144 +1,50 @@
 @php
-    $latestImage = $latestProduct?->galleryMedia?->first()?->url;
-    $category = $categories->first();
-    $categoryImage = $category?->coverMedia?->url;
+    $productsUrl = route('products.index');
+    $visuals = collect();
 
-    $latestUrl = $latestProduct
-        ? route('products.show', $latestProduct)
-        : route('products.index');
+    if ($latestProduct?->galleryMedia?->first()?->url) {
+        $visuals->push($latestProduct->galleryMedia->first()->url);
+    }
 
-    $categoryUrl = $category
-        ? route('categories.show', $category)
-        : route('categories.index');
+    foreach ($categories->take(3) as $category) {
+        if ($category->coverMedia?->url) {
+            $visuals->push($category->coverMedia->url);
+        }
+    }
 @endphp
 
 <section
-    class="home-discovery-section"
-    aria-labelledby="home-discovery-title"
+    class="home-closing-section"
+    aria-label="ورود به فروشگاه جانان"
 >
     <div class="container">
 
-        <header class="home-discovery__head">
-            <div>
-                <span class="eyebrow">JANAN / DISCOVER</span>
+        <a
+            href="{{ $productsUrl }}"
+            class="home-closing__panel"
+            aria-label="مشاهده همه محصولات"
+        >
+            <span class="home-closing__bg" aria-hidden="true"></span>
 
-                <h2 id="home-discovery-title">
-                    برای انتخاب بعدی، دو مسیر روشن.
-                </h2>
+            @foreach($visuals->take(4) as $image)
+                <span class="home-closing__image">
+                    <img
+                        src="{{ $image }}"
+                        alt=""
+                        loading="lazy"
+                        decoding="async"
+                    >
+                </span>
+            @endforeach
 
-                <p>
-                    تازه‌ترین محصول یا یک کالکشن مشخص را انتخاب کن و مستقیم ادامه بده.
-                </p>
-            </div>
+            <span class="home-closing__shade" aria-hidden="true"></span>
 
-            <a
-                href="{{ route('products.index') }}"
-                class="text-link"
-            >
-                همه محصولات
-                <span aria-hidden="true">↗</span>
-            </a>
-        </header>
-
-        <div class="home-discovery__grid">
-
-            <a
-                href="{{ $latestUrl }}"
-                class="discovery-card discovery-card--featured"
-            >
-                <div class="discovery-card__media">
-                    @if($latestImage)
-                        <img
-                            src="{{ $latestImage }}"
-                            alt="{{ $latestProduct?->name ?? 'محصولات تازه جانان' }}"
-                            loading="lazy"
-                            decoding="async"
-                        >
-                    @else
-                        <div class="discovery-card__placeholder" aria-hidden="true">
-                            <span>JANAN</span>
-                        </div>
-                    @endif
-                </div>
-
-                <span class="discovery-card__overlay" aria-hidden="true"></span>
-
-                <div class="discovery-card__top">
-                    <span>01</span>
-                    <span>{{ $siteBrandNameLatin ?? 'JANAN' }} / NEW IN</span>
-                </div>
-
-                <div class="discovery-card__body">
-                    <div>
-                        <span class="discovery-card__kicker">
-                            تازه‌های جانان
-                        </span>
-
-                        <h3>
-                            {{ $latestProduct?->name ?? 'انتخاب‌های تازه' }}
-                        </h3>
-
-                        <p>
-                            محصولات فعال و تازه‌ای که همین حالا آماده‌ی کشف‌اند.
-                        </p>
-                    </div>
-
-                    <span class="discovery-card__action">
-                        مشاهده محصول
-                        <b aria-hidden="true">↗</b>
-                    </span>
-                </div>
-            </a>
-
-            <a
-                href="{{ $categoryUrl }}"
-                class="discovery-card discovery-card--category"
-            >
-                <div class="discovery-card__media">
-                    @if($categoryImage)
-                        <img
-                            src="{{ $categoryImage }}"
-                            alt="{{ $category?->name ?? 'کالکشن جانان' }}"
-                            loading="lazy"
-                            decoding="async"
-                        >
-                    @else
-                        <div class="discovery-card__placeholder" aria-hidden="true">
-                            <span>{{ $category?->name ?? 'JANAN' }}</span>
-                        </div>
-                    @endif
-                </div>
-
-                <span class="discovery-card__overlay" aria-hidden="true"></span>
-
-                <div class="discovery-card__top">
-                    <span>02</span>
-                    <span>CURATED / COLLECTION</span>
-                </div>
-
-                <div class="discovery-card__body">
-                    <div>
-                        <span class="discovery-card__kicker">
-                            کالکشن منتخب
-                        </span>
-
-                        <h3>
-                            {{ $category?->name ?? 'انتخاب‌های خاص' }}
-                        </h3>
-
-                        <p>
-                            {{ $category?->description ?? 'مسیر مستقیم برای دیدن محصولات این کالکشن.' }}
-                        </p>
-                    </div>
-
-                    <span class="discovery-card__action">
-                        ورود به کالکشن
-                        <b aria-hidden="true">↗</b>
-                    </span>
-                </div>
-            </a>
-
-        </div>
+            <span class="home-closing__center" aria-hidden="true">
+                <small>JANAN</small>
+                <strong>EXPLORE</strong>
+                <i>↗</i>
+            </span>
+        </a>
 
     </div>
 </section>
