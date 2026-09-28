@@ -39,7 +39,7 @@
             <div
                 class="home-product-carousel"
                 data-product-carousel
-                data-autoplay="5000"
+                data-autoplay="3500"
                 role="region"
                 aria-roledescription="carousel"
                 aria-label="محصولات منتخب جانان"
@@ -87,7 +87,7 @@
                                 role="group"
                                 aria-label="محصول {{ $loop->iteration }} از {{ $products->count() }}"
                             >
-                                <x-store.product-card :product="$product" />
+                                <x-store.product-card :product="$product" variant="home" />
                             </div>
                         @endforeach
                     </div>
