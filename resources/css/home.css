@@ -3482,6 +3482,7 @@ font-size:
 
 /* =========================================================
    HOMEPAGE FINAL LAYOUT CONTRACT
+   One width system for every Home section.
 ========================================================= */
 
 .home-page {
@@ -3491,7 +3492,8 @@ font-size:
     overflow-x: clip;
 }
 
-.home-page > section {
+.home-page > section,
+.home-page > .editorial-hero {
     width: 100%;
     max-width: 100%;
     min-width: 0;
@@ -3507,59 +3509,56 @@ font-size:
     margin-inline: auto;
 }
 
-.home-proof {
-    width: 100%;
+.home-proof,
+.home-collections,
+.home-product-section,
+.home-discovery-section,
+.home-signals-section,
+.home-brands {
+    min-width: 0;
     max-width: 100%;
-    padding: 32px 0 48px;
-    overflow: hidden;
 }
 
 .home-proof .container,
 .home-collections .container,
+.home-product-section .container,
+.home-discovery-section .container,
 .home-signals-section .container,
 .home-brands .container {
     min-width: 0;
 }
 
-.home-signals__grid,
 .home-category-rail,
-.home-brand-rail {
+.home-signals__grid,
+.home-brand-rail,
+.home-discovery__grid {
     width: 100%;
     max-width: 100%;
     min-width: 0;
 }
 
-.home-signals__grid > * > *,
 .home-category-rail > *,
-.home-brand-rail > * {
+.home-signals__grid > *,
+.home-brand-rail > *,
+.home-discovery__grid > * {
     min-width: 0;
 }
 
+.home-section-head,
+.home-product-section__head,
+.home-discovery__head,
 .home-signals__head,
-.home-recommendations__head,
-.home-brands__head,
-.home-section-head {
+.home-brands__head {
     min-width: 0;
 }
 
+.home-section-head > *,
+.home-product-section__head > *,
+.home-discovery__head > *,
 .home-signals__head > *,
-.home-recommendations__head > *,
-.home-brands__head > *,
-.home-section-head > * {
+.home-brands__head > * {
     min-width: 0;
     max-width: 100%;
-}
-
-.home-closing-section {
-    width: 100%;
-    max-width: 100%;
-    overflow: hidden;
-}
-
-.home-closing {
-    width: 100%;
-    max-width: 100%;
-    min-width: 0;
 }
 
 @media (max-width: 1100px) {
@@ -3569,22 +3568,36 @@ font-size:
             var(--janan-container)
         );
     }
+}
+
+@media (max-width: 900px) {
+    .home-page .container {
+        width: min(
+            calc(100% - 32px),
+            var(--janan-container)
+        );
+    }
 
     .home-signals__grid {
+        grid-template-columns: 1fr;
+    }
+
+    .home-discovery__grid {
+        grid-template-columns: 1fr;
+    }
+
+    .home-brand-rail {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
-    .home-recommendations__grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .home-closing {
-        grid-template-columns: minmax(0, 1fr);
-        gap: 22px;
-    }
-
-    .home-closing__actions {
-        justify-content: flex-start;
+    .home-product-section__head,
+    .home-discovery__head,
+    .home-signals__head,
+    .home-brands__head,
+    .home-section-head {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 12px;
     }
 }
 
@@ -3596,25 +3609,17 @@ font-size:
         );
     }
 
-    .home-signals__grid {
+    .home-category-rail,
+    .home-brand-rail {
         grid-template-columns: 1fr;
     }
 
-    .home-signals__head,
-    .home-recommendations__head,
-    .home-brands__head,
-    .home-section-head {
-        align-items: flex-start;
-        flex-direction: column;
+    .home-brand-rail {
+        grid-template-rows: none;
     }
 
-    .home-closing {
-        padding: 26px 22px;
-        border-radius: 20px;
-    }
-
-    .home-closing__actions {
-        width: 100%;
+    .home-discovery-section {
+        padding-block: 48px;
     }
 }
 
@@ -3624,10 +3629,20 @@ font-size:
     }
 
     .home-proof {
-        padding: 22px 0 32px;
+        padding-block: 22px 32px;
+    }
+
+    .home-product-section,
+    .home-discovery-section,
+    .home-signals-section {
+        padding-block: 46px;
     }
 
     .home-signals__grid {
         gap: 12px;
+    }
+
+    .home-discovery__grid {
+        gap: 10px;
     }
 }
