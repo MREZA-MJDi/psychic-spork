@@ -35,6 +35,7 @@
                 <form
                     class="catalog-search"
                     data-store-search
+                    data-suggestions-url="{{ route('search.suggestions') }}"
                     method="GET"
                     action="{{ route('products.index') }}"
                     role="search"
