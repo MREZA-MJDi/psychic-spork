@@ -1,11 +1,11 @@
 <?php
 
-namespace AppHttpControllers;
+namespace App\Http\Controllers;
 
-use AppModelsBrand;
-use AppModelsProduct;
-use AppServicesSeoService;
-use IlluminateViewView;
+use App\ModelsBrand;
+use App\ModelsProduct;
+use App\ServicesSeoService;
+use Illuminate\View\View;
 
 class StoreBrandController extends Controller
 {
