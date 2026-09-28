@@ -90,6 +90,11 @@ const renderCart = (payload) => {
             price.className = 'cart-drawer__item-price';
             price.textContent = formatMoney(item.line_total);
 
+            const details = document.createElement('a');
+            details.className = 'cart-drawer__item-detail';
+            details.href = item.product_url || '/products';
+            details.textContent = 'جزئیات محصول ↗';
+
             const qty = document.createElement('div');
             qty.className = 'cart-drawer__qty';
 
@@ -111,7 +116,7 @@ const renderCart = (payload) => {
 
             qty.append(minus, number, plus);
 
-            copy.append(name, variant, price, qty);
+            copy.append(name, variant, price, qty, details);
 
             const remove = document.createElement('button');
             remove.type = 'button';
