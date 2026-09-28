@@ -5,13 +5,7 @@
 
 @section('content')
 
-    <div
-        x-data="{
-            previewOpen: false,
-            previewUrl: '',
-            previewName: ''
-        }"
-    >
+    <div data-product-index>
 
         {{-- =====================================================
             PAGE HEADER
@@ -375,11 +369,9 @@
                                                         overflow:hidden;
                                                         cursor:pointer;
                                                     "
-                                                @click="
-                                                        previewUrl = @js($galleryImage->url);
-                                                        previewName = @js($product->name);
-                                                        previewOpen = true;
-                                                    "
+                                                data-preview-open
+                                                data-preview-url="{{ $galleryImage->url }}"
+                                                data-preview-name="{{ $product->name }}"
                                                 title="مشاهده تصویر"
                                             >
 
@@ -670,11 +662,8 @@
         ====================================================== --}}
 
         <div
-            x-show="previewOpen"
-            x-cloak
-            x-transition.opacity
-            @keydown.escape.window="previewOpen = false"
-            @click.self="previewOpen = false"
+            data-product-preview-modal
+            hidden
             style="
                 position:fixed;
                 inset:0;
@@ -702,7 +691,7 @@
 
                 <button
                     type="button"
-                    @click="previewOpen = false"
+                    data-preview-close
                     class="admin-btn admin-btn--ghost admin-btn--sm"
                     style="
                         position:absolute;
@@ -721,8 +710,9 @@
 
 
                 <img
-                    :src="previewUrl"
-                    :alt="previewName"
+                    data-preview-image
+                    src=""
+                    alt=""
                     style="
                         display:block;
                         width:100%;
@@ -741,7 +731,7 @@
                 >
 
                     <strong
-                        x-text="previewName"
+                        data-preview-name
                         style="
                             display:block;
                             color:var(--admin-text);
