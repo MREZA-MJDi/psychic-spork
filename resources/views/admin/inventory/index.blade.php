@@ -417,6 +417,7 @@
                             id="product_variant_id"
                             name="product_variant_id"
                             required
+                            data-inventory-variant
                         >
 
                             <option value="">
@@ -426,12 +427,10 @@
                             @foreach($variantOptions as $variantOption)
 
                                 <option
-                                    value="{{ $variantOption->id }}"
-                                    @selected(
-                                    old('product_variant_id')
-                                == $variantOption->id
-                                )
-                                >
+                                value="{{ $variantOption->id }}"
+                                data-stock="{{ (int) $variantOption->stock }}"
+                                @selected(old('product_variant_id') == $variantOption->id)
+                            >
                                 {{ $variantOption->product?->name ?? 'محصول' }}
 
                                 @if($variantOption->sku)
@@ -466,6 +465,12 @@
                         </small>
 
                         @enderror
+
+                        <div class="inventory-current-stock" data-current-stock-panel>
+                            <span>موجودی فعلی این واریانت</span>
+                            <strong data-current-stock>—</strong>
+                            <small>بعد از انتخاب محصول، این عدد را می‌بینی.</small>
+                        </div>
 
                     </div>
 
@@ -905,9 +910,27 @@
             const directionInput =
                 document.getElementById('adjustment_direction');
 
+            const variantSelect =
+                document.querySelector('[data-inventory-variant]');
+
+            const currentStock =
+                document.querySelector('[data-current-stock]');
+
             const quantityHelp =
                 document.getElementById('quantity-help');
 
+
+            const updateCurrentStock = () => {
+                if (!variantSelect || !currentStock) return;
+
+                const option = variantSelect.options[variantSelect.selectedIndex];
+                const stock = option?.dataset?.stock;
+
+                currentStock.textContent =
+                    stock === undefined
+                        ? '—'
+                        : new Intl.NumberFormat('fa-IR').format(Number(stock)) + ' عدد';
+            };
 
             const updateQuantity = () => {
 
@@ -1015,6 +1038,8 @@
                 updateDirectionVisibility
             );
 
+            variantSelect?.addEventListener('change', updateCurrentStock);
+
 
             directionInput?.addEventListener(
                 'change',
@@ -1029,6 +1054,7 @@
 
 
             updateDirectionVisibility();
+            updateCurrentStock();
 
 
             document
