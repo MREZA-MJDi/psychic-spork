@@ -52,7 +52,7 @@
             </p>
 
             <div
-                class="editorial-hero__search"
+                class="search-panel is-open editorial-hero__search"
                 role="search"
             >
                 <form
