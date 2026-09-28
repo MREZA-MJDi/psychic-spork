@@ -111,6 +111,9 @@ Route::get('/faq', [StorePageController::class, 'faq'])
 Route::get('/cart', [CartController::class, 'index'])
     ->name('cart');
 
+Route::get('/cart/summary', [CartController::class, 'summary'])
+    ->name('cart.summary');
+
 Route::post('/cart/{variant}', [CartController::class, 'store'])
     ->name('cart.store');
 
