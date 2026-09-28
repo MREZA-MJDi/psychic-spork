@@ -4,7 +4,9 @@
 ])
 
 @php
-    $productVariant = $product->variants->first();
+    $productVariant = $product->variants->first(
+        fn ($variant) => (bool) $variant->is_active
+    );
     $image = $product->galleryMedia->first()?->url;
     $stock = (int) ($productVariant?->stock ?? 0);
     $isOnSale = (bool) ($productVariant?->is_on_sale ?? false);
