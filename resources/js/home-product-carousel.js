@@ -4,11 +4,11 @@
 
     const viewport = root.querySelector('[data-product-viewport]');
     const track = root.querySelector('[data-product-track]');
-    const cards = [...(track?.querySelectorAll('.home-product-slide') ?? [])];
+    const cards = [...track.querySelectorAll('.home-product-slide')];
     const prev = root.querySelector('[data-product-prev]');
     const next = root.querySelector('[data-product-next]');
-    const status = root.querySelector('[data-product-status]');
-    const autoplayMs = Math.max(3000, Number(root.dataset.autoplay || 3500));
+    const dots = root.querySelector('[data-product-status]');
+    const autoplayMs = Number(root.dataset.autoplay || 3500);
 
     if (!viewport || !track || cards.length <= 1) return;
 
@@ -23,54 +23,50 @@
 
     const metrics = () => {
         const visible = Math.min(visibleCount(), cards.length);
-        const gap = parseFloat(getComputedStyle(track).gap || '0') || 0;
-        const cardWidth = Math.max(
-            0,
-            (viewport.clientWidth - gap * (visible - 1)) / visible
-        );
+        const gap = parseFloat(getComputedStyle(track).gap || '0');
+        const cardWidth = (viewport.clientWidth - gap * (visible - 1)) / visible;
+        const step = cardWidth + gap;
 
-        cards.forEach((card) => {
-            card.style.flexBasis = cardWidth ? `${cardWidth}px` : '';
-            card.style.width = cardWidth ? `${cardWidth}px` : '';
-            card.style.maxWidth = cardWidth ? `${cardWidth}px` : '';
-        });
-
-        return {
-            visible,
-            maxIndex: Math.max(0, cards.length - visible),
-        };
-    };
-
-    const updateStatus = () => {
-        if (!status) return;
-
-        status.textContent = `${String(index + 1).padStart(2, '0')} / ${String(cards.length).padStart(2, '0')}`;
+        return { visible, step };
     };
 
     const update = (target, behavior = 'smooth') => {
-        const { maxIndex } = metrics();
+        const { visible, step } = metrics();
+        const maxIndex = Math.max(0, cards.length - visible);
 
         index = Math.max(0, Math.min(target, maxIndex));
 
-        cards[index]?.scrollIntoView({
+        viewport.scrollTo({
+            left: index * step,
             behavior,
-            block: 'nearest',
-            inline: 'start',
         });
 
-        updateStatus();
+        if (dots) {
+            dots.textContent = `${String(index + 1).padStart(2, '0')} / ${String(cards.length).padStart(2, '0')}`;
+        }
 
-        const locked = cards.length <= visibleCount();
-        prev?.toggleAttribute('disabled', locked);
-        next?.toggleAttribute('disabled', locked);
+        prev?.toggleAttribute('disabled', cards.length <= visible);
+        next?.toggleAttribute('disabled', cards.length <= visible);
     };
 
     const advance = () => {
-        const { maxIndex } = metrics();
+        const { visible } = metrics();
 
-        if (maxIndex <= 0) return;
+        if (cards.length <= visible) return;
 
-        update(index >= maxIndex ? 0 : index + 1);
+        const maxIndex = cards.length - visible;
+
+        if (index >= maxIndex) {
+            update(0, 'auto');
+        } else {
+            update(index + 1);
+        }
+    };
+
+    const start = () => {
+        if (cards.length <= visibleCount()) return;
+        stop();
+        timer = window.setInterval(advance, autoplayMs);
     };
 
     const stop = () => {
@@ -78,14 +74,6 @@
             window.clearInterval(timer);
             timer = null;
         }
-    };
-
-    const start = () => {
-        stop();
-
-        if (cards.length <= visibleCount()) return;
-
-        timer = window.setInterval(advance, autoplayMs);
     };
 
     prev?.addEventListener('click', () => {
@@ -97,25 +85,6 @@
         advance();
         start();
     });
-
-    viewport.addEventListener('scroll', () => {
-        if (!cards.length) return;
-
-        const center = viewport.scrollLeft;
-        const nearestIndex = cards.reduce((nearest, card, cardIndex) => {
-            const distance = Math.abs(card.offsetLeft - center);
-            const nearestDistance = Math.abs(
-                cards[nearest]?.offsetLeft - center
-            );
-
-            return distance < nearestDistance ? cardIndex : nearest;
-        }, 0);
-
-        if (nearestIndex !== index) {
-            index = nearestIndex;
-            updateStatus();
-        }
-    }, { passive: true });
 
     root.addEventListener('mouseenter', stop);
     root.addEventListener('mouseleave', start);
