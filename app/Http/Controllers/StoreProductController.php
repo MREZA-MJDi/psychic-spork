@@ -1,13 +1,13 @@
 <?php
 
-namespace AppHttpControllers;
+namespace App\Http\Controllers;
 
-use AppHttpRequestsStoreProductFilterRequest;
-use AppModelsBrand;
-use AppModelsCategory;
-use AppModelsProduct;
-use AppServicesSeoService;
-use IlluminateViewView;
+use App\Http\RequestsStoreProductFilterRequest;
+use App\ModelsBrand;
+use App\ModelsCategory;
+use App\ModelsProduct;
+use App\ServicesSeoService;
+use Illuminate\View\View;
 
 class StoreProductController extends Controller
 {
