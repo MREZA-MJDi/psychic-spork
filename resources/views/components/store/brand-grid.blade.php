@@ -17,7 +17,7 @@
 
             <div class="home-brands__intro">
                 <span class="eyebrow">
-                    HOUSES / 05
+                    HOUSES / 07
                 </span>
 
                 <h2 id="{{ $titleId }}">
