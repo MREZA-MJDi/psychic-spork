@@ -207,19 +207,10 @@
 
             <div class="auth-visual__frame">
                 <span class="auth-visual__frame-index">01 / JANAN</span>
-                <span class="auth-visual__monogram">J</span>
                 <span class="auth-visual__nasta">کالکشن جانان</span>
                 <span class="auth-visual__frame-caption">PRIVATE ACCESS · STORE / ADMIN</span>
             </div>
 
-            <div class="auth-visual__copy">
-                <span>JANAN / PRIVATE STORE</span>
-                <strong>برای خودت<br>انتخاب کن.</strong>
-                <small>AUTHENTICATE / SHOP / MANAGE</small>
-                <div class="auth-visual__line">
-                    <span>یک ورود ساده، برای یک تجربه دقیق.</span>
-                </div>
-            </div>
         </aside>
 
     </main>
