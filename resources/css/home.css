@@ -2954,7 +2954,7 @@ font-size:
 ========================================================= */
 
 .home-product-section {
-    padding-block: clamp(56px, 6vw, 84px);
+    padding-block: clamp(52px, 6vw, 78px);
     background:
         linear-gradient(
             180deg,
@@ -3044,10 +3044,7 @@ font-size:
 
 .home-product-slide {
     direction: rtl;
-    flex: 0 0
-        calc(
-            (min(1220px, calc(100vw - (var(--janan-gutter) * 2))) - 48px) / 4
-        );
+    flex: 0 0 calc((100% - 48px) / 4);
     min-width: 0;
     scroll-snap-align: start;
 }
@@ -3072,19 +3069,13 @@ font-size:
 
 @media (max-width: 1100px) {
     .home-product-slide {
-        flex-basis:
-            calc(
-                (min(100vw - (var(--janan-gutter) * 2), 960px) - 32px) / 3
-            );
+        flex-basis: calc((100% - 32px) / 3);
     }
 }
 
 @media (max-width: 900px) {
     .home-product-slide {
-        flex-basis:
-            calc(
-                (100vw - (var(--janan-gutter) * 2) - 16px) / 2
-            );
+        flex-basis: calc((100% - 16px) / 2);
     }
 }
 
