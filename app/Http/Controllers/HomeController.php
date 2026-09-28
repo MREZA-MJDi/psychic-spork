@@ -135,10 +135,17 @@ class HomeController extends Controller
             ->limit(4)
             ->get();
 
+        $recommendedProducts = $popularProducts
+            ->concat($products)
+            ->unique('id')
+            ->take(6)
+            ->values();
+
         $heroProducts = Product::query()
             ->active()
             ->with(['brand.logoMedia', 'galleryMedia', 'variants'])
-            ->inRandomOrder()
+            ->latest('updated_at')
+            ->latest('id')
             ->take(4)
             ->get();
 
@@ -166,6 +173,7 @@ class HomeController extends Controller
             'latestProduct' => $products->first(),
             'recentProducts' => $recentProducts,
             'popularProducts' => $popularProducts,
+            'recommendedProducts' => $recommendedProducts,
             'heroSlides' => $heroSlides,
             'homeTagline' => 'کالکشن‌های منتخب جانان با محصولات واقعی فروشگاه، برای انتخابی دقیق‌تر و شخصی‌تر.',
         ]);
