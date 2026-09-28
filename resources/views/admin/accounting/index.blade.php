@@ -138,12 +138,12 @@
 
                 <div class="admin-field">
 
-                    <label for="type">
+                    <label for="accounting-filter-type">
                         نوع تراکنش
                     </label>
 
                     <select
-                        id="type"
+                        id="accounting-filter-type"
                         name="type"
                     >
 
@@ -530,12 +530,12 @@
 
                     <div class="admin-field">
 
-                        <label for="type">
+                        <label for="transaction-type">
                             نوع تراکنش *
                         </label>
 
                         <select
-                            id="type"
+                            id="transaction-type"
                             name="type"
                             required
                         >
@@ -546,14 +546,14 @@
 
                             <option
                                 value="income"
-                                @selected(old('type') === 'income')
+                                @selected(old('type', 'expense') === 'income')
                             >
                             درآمد
                             </option>
 
                             <option
                                 value="expense"
-                                @selected(old('type') === 'expense')
+                                @selected(old('type', 'expense') === 'expense')
                             >
                             هزینه
                             </option>
