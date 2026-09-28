@@ -6,6 +6,7 @@ use App\Contracts\PaymentGateway;
 use App\Models\Cart;
 use App\Models\SiteSetting;
 use App\Services\ZarinPalPaymentGateway;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use RuntimeException;
@@ -29,14 +30,16 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        $contactSettings = SiteSetting::query()
-            ->whereIn('key', [
-                'contact.phone',
-                'contact.email',
-                'contact.address',
-                'contact.working_hours',
-            ])
-            ->pluck('value', 'key');
+        $contactSettings = Schema::hasTable('site_settings')
+            ? SiteSetting::query()
+                ->whereIn('key', [
+                    'contact.phone',
+                    'contact.email',
+                    'contact.address',
+                    'contact.working_hours',
+                ])
+                ->pluck('value', 'key')
+            : collect();
 
         View::share([
             'siteBrandNameLatin' => 'Janan',
