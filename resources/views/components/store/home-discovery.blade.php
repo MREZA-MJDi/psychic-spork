@@ -47,7 +47,7 @@
 
         <header class="home-discovery__head">
             <div>
-                <span class="eyebrow">JANAN / SMART DISCOVERY</span>
+                <span class="eyebrow">JANAN / SMART DISCOVERY / 05</span>
 
                 <h2 id="home-discovery-title">
                     انتخاب هوشمند،
