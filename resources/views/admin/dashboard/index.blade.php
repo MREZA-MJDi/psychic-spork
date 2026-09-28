@@ -124,6 +124,13 @@
                 <small>تنوع در محدوده هشدار</small>
                 <i>06</i>
             </article>
+
+            <article class="dashboard-v2__stat dashboard-v2__stat--accent">
+                <span>CONTACT INBOX</span>
+                <strong>{{ number_format((int) ($unreadContactMessages ?? 0)) }}</strong>
+                <small>پیام خوانده‌نشده</small>
+                <i>07</i>
+            </article>
         </section>
 
         <section class="dashboard-v2__grid dashboard-v2__grid--main">
@@ -165,6 +172,9 @@
                                 </div>
 
                                 <small>{{ $day['label'] ?? '—' }}</small>
+                                <b class="dashboard-v2__bar-orders">
+                                    {{ number_format((int) ($day['orders'] ?? 0)) }}
+                                </b>
                             </div>
                         @endforeach
                     </div>
@@ -469,6 +479,20 @@
                 <span>04</span>
                 <strong>حسابداری</strong>
                 <small>مشاهده جریان مالی فروشگاه</small>
+                <b aria-hidden="true">↗</b>
+            </a>
+
+            <a href="{{ route('admin.content.about') }}" class="dashboard-v2__quick-action">
+                <span>05</span>
+                <strong>محتوای سایت</strong>
+                <small>ویرایش متن‌های درباره ما</small>
+                <b aria-hidden="true">↗</b>
+            </a>
+
+            <a href="{{ route('admin.contact.index') }}" class="dashboard-v2__quick-action">
+                <span>06</span>
+                <strong>پیام‌های تماس</strong>
+                <small>پیگیری درخواست‌های مشتریان</small>
                 <b aria-hidden="true">↗</b>
             </a>
         </section>
