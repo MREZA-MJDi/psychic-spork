@@ -106,6 +106,7 @@
     @vite([
         'resources/css/app.css',
         'resources/css/store-structure.css',
+        'resources/css/store-polish.css',
         'resources/js/app.js',
         'resources/js/store-cart.js',
     ])
@@ -116,6 +117,7 @@
             'resources/css/home.css',
             'resources/css/editorial-hero.css',
             'resources/js/editorial-hero.js',
+            'resources/js/home-product-carousel.js',
         ])
     @endif
 
