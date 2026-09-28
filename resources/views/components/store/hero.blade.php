@@ -51,6 +51,74 @@
                 کالکشنی برای استایل روزمره؛ ظریف، راحت و با جزئیاتی که حس بهتری می‌سازند.
             </p>
 
+            <div
+                class="editorial-hero__search"
+                role="search"
+            >
+                <form
+                    class="search-panel__form"
+                    data-store-search
+                    data-suggestions-url="{{ route('search.suggestions') }}"
+                    action="{{ route('products.index') }}"
+                    method="GET"
+                >
+                    <div class="search-panel__field">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <circle cx="11" cy="11" r="6.5"/>
+                            <path d="m16 16 4.5 4.5"/>
+                        </svg>
+
+                        <input
+                            type="search"
+                            name="q"
+                            value="{{ request('q') }}"
+                            placeholder="محصول، برند، دسته یا SKU را جستجو کن…"
+                            autocomplete="off"
+                            enterkeyhint="search"
+                            aria-label="جستجوی محصولات"
+                            data-search-input
+                            minlength="2"
+                            maxlength="80"
+                        >
+
+                        <button
+                            type="button"
+                            class="search-panel__clear"
+                            data-search-clear
+                            aria-label="پاک کردن جستجو"
+                            hidden
+                        >
+                            ×
+                        </button>
+                    </div>
+
+                    <button
+                        type="submit"
+                        class="button button--primary search-panel__submit"
+                    >
+                        جستجو
+                        <span aria-hidden="true">↵</span>
+                    </button>
+                </form>
+
+                <div
+                    class="search-suggestions"
+                    data-search-results
+                    hidden
+                    aria-live="polite"
+                >
+                    <div class="search-suggestions__head">
+                        <span>جستجوی سریع</span>
+                        <small data-search-status>نام محصول یا برند را وارد کن</small>
+                    </div>
+
+                    <div
+                        class="search-suggestions__list"
+                        data-search-results-list
+                    ></div>
+                </div>
+            </div>
+
             <div class="editorial-hero__actions">
 
                 <a
