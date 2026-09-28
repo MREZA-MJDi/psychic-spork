@@ -157,10 +157,9 @@
 
     <x-store.cart-drawer />
 
-    <x-mobile-bottom-nav context="store" />
-
-
 </div>
+
+<x-mobile-bottom-nav context="store" />
 
 </body>
 </html>
