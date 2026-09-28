@@ -219,47 +219,7 @@
     </main>
 </div>
 
-<nav class="admin-mobile-nav" aria-label="دسترسی سریع موبایل">
-    <a
-        href="{{ route('admin.dashboard') }}"
-        class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}"
-    >
-        <span class="admin-mobile-nav__icon">⌂</span>
-        <span>خانه</span>
-    </a>
-
-    <a
-        href="{{ route('admin.products.index') }}"
-        class="{{ request()->routeIs('admin.products.*') ? 'active' : '' }}"
-    >
-        <span class="admin-mobile-nav__icon">◈</span>
-        <span>محصول</span>
-    </a>
-
-    <a
-        href="{{ route('admin.orders.index') }}"
-        class="{{ request()->routeIs('admin.orders.*') ? 'active' : '' }}"
-    >
-        <span class="admin-mobile-nav__icon">◫</span>
-        <span>سفارش</span>
-    </a>
-
-    <a
-        href="{{ route('admin.contact.index') }}"
-        class="{{ request()->routeIs('admin.contact.*') ? 'active' : '' }}"
-    >
-        <span class="admin-mobile-nav__icon">✉</span>
-        <span>پیام</span>
-    </a>
-
-    <a
-        href="{{ route('admin.profile.edit') }}"
-        class="{{ request()->routeIs('admin.profile.*') ? 'active' : '' }}"
-    >
-        <span class="admin-mobile-nav__icon">◉</span>
-        <span>پروفایل</span>
-    </a>
-</nav>
+<x-mobile-bottom-nav context="admin" />
 
 @stack('scripts')
 
