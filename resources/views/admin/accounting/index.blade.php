@@ -337,11 +337,7 @@
 
                                         <span class="admin-muted">
 
-                                            {{
-                                                $transaction
-                                                    ->transaction_date
-                                                    ->format('Y/m/d')
-                                            }}
+                                            <span class="admin-local-date" data-admin-date="{{ $transaction->transaction_date?->toIso8601String() }}" data-admin-date-format="day">{{ $transaction->transaction_date->format('Y/m/d') }}</span>
 
                                         </span>
 
