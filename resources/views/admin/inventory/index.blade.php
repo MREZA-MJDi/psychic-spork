@@ -847,11 +847,7 @@
 
                                 <span class="admin-muted">
 
-                                    {{
-                                        $movement->created_at
-                                            ? $movement->created_at->format('Y/m/d H:i')
-                                            : '—'
-                                    }}
+                                    <span class="admin-local-date" data-admin-date="{{ $movement->created_at?->toIso8601String() }}">{{ $movement->created_at ? $movement->created_at->format('Y/m/d H:i') : '—' }}</span>
 
                                 </span>
 
