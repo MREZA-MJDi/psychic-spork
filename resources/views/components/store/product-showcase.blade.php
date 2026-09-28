@@ -14,7 +14,7 @@
 
         <header class="home-product-section__head">
             <div>
-                <span class="eyebrow">JANAN / EDIT 03</span>
+                <span class="eyebrow">JANAN / EDIT 02</span>
 
                 <h2 id="home-products-title">
                     محصولات منتخب
