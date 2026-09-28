@@ -131,31 +131,6 @@
         }, 120);
     });
 
-    /*
-     * Keep the carousel from owning the document scroll position.
-     * Wheel/touch gestures stay horizontal inside the viewport.
-     */
-    viewport.addEventListener('wheel', (event) => {
-        if (Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
-
-        const maxScroll = viewport.scrollWidth - viewport.clientWidth;
-
-        if (maxScroll <= 0) return;
-
-        const atStart = viewport.scrollLeft <= 0;
-        const atEnd = viewport.scrollLeft >= maxScroll - 1;
-
-        if ((event.deltaY < 0 && atStart) || (event.deltaY > 0 && atEnd)) {
-            return;
-        }
-
-        event.preventDefault();
-        viewport.scrollLeft += event.deltaY;
-        stop();
-        window.clearTimeout(viewport._resumeTimer);
-        viewport._resumeTimer = window.setTimeout(start, autoplayMs);
-    }, { passive: false });
-
     update(0, 'auto');
     start();
 })();
