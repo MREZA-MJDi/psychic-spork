@@ -1,17 +1,19 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace AppHttpControllers;
 
-use App\Http\Requests\StoreProductFilterRequest;
-use App\Models\Brand;
-use App\Models\Category;
-use App\Models\Product;
-use Illuminate\View\View;
+use AppHttpRequestsStoreProductFilterRequest;
+use AppModelsBrand;
+use AppModelsCategory;
+use AppModelsProduct;
+use AppServicesSeoService;
+use IlluminateViewView;
 
 class StoreProductController extends Controller
 {
     public function index(
-        StoreProductFilterRequest $request
+        StoreProductFilterRequest $request,
+        SeoService $seo
     ): View {
         $filters = $request->validated();
 
@@ -66,14 +68,17 @@ class StoreProductController extends Controller
             ->withQueryString();
 
         return view('products.index', [
+            'seo' => $seo->page(
+                'محصولات — ' . config('app.store_name', 'Janan'),
+                'مشاهده، جستجو و خرید محصولات فعال فروشگاه جانان.',
+                route('products.index')
+            ),
             'products' => $products,
-
             'categories' => Category::query()
                 ->active()
                 ->orderBy('sort_order')
                 ->orderBy('name')
                 ->get(),
-
             'brands' => Brand::query()
                 ->active()
                 ->orderBy('name')
@@ -81,8 +86,10 @@ class StoreProductController extends Controller
         ]);
     }
 
-    public function show(Product $product): View
-    {
+    public function show(
+        Product $product,
+        SeoService $seo
+    ): View {
         abort_unless($product->is_active, 404);
 
         $product->load([
@@ -140,6 +147,7 @@ class StoreProductController extends Controller
         }
 
         return view('products.show', [
+            'seo' => $seo->product($product),
             'product' => $product,
             'relatedProducts' => $relatedProducts,
         ]);
