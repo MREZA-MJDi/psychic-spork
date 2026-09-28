@@ -1270,7 +1270,7 @@
     outline: 0;
     color: var(--janan-ink-strong);
     background: transparent;
-    font-size: 10px;
+    font-size: 11px;
 }
 
 .search-panel__field input::placeholder {
