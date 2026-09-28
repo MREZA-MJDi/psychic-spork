@@ -1,14 +1,14 @@
 <?php
 
-namespace TestsFeature;
+namespace Tests\Feature;
 
-use AppModelsCategory;
-use AppModelsProduct;
-use AppModelsProductVariant;
-use AppModelsUser;
+use App\Models\Category;
+use App\Models\Product;
+use App\Models\ProductVariant;
+use App\Models\User;
 use Database\Seeders\AdminUserSeeder;
-use IlluminateFoundation\Testing\RefreshDatabase;
-use IlluminateSupportFacadesConfig;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Config;
 use Tests\TestCase;
 
 class StoreFrontendTest extends TestCase
@@ -43,7 +43,7 @@ class StoreFrontendTest extends TestCase
             ->assertSee('ورود به جانان');
     }
 
-    public function test_homepage_contains_the_product_carousel_and_exactly_twelve_loaded_products_for_rotation(): void
+    public function test_homepage_contains_the_product_carousel_and_rotation_data(): void
     {
         $category = Category::create([
             'name' => 'کالکشن تست',
@@ -74,13 +74,13 @@ class StoreFrontendTest extends TestCase
             ]);
         }
 
-        $response = $this->get(route('home'));
-
-        $response
+        $this->get(route('home'))
             ->assertOk()
             ->assertSee('data-product-carousel', false)
             ->assertSee('data-product-prev', false)
             ->assertSee('data-product-next', false)
-            ->assertSee('دیدن بیشتر محصولات');
+            ->assertSee('دیدن بیشتر محصولات')
+            ->assertSee('محصول تست 1')
+            ->assertSee('محصول تست 12');
     }
 }
