@@ -16,9 +16,25 @@
     forms.forEach((form) => {
         const input = form.querySelector('[data-search-input]');
         const clear = form.querySelector('[data-search-clear]');
-        const results = form.parentElement?.querySelector('[data-search-results]');
-        const list = results?.querySelector('[data-search-results-list]');
-        const status = results?.querySelector('[data-search-status]');
+        let results = form.parentElement?.querySelector('[data-search-results]');
+
+        if (!results) {
+            results = document.createElement('div');
+            results.className = 'search-suggestions';
+            results.hidden = true;
+            results.setAttribute('aria-live', 'polite');
+            results.innerHTML = `
+                <div class="search-suggestions__head">
+                    <span>جستجوی سریع</span>
+                    <small data-search-status>نام محصول یا برند را وارد کن</small>
+                </div>
+                <div class="search-suggestions__list" data-search-results-list></div>
+            `;
+            form.insertAdjacentElement('afterend', results);
+        }
+
+        const list = results.querySelector('[data-search-results-list]');
+        const status = results.querySelector('[data-search-status]');
         const endpoint = form.dataset.suggestionsUrl;
 
         if (!input || !endpoint || !results || !list) return;
