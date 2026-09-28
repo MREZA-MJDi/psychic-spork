@@ -19,21 +19,26 @@
         title-id="home-collections-title"
     />
 
-    {{-- 04. Live store signals --}}
+    {{-- 04. Featured products --}}
+    <x-store.product-showcase
+        :products="$products"
+    />
+
+    {{-- 05. Live store signals --}}
     <x-store.home-signals
         :recent-products="$recentProducts"
         :popular-products="$popularProducts"
     />
 
-    {{-- 05. Brands --}}
+    {{-- 06. Brands --}}
     <x-store.brand-grid
         :brands="$brands"
     />
 
-    {{-- 06. Closing CTA --}}
+    {{-- 07. Closing CTA --}}
     <x-store.home-closing />
 
-    {{-- 07. Recommendations: immediately before the storefront footer --}}
+    {{-- 08. Recommendations: immediately before the storefront footer --}}
     <x-store.home-recommendations
         :products="$recommendedProducts"
     />
