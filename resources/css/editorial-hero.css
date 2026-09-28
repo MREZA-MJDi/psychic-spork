@@ -5,6 +5,8 @@
 
 .editorial-hero {
     position: relative;
+    width: 100%;
+    max-width: 100%;
     overflow: hidden;
     isolation: isolate;
 
@@ -144,6 +146,9 @@
             calc(100% - 56px)
         );
 
+    max-width: 100%;
+    min-width: 0;
+
     min-height: 720px;
 
     margin-inline: auto;
@@ -151,8 +156,8 @@
     display: grid;
 
     grid-template-columns:
-        minmax(330px, .72fr)
-        minmax(620px, 1.28fr);
+        minmax(0, .72fr)
+        minmax(0, 1.28fr);
 
     align-items: center;
 
@@ -953,16 +958,16 @@
     .editorial-hero__container {
         width:
             min(
-                100% - 40px,
+                calc(100% - 40px),
                 1080px
             );
 
         grid-template-columns:
-            minmax(285px, .72fr)
-            minmax(490px, 1.28fr);
+            minmax(0, .72fr)
+            minmax(0, 1.28fr);
 
         gap:
-            28px;
+            24px;
     }
 
     .editorial-hero__copy h1 {
