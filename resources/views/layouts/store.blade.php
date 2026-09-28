@@ -105,6 +105,7 @@
     {{-- Shared storefront shell --}}
     @vite([
         'resources/css/app.css',
+        'resources/css/responsive-shell.css',
         'resources/css/store-structure.css',
         'resources/js/app.js',
         'resources/js/store-cart.js',
