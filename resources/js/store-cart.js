@@ -284,6 +284,7 @@ document.addEventListener('click', async (event) => {
     const qtyTrigger = event.target.closest('[data-cart-qty]');
     const removeTrigger = event.target.closest('[data-cart-remove]');
     const checkoutTrigger = event.target.closest('[data-cart-checkout]');
+    const previewCloseTrigger = event.target.closest('[data-cart-preview-close]');
 
     if (checkoutTrigger?.dataset.disabled === 'true') {
         event.preventDefault();
@@ -357,6 +358,21 @@ document.addEventListener('submit', async (event) => {
 
     const button = form.querySelector('button[type="submit"]');
     const formData = new FormData(form);
+
+    // بازخورد فوری قبل از برگشت پاسخ شبکه.
+    showQuickPreview(
+        {
+            items: [
+                {
+                    name: form.dataset.productName || 'محصول',
+                    image: form.dataset.productImage || '',
+                    quantity: 1,
+                    line_total: 0,
+                },
+            ],
+        },
+        form
+    );
 
     if (button) {
         button.disabled = true;
