@@ -3415,3 +3415,37 @@
         justify-content: center;
     }
 }
+
+.inventory-current-stock {
+    display: grid;
+    grid-template-columns: auto auto;
+    align-items: center;
+    gap: 2px 10px;
+    margin-top: 9px;
+    padding: 12px;
+    border: 1px solid rgba(73,109,143,.12);
+    border-radius: 12px;
+    background: var(--admin-info-bg);
+}
+
+.inventory-current-stock span {
+    color: var(--admin-info);
+    font-size: 7px;
+    font-weight: 700;
+}
+
+.inventory-current-stock strong {
+    color: var(--admin-text);
+    font-size: 14px;
+    text-align: left;
+}
+
+.inventory-current-stock small {
+    grid-column: 1 / -1;
+    color: var(--admin-muted);
+    font-size: 6.5px;
+}
+
+.admin-form-section .admin-help + .admin-help {
+    margin-top: 2px;
+}
