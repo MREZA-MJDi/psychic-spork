@@ -221,6 +221,28 @@ class AdminDashboardController extends Controller
 
         /*
         |--------------------------------------------------------------------------
+        | Recent products
+        |--------------------------------------------------------------------------
+        |
+        | Keep catalog visibility separate from sales analytics.
+        | Newly created products should be visible even before they sell.
+        |--------------------------------------------------------------------------
+        */
+
+        $recentProducts = Product::query()
+            ->with([
+                'category:id,name',
+                'galleryMedia',
+                'variants',
+            ])
+            ->latest('created_at')
+            ->latest('id')
+            ->limit(6)
+            ->get();
+
+
+        /*
+        |--------------------------------------------------------------------------
         | Top products
         |
         | NOTE:
@@ -318,6 +340,8 @@ class AdminDashboardController extends Controller
                 'recentOrders' => $recentOrders,
 
                 'topProducts' => $topProducts,
+
+                'recentProducts' => $recentProducts,
             ]
         );
     }
