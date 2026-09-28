@@ -16,7 +16,7 @@
 
         <header class="home-signals__head">
             <div>
-                <span class="eyebrow">JANAN / STORE PULSE</span>
+                <span class="eyebrow">JANAN / STORE PULSE / 06</span>
                 <h2 id="home-signals-title">آنچه همین حالا در فروشگاه جریان دارد.</h2>
                 <p>تازه‌های کاتالوگ و خریدهای ثبت‌شده در ۳۰ روز اخیر.</p>
             </div>
