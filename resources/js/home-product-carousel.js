@@ -37,7 +37,6 @@
 
         return {
             visible,
-            step: cardWidth + gap,
             maxIndex: Math.max(0, cards.length - visible),
         };
     };
@@ -49,16 +48,32 @@
         }
     };
 
+    const scrollToCard = (card, behavior = 'smooth') => {
+        if (!card) return;
+
+        /*
+         * Do not use Element.scrollIntoView() here.
+         * It is allowed to move every scrollable ancestor, including the
+         * document itself, which made clicking/autoplay jump the page back
+         * to the Product section.
+         */
+        const left = Math.max(
+            0,
+            card.offsetLeft - parseFloat(getComputedStyle(viewport).paddingLeft || '0')
+        );
+
+        viewport.scrollTo({
+            left,
+            behavior,
+        });
+    };
+
     const update = (target, behavior = 'smooth') => {
         const { maxIndex } = metrics();
 
         index = Math.max(0, Math.min(target, maxIndex));
 
-        cards[index]?.scrollIntoView({
-            behavior,
-            block: 'nearest',
-            inline: 'nearest',
-        });
+        scrollToCard(cards[index], behavior);
 
         updateStatus();
 
@@ -106,6 +121,7 @@
     root.addEventListener('focusout', start);
 
     let resizeTimer = null;
+
     window.addEventListener('resize', () => {
         window.clearTimeout(resizeTimer);
 
@@ -114,6 +130,31 @@
             start();
         }, 120);
     });
+
+    /*
+     * Keep the carousel from owning the document scroll position.
+     * Wheel/touch gestures stay horizontal inside the viewport.
+     */
+    viewport.addEventListener('wheel', (event) => {
+        if (Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
+
+        const maxScroll = viewport.scrollWidth - viewport.clientWidth;
+
+        if (maxScroll <= 0) return;
+
+        const atStart = viewport.scrollLeft <= 0;
+        const atEnd = viewport.scrollLeft >= maxScroll - 1;
+
+        if ((event.deltaY < 0 && atStart) || (event.deltaY > 0 && atEnd)) {
+            return;
+        }
+
+        event.preventDefault();
+        viewport.scrollLeft += event.deltaY;
+        stop();
+        window.clearTimeout(viewport._resumeTimer);
+        viewport._resumeTimer = window.setTimeout(start, autoplayMs);
+    }, { passive: false });
 
     update(0, 'auto');
     start();
