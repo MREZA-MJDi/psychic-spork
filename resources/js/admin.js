@@ -289,3 +289,48 @@ document.addEventListener('DOMContentLoaded', () => {
         sync();
     });
 });
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('[data-product-index]').forEach((page) => {
+        const modal = page.querySelector('[data-product-preview-modal]');
+        const image = modal?.querySelector('[data-preview-image]');
+        const title = modal?.querySelector('[data-preview-name]');
+        const closeButton = modal?.querySelector('[data-preview-close]');
+
+        if (!modal || !image || !title) return;
+
+        const close = () => {
+            modal.hidden = true;
+            document.body.classList.remove('admin-modal-open');
+            image.src = '';
+            image.alt = '';
+            title.textContent = '';
+        };
+
+        page.querySelectorAll('[data-preview-open]').forEach((trigger) => {
+            trigger.addEventListener('click', () => {
+                const url = trigger.dataset.previewUrl;
+                const name = trigger.dataset.previewName || '';
+
+                if (!url) return;
+
+                image.src = url;
+                image.alt = name;
+                title.textContent = name;
+                modal.hidden = false;
+                document.body.classList.add('admin-modal-open');
+            });
+        });
+
+        closeButton?.addEventListener('click', close);
+
+        modal.addEventListener('click', (event) => {
+            if (event.target === modal) close();
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && !modal.hidden) close();
+        });
+    });
+});
