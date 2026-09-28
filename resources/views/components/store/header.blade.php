@@ -35,8 +35,10 @@
 
         {{-- Desktop Navigation --}}
         <nav
+            id="store-mobile-menu"
             class="store-nav"
             aria-label="منوی اصلی فروشگاه"
+            data-mobile-menu
         >
             <a
                 href="{{ route('home') }}"
