@@ -305,9 +305,7 @@
 
                                     <span class="admin-muted">
 
-                                        {{ $customer->created_at->format(
-                                            'Y/m/d'
-                                        ) }}
+                                        <span class="admin-local-date" data-admin-date="{{ $customer->created_at->toIso8601String() }}" data-admin-date-format="day">{{ $customer->created_at->format('Y/m/d') }}</span>
 
                                     </span>
 
