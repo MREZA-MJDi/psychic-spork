@@ -113,6 +113,8 @@
                 action="{{ route('cart.store', $productVariant) }}"
                 class="quick-add-form"
                 data-cart-add
+                data-product-name="{{ $product->name }}"
+                data-product-image="{{ $image ?? '' }}"
             >
                 @csrf
 
