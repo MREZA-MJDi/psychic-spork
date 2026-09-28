@@ -5,11 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
+use App\Services\SeoService;
 use Illuminate\View\View;
 
 class HomeController extends Controller
 {
-    public function index(): View
+    public function index(SeoService $seo): View
     {
         $categories = Category::query()
             ->active()
@@ -20,7 +21,7 @@ class HomeController extends Controller
             ])
             ->orderBy('sort_order')
             ->orderBy('name')
-            ->take(8)
+            ->take(12)
             ->get();
 
         $brands = Brand::query()
@@ -82,6 +83,7 @@ class HomeController extends Controller
             ->all();
 
         return view('home.index', [
+            'seo' => $seo->storeHome(),
             'categories' => $categories,
             'brands' => $brands,
             'products' => $products,
