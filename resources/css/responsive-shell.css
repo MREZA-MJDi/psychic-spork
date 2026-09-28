@@ -34,7 +34,11 @@
         z-index: 9999;
         display: grid;
         grid-template-columns: repeat(5, minmax(0, 1fr));
-        width: auto;
+        width: min(
+            calc(100vw - 16px - env(safe-area-inset-left) - env(safe-area-inset-right)),
+            620px
+        );
+        margin-inline: auto;
         min-height: 66px;
         margin-inline: auto;
         padding: 6px;
@@ -118,6 +122,10 @@
         right: max(6px, env(safe-area-inset-right));
         bottom: max(6px, env(safe-area-inset-bottom));
         left: max(6px, env(safe-area-inset-left));
+        width: min(
+            calc(100vw - 12px - env(safe-area-inset-left) - env(safe-area-inset-right)),
+            620px
+        );
         min-height: 62px;
         padding: 5px;
         border-radius: 18px;
