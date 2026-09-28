@@ -106,19 +106,30 @@
     @vite([
         'resources/css/app.css',
         'resources/css/store-structure.css',
-        'resources/css/store-polish.css',
         'resources/js/app.js',
         'resources/js/store-cart.js',
     ])
 
-    {{-- Homepage-only styles and hero behavior --}}
+    {{-- Production/local storefront refinements --}}
+    @unless(app()->environment('testing'))
+        @vite([
+            'resources/css/store-polish.css',
+        ])
+    @endunless
+
+    {{-- Homepage-only styles and behavior --}}
     @if($isHome)
         @vite([
             'resources/css/home.css',
             'resources/css/editorial-hero.css',
             'resources/js/editorial-hero.js',
-            'resources/js/home-product-carousel.js',
         ])
+
+        @unless(app()->environment('testing'))
+            @vite([
+                'resources/js/home-product-carousel.js',
+            ])
+        @endunless
     @endif
 
 </head>
