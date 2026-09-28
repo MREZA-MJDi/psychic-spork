@@ -1,199 +1,56 @@
 @extends('layouts.store')
 
 @section('content')
+<div class="home-page">
 
-    @php
-        $latestProductImage = $latestProduct?->galleryMedia->first()?->url;
-    @endphp
+    {{-- 01. Hero --}}
+    <x-store.hero :hero-slides="$heroSlides" />
 
-    <div class="home-page">
+    {{-- 02. Store benefits --}}
+    <section class="home-proof" aria-label="مزایای خرید از جانان">
+        <div class="container">
+            <x-store.trust-strip />
+        </div>
+    </section>
 
-        {{-- Hero --}}
-        <x-store.hero :hero-slides="$heroSlides" />
-
-<br >
-        {{-- Store benefits --}}
-        <section
-            class="home-proof"
-            aria-label="مزایای خرید از جانان"
-        >
-            <div class="container">
-                <x-store.trust-strip />
-            </div>
-        </section>
-
-
-        {{-- Collections --}}
-        <section
-            class="home-section home-section--collections"
-            aria-labelledby="home-collections-title"
-        >
-            <x-store.category-grid
-                :categories="$categories"
-                title-id="home-collections-title"
-            />
-        </section>
-
-
-        {{-- Editorial feature --}}
-        @php
-            $editorialProduct = $latestProduct ?? null;
-            $editorialImage = $editorialProduct?->galleryMedia?->first()?->url;
-        @endphp
-
-        <section
-            class="home-editorial-interlude"
-            aria-labelledby="home-editorial-title"
-        >
-            <div class="home-editorial-interlude__frame">
-
-                <div class="home-editorial-interlude__top">
-            <span class="eyebrow">
-                SPECIAL FOR YOU
-            </span>
-
-                    <span
-                        class="home-editorial-interlude__index"
-                        aria-hidden="true"
-                    >
-                04 / 05
-            </span>
-                </div>
-
-
-                <div class="home-editorial-interlude__grid">
-
-                    {{-- IMAGE --}}
-                    <div class="home-editorial-interlude__visual">
-
-                        @if($editorialImage)
-                            <img
-                                src="{{ $editorialImage }}"
-                                alt="{{ $editorialProduct?->name ?? 'محصول منتخب جانان' }}"
-                                loading="lazy"
-                                decoding="async"
-                            >
-                        @else
-                            <div
-                                class="home-editorial-interlude__placeholder"
-                                aria-hidden="true"
-                            >
-                                <span>JANAN</span>
-                                <small>THE LATEST EDIT</small>
-                            </div>
-                        @endif
-
-                        <span
-                            class="home-editorial-interlude__image-number"
-                            aria-hidden="true"
-                        >
-                    01
-                </span>
-
-                        <div class="home-editorial-interlude__caption">
-                    <span>
-                        {{ $siteBrandNameLatin ?? 'JANAN' }} / EDIT
-                    </span>
-
-                            @if($editorialProduct?->name)
-                                <strong>
-                                    {{ $editorialProduct->name }}
-                                </strong>
-                            @endif
-                        </div>
-
-                    </div>
-
-
-                    {{-- COPY --}}
-                    <div class="home-editorial-interlude__copy">
-
-                        <div class="home-editorial-interlude__copy-top">
-                    <span class="home-editorial-interlude__micro">
-                        A PERSONAL SELECTION
-                    </span>
-
-                            <span
-                                class="home-editorial-interlude__line"
-                                aria-hidden="true"
-                            ></span>
-                        </div>
-
-                        <h2 id="home-editorial-title">
-                            هر انتخاب،
-                            <br>
-                            <em>امضای شماست.</em>
-                        </h2>
-
-                        <p>
-                            {{ $homeTagline ?? 'انتخاب‌هایی دقیق، آرام و شخصی برای جهان جانان.' }}
-                        </p>
-
-                        <a
-                            href="{{ route('products.index') }}"
-                            class="home-editorial-interlude__link"
-                        >
-                    <span>
-                        مشاهده انتخاب‌های جانان
-                    </span>
-
-                            <b aria-hidden="true">
-                                ↗
-                            </b>
-                        </a>
-
-                        <div class="home-editorial-interlude__bottom">
-                    <span>
-                        CURATED WITH INTENTION
-                    </span>
-
-                            <span>
-                        JANAN / 04
-                    </span>
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <span
-                    class="home-editorial-interlude__orb home-editorial-interlude__orb--one"
-                    aria-hidden="true"
-                ></span>
-
-                <span
-                    class="home-editorial-interlude__orb home-editorial-interlude__orb--two"
-                    aria-hidden="true"
-                ></span>
-
-            </div>
-        </section>
-        {{-- Products --}}
-        <x-store.product-section
-            :products="$products"
-        />
-
-
-        {{-- Editorial banner --}}
-        <x-store.editorial-banner
-            :product="$latestProduct"
-        />
-
-
-        {{-- Brands --}}
-        <x-store.brand-grid
-            :brands="$brands"
-        />
-
-
-        {{-- Final discovery banners --}}
-        <x-store.mini-banners
-            :latest-product="$latestProduct"
+    {{-- 03. Collections --}}
+    <section
+        class="home-section home-section--collections"
+        aria-labelledby="home-collections-title"
+    >
+        <x-store.category-grid
             :categories="$categories"
+            title-id="home-collections-title"
         />
+    </section>
 
-    </div>
+    {{-- 04. Two promotional cards between collections and products --}}
+    <x-store.promo-stack
+        :latest-product="$latestProduct"
+        :category="$categories->first()"
+        label="JANAN / DISCOVER"
+    />
 
+    {{-- 05. Products --}}
+    <x-store.product-section
+        :products="$products"
+    />
 
+    {{-- 06. Editorial --}}
+    <x-store.editorial-banner
+        :product="$latestProduct"
+    />
+
+    {{-- 07. Brands --}}
+    <x-store.brand-grid
+        :brands="$brands"
+    />
+
+    {{-- 08. Final discovery --}}
+    <x-store.mini-banners
+        :latest-product="$latestProduct"
+        :categories="$categories"
+    />
+
+</div>
 @endsection
