@@ -1,23 +1,35 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace AppHttpControllers;
 
-use App\Models\ContactMessage;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use Illuminate\View\View;
+use AppModelsContactMessage;
+use AppServicesSeoService;
+use IlluminateHttpRedirectResponse;
+use IlluminateHttpRequest;
+use IlluminateViewView;
 use Throwable;
 
 class StorePageController extends Controller
 {
-    public function about(): View
+    public function about(SeoService $seo): View
     {
-        return view('pages.about');
+        return view('pages.about', [
+            'seo' => $seo->page(
+                'درباره جانان — ' . config('app.store_name', 'Janan'),
+                'آشنایی با فلسفه، ساختار و تجربه فروشگاه آنلاین جانان.',
+                route('about')
+            ),
+        ]);
     }
 
-    public function contact(): View
+    public function contact(SeoService $seo): View
     {
         return view('pages.contact', [
+            'seo' => $seo->page(
+                'تماس با جانان — ' . config('app.store_name', 'Janan'),
+                'راه‌های ارتباط با فروشگاه و ارسال پیام به پشتیبانی جانان.',
+                route('contact')
+            ),
             'contactStore' => [
                 'phone' => env('JANAN_STORE_PHONE'),
                 'email' => env('JANAN_STORE_EMAIL'),
@@ -53,18 +65,36 @@ class StorePageController extends Controller
         }
     }
 
-    public function shipping(): View
+    public function shipping(SeoService $seo): View
     {
-        return view('pages.shipping');
+        return view('pages.shipping', [
+            'seo' => $seo->page(
+                'روش‌های ارسال — ' . config('app.store_name', 'Janan'),
+                'اطلاعات و سیاست‌های ارسال سفارش‌های فروشگاه جانان.',
+                route('shipping')
+            ),
+        ]);
     }
 
-    public function returns(): View
+    public function returns(SeoService $seo): View
     {
-        return view('pages.returns');
+        return view('pages.returns', [
+            'seo' => $seo->page(
+                'شرایط مرجوعی — ' . config('app.store_name', 'Janan'),
+                'اطلاعات و سیاست‌های مرجوعی سفارش‌های فروشگاه جانان.',
+                route('returns')
+            ),
+        ]);
     }
 
-    public function faq(): View
+    public function faq(SeoService $seo): View
     {
-        return view('pages.faq');
+        return view('pages.faq', [
+            'seo' => $seo->page(
+                'سوالات متداول — ' . config('app.store_name', 'Janan'),
+                'پاسخ به سوالات متداول درباره محصولات، سبد خرید و مسیر سفارش جانان.',
+                route('faq')
+            ),
+        ]);
     }
 }
