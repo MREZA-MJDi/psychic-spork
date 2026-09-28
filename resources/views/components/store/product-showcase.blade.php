@@ -39,7 +39,7 @@
             <div
                 class="home-product-carousel"
                 data-product-carousel
-                data-autoplay="4200"
+                data-autoplay="5000"
                 role="region"
                 aria-roledescription="carousel"
                 aria-label="محصولات منتخب جانان"
