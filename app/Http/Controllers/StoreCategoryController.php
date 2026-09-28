@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\ModelsCategory;
-use App\ModelsProduct;
-use App\ServicesSeoService;
+use App\Models\Category;
+use App\Models\Product;
+use App\Services\SeoService;
 use Illuminate\View\View;
 
 class StoreCategoryController extends Controller
