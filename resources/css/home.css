@@ -2580,24 +2580,18 @@ font-size:
 
 /* =========================================================
    HOME LAYOUT SAFETY
-   Keep every homepage section inside the viewport.
+   Keep every active homepage section inside the viewport.
 ========================================================= */
 
-.home-page {
-    position: relative;
-    width: 100%;
-    max-width: 100%;
-    min-width: 0;
-    overflow-x: clip;
-}
-
+.home-page,
 .home-page > *,
 .home-page section,
 .home-page .container,
 .home-page .section-block,
 .home-page .home-product-section,
+.home-page .home-discovery-section,
 .home-page .home-signals-section,
-.home-page .home-recommendations-section {
+.home-page .home-brands {
     min-width: 0;
     max-width: 100%;
 }
@@ -2609,12 +2603,11 @@ font-size:
 
     .home-category-rail,
     .home-brand-rail,
-    .home-product-grid,
     .home-discovery__grid,
     .home-signals__grid {
-        min-width: 0;
         width: 100%;
         max-width: 100%;
+        min-width: 0;
     }
 }
 
@@ -2627,8 +2620,7 @@ font-size:
     .home-product-section__head,
     .home-discovery__head,
     .home-signals__head,
-    .home-brands__head,
-    .home-recommendations__head {
+    .home-brands__head {
         width: 100%;
         min-width: 0;
     }
@@ -2637,8 +2629,7 @@ font-size:
     .home-product-section__head > *,
     .home-discovery__head > *,
     .home-signals__head > *,
-    .home-brands__head > *,
-    .home-recommendations__head > * {
+    .home-brands__head > * {
         min-width: 0;
         max-width: 100%;
     }
@@ -2646,15 +2637,12 @@ font-size:
 
 @media (max-width: 560px) {
     .home-category-card__body,
-
-    .home-signal-panel__head,
-    .home-recommendations__head {
+    .home-signal-panel__head {
         min-width: 0;
     }
 
     .home-signal-item__copy,
-    .home-category-card__meta,
-    .home-closing__copy {
+    .home-category-card__meta {
         min-width: 0;
         max-width: 100%;
     }
