@@ -98,6 +98,7 @@ class AdminDashboardController extends Controller
 
                 return [
                     'label' => $day->format('m/d'),
+                    'date' => $day->toDateString(),
 
                     'income' => (float) (
                         $row->income ?? 0
