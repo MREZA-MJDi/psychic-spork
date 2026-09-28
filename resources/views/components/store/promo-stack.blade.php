@@ -7,82 +7,64 @@
 @php
     $latestImage = $latestProduct?->galleryMedia?->first()?->url;
     $categoryImage = $category?->coverMedia?->url;
-    $latestUrl = $latestProduct
-        ? route('products.show', $latestProduct)
-        : route('products.index');
-    $categoryUrl = $category
-        ? route('categories.show', $category)
-        : route('categories.index');
+    $productsUrl = route('products.index');
 @endphp
 
-<section class="store-promo-section" aria-label="پیشنهادهای جانان">
+<section
+    class="store-promo-section"
+    aria-label="دسترسی سریع به محصولات"
+>
     <div class="container">
 
-        <header class="store-promo-section__head">
-            <div>
-                <span class="eyebrow">{{ $label }}</span>
-                <h2>دو مسیر برای ادامه‌ی انتخاب.</h2>
-            </div>
+        <div class="store-promo-tiles">
 
             <a
-                href="{{ route('products.index') }}"
-                class="text-link"
+                href="{{ $productsUrl }}"
+                class="store-promo-tile is-large"
+                aria-label="مشاهده همه محصولات"
             >
-                مشاهده همه
-                <span aria-hidden="true">↗</span>
-            </a>
-        </header>
+                @if($latestImage)
+                    <img
+                        src="{{ $latestImage }}"
+                        alt=""
+                        loading="lazy"
+                        decoding="async"
+                    >
+                @else
+                    <span class="store-promo-tile__placeholder" aria-hidden="true">
+                        JANAN
+                    </span>
+                @endif
 
-        <div class="store-promo-stack">
-
-            <a href="{{ $latestUrl }}" class="store-promo">
-                <span class="store-promo__media">
-                    @if($latestImage)
-                        <img
-                            src="{{ $latestImage }}"
-                            alt="{{ $latestProduct?->name ?? 'محصول منتخب جانان' }}"
-                            loading="lazy"
-                            decoding="async"
-                        >
-                    @else
-                        <span class="store-promo__placeholder">JANAN</span>
-                    @endif
-                </span>
-
-                <span class="store-promo__veil" aria-hidden="true"></span>
-
-                <span class="store-promo__content">
-                    <small>01 / NEW EDIT</small>
-                    <strong>{{ $latestProduct?->name ?? 'کالکشن تازه جانان' }}</strong>
-                    <span>مشاهده محصول ↗</span>
-                </span>
+                <span class="store-promo-tile__shade" aria-hidden="true"></span>
+                <span class="store-promo-tile__index" aria-hidden="true">01</span>
+                <span class="store-promo-tile__arrow" aria-hidden="true">↗</span>
             </a>
 
-            <a href="{{ $categoryUrl }}" class="store-promo">
-                <span class="store-promo__media">
-                    @if($categoryImage)
-                        <img
-                            src="{{ $categoryImage }}"
-                            alt="{{ $category?->name ?? 'دسته‌بندی جانان' }}"
-                            loading="lazy"
-                            decoding="async"
-                        >
-                    @else
-                        <span class="store-promo__placeholder">
-                            {{ $category?->name ?? 'JANAN' }}
-                        </span>
-                    @endif
-                </span>
+            <a
+                href="{{ $productsUrl }}"
+                class="store-promo-tile"
+                aria-label="مشاهده همه محصولات"
+            >
+                @if($categoryImage)
+                    <img
+                        src="{{ $categoryImage }}"
+                        alt=""
+                        loading="lazy"
+                        decoding="async"
+                    >
+                @else
+                    <span class="store-promo-tile__placeholder" aria-hidden="true">
+                        JANAN
+                    </span>
+                @endif
 
-                <span class="store-promo__veil" aria-hidden="true"></span>
-
-                <span class="store-promo__content">
-                    <small>02 / COLLECTION</small>
-                    <strong>{{ $category?->name ?? 'کالکشن‌های جانان' }}</strong>
-                    <span>مشاهده کالکشن ↗</span>
-                </span>
+                <span class="store-promo-tile__shade" aria-hidden="true"></span>
+                <span class="store-promo-tile__index" aria-hidden="true">02</span>
+                <span class="store-promo-tile__arrow" aria-hidden="true">↗</span>
             </a>
 
         </div>
+
     </div>
 </section>
