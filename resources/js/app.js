@@ -9,10 +9,30 @@ document.addEventListener('DOMContentLoaded', () => {
     const mobileMenu = document.querySelector('[data-mobile-menu]');
     const searchToggle = document.querySelector('[data-search-toggle]');
     const searchPanel = document.querySelector('[data-search-panel]');
+    const storeHeader = document.querySelector('.store-header');
+
+    const closeMobileMenu = () => {
+        mobileMenu?.classList.remove('is-open');
+        menuToggle?.setAttribute('aria-expanded', 'false');
+    };
 
     menuToggle?.addEventListener('click', () => {
-        const open = mobileMenu?.classList.toggle('is-open') ?? false;
+        if (!mobileMenu) return;
+
+        const open = mobileMenu.classList.toggle('is-open');
         menuToggle.setAttribute('aria-expanded', String(open));
+    });
+
+    const syncHeaderScrollState = () => {
+        storeHeader?.classList.toggle(
+            'is-scrolled',
+            window.scrollY > 12
+        );
+    };
+
+    syncHeaderScrollState();
+    window.addEventListener('scroll', syncHeaderScrollState, {
+        passive: true,
     });
 
     const setSearchOpen = (open) => {
@@ -44,8 +64,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.addEventListener('keydown', (event) => {
-        if (event.key === 'Escape' && searchPanel?.classList.contains('is-open')) {
-            setSearchOpen(false);
+        if (event.key === 'Escape') {
+            if (searchPanel?.classList.contains('is-open')) {
+                setSearchOpen(false);
+            }
+
+            if (mobileMenu?.classList.contains('is-open')) {
+                closeMobileMenu();
+            }
         }
 
         if (
@@ -58,10 +84,17 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     mobileMenu?.querySelectorAll('a').forEach((link) => {
-        link.addEventListener('click', () => {
-            mobileMenu.classList.remove('is-open');
-            menuToggle?.setAttribute('aria-expanded', 'false');
-        });
+        link.addEventListener('click', closeMobileMenu);
+    });
+
+    document.addEventListener('click', (event) => {
+        if (
+            mobileMenu?.classList.contains('is-open') &&
+            !mobileMenu.contains(event.target) &&
+            !menuToggle?.contains(event.target)
+        ) {
+            closeMobileMenu();
+        }
     });
 
     document.querySelectorAll('[data-password-toggle]').forEach((toggle) => {
@@ -124,8 +157,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.addEventListener('resize', () => {
         if (window.innerWidth > 820) {
-            mobileMenu?.classList.remove('is-open');
-            menuToggle?.setAttribute('aria-expanded', 'false');
+            closeMobileMenu();
         }
     });
 });
