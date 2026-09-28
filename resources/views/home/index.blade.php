@@ -6,8 +6,8 @@
     {{-- 01. Hero --}}
     <x-store.hero :hero-slides="$heroSlides" />
 
-    {{-- 02. Store benefits --}}
-    <section class="home-proof" aria-label="مزایای خرید از جانان">
+    {{-- 02. Trust / system proof --}}
+    <section class="home-proof" aria-label="اعتماد و مزایای خرید از جانان">
         <div class="container">
             <x-store.trust-strip />
         </div>
@@ -19,28 +19,25 @@
         title-id="home-collections-title"
     />
 
-    {{-- 04. Featured products --}}
+    {{-- 04. Featured product slider --}}
     <x-store.product-showcase
         :products="$products"
     />
 
-    {{-- 05. Live store signals --}}
+    {{-- 05. Dynamic editorial product intelligence --}}
+    <x-store.home-intelligence
+        :products="$products"
+    />
+
+    {{-- 06. Live store signals: new + popular --}}
     <x-store.home-signals
         :recent-products="$recentProducts"
         :popular-products="$popularProducts"
     />
 
-    {{-- 06. Brands --}}
+    {{-- 07. Brands --}}
     <x-store.brand-grid
         :brands="$brands"
-    />
-
-    {{-- 07. Closing CTA --}}
-    <x-store.home-closing />
-
-    {{-- 08. Recommendations: immediately before the storefront footer --}}
-    <x-store.home-recommendations
-        :products="$recommendedProducts"
     />
 
 </div>
