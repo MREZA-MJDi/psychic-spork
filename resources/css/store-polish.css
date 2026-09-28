@@ -1175,9 +1175,9 @@
 
 @media (max-width: 560px) {
     .cart-quick-preview {
-        position: fixed;
-        right: 12px;
-        bottom: calc(100% - 12px);
+        position: absolute;
+        right: calc(100% + 8px);
+        bottom: calc(100% + 10px);
         width: min(320px, calc(100vw - 24px));
         transform-origin: bottom right;
     }
