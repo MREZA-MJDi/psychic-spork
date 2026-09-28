@@ -244,6 +244,79 @@
 
 
     {{-- =========================================================
+        SEO
+    ========================================================== --}}
+
+    @php
+        $defaultMetaTitle = old(
+            'meta_title',
+            $product?->meta_title ?: (
+                filled($product?->name)
+                    ? $product->name . ' | Janan'
+                    : ''
+            )
+        );
+
+        $defaultMetaDescription = old(
+            'meta_description',
+            $product?->meta_description ?: (
+                $product?->short_description
+                    ?: $product?->description
+                    ?: 'معرفی و خرید ' . ($product?->name ?: 'محصول') . ' از فروشگاه جانان.'
+            )
+        );
+    @endphp
+
+    <section class="admin-card admin-form-section admin-form-section-full">
+        <div class="admin-card-header">
+            <div>
+                <h2 class="admin-card-title">نمایش در گوگل و اشتراک‌گذاری</h2>
+                <p class="admin-card-description">
+                    این بخش لازم نیست پیچیده باشد؛ اگر خالی بماند، جانان مقدار پیش‌فرض مناسبی بر اساس نام و توضیحات محصول می‌سازد.
+                </p>
+            </div>
+        </div>
+
+        <div class="admin-form-grid">
+            <div class="admin-field admin-field-full">
+                <label for="meta_title">عنوان SEO</label>
+                <input
+                    id="meta_title"
+                    type="text"
+                    name="meta_title"
+                    maxlength="180"
+                    value="{{ $defaultMetaTitle }}"
+                    placeholder="مثلاً کرم مرطوب‌کننده آبرسان | Janan"
+                >
+                <small class="admin-help">
+                    این متن عنوان صفحه در نتایج جستجو و عنوان مرورگر است. حالت پیشنهادی: نام محصول + نام فروشگاه.
+                </small>
+            </div>
+
+            <div class="admin-field admin-field-full">
+                <label for="meta_description">توضیحات SEO</label>
+                <textarea
+                    id="meta_description"
+                    name="meta_description"
+                    rows="4"
+                    maxlength="320"
+                    placeholder="یک توضیح کوتاه و روشن درباره محصول..."
+                >{{ $defaultMetaDescription }}</textarea>
+                <small class="admin-help">
+                    توضیح کوتاهی که کاربر قبل از ورود به صفحه می‌تواند در نتایج جستجو ببیند. حدود ۱۲۰ تا ۱۶۰ کاراکتر معمولاً خواناتر است.
+                </small>
+            </div>
+
+            <div class="admin-seo-preview admin-field-full">
+                <span>پیش‌نمایش تقریبی</span>
+                <strong data-seo-preview-title>{{ $defaultMetaTitle ?: 'عنوان محصول' }}</strong>
+                <small data-seo-preview-url>janan.local/products/{{ $product?->slug ?: 'product-slug' }}</small>
+                <p data-seo-preview-description>{{ $defaultMetaDescription ?: 'توضیحات کوتاه محصول در این قسمت دیده می‌شود.' }}</p>
+            </div>
+        </div>
+    </section>
+
+    {{-- =========================================================
         STATUS
     ========================================================== --}}
 
@@ -1134,6 +1207,34 @@
                     'input',
                     syncAttributes
                 );
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | SEO live preview
+                |--------------------------------------------------------------------------
+                */
+
+                const metaTitle = document.getElementById('meta_title');
+                const metaDescription = document.getElementById('meta_description');
+                const seoTitlePreview = document.querySelector('[data-seo-preview-title]');
+                const seoDescriptionPreview = document.querySelector('[data-seo-preview-description]');
+
+                const syncSeoPreview = function () {
+                    if (seoTitlePreview && metaTitle) {
+                        seoTitlePreview.textContent = metaTitle.value.trim() || 'عنوان محصول';
+                    }
+
+                    if (seoDescriptionPreview && metaDescription) {
+                        seoDescriptionPreview.textContent =
+                            metaDescription.value.trim() ||
+                            'توضیحات کوتاه محصول در این قسمت دیده می‌شود.';
+                    }
+                };
+
+                metaTitle?.addEventListener('input', syncSeoPreview);
+                metaDescription?.addEventListener('input', syncSeoPreview);
+                syncSeoPreview();
 
 
                 /*
