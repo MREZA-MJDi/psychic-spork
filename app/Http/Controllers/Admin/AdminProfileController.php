@@ -26,9 +26,11 @@ class AdminProfileController extends Controller
             'name' => ['required', 'string', 'max:120'],
             'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
             'phone' => ['nullable', 'string', 'max:30'],
-            'password' => ['nullable', 'string', 'min:8', 'confirmed', 'current_password:password'],
+            'password' => ['nullable', 'string', 'min:8', 'confirmed'],
+            'current_password' => ['nullable', 'required_with:password', 'current_password:password'],
         ], [
-            'password.current_password' => 'برای تغییر رمز، رمز فعلی را درست وارد کنید.',
+            'current_password.required_with' => 'برای تغییر رمز، رمز فعلی را وارد کنید.',
+            'current_password.current_password' => 'رمز فعلی صحیح نیست.',
         ]);
 
         $user->update([
