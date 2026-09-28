@@ -370,26 +370,6 @@
 </div>
 
 
-{{-- =========================================================
-    FORM ACTIONS
-========================================================= --}}
-
-<div class="admin-form-actions">
-
-    <a
-        href="{{ route('admin.categories.index') }}"
-        class="admin-btn admin-btn--ghost"
-    >
-        انصراف
-    </a>
-
-    <button
-        type="submit"
-        class="admin-btn admin-btn--secondary"
-    >
-        {{ $category->exists ? 'ذخیره تغییرات' : 'ایجاد دسته‌بندی' }}
-    </button>
-
     @php
         $categoryMetaTitle = old(
             'meta_title',
@@ -450,6 +430,28 @@
             </div>
         </div>
     </section>
+
+
+
+{{-- =========================================================
+    FORM ACTIONS
+========================================================= --}}
+
+<div class="admin-form-actions">
+
+    <a
+        href="{{ route('admin.categories.index') }}"
+        class="admin-btn admin-btn--ghost"
+    >
+        انصراف
+    </a>
+
+    <button
+        type="submit"
+        class="admin-btn admin-btn--secondary"
+    >
+        {{ $category->exists ? 'ذخیره تغییرات' : 'ایجاد دسته‌بندی' }}
+    </button>
 
 </div>
 
