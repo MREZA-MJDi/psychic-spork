@@ -2786,7 +2786,11 @@ width:
     }
 
     .home-proof {
-        padding-block: 20px 30px;
+        padding-block: 16px 22px;
+    }
+
+    .home-proof .janan-trust {
+        min-height: 88px;
     }
 }
 
@@ -2811,11 +2815,11 @@ width:
     }
 
     .home-proof {
-        padding-block: 18px 26px;
+        padding-block: 12px 18px;
     }
 
     .home-proof .janan-trust {
-        min-height: 84px;
+        min-height: 0;
     }
 
     .home-collections,
