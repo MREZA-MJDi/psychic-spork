@@ -313,7 +313,7 @@
 }
 
 .store-page__section {
-    padding-block: clamp(56px, 7vw, 92px);
+    padding-block: clamp(64px, 7vw, 88px);
 }
 
 .store-page__section--soft {
@@ -322,13 +322,13 @@
 
 .store-page__intro {
     max-width: 760px;
-    margin-bottom: 30px;
+    margin-bottom: 26px;
 }
 
 .store-page__intro h2 {
     margin: 9px 0 10px;
     color: var(--janan-ink-strong);
-    font-size: clamp(28px, 3.8vw, 48px);
+    font-size: clamp(28px, 3.6vw, 44px);
     font-weight: 620;
     letter-spacing: -.05em;
     line-height: 1.2;
@@ -338,7 +338,7 @@
     max-width: 680px;
     margin: 0;
     color: var(--janan-muted);
-    font-size: 10px;
+    font-size: 11px;
     line-height: 2.1;
 }
 
@@ -549,7 +549,7 @@
 
 .footer-trust__item img {
     width: 66px;
-    height: 48px;
+    height: 50px;
     object-fit: contain;
     justify-self: start;
     margin-bottom: 2px;
@@ -1279,9 +1279,9 @@
 
 .search-panel__submit {
     min-width: 104px;
-    height: 48px;
+    height: 50px;
     border-radius: 14px;
-    font-size: 8px;
+    font-size: 8.5px;
 }
 
 .search-panel__submit span {
