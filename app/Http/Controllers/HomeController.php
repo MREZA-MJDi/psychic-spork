@@ -99,6 +99,12 @@ class HomeController extends Controller
             ->limit(4)
             ->get();
 
+        $signalFrom = now()
+            ->startOfDay()
+            ->subDays(29);
+
+        $signalTo = now()->endOfDay();
+
         $popularProducts = Product::query()
             ->active()
             ->with([
@@ -110,8 +116,9 @@ class HomeController extends Controller
             ->withSum(
                 [
                     'orderItems as sales_quantity' => function ($query) {
-                        $query->whereHas('order', function ($orderQuery) {
+                        $query->whereHas('order', function ($orderQuery) use ($signalFrom, $signalTo) {
                             $orderQuery
+                                ->whereBetween('placed_at', [$signalFrom, $signalTo])
                                 ->whereNotIn(
                                     'status',
                                     Order::CANCEL_LIKE_STATUSES
