@@ -46,7 +46,7 @@
             >
                 <div class="home-product-carousel__topline">
                     <span>
-                        <b data-product-status>01 / {{ str_pad((string) $products->count(), 2, '0', STR_PAD_LEFT) }}</b>
+                        <b data-product-status aria-live="polite">01 / {{ str_pad((string) $products->count(), 2, '0', STR_PAD_LEFT) }}</b>
                         انتخاب
                     </span>
 
@@ -75,7 +75,6 @@
                     class="home-product-carousel__viewport"
                     data-product-viewport
                     tabindex="0"
-                    aria-live="polite"
                 >
                     <div
                         class="home-product-carousel__track"
