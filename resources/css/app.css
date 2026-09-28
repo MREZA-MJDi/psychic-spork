@@ -5709,3 +5709,75 @@ animation-duration:
             auto !important;
 }
 }
+
+
+
+/* =========================================================
+   JANAN / PRODUCT CARD SCALE STANDARD
+========================================================= */
+
+.product-card__media {
+    aspect-ratio: 1 / 1.08;
+}
+
+.product-card--home .product-card__media {
+    aspect-ratio: auto;
+    height: clamp(210px, 19vw, 252px);
+}
+
+.product-card--home .product-card__body {
+    min-height: 126px;
+    padding: 13px 14px 14px;
+}
+
+.product-card--home .product-card__title {
+    min-height: 38px;
+    font-size: 9.5px;
+    line-height: 1.8;
+}
+
+.product-card--home .product-price {
+    margin-top: 5px;
+}
+
+.product-card--home .product-price strong {
+    font-size: 12px;
+}
+
+.product-card--home .quick-add-form {
+    right: 10px;
+    bottom: 10px;
+    left: 10px;
+}
+
+.product-card--home .quick-add {
+    min-height: 36px;
+    font-size: 7.5px;
+}
+
+.product-card--home .sale-pill {
+    top: 10px;
+    right: 10px;
+}
+
+@media (max-width: 900px) {
+    .product-card--home .product-card__media {
+        height: clamp(205px, 28vw, 235px);
+    }
+}
+
+@media (max-width: 560px) {
+    .product-card--home .product-card__media {
+        height: 300px;
+    }
+}
+
+@media (max-width: 390px) {
+    .product-card--home .product-card__media {
+        height: 260px;
+    }
+
+    .product-card--home .product-card__body {
+        min-height: 118px;
+    }
+}
