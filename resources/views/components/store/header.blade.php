@@ -192,37 +192,74 @@
     </div>
 
 
-    {{-- Search Panel --}}
+    {{-- Smart storefront search --}}
     <div
         id="store-search-panel"
         class="search-panel"
         data-search-panel
     >
         <div class="container">
-
             <form
                 class="search-panel__form"
+                data-store-search
                 action="{{ route('products.index') }}"
                 method="GET"
+                role="search"
             >
-                <input
-                    type="search"
-                    name="q"
-                    value="{{ request('q') }}"
-                    placeholder="نام محصول را جستجو کنید..."
-                    autocomplete="off"
-                    enterkeyhint="search"
-                    aria-label="جستجوی محصولات"
-                >
+                <div class="search-panel__field">
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <circle cx="11" cy="11" r="6.5"/>
+                        <path d="m16 16 4.5 4.5"/>
+                    </svg>
+
+                    <input
+                        type="search"
+                        name="q"
+                        value="{{ request('q') }}"
+                        placeholder="نام محصول، برند، دسته یا SKU را جستجو کن…"
+                        autocomplete="off"
+                        enterkeyhint="search"
+                        aria-label="جستجوی محصولات"
+                        data-search-input
+                        minlength="2"
+                    >
+
+                    <button
+                        type="button"
+                        class="search-panel__clear"
+                        data-search-clear
+                        aria-label="پاک کردن جستجو"
+                        hidden
+                    >
+                        ×
+                    </button>
+                </div>
 
                 <button
                     type="submit"
-                    class="button button--primary"
+                    class="button button--primary search-panel__submit"
                 >
                     جستجو
+                    <span aria-hidden="true">↵</span>
                 </button>
             </form>
 
+            <div
+                class="search-suggestions"
+                data-search-results
+                hidden
+                aria-live="polite"
+            >
+                <div class="search-suggestions__head">
+                    <span>جستجوی سریع</span>
+                    <small data-search-status>نام محصول یا برند را وارد کن</small>
+                </div>
+
+                <div
+                    class="search-suggestions__list"
+                    data-search-results-list
+                ></div>
+            </div>
         </div>
     </div>
 
