@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\RequestsStoreProductFilterRequest;
-use App\ModelsBrand;
-use App\ModelsCategory;
-use App\ModelsProduct;
-use App\ServicesSeoService;
+use App\Http\Requests\StoreProductFilterRequest;
+use App\Models\Brand;
+use App\Models\Category;
+use App\Models\Product;
+use App\Services\SeoService;
 use Illuminate\View\View;
 
 class StoreProductController extends Controller
