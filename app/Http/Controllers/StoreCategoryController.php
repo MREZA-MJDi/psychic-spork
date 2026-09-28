@@ -1,14 +1,15 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace AppHttpControllers;
 
-use App\Models\Category;
-use App\Models\Product;
-use Illuminate\View\View;
+use AppModelsCategory;
+use AppModelsProduct;
+use AppServicesSeoService;
+use IlluminateViewView;
 
 class StoreCategoryController extends Controller
 {
-    public function index(): View
+    public function index(SeoService $seo): View
     {
         $categories = Category::query()
             ->active()
@@ -22,11 +23,16 @@ class StoreCategoryController extends Controller
             ->get();
 
         return view('categories.index', [
+            'seo' => $seo->page(
+                'دسته‌بندی‌ها — ' . config('app.store_name', 'Janan'),
+                'مرور دسته‌بندی‌ها و کالکشن‌های فروشگاه جانان.',
+                route('categories.index')
+            ),
             'categories' => $categories,
         ]);
     }
 
-    public function show(Category $category): View
+    public function show(Category $category, SeoService $seo): View
     {
         abort_unless($category->is_active, 404);
 
@@ -47,6 +53,7 @@ class StoreCategoryController extends Controller
             ->withQueryString();
 
         return view('categories.show', [
+            'seo' => $seo->category($category),
             'category' => $category,
             'products' => $products,
         ]);
