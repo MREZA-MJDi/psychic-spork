@@ -1,142 +1,102 @@
+@props([
+    'products' => collect(),
+])
+
 @php
-    $editorialMedia = $product?->galleryMedia?->first();
-    $editorialImage = $editorialMedia?->url;
-    $editorialAlt = $product?->name ?: 'کالکشن جانان';
-    $editorialVariant = $product?->variants?->first();
-    $editorialCategory = $product?->category?->name ?? 'Janan Collection';
-    $editorialBrand = $product?->brand?->name ?? ($siteBrandNameLatin ?? 'Janan');
-    $editorialPrice = $editorialVariant?->effective_price;
-    $editorialStock = (int) ($editorialVariant?->stock ?? 0);
-    $editorialSale = $editorialVariant?->is_on_sale ?? false;
-    $editorialDiscount = $editorialSale
-        ? max(
-            1,
-            round(
-                (1 - (
-                    $editorialVariant->effective_price /
-                    max(1, (float) $editorialVariant->price)
-                )) * 100
-            )
-        )
-        : 0;
+    $editorialProducts = collect($products)
+        ->filter(fn ($item) => $item)
+        ->take(3)
+        ->values();
 @endphp
 
 <section
-    class="editorial-tech-section"
-    aria-labelledby="editorial-tech-title"
+    class="janan-edit-section"
+    aria-labelledby="janan-edit-title"
 >
     <div class="container">
-        <article class="editorial-tech">
 
-            <div class="editorial-tech__visual">
-                <div class="editorial-tech__media">
-                    @if($editorialImage)
-                        <img
-                            src="{{ $editorialImage }}"
-                            alt="{{ $editorialAlt }}"
-                            loading="lazy"
-                            decoding="async"
-                        >
-                    @else
-                        <div class="editorial-tech__placeholder" aria-hidden="true">
-                            <span>JANAN</span>
-                            <strong>THE ART OF DETAILS</strong>
-                        </div>
-                    @endif
-                </div>
-
-                <div class="editorial-tech__veil" aria-hidden="true"></div>
-
-                <div class="editorial-tech__topline" aria-hidden="true">
-                    <span>JANAN / EDIT</span>
-                    <span>01 — 04</span>
-                </div>
-
-                <div class="editorial-tech__floating-card">
-                    <span class="editorial-tech__floating-label">CURRENT EDIT</span>
-
-                    <div class="editorial-tech__floating-main">
-                        <strong>{{ $editorialBrand }}</strong>
-                        @if($editorialPrice)
-                            <span>{{ number_format($editorialPrice) }} تومان</span>
-                        @endif
-                    </div>
-
-                    <div class="editorial-tech__floating-meta">
-                        <span>{{ $editorialCategory }}</span>
-                        <span class="{{ $editorialStock > 0 ? 'is-available' : 'is-out' }}">
-                            {{ $editorialStock > 0 ? 'AVAILABLE' : 'SOLD OUT' }}
-                        </span>
-                    </div>
-                </div>
-
-                @if($editorialSale)
-                    <span class="editorial-tech__discount">
-                        -{{ $editorialDiscount }}%
-                    </span>
-                @endif
-
-                <span class="editorial-tech__vertical" aria-hidden="true">
-                    DETAILS / TEXTURE / FORM
-                </span>
+        <header class="janan-edit__head">
+            <div>
+                <span class="eyebrow">JANAN / EDIT</span>
+                <h2 id="janan-edit-title">یک نگاه، چند انتخاب.</h2>
             </div>
 
-            <div class="editorial-tech__content">
-                <div class="editorial-tech__content-top">
-                    <span class="eyebrow">
-                        {{ $siteBrandNameLatin ?? 'Janan' }} / THE ART OF DETAILS
-                    </span>
+            <a
+                href="{{ route('products.index') }}"
+                class="janan-edit__link"
+                aria-label="مشاهده همه محصولات"
+            >
+                <span aria-hidden="true">↗</span>
+            </a>
+        </header>
 
-                    <span class="editorial-tech__counter" aria-hidden="true">
-                        04 <i></i> 08
-                    </span>
-                </div>
+        @if($editorialProducts->isNotEmpty())
 
-                <div class="editorial-tech__copy">
-                    <span class="editorial-tech__kicker">
-                        A MORE PERSONAL EDIT
-                    </span>
+            <div class="janan-edit__layout">
 
-                    <h2 id="editorial-tech-title">
-                        جزئیاتی که
-                        <em>دیده می‌شوند.</em>
-                    </h2>
+                @foreach($editorialProducts as $product)
 
-                    <p>
-                        انتخاب‌های جانان فقط محصول نیستند؛ ترکیبی از فرم، بافت و جزئیاتی هستند که تجربه‌ی نهایی را کامل می‌کنند.
-                    </p>
-                </div>
-
-                <div class="editorial-tech__footer">
-                    <div class="editorial-tech__metrics">
-                        <div>
-                            <strong>01</strong>
-                            <span>CURATED</span>
-                        </div>
-
-                        <div>
-                            <strong>{{ $editorialCategory }}</strong>
-                            <span>COLLECTION</span>
-                        </div>
-
-                        <div>
-                            <strong>{{ $editorialStock > 0 ? 'LIVE' : 'OFF' }}</strong>
-                            <span>STATUS</span>
-                        </div>
-                    </div>
+                    @php
+                        $image = $product->galleryMedia?->first()?->url;
+                    @endphp
 
                     <a
-                        href="{{ $product ? route('products.show', $product) : route('products.index') }}"
-                        class="editorial-tech__cta"
+                        href="{{ route('products.index') }}"
+                        class="janan-edit__tile {{ $loop->first ? 'is-main' : '' }}"
+                        aria-label="مشاهده همه محصولات"
                     >
-                        <span>مشاهده انتخاب</span>
-                        <i aria-hidden="true">↗</i>
+                        @if($image)
+                            <img
+                                src="{{ $image }}"
+                                alt=""
+                                loading="lazy"
+                                decoding="async"
+                            >
+                        @else
+                            <span
+                                class="janan-edit__placeholder"
+                                aria-hidden="true"
+                            >
+                                JANAN
+                            </span>
+                        @endif
+
+                        <span
+                            class="janan-edit__veil"
+                            aria-hidden="true"
+                        ></span>
+
+                        <span
+                            class="janan-edit__number"
+                            aria-hidden="true"
+                        >
+                            {{ sprintf('%02d', $loop->iteration) }}
+                        </span>
+
+                        <span
+                            class="janan-edit__arrow"
+                            aria-hidden="true"
+                        >
+                            ↗
+                        </span>
                     </a>
-                </div>
+
+                @endforeach
+
             </div>
 
-            <span class="editorial-tech__orb editorial-tech__orb--one" aria-hidden="true"></span>
-            <span class="editorial-tech__orb editorial-tech__orb--two" aria-hidden="true"></span>
-        </article>
+        @else
+
+            <a
+                href="{{ route('products.index') }}"
+                class="janan-edit__fallback"
+                aria-label="مشاهده همه محصولات"
+            >
+                <span>JANAN</span>
+                <i aria-hidden="true">↗</i>
+            </a>
+
+        @endif
+
     </div>
 </section>
