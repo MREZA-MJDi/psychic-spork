@@ -18,7 +18,7 @@
             <div>
                 <span class="eyebrow">JANAN / STORE PULSE</span>
                 <h2 id="home-signals-title">آنچه همین حالا در فروشگاه جریان دارد.</h2>
-                <p>تازه‌های کاتالوگ و محصولاتی که واقعاً در فروشگاه خریداری شده‌اند.</p>
+                <p>تازه‌های کاتالوگ و خریدهای ثبت‌شده در ۳۰ روز اخیر.</p>
             </div>
 
             <a
@@ -93,7 +93,7 @@
                 <div class="home-signal-panel__head">
                     <div>
                         <span class="home-signal-panel__index">02</span>
-                        <h3 id="home-popular-title">پرفروش‌های واقعی</h3>
+                        <h3 id="home-popular-title">پرفروش‌های ۳۰ روز اخیر</h3>
                     </div>
 
                     <span class="home-signal-panel__meta">
