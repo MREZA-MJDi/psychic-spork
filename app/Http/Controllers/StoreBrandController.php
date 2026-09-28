@@ -1,14 +1,15 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace AppHttpControllers;
 
-use App\Models\Brand;
-use App\Models\Product;
-use Illuminate\View\View;
+use AppModelsBrand;
+use AppModelsProduct;
+use AppServicesSeoService;
+use IlluminateViewView;
 
 class StoreBrandController extends Controller
 {
-    public function index(): View
+    public function index(SeoService $seo): View
     {
         $brands = Brand::query()
             ->active()
@@ -21,11 +22,16 @@ class StoreBrandController extends Controller
             ->get();
 
         return view('brands.index', [
+            'seo' => $seo->page(
+                'برندها — ' . config('app.store_name', 'Janan'),
+                'معرفی برندهای فعال و محصولات مرتبط در فروشگاه جانان.',
+                route('brands.index')
+            ),
             'brands' => $brands,
         ]);
     }
 
-    public function show(Brand $brand): View
+    public function show(Brand $brand, SeoService $seo): View
     {
         abort_unless($brand->is_active, 404);
 
@@ -46,6 +52,7 @@ class StoreBrandController extends Controller
             ->withQueryString();
 
         return view('brands.show', [
+            'seo' => $seo->brand($brand),
             'brand' => $brand,
             'products' => $products,
         ]);
