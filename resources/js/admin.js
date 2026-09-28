@@ -510,7 +510,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const formatJalali = (iso) => {
         if (!iso) return '';
-        const match = String(iso).match(/^(\\d{4})-(\\d{2})-(\\d{2})/);
+        const match = String(iso).match(/^(\d{4})-(\d{2})-(\d{2})/);
         if (!match) return '';
 
         const [jy, jm, jd] = gregorianToJalali(
@@ -524,7 +524,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const jalaliToIso = (value) => {
         const normalized = normalizeDigits(value).replace(/-/g, '/');
-        const match = normalized.match(/^(\\d{4})\\/(\\d{1,2})\\/(\\d{1,2})$/);
+        const match = normalized.match(/^(\d{4})\/(\d{1,2})\/(\d{1,2})$/);
 
         if (!match) return '';
 
