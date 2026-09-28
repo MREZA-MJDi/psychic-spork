@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Brand;
 use App\Models\Category;
+use App\Models\Order;
 use App\Models\Product;
 use App\Services\SeoService;
 use Illuminate\View\View;
