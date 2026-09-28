@@ -21,7 +21,7 @@
         <header class="store-promo-section__head">
             <div>
                 <span class="eyebrow">{{ $label }}</span>
-                <h2>یک انتخاب دیگر برای تو.</h2>
+                <h2>دو مسیر برای ادامه‌ی انتخاب.</h2>
             </div>
 
             <a
@@ -54,7 +54,7 @@
                 <span class="store-promo__content">
                     <small>01 / NEW EDIT</small>
                     <strong>{{ $latestProduct?->name ?? 'کالکشن تازه جانان' }}</strong>
-                    <span>مشاهده انتخاب ↗</span>
+                    <span>مشاهده محصول ↗</span>
                 </span>
             </a>
 
@@ -79,7 +79,7 @@
                 <span class="store-promo__content">
                     <small>02 / COLLECTION</small>
                     <strong>{{ $category?->name ?? 'کالکشن‌های جانان' }}</strong>
-                    <span>ورود به دسته ↗</span>
+                    <span>مشاهده کالکشن ↗</span>
                 </span>
             </a>
 
