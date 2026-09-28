@@ -593,15 +593,23 @@ document.addEventListener('DOMContentLoaded', () => {
             const date = new Date(iso);
             if (Number.isNaN(date.getTime())) return;
 
+            const dateOnly = element.dataset.adminDateFormat === 'day';
+
             element.textContent = new Intl.DateTimeFormat(
                 'fa-IR-u-ca-persian',
-                {
-                    year: 'numeric',
-                    month: '2-digit',
-                    day: '2-digit',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                }
+                dateOnly
+                    ? {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                    }
+                    : {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                    }
             ).format(date);
         });
     };
