@@ -637,3 +637,334 @@
         padding: 18px;
     }
 }
+
+
+/* =========================================================
+   BRAND PROFILE
+========================================================= */
+
+.brand-profile-page {
+    background:
+        linear-gradient(
+            180deg,
+            #fbfdfe 0%,
+            #ffffff 34%,
+            #fafbfd 100%
+        );
+}
+
+.brand-profile__section {
+    padding-block: clamp(58px, 7vw, 92px);
+}
+
+.brand-profile__section--soft {
+    background:
+        linear-gradient(
+            180deg,
+            rgba(244,251,254,.72),
+            rgba(255,255,255,.98)
+        );
+    border-block: 1px solid rgba(57,65,74,.045);
+}
+
+.brand-profile__intro {
+    display: grid;
+    grid-template-columns: minmax(0, .72fr) minmax(0, 1.28fr);
+    gap: clamp(36px, 7vw, 110px);
+    align-items: start;
+}
+
+.brand-profile__intro h2 {
+    margin: 9px 0 13px;
+    color: var(--janan-ink-strong);
+    font-size: clamp(31px, 4.5vw, 58px);
+    font-weight: 620;
+    letter-spacing: -.06em;
+    line-height: 1.16;
+}
+
+.brand-profile__intro p {
+    max-width: 720px;
+    margin: 0;
+    color: var(--janan-muted);
+    font-size: 11px;
+    line-height: 2.2;
+}
+
+.brand-profile__grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0,1fr));
+    gap: 14px;
+}
+
+.brand-profile__card {
+    position: relative;
+    min-height: 260px;
+    padding: 25px;
+    border: 1px solid var(--janan-line);
+    border-radius: 20px;
+    background: rgba(255,255,255,.92);
+    box-shadow: var(--janan-shadow-xs);
+    transition:
+        transform .35s var(--janan-ease),
+        border-color .25s ease,
+        box-shadow .35s ease;
+}
+
+.brand-profile__card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(98,178,209,.18);
+    box-shadow: var(--janan-shadow-sm);
+}
+
+.brand-profile__number {
+    display: inline-flex;
+    min-width: 34px;
+    height: 34px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    color: var(--janan-pink-ink);
+    background: var(--janan-pink-50);
+    font: 10px var(--janan-display);
+}
+
+.brand-profile__card h3 {
+    margin: 35px 0 9px;
+    color: var(--janan-ink-strong);
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.brand-profile__card p {
+    max-width: 35ch;
+    margin: 0;
+    color: var(--janan-muted);
+    font-size: 9px;
+    line-height: 2;
+}
+
+.brand-profile__comparison {
+    display: grid;
+    grid-template-columns: minmax(280px,.75fr) minmax(0,1.25fr);
+    gap: clamp(34px, 7vw, 100px);
+    align-items: start;
+}
+
+.brand-profile__comparison-intro h2 {
+    margin: 9px 0 12px;
+    color: var(--janan-ink-strong);
+    font-size: clamp(29px, 4vw, 48px);
+    font-weight: 620;
+    letter-spacing: -.055em;
+    line-height: 1.18;
+}
+
+.brand-profile__comparison-intro p {
+    max-width: 520px;
+    margin: 0;
+    color: var(--janan-muted);
+    font-size: 10px;
+    line-height: 2.1;
+}
+
+.brand-profile__considerations {
+    display: grid;
+    gap: 0;
+    border-top: 1px solid var(--janan-line);
+}
+
+.brand-profile__consideration {
+    display: grid;
+    grid-template-columns: 50px minmax(0,1fr);
+    gap: 15px;
+    padding: 20px 0;
+    border-bottom: 1px solid var(--janan-line);
+}
+
+.brand-profile__consideration > span {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--janan-line);
+    border-radius: 50%;
+    color: var(--janan-blue-ink);
+    background: var(--janan-sky-50);
+    font: 10px var(--janan-display);
+}
+
+.brand-profile__consideration h3 {
+    margin: 1px 0 5px;
+    color: var(--janan-ink-strong);
+    font-size: 13px;
+}
+
+.brand-profile__consideration p {
+    max-width: 65ch;
+    margin: 0;
+    color: var(--janan-muted);
+    font-size: 9px;
+    line-height: 2;
+}
+
+.brand-profile__market {
+    padding-block: clamp(58px, 7vw, 86px);
+    color: #fff;
+    background:
+        radial-gradient(circle at 80% 22%, rgba(159,212,234,.12), transparent 24rem),
+        radial-gradient(circle at 20% 80%, rgba(231,177,197,.10), transparent 20rem),
+        linear-gradient(145deg, #26323a 0%, #313e47 54%, #263138 100%);
+}
+
+.brand-profile__market-head {
+    display: grid;
+    grid-template-columns: minmax(0,1fr) 150px;
+    gap: 32px;
+    align-items: end;
+}
+
+.brand-profile__market .eyebrow {
+    color: #b6ddec;
+}
+
+.brand-profile__market-head h2 {
+    margin: 9px 0 10px;
+    color: #fff;
+    font-size: clamp(30px, 4vw, 54px);
+    font-weight: 600;
+    letter-spacing: -.055em;
+    line-height: 1.18;
+}
+
+.brand-profile__market-head p {
+    max-width: 780px;
+    margin: 0;
+    color: rgba(255,255,255,.62);
+    font-size: 10px;
+    line-height: 2.1;
+}
+
+.brand-profile__market-mark {
+    justify-self: end;
+    width: 126px;
+    height: 126px;
+    display: grid;
+    place-items: center;
+    border: 1px solid rgba(255,255,255,.16);
+    border-radius: 50%;
+    color: rgba(255,255,255,.86);
+    font: italic 72px/1 var(--janan-display);
+    background: rgba(255,255,255,.035);
+}
+
+.brand-profile__market-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0,1fr));
+    gap: 10px;
+    margin-top: 34px;
+}
+
+.brand-profile__market-item {
+    min-height: 120px;
+    display: grid;
+    align-content: space-between;
+    gap: 15px;
+    padding: 18px;
+    border: 1px solid rgba(255,255,255,.11);
+    border-radius: 16px;
+    background: rgba(255,255,255,.035);
+}
+
+.brand-profile__market-item span {
+    color: rgba(255,255,255,.42);
+    font-size: 7px;
+    letter-spacing: .14em;
+}
+
+.brand-profile__market-item strong {
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.brand-profile__market-note {
+    display: grid;
+    grid-template-columns: 165px minmax(0,1fr);
+    gap: 24px;
+    margin-top: 14px;
+    padding: 18px;
+    border-top: 1px solid rgba(255,255,255,.10);
+    border-bottom: 1px solid rgba(255,255,255,.10);
+}
+
+.brand-profile__market-note-label {
+    color: #b6ddec;
+    font-size: 7px;
+    letter-spacing: .14em;
+}
+
+.brand-profile__market-note p {
+    max-width: 720px;
+    margin: 0;
+    color: rgba(255,255,255,.54);
+    font-size: 8px;
+    line-height: 2;
+}
+
+.brand-profile__products {
+    background: #fff;
+}
+
+@media (max-width: 900px) {
+    .brand-profile__intro,
+    .brand-profile__comparison {
+        grid-template-columns: 1fr;
+    }
+
+    .brand-profile__grid {
+        grid-template-columns: repeat(2, minmax(0,1fr));
+    }
+
+    .brand-profile__market-head {
+        grid-template-columns: 1fr;
+    }
+
+    .brand-profile__market-mark {
+        justify-self: start;
+    }
+}
+
+@media (max-width: 620px) {
+    .brand-profile__section {
+        padding-block: 48px;
+    }
+
+    .brand-profile__grid {
+        grid-template-columns: 1fr;
+    }
+
+    .brand-profile__card {
+        min-height: 0;
+        padding: 21px;
+    }
+
+    .brand-profile__market {
+        padding-block: 46px;
+    }
+
+    .brand-profile__market-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .brand-profile__market-note {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .brand-profile__market-mark {
+        width: 92px;
+        height: 92px;
+        font-size: 52px;
+    }
+}
