@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\ContactMessage;
 use App\Models\FinancialTransaction;
 use App\Models\Order;
 use App\Models\Product;
@@ -202,6 +203,10 @@ class AdminDashboardController extends Controller
             ->customers()
             ->count();
 
+        $unreadContactMessages = ContactMessage::query()
+            ->unread()
+            ->count();
+
 
         /*
         |--------------------------------------------------------------------------
@@ -319,6 +324,8 @@ class AdminDashboardController extends Controller
                 'pendingOrders' => $pendingOrders,
 
                 'customers' => $customers,
+
+                'unreadContactMessages' => $unreadContactMessages,
 
                 'lowStock' => $lowStock,
 
