@@ -24,14 +24,17 @@
 
 <article class="product-card product-card--{{ $variant }}">
     <div class="product-card__media">
+
         @if($isOnSale)
-            <span class="sale-pill">{{ $discount }}٪</span>
+            <span class="sale-pill">
+                {{ $discount }}٪
+            </span>
         @endif
 
         <a
             href="{{ route('products.show', $product) }}"
             class="product-card__image-link"
-            aria-label="{{ $product->name }}"
+            aria-label="مشاهده {{ $product->name }}"
         >
             @if($image)
                 <img
@@ -41,36 +44,29 @@
                     decoding="async"
                 >
             @else
-                <div class="product-image-placeholder" aria-hidden="true">
+                <div
+                    class="product-image-placeholder"
+                    aria-hidden="true"
+                >
                     <span>JANAN</span>
                 </div>
             @endif
         </a>
 
-        @if($productVariant)
-            <form
-                method="POST"
-                action="{{ route('cart.store', $productVariant) }}"
-                class="quick-add-form"
-                data-cart-add
-            >
-                @csrf
-                <input type="hidden" name="quantity" value="1">
-
-                <button
-                    type="submit"
-                    class="quick-add"
-                    @disabled($stock < 1)
-                >
-                    {{ $stock > 0 ? 'افزودن به سبد' : 'ناموجود' }}
-                </button>
-            </form>
-        @endif
     </div>
 
     <div class="product-card__body">
+
         <div class="product-card__topline">
-            <span>{{ $product->category?->name ?? 'Janan' }}</span>
+            <span>
+                {{ $product->category?->name ?? 'Janan' }}
+            </span>
+
+            @if($productVariant?->sku)
+                <span>
+                    {{ $productVariant->sku }}
+                </span>
+            @endif
         </div>
 
         <a
@@ -81,12 +77,18 @@
         </a>
 
         @if($productVariant)
+
             <div class="product-price">
-                <strong>{{ number_format($productVariant->effective_price) }}</strong>
+                <strong>
+                    {{ number_format($productVariant->effective_price) }}
+                </strong>
+
                 <span>تومان</span>
 
                 @if($isOnSale)
-                    <del>{{ number_format($productVariant->price) }}</del>
+                    <del>
+                        {{ number_format($productVariant->price) }}
+                    </del>
                 @endif
             </div>
 
@@ -103,6 +105,37 @@
                     default => 'موجود'
                 } }}
             </div>
+
+            <form
+                method="POST"
+                action="{{ route('cart.store', $productVariant) }}"
+                class="quick-add-form"
+                data-cart-add
+            >
+                @csrf
+
+                <input
+                    type="hidden"
+                    name="quantity"
+                    value="1"
+                >
+
+                <button
+                    type="submit"
+                    class="quick-add"
+                    @disabled($stock < 1)
+                >
+                    {{ $stock > 0 ? 'افزودن به سبد خرید' : 'ناموجود' }}
+                </button>
+            </form>
+
+        @else
+
+            <span class="product-card__no-variant">
+                اطلاعات قیمت در دسترس نیست.
+            </span>
+
         @endif
+
     </div>
 </article>
