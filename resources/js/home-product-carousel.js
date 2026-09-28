@@ -8,7 +8,7 @@
     const prev = root.querySelector('[data-product-prev]');
     const next = root.querySelector('[data-product-next]');
     const dots = root.querySelector('[data-product-status]');
-    const autoplayMs = Number(root.dataset.autoplay || 4200);
+    const autoplayMs = Number(root.dataset.autoplay || 5000);
 
     if (!viewport || !track || cards.length <= 1) return;
 
