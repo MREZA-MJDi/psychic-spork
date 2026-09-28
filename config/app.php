@@ -23,6 +23,14 @@ return [
         'password' => env('JANAN_ADMIN_PASSWORD'),
     ],
 
+    'trust' => [
+        'enamad_url' => env('JANAN_ENAMAD_URL'),
+        'enamad_image' => env('JANAN_ENAMAD_IMAGE'),
+        'license_url' => env('JANAN_LICENSE_URL'),
+        'social_instagram' => env('JANAN_SOCIAL_INSTAGRAM'),
+        'social_telegram' => env('JANAN_SOCIAL_TELEGRAM'),
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Application Environment
