@@ -44,19 +44,34 @@ class HomeController extends Controller
                 'galleryMedia',
             ]);
 
-        $products = (clone $productsQuery)
+        $featuredProducts = (clone $productsQuery)
             ->featured()
             ->latest('updated_at')
             ->latest('id')
             ->take(12)
             ->get();
 
-        if ($products->isEmpty()) {
-            $products = $productsQuery
+        $products = $featuredProducts;
+
+        if ($products->count() < 12) {
+            $remaining = 12 - $products->count();
+
+            $latestProducts = (clone $productsQuery)
+                ->when(
+                    $products->isNotEmpty(),
+                    fn ($query) => $query->whereNotIn(
+                        'id',
+                        $products->pluck('id')
+                    )
+                )
                 ->latest('updated_at')
                 ->latest('id')
-                ->take(12)
+                ->take($remaining)
                 ->get();
+
+            $products = $products
+                ->concat($latestProducts)
+                ->values();
         }
 
         $heroProducts = Product::query()
