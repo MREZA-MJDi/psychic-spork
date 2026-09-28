@@ -143,7 +143,7 @@
                 </header>
 
                 <div class="dashboard-v2__chart-wrap">
-                    <div class="dashboard-v2__chart">
+                    <div class="dashboard-v2__chart" style="--chart-columns: {{ max(1, $daily->count()) }};">
                         @foreach($daily as $day)
                             @php
                                 $income = (float) ($day['income'] ?? 0);
