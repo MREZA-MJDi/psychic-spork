@@ -7,6 +7,8 @@ use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
 use App\Services\SeoService;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class StoreProductController extends Controller
@@ -28,19 +30,31 @@ class StoreProductController extends Controller
             ->when(
                 ! empty($filters['q']),
                 fn ($query) => $query->where(function ($query) use ($filters) {
+                    $term = '%' . $filters['q'] . '%';
+
                     $query
-                        ->where(
-                            'name',
-                            'like',
-                            '%' . $filters['q'] . '%'
-                        )
+                        ->where('name', 'like', $term)
+                        ->orWhere('short_description', 'like', $term)
+                        ->orWhere('description', 'like', $term)
                         ->orWhereHas(
                             'variants',
                             fn ($variant) => $variant->where(
                                 'sku',
                                 'like',
-                                '%' . $filters['q'] . '%'
+                                $term
                             )
+                        )
+                        ->orWhereHas(
+                            'category',
+                            fn ($category) => $category
+                                ->where('name', 'like', $term)
+                                ->where('is_active', true)
+                        )
+                        ->orWhereHas(
+                            'brand',
+                            fn ($brand) => $brand
+                                ->where('name', 'like', $term)
+                                ->where('is_active', true)
                         );
                 })
             )
@@ -86,6 +100,70 @@ class StoreProductController extends Controller
         ]);
     }
 
+    public function suggestions(Request $request): JsonResponse
+    {
+        $term = trim((string) $request->query('q', ''));
+
+        if (mb_strlen($term) < 2) {
+            return response()->json(['items' => []]);
+        }
+
+        $like = '%' . $term . '%';
+
+        $items = Product::query()
+            ->active()
+            ->with([
+                'category:id,name',
+                'brand:id,name',
+                'galleryMedia',
+                'variants',
+            ])
+            ->where(function ($query) use ($like) {
+                $query
+                    ->where('name', 'like', $like)
+                    ->orWhere('short_description', 'like', $like)
+                    ->orWhereHas(
+                        'variants',
+                        fn ($variant) => $variant->where('sku', 'like', $like)
+                    )
+                    ->orWhereHas(
+                        'category',
+                        fn ($category) => $category
+                            ->where('name', 'like', $like)
+                            ->where('is_active', true)
+                    )
+                    ->orWhereHas(
+                        'brand',
+                        fn ($brand) => $brand
+                            ->where('name', 'like', $like)
+                            ->where('is_active', true)
+                    );
+            })
+            ->latest('updated_at')
+            ->latest('id')
+            ->limit(6)
+            ->get()
+            ->map(function (Product $product): array {
+                $variant = $product->variants->first(
+                    fn ($item) => (bool) $item->is_active
+                );
+
+                return [
+                    'name' => $product->name,
+                    'brand' => $product->brand?->name,
+                    'category' => $product->category?->name,
+                    'image' => $product->galleryMedia->first()?->url,
+                    'price' => $variant?->effective_price,
+                    'url' => route('products.show', $product),
+                ];
+            })
+            ->values();
+
+        return response()->json([
+            'items' => $items,
+        ]);
+    }
+
     public function show(
         Product $product,
         SeoService $seo
@@ -96,6 +174,7 @@ class StoreProductController extends Controller
             'category',
             'brand',
             'variants',
+            'activeVariants',
             'galleryMedia',
         ]);
 
