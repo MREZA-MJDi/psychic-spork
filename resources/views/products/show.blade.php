@@ -1,5 +1,7 @@
 @extends('layouts.store')
 
+@section('title', $product->name . ' — ' . ($siteBrandNameLatin ?? 'Janan'))
+
 @section('content')
 @php
     $gallery = $product->galleryMedia->take(8)->values();
@@ -10,20 +12,35 @@
     ) ?? $variants->first();
 
     $image = $gallery->first()?->url;
+    $secondaryGallery = $gallery->slice(1, 2)->values();
 
     $attributes = collect($product->attributes ?? [])
         ->filter(fn ($value) => filled($value))
         ->values();
 
-    $pageNumber = str_pad((string) ($gallery->count() ?: 1), 2, '0', STR_PAD_LEFT);
+    $galleryCount = max(1, $gallery->count());
+
+    $discount = null;
+
+    if ($variant?->is_on_sale) {
+        $discount = max(
+            1,
+            round(
+                (1 - (
+                    $variant->effective_price /
+                    max(1, (float) $variant->price)
+                )) * 100
+            )
+        );
+    }
 @endphp
 
-<div class="product-experience">
+<div class="product-detail-v2">
 
-    <section class="product-experience__top">
+    <section class="product-detail-v2__hero">
         <div class="container">
 
-            <nav class="product-breadcrumbs" aria-label="مسیر محصول">
+            <nav class="product-breadcrumbs product-detail-v2__breadcrumbs" aria-label="مسیر محصول">
                 <a href="{{ route('home') }}">خانه</a>
                 <span aria-hidden="true">/</span>
 
@@ -40,105 +57,124 @@
                 <span aria-current="page">{{ $product->name }}</span>
             </nav>
 
-            <div class="product-experience__stage">
+            <div class="product-detail-v2__layout">
 
-                <div class="product-gallery" data-product-gallery>
+                <div class="product-detail-v2__visual">
 
-                    <div class="product-gallery__main">
-                        @if($image)
-                            <img
-                                src="{{ $image }}"
-                                alt="{{ $product->name }}"
-                                fetchpriority="high"
-                                decoding="async"
-                                data-gallery-main
-                            >
-                        @else
-                            <div class="product-gallery__placeholder">
-                                <span>JANAN</span>
-                            </div>
-                        @endif
+                    <div
+                        class="product-gallery product-gallery--v2"
+                        data-product-gallery
+                    >
+                        <div class="product-gallery-v2__grid">
 
-                        <div class="product-gallery__counter">
-                            <span data-gallery-current>01</span>
-                            <i>/</i>
-                            <span>{{ $pageNumber }}</span>
-                        </div>
+                            <figure class="product-gallery-v2__main">
+                                @if($image)
+                                    <img
+                                        src="{{ $image }}"
+                                        alt="{{ $product->name }}"
+                                        fetchpriority="high"
+                                        decoding="async"
+                                        data-gallery-main
+                                    >
+                                @else
+                                    <div class="product-gallery__placeholder" aria-hidden="true">
+                                        <span>JANAN</span>
+                                    </div>
+                                @endif
 
-                        @if($variant?->is_on_sale)
-                            @php
-                                $discount = max(
-                                    1,
-                                    round(
-                                        (1 - (
-                                            $variant->effective_price /
-                                            max(1, (float) $variant->price)
-                                        )) * 100
-                                    )
-                                );
-                            @endphp
+                                <div class="product-gallery-v2__overlay" aria-hidden="true">
+                                    <span class="product-gallery-v2__counter">
+                                        <span data-gallery-current>01</span>
+                                        <i>/</i>
+                                        <span>{{ str_pad((string) $galleryCount, 2, '0', STR_PAD_LEFT) }}</span>
+                                    </span>
 
-                            <span class="product-gallery__sale">
-                                {{ $discount }}٪-
-                            </span>
-                        @endif
-                    </div>
+                                    @if($discount)
+                                        <span class="product-gallery-v2__sale">
+                                            {{ $discount }}٪-
+                                        </span>
+                                    @endif
+                                </div>
+                            </figure>
 
-                    @if($gallery->count() > 1)
-                        <div
-                            class="product-gallery__thumbs"
-                            role="list"
-                            aria-label="تصاویر محصول"
-                        >
-                            @foreach($gallery as $galleryItem)
+                            @foreach($secondaryGallery as $galleryItem)
                                 <button
                                     type="button"
-                                    class="product-gallery__thumb {{ $loop->first ? 'is-active' : '' }}"
+                                    class="product-gallery-v2__secondary"
                                     data-gallery-thumb
                                     data-gallery-src="{{ $galleryItem->url }}"
-                                    data-gallery-alt="{{ $product->name }} — تصویر {{ $loop->iteration }}"
-                                    data-gallery-index="{{ str_pad((string) $loop->iteration, 2, '0', STR_PAD_LEFT) }}"
-                                    aria-label="تصویر {{ $loop->iteration }} محصول"
-                                    aria-pressed="{{ $loop->first ? 'true' : 'false' }}"
+                                    data-gallery-alt="{{ $product->name }} — تصویر {{ $loop->iteration + 1 }}"
+                                    data-gallery-index="{{ str_pad((string) ($loop->iteration + 1), 2, '0', STR_PAD_LEFT) }}"
+                                    aria-label="مشاهده تصویر {{ $loop->iteration + 1 }} محصول"
+                                    aria-pressed="false"
                                 >
                                     <img
                                         src="{{ $galleryItem->url }}"
                                         alt=""
-                                        loading="{{ $loop->first ? 'eager' : 'lazy' }}"
+                                        loading="lazy"
                                         decoding="async"
                                     >
+                                    <span aria-hidden="true">↗</span>
                                 </button>
                             @endforeach
+
                         </div>
-                    @endif
+
+                        @if($gallery->count() > 1)
+                            <div
+                                class="product-gallery__thumbs product-gallery__thumbs--v2"
+                                role="list"
+                                aria-label="تمام تصاویر محصول"
+                            >
+                                @foreach($gallery as $galleryItem)
+                                    <button
+                                        type="button"
+                                        class="product-gallery__thumb {{ $loop->first ? 'is-active' : '' }}"
+                                        data-gallery-thumb
+                                        data-gallery-src="{{ $galleryItem->url }}"
+                                        data-gallery-alt="{{ $product->name }} — تصویر {{ $loop->iteration }}"
+                                        data-gallery-index="{{ str_pad((string) $loop->iteration, 2, '0', STR_PAD_LEFT) }}"
+                                        aria-label="تصویر {{ $loop->iteration }} محصول"
+                                        aria-pressed="{{ $loop->first ? 'true' : 'false' }}"
+                                    >
+                                        <img
+                                            src="{{ $galleryItem->url }}"
+                                            alt=""
+                                            loading="{{ $loop->first ? 'eager' : 'lazy' }}"
+                                            decoding="async"
+                                        >
+                                    </button>
+                                @endforeach
+                            </div>
+                        @endif
+                    </div>
+
                 </div>
 
                 <aside
-                    class="product-buy-card"
+                    class="product-detail-v2__purchase"
                     aria-labelledby="product-title"
                     data-product-purchase
                 >
-                    <div class="product-buy-card__topline">
-                        <div class="product-buy-card__brand">
+                    <div class="product-detail-v2__topline">
+                        <div class="product-detail-v2__identity">
                             <span class="eyebrow">JANAN / PRODUCT</span>
 
                             @if($product->brand)
-                                <a
-                                    href="{{ route('brands.show', $product->brand) }}"
-                                >
+                                <a href="{{ route('brands.show', $product->brand) }}">
                                     {{ $product->brand->name }}
                                 </a>
                             @endif
                         </div>
 
                         @if($variant?->sku)
-                            <span class="product-buy-card__sku">
+                            <span class="product-detail-v2__sku">
                                 SKU / {{ $variant->sku }}
                             </span>
                         @endif
                     </div>
 
-                    <div class="product-buy-card__heading">
+                    <div class="product-detail-v2__title">
                         <h1 id="product-title">{{ $product->name }}</h1>
 
                         <p>
@@ -146,38 +182,44 @@
                         </p>
                     </div>
 
-                    <div class="product-buy-card__price" aria-live="polite">
-                        <strong data-product-price>
-                            {{ number_format($variant?->effective_price ?? 0) }}
-                        </strong>
+                    <div class="product-detail-v2__price-row">
+                        <div class="product-buy-card__price product-buy-card__price--v2" aria-live="polite">
+                            <strong data-product-price>
+                                {{ number_format($variant?->effective_price ?? 0) }}
+                            </strong>
+                            <span>تومان</span>
 
-                        <span>تومان</span>
+                            <del
+                                data-product-regular-price
+                                @if(!$variant?->is_on_sale) hidden @endif
+                            >
+                                {{ number_format($variant?->price ?? 0) }}
+                            </del>
+                        </div>
 
-                        <del
-                            data-product-regular-price
-                            @if(!$variant?->is_on_sale) hidden @endif
+                        <div
+                            class="product-buy-card__stock product-detail-v2__stock {{ ($variant?->stock ?? 0) < 1 ? 'is-out' : (($variant?->is_low_stock ?? false) ? 'is-low' : '') }}"
+                            data-product-stock
                         >
-                            {{ number_format($variant?->price ?? 0) }}
-                        </del>
-                    </div>
-
-                    <div
-                        class="product-buy-card__stock {{ ($variant?->stock ?? 0) < 1 ? 'is-out' : (($variant?->is_low_stock ?? false) ? 'is-low' : '') }}"
-                        data-product-stock
-                    >
-                        {{ ($variant?->stock ?? 0) < 1
-                            ? 'فعلاً ناموجود'
-                            : (($variant?->is_low_stock ?? false) ? 'موجودی محدود' : 'موجود و آماده سفارش')
-                        }}
+                            <i aria-hidden="true"></i>
+                            {{ ($variant?->stock ?? 0) < 1
+                                ? 'فعلاً ناموجود'
+                                : (($variant?->is_low_stock ?? false) ? 'موجودی محدود' : 'موجود و آماده سفارش')
+                            }}
+                        </div>
                     </div>
 
                     @if($variants->isNotEmpty())
-                        <div class="product-variant-picker">
+                        <div class="product-variant-picker product-variant-picker--v2">
                             <div class="product-variant-picker__head">
-                                <span>انتخاب مدل / Variant</span>
-                                <small data-product-variant-label>
+                                <div>
+                                    <span>انتخاب مدل</span>
+                                    <small>مدل انتخابی روی قیمت و موجودی اثر می‌گذارد.</small>
+                                </div>
+
+                                <b data-product-variant-label>
                                     {{ $variant?->display_name ?: 'انتخاب نشده' }}
-                                </small>
+                                </b>
                             </div>
 
                             <div class="product-variant-picker__grid">
@@ -213,13 +255,8 @@
                                             ></i>
                                         @endif
 
-                                        <span>
-                                            {{ $variantOption->display_name }}
-                                        </span>
-
-                                        <small>
-                                            {{ $variantOption->stock > 0 ? 'موجود' : 'ناموجود' }}
-                                        </small>
+                                        <span>{{ $variantOption->display_name }}</span>
+                                        <small>{{ $variantOption->stock > 0 ? 'موجود' : 'ناموجود' }}</small>
                                     </button>
                                 @endforeach
                             </div>
@@ -230,7 +267,7 @@
                         <form
                             method="POST"
                             action="{{ route('cart.store', $variant) }}"
-                            class="product-purchase-form"
+                            class="product-purchase-form product-purchase-form--v2"
                             data-cart-add
                             data-product-name="{{ $product->name }}"
                             data-product-image="{{ $image ?? '' }}"
@@ -239,18 +276,10 @@
 
                             <div class="product-purchase-form__row">
                                 <div class="product-quantity-control">
-                                    <span class="product-quantity-control__label">
-                                        تعداد
-                                    </span>
+                                    <span class="product-quantity-control__label">تعداد</span>
 
                                     <div class="product-quantity-control__control">
-                                        <button
-                                            type="button"
-                                            data-product-quantity="decrease"
-                                            aria-label="کاهش تعداد"
-                                        >
-                                            −
-                                        </button>
+                                        <button type="button" data-product-quantity="decrease" aria-label="کاهش تعداد">−</button>
 
                                         <input
                                             id="product-quantity"
@@ -263,13 +292,7 @@
                                             data-product-quantity-input
                                         >
 
-                                        <button
-                                            type="button"
-                                            data-product-quantity="increase"
-                                            aria-label="افزایش تعداد"
-                                        >
-                                            +
-                                        </button>
+                                        <button type="button" data-product-quantity="increase" aria-label="افزایش تعداد">+</button>
                                     </div>
                                 </div>
 
@@ -282,39 +305,44 @@
                                     <span data-product-add-label>
                                         {{ $variant->stock > 0 ? 'افزودن به سبد خرید' : 'ناموجود' }}
                                     </span>
-
                                     <span aria-hidden="true">←</span>
                                 </button>
                             </div>
 
                             <p class="product-purchase-form__hint">
-                                پیش‌نمایش سبد بلافاصله کنار آیکن سبد نمایش داده می‌شود.
+                                انتخابت را اضافه کن؛ سبد خرید بدون ترک کردن صفحه به‌روزرسانی می‌شود.
                             </p>
                         </form>
                     @else
                         <div class="product-unavailable">
                             <strong>این محصول فعلاً Variant فعالی ندارد.</strong>
-                            <span>وقتی موجودی یا مدل فعال شود، خرید از همین صفحه در دسترس خواهد بود.</span>
+                            <span>وقتی مدل فعال شود، خرید از همین صفحه در دسترس خواهد بود.</span>
                         </div>
                     @endif
 
-                    <div class="product-buy-benefits" aria-label="مزایای خرید">
+                    <div class="product-buy-benefits product-buy-benefits--v2" aria-label="اطلاعات خرید">
                         <div>
                             <span>01</span>
-                            <strong>موجودی لحظه‌ای</strong>
-                            <small>وضعیت خرید از همین صفحه خوانده می‌شود.</small>
+                            <div>
+                                <strong>موجودی واقعی</strong>
+                                <small>وضعیت موجودی همین مدل نمایش داده می‌شود.</small>
+                            </div>
                         </div>
 
                         <div>
                             <span>02</span>
-                            <strong>سبد سریع</strong>
-                            <small>بدون ترک کردن صفحه محصول.</small>
+                            <div>
+                                <strong>انتخاب مدل</strong>
+                                <small>قیمت و موجودی با تغییر مدل هماهنگ می‌شود.</small>
+                            </div>
                         </div>
 
                         <div>
                             <span>03</span>
-                            <strong>جزئیات واقعی</strong>
-                            <small>قیمت و مشخصات از کاتالوگ فروشگاه.</small>
+                            <div>
+                                <strong>خرید سریع</strong>
+                                <small>بعد از افزودن، سبد خرید از همان صفحه در دسترس است.</small>
+                            </div>
                         </div>
                     </div>
                 </aside>
@@ -323,16 +351,17 @@
         </div>
     </section>
 
-    <section class="product-information">
+    <section class="product-information product-information--v2">
         <div class="container">
-
             <div class="product-information__grid">
 
                 <div class="product-information__intro">
                     <span class="eyebrow">JANAN / DETAILS</span>
-                    <h2>همه‌چیز را قبل از خرید ببین.</h2>
+
+                    <h2>قبل از خرید، محصول را کامل بشناس.</h2>
+
                     <p>
-                        مشخصات، توضیحات و اطلاعات سفارش در یک ساختار خوانا و جمع‌وجور قرار گرفته‌اند.
+                        اطلاعاتی که برای انتخاب لازم است، پایین همین صفحه در دسترس است.
                     </p>
                 </div>
 
@@ -353,13 +382,12 @@
 
                     <details {{ !$product->description ? 'open' : '' }}>
                         <summary>
-                            <span>مشخصات فنی و محصول</span>
+                            <span>مشخصات محصول</span>
                             <b>+</b>
                         </summary>
 
                         <div class="product-information__content">
                             <dl class="product-spec-list">
-
                                 @if($variant?->sku)
                                     <div>
                                         <dt>SKU</dt>
@@ -396,7 +424,6 @@
                                         <dd>اطلاعات تکمیلی برای این محصول ثبت نشده است.</dd>
                                     </div>
                                 @endif
-
                             </dl>
                         </div>
                     </details>
@@ -409,7 +436,7 @@
 
                         <div class="product-information__content">
                             <p>
-                                Variant موردنظر را انتخاب کن، تعداد را مشخص کن و محصول را به سبد اضافه کن.
+                                مدل موردنظر را انتخاب کن، تعداد را مشخص کن و محصول را به سبد اضافه کن.
                                 اگر موجودی یک مدل تمام شده باشد، همان مدل برای خرید غیرفعال می‌شود.
                             </p>
                         </div>
@@ -421,24 +448,18 @@
     </section>
 
     @if($relatedProducts->isNotEmpty())
-        <section class="section-block section-block--soft product-detail__related">
+        <section class="product-detail__related product-detail__related--v2">
             <div class="container">
 
-                <header class="section-head">
+                <header class="product-detail__related-head">
                     <div>
                         <span class="eyebrow">JANAN / RELATED</span>
                         <h2>انتخاب‌های نزدیک</h2>
-                        <p>
-                            چند محصول مشابه برای مقایسه و ادامه خرید.
-                        </p>
+                        <p>چند محصول نزدیک برای ادامه‌ی کشف و خرید.</p>
                     </div>
 
-                    <a
-                        class="text-link"
-                        href="{{ route('products.index') }}"
-                    >
-                        همه محصولات
-                        <span aria-hidden="true">↗</span>
+                    <a class="text-link" href="{{ route('products.index') }}">
+                        همه محصولات <span aria-hidden="true">↗</span>
                     </a>
                 </header>
 
@@ -447,7 +468,6 @@
                         <x-store.product-card :product="$relatedProduct" />
                     @endforeach
                 </div>
-
             </div>
         </section>
     @endif
