@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Contracts\PaymentGateway;
+use App\Services\PaymentMethodManager;
 use App\Http\Requests\CheckoutRequest;
 use App\Services\CartService;
 use App\Services\OrderService;
@@ -41,7 +41,7 @@ class CheckoutController extends Controller
         CheckoutRequest $request,
         OrderService $orders,
         CartService $cart,
-        PaymentGateway $gateway
+        PaymentMethodManager $paymentMethods
     ): RedirectResponse {
         $lockKey = $request->user()
             ? 'janan:checkout:user:' . $request->user()->id
@@ -54,31 +54,56 @@ class CheckoutController extends Controller
                     $request,
                     $orders,
                     $cart,
-                    $gateway
+                    $paymentMethods
                 ): RedirectResponse {
                     $order = null;
 
                     try {
+                        $checkoutData = $request->validated();
+                        $checkoutData['checkout_total'] = (float) $cart
+                            ->items($cart->current($request))
+                            ->sum('line_total');
+
+                        $paymentMethods->validateCheckout(
+                            $checkoutData['payment_method'],
+                            $request->user(),
+                            $checkoutData
+                        );
                         $order = $orders->createFromCart(
                             $cart->current($request),
-                            $request->validated(),
+                            $checkoutData,
                             $request->user()
                         );
 
-                        $payment = $gateway->purchase($order);
+                        $payment = $paymentMethods->start(
+                            $checkoutData['payment_method'],
+                            $order,
+                            $request->user(),
+                            $checkoutData
+                        );
 
                         $redirectUrl = data_get(
                             $payment->metadata,
                             'redirect_url'
                         );
 
-                        abort_if(
-                            blank($redirectUrl),
-                            500,
-                            'آدرس انتقال به درگاه ایجاد نشد.'
-                        );
+                        if (filled($redirectUrl)) {
+                            return redirect()->away($redirectUrl);
+                        }
 
-                        return redirect()->away($redirectUrl);
+                        $request->session()->put('completed_order', [
+                            'orderNumber' => $order->order_number,
+                            'total' => (float) $order->total,
+                            'orderStatus' => $order->status,
+                            'paymentStatus' => $order->payment_status,
+                        ]);
+
+                        return redirect()
+                            ->route('checkout.success')
+                            ->with(
+                                'success',
+                                'درخواست پرداخت چکی ثبت شد و در انتظار بررسی مدیریت است.'
+                            );
                     } catch (Throwable $e) {
                         if ($order) {
                             try {

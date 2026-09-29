@@ -6,6 +6,9 @@ use App\Contracts\PaymentGateway;
 use App\Models\Cart;
 use App\Models\SiteSetting;
 use App\Services\ZarinPalPaymentGateway;
+use App\Services\PaymentMethodManager;
+use App\Services\OnlinePaymentMethod;
+use App\Services\ChequePaymentMethod;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -30,6 +33,13 @@ class AppServiceProvider extends ServiceProvider
                 };
             }
         );
+
+        $this->app->singleton(PaymentMethodManager::class, function (): PaymentMethodManager {
+            return new PaymentMethodManager([
+                'online' => app(OnlinePaymentMethod::class),
+                'cheque' => app(ChequePaymentMethod::class),
+            ]);
+        });
     }
 
     public function boot(): void

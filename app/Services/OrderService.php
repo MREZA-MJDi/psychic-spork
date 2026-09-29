@@ -80,7 +80,8 @@ final class OrderService
 
                 'status' => 'pending',
                 'payment_status' => 'pending',
-                'payment_method' => 'cash_on_delivery',
+                'payment_method' => $customer['payment_method'] ?? 'online',
+                'order_type' => $customer['order_type'] ?? 'retail',
 
                 'subtotal' => 0,
                 'discount' => 0,

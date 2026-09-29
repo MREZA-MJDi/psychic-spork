@@ -23,6 +23,10 @@ class CheckoutRequest extends FormRequest
                      'shipping_city',
                      'postal_code',
                      'customer_note',
+                     'bank_name',
+                     'account_holder',
+                     'cheque_number',
+                     'sayad_id',
                  ] as $field) {
             if (is_string($this->input($field))) {
                 $this->merge([
@@ -43,6 +47,58 @@ class CheckoutRequest extends FormRequest
             });
 
         return [
+            'payment_method' => [
+                'required',
+                Rule::in(['online', 'cheque']),
+            ],
+
+            'order_type' => [
+                'required',
+                Rule::in(['retail', 'wholesale']),
+            ],
+
+            'sayad_id' => [
+                'required_if:payment_method,cheque',
+                'nullable',
+                'digits:16',
+            ],
+
+            'cheque_number' => [
+                'required_if:payment_method,cheque',
+                'nullable',
+                'string',
+                'max:100',
+            ],
+
+            'bank_name' => [
+                'required_if:payment_method,cheque',
+                'nullable',
+                'string',
+                'max:120',
+            ],
+
+            'account_holder' => [
+                'nullable',
+                'string',
+                'max:160',
+            ],
+
+            'due_date' => [
+                'required_if:payment_method,cheque',
+                'nullable',
+                'date',
+                'after_or_equal:today',
+            ],
+
+            'cheque_image' => [
+                'nullable',
+                'required_if:payment_method,cheque',
+                'file',
+                'image',
+                'mimes:jpg,jpeg,png,webp',
+                'max:5120',
+            ],
+
             'address_id' => [
                 'nullable',
                 'integer',
@@ -126,6 +182,12 @@ class CheckoutRequest extends FormRequest
             'shipping_address.required' =>
                 'وارد کردن :attribute الزامی است.',
 
+            'payment_method.in' => 'روش پرداخت نامعتبر است.',
+
+            'order_type.in' => 'نوع سفارش نامعتبر است.',
+
+            'sayad_id.digits' => 'شناسه صیادی باید ۱۶ رقم باشد.',
+
             '*.max' =>
                 'مقدار :attribute بیشتر از حد مجاز است.',
         ];
@@ -143,6 +205,14 @@ class CheckoutRequest extends FormRequest
             'shipping_city' => 'شهر',
             'postal_code' => 'کد پستی',
             'customer_note' => 'یادداشت سفارش',
+            'payment_method' => 'روش پرداخت',
+            'order_type' => 'نوع سفارش',
+            'sayad_id' => 'شناسه صیادی',
+            'cheque_number' => 'شماره چک',
+            'bank_name' => 'بانک',
+            'account_holder' => 'صاحب حساب',
+            'due_date' => 'تاریخ سررسید',
+            'cheque_image' => 'تصویر چک',
         ];
     }
 }

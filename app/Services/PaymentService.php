@@ -25,11 +25,21 @@ final class PaymentService
         abort_unless(in_array($status, Payment::STATUSES, true), 422, 'وضعیت پرداخت معتبر نیست.');
 
         return DB::transaction(function () use ($order, $status, $gateway) {
-            $payment = $order->payments()->latest('id')->first() ?? $order->payments()->create([
+            $order = Order::query()
+                ->lockForUpdate()
+                ->findOrFail($order->id);
+            $payment = $order->payments()->latest('id')->lockForUpdate()->first() ?? $order->payments()->create([
                 'gateway' => $gateway,
+                'idempotency_key' => 'manual:order:' . $order->id,
                 'amount' => $order->total,
                 'status' => 'pending',
             ]);
+
+            abort_if(
+                $payment->status === 'paid' && $status !== 'paid',
+                409,
+                'پرداخت موفق قابل بازگردانی به وضعیت قبلی نیست.'
+            );
 
             $payment->update([
                 'gateway' => $gateway,

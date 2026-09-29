@@ -6,6 +6,7 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class User extends Authenticatable
 {
@@ -67,6 +68,16 @@ class User extends Authenticatable
     public function media()
     {
         return $this->hasMany(Media::class, 'uploaded_by');
+    }
+
+    public function wholesaleProfile(): HasOne
+    {
+        return $this->hasOne(WholesaleProfile::class);
+    }
+
+    public function chequePermission(): HasOne
+    {
+        return $this->hasOne(ChequePermission::class);
     }
 
     public function scopeCustomers($query)

@@ -19,97 +19,68 @@ final class ZarinPalPaymentGateway implements PaymentGateway
 
     public function purchase(Order $order): Payment
     {
-        $merchantId = config('payment.zarinpal.merchant_id');
+        abort_unless(
+            $order->payment_status === 'pending',
+            422,
+            'این سفارش در وضعیت قابل پرداخت نیست.'
+        );
 
-        if (! filled($merchantId)) {
-            throw new RuntimeException(
-                'درگاه پرداخت پیکربندی نشده است. MERCHANT ID را تنظیم کنید.'
-            );
+        $existing = $order->payments()
+            ->where('gateway', $this->name())
+            ->whereIn('status', ['pending'])
+            ->latest('id')
+            ->first();
+
+        if ($existing?->authority) {
+            return $existing->fresh();
         }
 
-        $payment = $order->payments()->create([
+        $payment = $existing ?? $order->payments()->create([
             'gateway' => $this->name(),
+            'idempotency_key' => 'zarinpal:order:' . $order->id,
             'amount' => $order->total,
             'status' => 'pending',
         ]);
 
-        $callbackUrl = URL::signedRoute(
-            'payment.zarinpal.callback',
-            ['order' => $order->id]
+        $response = $this->request(
+            config('payment.zarinpal.request_url'),
+            [
+                'merchant_id' => config('payment.zarinpal.merchant_id'),
+                'amount' => $this->gatewayAmount($order->total),
+                'description' => 'پرداخت سفارش ' . $order->order_number,
+                'callback_url' => URL::temporarySignedRoute(
+                    'payment.zarinpal.callback',
+                    now()->addMinutes(30),
+                    ['order' => $order->id]
+                ),
+                'metadata' => array_filter([
+                    'email' => $order->customer_email,
+                    'mobile' => $order->customer_phone,
+                ]),
+            ]
         );
 
-        $amountRial = (int) round(
-            ((float) $order->total) * 10
+        $code = (int) data_get($response, 'data.code', -1);
+        $authority = trim((string) data_get(
+            $response,
+            'data.authority',
+            ''
+        ));
+
+        abort_unless(
+            $code === 100 && $authority !== '',
+            502,
+            'درخواست پرداخت از درگاه پذیرفته نشد.'
         );
-
-        try {
-            $response = Http::asJson()
-                ->acceptJson()
-                ->timeout(config('payment.zarinpal.timeout', 15))
-                ->post(
-                    config('payment.zarinpal.request_url'),
-                    [
-                        'merchant_id' => $merchantId,
-                        'amount' => $amountRial,
-                        'description' => 'سفارش ' . $order->order_number,
-                        'callback_url' => $callbackUrl,
-                        'metadata' => array_filter([
-                            'mobile' => $order->customer_phone,
-                            'email' => $order->customer_email,
-                        ]),
-                    ]
-                );
-        } catch (ConnectionException $e) {
-            report($e);
-
-            throw new RuntimeException(
-                'اتصال به درگاه پرداخت برقرار نشد.',
-                previous: $e
-            );
-        }
-
-        $payload = $response->json();
-
-        if (
-            ! $response->successful()
-            || (int) data_get($payload, 'data.code') !== 100
-            || ! filled(data_get($payload, 'data.authority'))
-        ) {
-            $message = data_get(
-                $payload,
-                'errors.message',
-                'درخواست پرداخت توسط درگاه پذیرفته نشد.'
-            );
-
-            throw new RuntimeException(
-                'خطا در ایجاد تراکنش پرداخت: ' . $message
-            );
-        }
-
-        $authority = (string) data_get(
-            $payload,
-            'data.authority'
-        );
-
-        $redirectUrl = rtrim(
-            config('payment.zarinpal.startpay_url'),
-            '/'
-        ) . '/' . rawurlencode($authority);
 
         $payment->update([
             'authority' => $authority,
             'metadata' => [
-                'redirect_url' => $redirectUrl,
-                'request_code' => (int) data_get(
-                    $payload,
-                    'data.code'
-                ),
-                'amount_rial' => $amountRial,
+                'redirect_url' => rtrim(
+                    config('payment.zarinpal.startpay_url'),
+                    '/'
+                ) . '/' . $authority,
             ],
-        ]);
-
-        $order->update([
-            'payment_method' => $this->name(),
         ]);
 
         return $payment->fresh();
@@ -117,92 +88,133 @@ final class ZarinPalPaymentGateway implements PaymentGateway
 
     public function verify(Payment $payment): Payment
     {
-        $merchantId = config('payment.zarinpal.merchant_id');
+        $payment = $payment->fresh();
+
+        if ($payment->status === 'paid') {
+            return $payment;
+        }
 
         abort_unless(
-            filled($merchantId),
-            500,
-            'درگاه پرداخت پیکربندی نشده است.'
-        );
-
-        abort_unless(
-            $payment->authority,
+            $payment->gateway === $this->name()
+                && filled($payment->authority),
             422,
-            'کد پیگیری اولیه پرداخت یافت نشد.'
+            'پرداخت درگاه قابل تأیید نیست.'
         );
 
-        $amountRial = (int) round(
-            ((float) $payment->amount) * 10
+        $response = $this->request(
+            config('payment.zarinpal.verify_url'),
+            [
+                'merchant_id' => config('payment.zarinpal.merchant_id'),
+                'amount' => $this->gatewayAmount($payment->amount),
+                'authority' => $payment->authority,
+            ]
         );
 
-        try {
-            $response = Http::asJson()
-                ->acceptJson()
-                ->timeout(config('payment.zarinpal.timeout', 15))
-                ->post(
-                    config('payment.zarinpal.verify_url'),
-                    [
-                        'merchant_id' => $merchantId,
-                        'amount' => $amountRial,
-                        'authority' => $payment->authority,
-                    ]
-                );
-        } catch (ConnectionException $e) {
-            report($e);
+        $code = (int) data_get($response, 'data.code', -1);
 
-            throw new RuntimeException(
-                'اتصال به سرویس تأیید پرداخت برقرار نشد.',
-                previous: $e
-            );
-        }
-
-        $payload = $response->json();
-        $code = (int) data_get($payload, 'data.code');
-
-        if (
-            $response->successful()
-            && in_array($code, [100, 101], true)
-        ) {
-            return tap($payment)->update([
+        if ($code === 100 || $code === 101) {
+            $payment->update([
                 'status' => 'paid',
-                'transaction_id' => $payment->authority,
-                'reference_number' => data_get(
-                    $payload,
-                    'data.ref_id'
-                )
-                    ? (string) data_get($payload, 'data.ref_id')
-                    : $payment->reference_number,
-                'paid_at' => $payment->paid_at ?? now(),
-                'metadata' => array_merge(
-                    $payment->metadata ?? [],
-                    [
-                        'verify_code' => $code,
-                    ]
+                'transaction_id' => (string) data_get(
+                    $response,
+                    'data.ref_id',
+                    $payment->transaction_id
                 ),
+                'reference_number' => (string) data_get(
+                    $response,
+                    'data.ref_id',
+                    $payment->reference_number
+                ),
+                'paid_at' => $payment->paid_at ?? now(),
             ]);
+
+            return $payment->fresh();
         }
 
-        $payment->update([
-            'status' => 'failed',
-            'metadata' => array_merge(
-                $payment->metadata ?? [],
-                [
-                    'verify_code' => $code,
-                    'verify_error' => data_get(
-                        $payload,
-                        'errors.message'
-                    ),
-                ]
-            ),
-        ]);
+        $payment->update(['status' => 'failed']);
 
         return $payment->fresh();
     }
 
     public function refund(Payment $payment): Payment
     {
-        throw new RuntimeException(
-            'Refund API این درگاه هنوز در این flow فعال نشده است.'
+        $payment = $payment->fresh();
+
+        abort_unless(
+            $payment->gateway === $this->name()
+                && $payment->status === 'paid'
+                && filled($payment->authority),
+            422,
+            'این پرداخت قابل بازگشت نیست.'
         );
+
+        $response = $this->request(
+            config('payment.zarinpal.reverse_url'),
+            [
+                'merchant_id' => config('payment.zarinpal.merchant_id'),
+                'authority' => $payment->authority,
+            ]
+        );
+
+        $code = (int) data_get($response, 'data.code', -1);
+
+        abort_unless(
+            in_array($code, [100, 101], true),
+            502,
+            'بازگشت وجه توسط درگاه تأیید نشد.'
+        );
+
+        $payment->update([
+            'status' => 'refunded',
+        ]);
+
+        return $payment->fresh();
+    }
+
+    private function request(string $url, array $payload): array
+    {
+        if (blank(config('payment.zarinpal.merchant_id'))) {
+            throw new RuntimeException(
+                'شناسه پذیرنده زرین‌پال تنظیم نشده است.'
+            );
+        }
+
+        try {
+            $response = Http::acceptJson()
+                ->asJson()
+                ->timeout((int) config('payment.zarinpal.timeout', 15))
+                ->retry(2, 250, throw: false)
+                ->post($url, $payload);
+        } catch (ConnectionException $e) {
+            throw new RuntimeException(
+                'ارتباط با درگاه پرداخت برقرار نشد.',
+                previous: $e
+            );
+        }
+
+        if ($response->failed()) {
+            throw new RuntimeException(
+                'درگاه پرداخت پاسخ معتبر نداد.'
+            );
+        }
+
+        $json = $response->json();
+
+        if (! is_array($json)) {
+            throw new RuntimeException(
+                'پاسخ درگاه پرداخت نامعتبر است.'
+            );
+        }
+
+        return $json;
+    }
+
+    private function gatewayAmount(float|string $amount): int
+    {
+        $amount = (int) round((float) $amount);
+
+        return config('payment.currency_unit') === 'toman'
+            ? $amount * 10
+            : $amount;
     }
 }
