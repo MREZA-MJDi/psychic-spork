@@ -723,7 +723,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 try {
                     const response = await fetch(
-                        '{{ route('admin.products.media.reorder', $product) }}',
+                        manager.dataset.reorderUrl,
                         {
                             method: 'POST',
                             headers: {
