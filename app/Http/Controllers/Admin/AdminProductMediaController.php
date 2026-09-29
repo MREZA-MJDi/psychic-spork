@@ -92,20 +92,21 @@ class AdminProductMediaController extends Controller
             'media.*' => ['integer', 'distinct'],
         ]);
 
-        $ids = $product->galleryMedia()
-            ->whereIn('id', $validated['media'])
+        $requestedIds = array_map('intval', $validated['media']);
+        $ownedIds = $product->galleryMedia()
+            ->whereIn('id', $requestedIds)
             ->pluck('id')
             ->map(fn ($id) => (int) $id)
             ->all();
 
-        if (count($ids) !== count($validated['media'])) {
+        if (count($ownedIds) !== count($requestedIds)) {
             return response()->json([
                 'message' => 'ترتیب تصاویر معتبر نیست.',
             ], 422);
         }
 
-        DB::transaction(function () use ($product, $ids): void {
-            foreach ($ids as $sortOrder => $mediaId) {
+        DB::transaction(function () use ($product, $requestedIds): void {
+            foreach ($requestedIds as $sortOrder => $mediaId) {
                 Media::query()
                     ->whereKey($mediaId)
                     ->where('mediable_type', $product->getMorphClass())
