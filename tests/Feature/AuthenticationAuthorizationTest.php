@@ -20,9 +20,8 @@ class AuthenticationAuthorizationTest extends TestCase
 
     public function test_customer_cannot_access_admin_area(): void
     {
-        $customer = User::factory()->create([
-            'is_admin' => false,
-        ]);
+        $customer = User::factory()->create();
+        $customer->forceFill(['is_admin' => false])->save();
 
         $this->actingAs($customer)
             ->get(route('admin.dashboard'))
@@ -31,9 +30,8 @@ class AuthenticationAuthorizationTest extends TestCase
 
     public function test_admin_cannot_access_customer_account(): void
     {
-        $admin = User::factory()->create([
-            'is_admin' => true,
-        ]);
+        $admin = User::factory()->create();
+        $admin->forceFill(['is_admin' => true])->save();
 
         $this->actingAs($admin)
             ->get(route('account'))
@@ -67,8 +65,8 @@ class AuthenticationAuthorizationTest extends TestCase
         $customer = User::factory()->create([
             'email' => 'customer@example.test',
             'password' => Hash::make($password),
-            'is_admin' => false,
         ]);
+        $customer->forceFill(['is_admin' => false])->save();
 
         $response = $this->post(route('login.store'), [
             'identifier' => $customer->email,
@@ -86,8 +84,8 @@ class AuthenticationAuthorizationTest extends TestCase
         $admin = User::factory()->create([
             'email' => 'admin@example.test',
             'password' => Hash::make($password),
-            'is_admin' => true,
         ]);
+        $admin->forceFill(['is_admin' => true])->save();
 
         $response = $this->post(route('login.store'), [
             'identifier' => $admin->email,
