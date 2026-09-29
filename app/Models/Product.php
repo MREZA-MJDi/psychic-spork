@@ -52,10 +52,10 @@ class Product extends Model
      */
     public function primaryActiveVariant(): HasOne
     {
-        return $this->hasOne(ProductVariant::class)
-            ->where('is_active', true)
-            ->orderBy('sort_order')
-            ->orderBy('id');
+        return $this->hasOne(ProductVariant::class)->ofMany(
+            ['sort_order' => 'min', 'id' => 'min'],
+            fn ($query) => $query->where('is_active', true)
+        );
     }
 
     public function orderItems(): HasMany { return $this->hasMany(OrderItem::class); }
@@ -74,10 +74,10 @@ class Product extends Model
      */
     public function primaryGalleryMedia(): MorphOne
     {
-        return $this->morphOne(Media::class, 'mediable')
-            ->where('collection', 'gallery')
-            ->orderBy('sort_order')
-            ->orderBy('id');
+        return $this->morphOne(Media::class, 'mediable')->ofMany(
+            ['sort_order' => 'min', 'id' => 'min'],
+            fn ($query) => $query->where('collection', 'gallery')
+        );
     }
 
     public function integrationMappings(): MorphMany
