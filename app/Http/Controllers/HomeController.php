@@ -75,17 +75,6 @@ class HomeController extends Controller
                 ->values();
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | Home signals
-        |--------------------------------------------------------------------------
-        |
-        | These values mirror the catalog signals used in Admin Dashboard:
-        | recent catalog additions + paid, non-cancelled top sellers.
-        | They are filtered to active products before reaching the storefront.
-        |--------------------------------------------------------------------------
-        */
-
         $recentProducts = Product::query()
             ->active()
             ->with([
@@ -137,10 +126,11 @@ class HomeController extends Controller
 
         $heroProducts = Product::query()
             ->active()
-            ->with(['brand.logoMedia', 'galleryMedia', 'variants'])
+            ->with(['brand.logoMedia', 'category', 'galleryMedia', 'variants'])
+            ->orderByDesc('is_featured')
             ->latest('updated_at')
             ->latest('id')
-            ->take(4)
+            ->take(24)
             ->get();
 
         $heroSlides = $heroProducts
@@ -149,12 +139,27 @@ class HomeController extends Controller
                 $productImage = $product->galleryMedia->first()?->url;
                 $brandImage = $product->brand?->logoMedia?->url;
 
+                $description = trim((string) ($product->short_description ?: $product->description));
+
+                if ($description === '') {
+                    $description = sprintf(
+                        '%s%s',
+                        $product->brand?->name
+                            ? $product->brand->name . ' · '
+                            : '',
+                        $product->category?->name
+                            ? 'منتخبی از دسته ' . $product->category->name . ' در جانان.'
+                            : 'منتخبی از کالکشن جانان.'
+                    );
+                }
+
                 return [
+                    'number' => str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT),
                     'image' => $productImage ?: $brandImage,
                     'title' => $product->name,
+                    'description' => $description,
                     'brand' => $product->brand?->name ?? 'JANAN',
                     'url' => route('products.show', $product),
-                    'index' => $index,
                 ];
             })
             ->all();
