@@ -21,6 +21,7 @@ class Payment extends Model
     protected $fillable = [
         'order_id',
         'gateway',
+        'idempotency_key',
         'transaction_id',
         'authority',
         'reference_number',

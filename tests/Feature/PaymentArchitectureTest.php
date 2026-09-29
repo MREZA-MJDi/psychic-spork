@@ -171,6 +171,40 @@ class PaymentArchitectureTest extends TestCase
         ]);
     }
 
+    public function test_payment_idempotency_key_is_persisted(): void
+    {
+        $customer = User::factory()->create();
+        $order = $this->orderFor($customer, 100000);
+
+        $payment = app(\App\Services\PaymentService::class)->setStatus(
+            $order,
+            'pending',
+            'test-gateway'
+        );
+
+        $this->assertSame(
+            'test-gateway:order:' . $order->id,
+            $payment->fresh()->idempotency_key
+        );
+    }
+
+    public function test_refunded_payment_cannot_be_paid_again(): void
+    {
+        $customer = User::factory()->create();
+        $order = $this->orderFor($customer, 100000);
+        $payments = app(\App\Services\PaymentService::class);
+
+        $payments->markPaid($order, 'test-gateway', 'REF-1');
+        $payments->refund($order->fresh());
+
+        try {
+            $payments->markPaid($order->fresh(), 'test-gateway', 'REF-2');
+            $this->fail('A refunded payment must not become paid again.');
+        } catch (HttpException $e) {
+            $this->assertSame(409, $e->getStatusCode());
+        }
+    }
+
     public function test_admin_style_order_update_cannot_forge_a_successful_payment(): void
     {
         $customer = User::factory()->create();

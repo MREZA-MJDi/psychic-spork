@@ -59,10 +59,12 @@ final class PaymentService
             ]);
 
             abort_if(
-                $payment->status === 'paid'
-                && $status !== 'paid',
+                in_array($payment->status, ['paid', 'refunded'], true)
+                && $status !== $payment->status,
                 409,
-                'پرداخت موفق قابل بازگردانی به وضعیت قبلی نیست.'
+                $payment->status === 'refunded'
+                    ? 'پرداخت بازپرداخت‌شده قابل تغییر نیست.'
+                    : 'پرداخت موفق قابل بازگردانی به وضعیت قبلی نیست.'
             );
 
             $payment->update([
@@ -150,7 +152,7 @@ final class PaymentService
 
             abort_unless(
                 $payment->status === 'paid'
-                || $order->payment_status === 'paid',
+                && $order->payment_status === 'paid',
                 422,
                 'فقط یک پرداخت موفق قابل بازپرداخت است.'
             );
