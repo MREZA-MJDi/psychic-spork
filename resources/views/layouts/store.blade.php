@@ -142,7 +142,7 @@
 
 </head>
 
-<body class="store-body">
+<body class="store-body{{ $isHome ? ' home-immersive' : '' }}">
 
 <div class="site-shell">
 
