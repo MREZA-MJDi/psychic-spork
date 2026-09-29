@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'driver' => env('PAYMENT_DRIVER', 'zarinpal'),
+    'driver' => env('PAYMENT_GATEWAY', 'zarinpal'),
 
     'currency_unit' => env('PAYMENT_CURRENCY_UNIT', 'toman'),
 

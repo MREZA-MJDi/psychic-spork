@@ -183,7 +183,6 @@ final class ZarinPalPaymentGateway implements PaymentGateway
             $response = Http::acceptJson()
                 ->asJson()
                 ->timeout((int) config('payment.zarinpal.timeout', 15))
-                ->retry(2, 250, throw: false)
                 ->post($url, $payload);
         } catch (ConnectionException $e) {
             throw new RuntimeException(

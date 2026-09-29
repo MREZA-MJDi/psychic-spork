@@ -2,8 +2,10 @@
 
 namespace App\Services;
 
+use App\Models\ChequePermission;
 use App\Models\ChequePayment;
 use App\Models\Order;
+use App\Models\WholesaleProfile;
 use App\Models\Payment;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
@@ -45,9 +47,7 @@ final class ChequePaymentService
 
         try {
             if ($file instanceof UploadedFile) {
-                $storedPath = Storage::disk(
-                    config('filesystems.default')
-                )->putFile('private/cheques', $file);
+                $storedPath = Storage::disk('local')->putFile('private/cheques', $file);
 
                 abort_if(
                     ! $storedPath,
@@ -65,6 +65,23 @@ final class ChequePaymentService
                 $lockedOrder = Order::query()
                     ->lockForUpdate()
                     ->findOrFail($order->id);
+
+                $profile = WholesaleProfile::query()
+                    ->where('user_id', $user->id)
+                    ->lockForUpdate()
+                    ->first();
+
+                $permission = ChequePermission::query()
+                    ->where('user_id', $user->id)
+                    ->lockForUpdate()
+                    ->first();
+
+                abort_unless(
+                    $profile?->isApproved()
+                    && $permission?->allows((float) $lockedOrder->total),
+                    403,
+                    'دسترسی پرداخت چکی این حساب در حال حاضر مجاز نیست.'
+                );
 
                 abort_unless(
                     $lockedOrder->user_id === $user->id
@@ -125,8 +142,7 @@ final class ChequePaymentService
             });
         } catch (Throwable $e) {
             if ($storedPath) {
-                Storage::disk(config('filesystems.default'))
-                    ->delete($storedPath);
+                Storage::disk('local')->delete($storedPath);
             }
 
             throw $e;
@@ -163,6 +179,14 @@ final class ChequePaymentService
                 $cheque->canTransitionTo('accepted'),
                 422,
                 'وضعیت فعلی چک قابل تأیید نیست.'
+            );
+
+            abort_unless(
+                $cheque->order
+                && $cheque->order->status !== 'cancelled'
+                && $cheque->payment->status === 'pending',
+                422,
+                'سفارش یا پرداخت چک دیگر قابل تأیید نیست.'
             );
 
             $cheque->update([
@@ -210,23 +234,20 @@ final class ChequePaymentService
                 'review_note' => $note,
             ]);
 
+            if (
+                $cheque->order->status !== 'cancelled'
+                && $cheque->order->payment_status !== 'paid'
+            ) {
+                $this->orders->updateStatus(
+                    $cheque->order,
+                    'cancelled',
+                    'failed',
+                    $note ?: 'پرداخت چکی توسط مدیریت رد شد.'
+                );
+            }
+
             return $cheque->fresh(['order', 'payment']);
         });
-
-        if (
-            $result->order
-            && $result->order->status !== 'cancelled'
-            && $result->order->payment_status !== 'paid'
-        ) {
-            $this->orders->updateStatus(
-                $result->order,
-                'cancelled',
-                'failed',
-                $note ?: 'پرداخت چکی توسط مدیریت رد شد.'
-            );
-        }
-
-        return $result->fresh(['order', 'payment']);
     }
 
     public function markDeposited(ChequePayment $cheque, User $admin): ChequePayment
