@@ -7,6 +7,7 @@ use App\Integrations\Nila\Data\ExternalVariantData;
 use App\Integrations\Nila\NilaCatalogImporter;
 use App\Models\IntegrationMapping;
 use App\Models\Product;
+use App\Models\Media;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -61,6 +62,33 @@ class NilaCatalogImporterTest extends TestCase
         $this->assertDatabaseCount('integration_mappings', 0);
     }
 
+    public function test_nila_import_never_touches_janan_managed_media(): void
+    {
+        $product = app(NilaCatalogImporter::class)->import($this->productData());
+
+        $media = $product->media()->create([
+            'collection' => 'gallery',
+            'disk' => 'public',
+            'path' => 'products/manual-image.webp',
+            'original_name' => 'manual-image.webp',
+            'mime_type' => 'image/webp',
+            'alt_text' => 'تصویر دستی جانان',
+            'sort_order' => 0,
+            'metadata' => ['source' => 'admin'],
+        ]);
+
+        app(NilaCatalogImporter::class)->import(
+            $this->productData(stock: 2, price: 990_000)
+        );
+
+        $this->assertDatabaseHas('media', [
+            'id' => $media->id,
+            'path' => 'products/manual-image.webp',
+            'alt_text' => 'تصویر دستی جانان',
+            'sort_order' => 0,
+        ]);
+        $this->assertSame(1, Media::query()->where('mediable_id', $product->id)->count());
+    }
     public function test_nila_mappings_point_to_product_and_variant(): void
     {
         $product = app(NilaCatalogImporter::class)->import($this->productData());
