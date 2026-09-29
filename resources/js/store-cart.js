@@ -270,6 +270,19 @@ const openDrawer = async (refresh = true) => {
     }
 };
 
+
+
+// Bind the real storefront cart buttons directly as well as through delegation.
+// This keeps the cart reliable when the immersive homepage has touch/drag layers.
+document.querySelectorAll('[data-cart-open]').forEach((trigger) => {
+    trigger.addEventListener('click', async (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        hideQuickPreview();
+        await openDrawer();
+    });
+});
+
 const closeDrawer = () => {
     if (!drawer) return;
 

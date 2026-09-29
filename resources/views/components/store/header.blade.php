@@ -13,7 +13,7 @@
     $isContact = request()->routeIs('contact');
 @endphp
 
-<header class="store-header">
+<header class="store-header {{ $isHome ? 'store-header--immersive' : '' }}">
 
     <div class="container store-header__inner">
 
