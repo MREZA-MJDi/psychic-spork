@@ -215,7 +215,7 @@ Route::prefix('admin')
 
         Route::resource('products', AdminProductController::class)
             ->except(['show']);
-\n        Route::get('products/{product}/media', [AdminProductMediaController::class, 'index'])
+        Route::get('products/{product}/media', [AdminProductMediaController::class, 'index'])
             ->name('products.media.index');
 
         Route::post('products/{product}/media', [AdminProductMediaController::class, 'store'])
