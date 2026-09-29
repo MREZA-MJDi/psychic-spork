@@ -5,7 +5,6 @@ namespace App\Integrations\Nila;
 use App\Integrations\Nila\Data\ExternalProductData;
 use App\Integrations\Nila\Data\ExternalVariantData;
 use App\Models\IntegrationMapping;
-use App\Models\Media;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use Illuminate\Support\Facades\DB;
@@ -60,10 +59,6 @@ final class NilaCatalogImporter
             'sort_order' => $data->sortOrder,
         ]);
         $product->save();
-
-        if ($data->imageUrl) {
-            $this->syncPrimaryImage($product, $data->imageUrl);
-        }
 
         $this->syncMapping(
             Product::class,
@@ -155,42 +150,6 @@ final class NilaCatalogImporter
         );
 
         return $variant;
-    }
-
-    private function syncPrimaryImage(Product $product, string $url): void
-    {
-        $existingRemote = Media::query()
-            ->where('disk', 'remote')
-            ->where('path', $url)
-            ->first();
-
-        if ($existingRemote && (
-            $existingRemote->mediable_type !== Product::class
-            || (int) $existingRemote->mediable_id !== (int) $product->id
-        )) {
-            return;
-        }
-
-        $primary = $product->media()
-            ->where('collection', 'gallery')
-            ->where('sort_order', 0)
-            ->first();
-
-        $media = $primary ?: new Media;
-        $media->fill([
-            'mediable_type' => Product::class,
-            'mediable_id' => $product->id,
-            'collection' => 'gallery',
-            'disk' => 'remote',
-            'path' => $url,
-            'original_name' => basename(parse_url($url, PHP_URL_PATH) ?: 'nila-product-image'),
-            'sort_order' => 0,
-            'metadata' => [
-                'source' => 'nila',
-                'remote' => true,
-            ],
-        ]);
-        $media->save();
     }
 
     private function syncMapping(
