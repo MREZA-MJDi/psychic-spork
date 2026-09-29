@@ -1118,18 +1118,18 @@
     color: var(--janan-pink-ink);
 }
 
-/* The full cart panel intentionally opens from the opposite side of the header cart icon. */
+/* RTL storefront: the full cart drawer opens from the right side. */
 .cart-drawer__panel {
     top: 0;
-    right: auto;
-    left: 0;
+    right: 0;
+    left: auto;
     width: min(470px, calc(100vw - 16px));
     height: 100%;
-    border-right: 1px solid var(--janan-line);
-    border-left: 0;
-    border-radius: 0 24px 24px 0;
-    transform: translateX(-102%);
-    box-shadow: 30px 0 80px rgba(26,33,39,.14);
+    border-left: 1px solid var(--janan-line);
+    border-right: 0;
+    border-radius: 24px 0 0 24px;
+    transform: translateX(102%);
+    box-shadow: -30px 0 80px rgba(26,33,39,.14);
 }
 
 .cart-drawer.is-open .cart-drawer__panel {
@@ -1139,15 +1139,15 @@
 @media (max-width: 820px) {
     .cart-drawer__panel {
         top: 0;
-        right: auto;
-        left: 0;
+        right: 0;
+        left: auto;
         bottom: auto;
         width: min(430px, calc(100vw - 12px));
         height: 100%;
-        border-radius: 0 22px 22px 0;
-        border-right: 1px solid var(--janan-line);
-        border-left: 0;
-        transform: translateX(-102%);
+        border-radius: 22px 0 0 22px;
+        border-left: 1px solid var(--janan-line);
+        border-right: 0;
+        transform: translateX(102%);
     }
 
     .cart-drawer.is-open .cart-drawer__panel {
