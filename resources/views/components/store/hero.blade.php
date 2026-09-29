@@ -3,6 +3,13 @@
     $slideCount = count($slides);
 @endphp
 
+@if(!app()->environment('testing'))
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/Draggable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/Flip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+@endif
+
 <section
     class="immersive-grid-hero"
     id="immersiveGridHero"

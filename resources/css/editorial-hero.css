@@ -704,3 +704,8 @@ body.home-immersive {
     animation-duration: .01ms !important;
   }
 }
+
+body:has(.immersive-grid-hero) .store-header,
+body:has(.immersive-grid-hero) .store-footer,
+body:has(.immersive-grid-hero) .mobile-bottom-nav{display:none!important}
+body.immersive-zoom-lock{overflow:hidden!important}
