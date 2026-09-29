@@ -38,17 +38,68 @@
                 </p>
 
                 <div class="brand-hero__meta">
-                    <span>{{ number_format($products->total()) }} محصول فعال</span>
-                    <i></i>
+                    <span>
+                        <strong>{{ number_format($products->total()) }}</strong>
+                        محصول فعال
+                    </span>
+
+                    <i aria-hidden="true"></i>
+
                     <span>JANAN SELECT</span>
+                </div>
+
+                <div class="brand-hero__actions">
+                    <a
+                        class="button button--dark"
+                        href="#brand-products"
+                    >
+                        دیدن محصولات
+                        <span aria-hidden="true">↓</span>
+                    </a>
+
+                    <a
+                        class="button button--ghost"
+                        href="#brand-overview"
+                    >
+                        شناخت برند
+                    </a>
                 </div>
             </div>
 
         </div>
     </section>
 
+    <nav
+        class="brand-profile-nav"
+        aria-label="ناوبری صفحه برند"
+    >
+        <div class="container">
+            <span class="brand-profile-nav__identity">
+                {{ strtoupper($brand->slug) }}
+            </span>
+
+            <div class="brand-profile-nav__links">
+                <a href="#brand-overview">معرفی</a>
+                <a href="#brand-strengths">نقاط برجسته</a>
+                <a href="#brand-considerations">قبل از خرید</a>
+                <a href="#brand-products">محصولات</a>
+            </div>
+
+            <a
+                class="brand-profile-nav__shop"
+                href="#brand-products"
+            >
+                {{ number_format($products->total()) }} محصول
+                <span aria-hidden="true">↘</span>
+            </a>
+        </div>
+    </nav>
+
     {{-- 02. Brand overview --}}
-    <section class="brand-profile__section">
+    <section
+        id="brand-overview"
+        class="brand-profile__section brand-profile__section--overview"
+    >
         <div class="container">
 
             <div class="brand-profile__intro">
@@ -67,7 +118,10 @@
     </section>
 
     {{-- 03. Strengths --}}
-    <section class="brand-profile__section brand-profile__section--soft">
+    <section
+        id="brand-strengths"
+        class="brand-profile__section brand-profile__section--soft"
+    >
         <div class="container">
 
             <header class="section-head">
@@ -104,7 +158,10 @@
     </section>
 
     {{-- 04. Considerations --}}
-    <section class="brand-profile__section">
+    <section
+        id="brand-considerations"
+        class="brand-profile__section brand-profile__section--considerations"
+    >
         <div class="container">
 
             <div class="brand-profile__comparison">
@@ -191,7 +248,10 @@
     </section>
 
     {{-- 06. Products --}}
-    <section class="section-block catalog-stage brand-profile__products">
+    <section
+        id="brand-products"
+        class="section-block catalog-stage brand-profile__products"
+    >
         <div class="container">
 
             <header class="section-head">
@@ -203,7 +263,8 @@
                     </h2>
 
                     <p>
-                        اطلاعات قیمت، موجودی و مشخصات از محصولات فعال فروشگاه خوانده می‌شود.
+                        انتخاب‌های فعلی {{ $brand->name }} را ببین؛
+                        از همین‌جا وارد صفحه محصول شو و سایز، مشخصات و موجودی را بررسی کن.
                     </p>
                 </div>
 
