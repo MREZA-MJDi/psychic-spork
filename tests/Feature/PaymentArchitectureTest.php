@@ -13,6 +13,7 @@ use App\Services\ChequePaymentService;
 use App\Services\ZarinPalPaymentGateway;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Tests\TestCase;
 
 class PaymentArchitectureTest extends TestCase
@@ -25,17 +26,21 @@ class PaymentArchitectureTest extends TestCase
 
         $order = $this->orderFor($customer, 100000);
 
-        $this->expectExceptionCode(403);
+        try {
+            app(ChequePaymentService::class)->submit(
+                $order,
+                $customer,
+                [
+                    'sayad_id' => '1234567890123456',
+                    'bank_name' => 'Test Bank',
+                    'due_date' => now()->addDays(10)->toDateString(),
+                ]
+            );
 
-        app(ChequePaymentService::class)->submit(
-            $order,
-            $customer,
-            [
-                'sayad_id' => '1234567890123456',
-                'bank_name' => 'Test Bank',
-                'due_date' => now()->addDays(10)->toDateString(),
-            ]
-        );
+            $this->fail('Cheque submission should have been rejected.');
+        } catch (HttpException $e) {
+            $this->assertSame(403, $e->getStatusCode());
+        }
     }
 
     public function test_approved_customer_can_submit_only_one_cheque_for_an_order(): void
@@ -73,17 +78,21 @@ class PaymentArchitectureTest extends TestCase
         $this->assertSame('pending', $payment->status);
         $this->assertSame('submitted', $order->fresh()->chequePayment->status);
 
-        $this->expectExceptionCode(409);
+        try {
+            $service->submit(
+                $order->fresh(),
+                $customer,
+                [
+                    'sayad_id' => '1234567890123457',
+                    'bank_name' => 'Test Bank',
+                    'due_date' => now()->addDays(10)->toDateString(),
+                ]
+            );
 
-        $service->submit(
-            $order->fresh(),
-            $customer,
-            [
-                'sayad_id' => '1234567890123457',
-                'bank_name' => 'Test Bank',
-                'due_date' => now()->addDays(10)->toDateString(),
-            ]
-        );
+            $this->fail('Duplicate cheque submission should have been rejected.');
+        } catch (HttpException $e) {
+            $this->assertSame(409, $e->getStatusCode());
+        }
     }
 
     public function test_cheque_must_be_cleared_before_becoming_a_paid_payment(): void

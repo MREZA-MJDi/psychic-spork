@@ -14,6 +14,11 @@ class CheckoutRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
+        $this->merge([
+            'payment_method' => $this->input('payment_method', 'online'),
+            'order_type' => $this->input('order_type', 'retail'),
+        ]);
+
         foreach ([
                      'customer_name',
                      'customer_phone',
