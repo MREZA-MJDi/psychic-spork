@@ -23,7 +23,6 @@ final readonly class ExternalProductData
         public bool $isActive = true,
         public bool $isFeatured = false,
         public int $sortOrder = 0,
-        public ?string $imageUrl = null,
         public array $metadata = [],
     ) {
         if ($externalId === '') {
