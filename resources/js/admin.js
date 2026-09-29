@@ -634,3 +634,130 @@ document.addEventListener('DOMContentLoaded', () => {
         formatLocalDates();
     });
 })();
+
+
+/* =========================================================
+   PRODUCT MEDIA MANAGER
+========================================================= */
+
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('[data-product-media-manager]').forEach((manager) => {
+        const input = manager.querySelector('[data-media-upload-input]');
+        const dropzone = manager.querySelector('[data-media-dropzone]');
+        const preview = manager.querySelector('[data-media-upload-preview]');
+        const count = manager.querySelector('[data-media-upload-count]');
+        const submit = manager.querySelector('[data-media-upload-submit]');
+        const sortable = manager.querySelector('[data-media-sortable]');
+
+        const renderFiles = (files) => {
+            if (!input || !preview || !submit) return;
+
+            preview.innerHTML = '';
+            const validFiles = [...files].filter((file) => file.type.startsWith('image/'));
+
+            validFiles.forEach((file) => {
+                const item = document.createElement('div');
+                item.className = 'admin-media-upload-preview__item';
+
+                const image = document.createElement('img');
+                image.alt = file.name;
+                image.src = URL.createObjectURL(file);
+
+                const name = document.createElement('span');
+                name.textContent = file.name;
+
+                item.append(image, name);
+                preview.appendChild(item);
+            });
+
+            if (count) {
+                count.textContent = validFiles.length
+                    ? `${validFiles.length} تصویر انتخاب شده`
+                    : '';
+            }
+
+            submit.disabled = validFiles.length === 0;
+        };
+
+        input?.addEventListener('change', () => renderFiles(input.files));
+
+        ['dragenter', 'dragover'].forEach((eventName) => {
+            dropzone?.addEventListener(eventName, (event) => {
+                event.preventDefault();
+                dropzone.classList.add('is-dragover');
+            });
+        });
+
+        ['dragleave', 'drop'].forEach((eventName) => {
+            dropzone?.addEventListener(eventName, (event) => {
+                event.preventDefault();
+                dropzone.classList.remove('is-dragover');
+            });
+        });
+
+        dropzone?.addEventListener('drop', (event) => {
+            const files = event.dataTransfer?.files;
+            if (!files?.length || !input) return;
+
+            const transfer = new DataTransfer();
+            [...files].slice(0, 12).forEach((file) => transfer.items.add(file));
+            input.files = transfer.files;
+            renderFiles(input.files);
+        });
+
+        let dragged = null;
+
+        sortable?.querySelectorAll('[data-media-id]').forEach((item) => {
+            item.addEventListener('dragstart', () => {
+                dragged = item;
+                item.classList.add('is-dragging');
+            });
+
+            item.addEventListener('dragend', async () => {
+                item.classList.remove('is-dragging');
+                if (!dragged || !sortable) return;
+
+                const ids = [...sortable.querySelectorAll('[data-media-id]')]
+                    .map((node) => Number(node.dataset.mediaId))
+                    .filter(Boolean);
+
+                try {
+                    const response = await fetch(
+                        '{{ route('admin.products.media.reorder', $product) }}',
+                        {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                            },
+                            body: JSON.stringify({ media: ids }),
+                        }
+                    );
+
+                    if (!response.ok) {
+                        throw new Error('reorder failed');
+                    }
+                } catch {
+                    window.location.reload();
+                }
+
+                dragged = null;
+            });
+
+            item.addEventListener('dragover', (event) => {
+                event.preventDefault();
+                if (!dragged || dragged === item) return;
+
+                const rect = item.getBoundingClientRect();
+                const after = event.clientY > rect.top + rect.height / 2;
+
+                if (after) {
+                    item.after(dragged);
+                } else {
+                    item.before(dragged);
+                }
+            });
+        });
+    });
+});
