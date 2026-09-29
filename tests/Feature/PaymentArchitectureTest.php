@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Models\WholesaleProfile;
 use App\Services\ChequePaymentService;
 use App\Services\ZarinPalPaymentGateway;
+use App\Services\OnlinePaymentMethod;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -38,6 +39,22 @@ class PaymentArchitectureTest extends TestCase
             );
 
             $this->fail('Cheque submission should have been rejected.');
+        } catch (HttpException $e) {
+            $this->assertSame(403, $e->getStatusCode());
+        }
+    }
+
+    public function test_online_wholesale_checkout_also_requires_wholesale_approval(): void
+    {
+        $customer = User::factory()->create();
+
+        try {
+            app(OnlinePaymentMethod::class)->validateCheckout(
+                $customer,
+                ['order_type' => 'wholesale']
+            );
+
+            $this->fail('Wholesale approval should be required.');
         } catch (HttpException $e) {
             $this->assertSame(403, $e->getStatusCode());
         }

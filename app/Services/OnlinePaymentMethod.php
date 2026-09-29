@@ -11,6 +11,7 @@ final class OnlinePaymentMethod implements PaymentMethod
 {
     public function __construct(
         private readonly PaymentGateway $gateway,
+        private readonly WholesaleEligibilityService $eligibility,
     ) {
     }
 
@@ -21,12 +22,15 @@ final class OnlinePaymentMethod implements PaymentMethod
 
     public function validateCheckout(?User $user, array $data): void
     {
-        abort_if(
-            ($data['order_type'] ?? 'retail') === 'wholesale'
-            && ! $user,
-            403,
-            'برای خرید عمده باید وارد حساب مشتری شوید.'
-        );
+        if (($data['order_type'] ?? 'retail') === 'wholesale') {
+            abort_unless(
+                $user && $user->isCustomer(),
+                403,
+                'برای خرید عمده باید وارد حساب مشتری شوید.'
+            );
+
+            $this->eligibility->assertWholesaleAllowed($user);
+        }
     }
 
     public function start(
