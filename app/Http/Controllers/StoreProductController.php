@@ -22,10 +22,10 @@ class StoreProductController extends Controller
         $products = Product::query()
             ->active()
             ->with([
-                'category',
-                'brand',
-                'variants',
-                'galleryMedia',
+                'category:id,name,slug',
+                'brand:id,name,slug',
+                'primaryActiveVariant',
+                'primaryGalleryMedia',
             ])
             ->when(
                 ! empty($filters['q']),
@@ -90,11 +90,13 @@ class StoreProductController extends Controller
             'products' => $products,
             'categories' => Category::query()
                 ->active()
+                ->select(['id', 'name', 'slug'])
                 ->orderBy('sort_order')
                 ->orderBy('name')
                 ->get(),
             'brands' => Brand::query()
                 ->active()
+                ->select(['id', 'name', 'slug'])
                 ->orderBy('name')
                 ->get(),
         ]);
@@ -115,8 +117,8 @@ class StoreProductController extends Controller
             ->with([
                 'category:id,name',
                 'brand:id,name',
-                'galleryMedia',
-                'variants',
+                'primaryGalleryMedia',
+                'primaryActiveVariant',
             ])
             ->where(function ($query) use ($like) {
                 $query
@@ -144,15 +146,13 @@ class StoreProductController extends Controller
             ->limit(6)
             ->get()
             ->map(function (Product $product): array {
-                $variant = $product->variants->first(
-                    fn ($item) => (bool) $item->is_active
-                );
+                $variant = $product->primaryActiveVariant;
 
                 return [
                     'name' => $product->name,
                     'brand' => $product->brand?->name,
                     'category' => $product->category?->name,
-                    'image' => $product->galleryMedia->first()?->url,
+                    'image' => $product->primaryGalleryMedia?->url,
                     'price' => $variant?->effective_price,
                     'url' => route('products.show', $product),
                 ];
@@ -181,10 +181,10 @@ class StoreProductController extends Controller
         $relatedProducts = Product::query()
             ->active()
             ->with([
-                'category',
-                'brand',
-                'variants',
-                'galleryMedia',
+                'category:id,name,slug',
+                'brand:id,name,slug',
+                'primaryActiveVariant',
+                'primaryGalleryMedia',
             ])
             ->where('id', '!=', $product->id)
             ->when(
@@ -205,10 +205,10 @@ class StoreProductController extends Controller
             $fallbackProducts = Product::query()
                 ->active()
                 ->with([
-                    'category',
-                    'brand',
-                    'variants',
-                    'galleryMedia',
+                    'category:id,name,slug',
+                    'brand:id,name,slug',
+                    'primaryActiveVariant',
+                    'primaryGalleryMedia',
                 ])
                 ->where('id', '!=', $product->id)
                 ->whereNotIn(
