@@ -149,7 +149,10 @@ class PaymentArchitectureTest extends TestCase
 
         $cheque = $order->fresh()->chequePayment;
 
-        $service->accept($cheque, $admin);
+        $service->moveToReview($cheque->fresh());
+        $this->assertSame('under_review', $cheque->fresh()->status);
+
+        $service->accept($cheque->fresh(), $admin);
         $this->assertSame('accepted', $cheque->fresh()->status);
         $this->assertSame('confirmed', $order->fresh()->status);
         $this->assertSame('pending', $order->fresh()->payment_status);
