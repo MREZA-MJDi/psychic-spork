@@ -41,10 +41,10 @@ class StoreCategoryController extends Controller
         $products = Product::query()
             ->active()
             ->with([
-                'category',
-                'brand',
-                'variants',
-                'galleryMedia',
+                'category:id,name,slug',
+                'brand:id,name,slug',
+                'primaryActiveVariant',
+                'primaryGalleryMedia',
             ])
             ->where('category_id', $category->id)
             ->latest('updated_at')
