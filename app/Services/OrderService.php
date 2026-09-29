@@ -270,6 +270,18 @@ final class OrderService
             ]);
 
             if ($paymentStatus !== $oldPaymentStatus) {
+                abort_if(
+                    $paymentStatus === 'paid',
+                    422,
+                    'ثبت پرداخت موفق فقط از مسیر تأیید درگاه یا تسویه ابزار پرداخت انجام می‌شود.'
+                );
+
+                abort_if(
+                    $paymentStatus === 'refunded',
+                    422,
+                    'بازپرداخت باید از مسیر امن پرداخت انجام شود.'
+                );
+
                 $this->payment->matchStatus(
                     $order,
                     $paymentStatus

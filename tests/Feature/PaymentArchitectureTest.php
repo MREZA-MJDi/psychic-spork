@@ -12,6 +12,7 @@ use App\Models\WholesaleProfile;
 use App\Services\ChequePaymentService;
 use App\Services\ZarinPalPaymentGateway;
 use App\Services\OnlinePaymentMethod;
+use App\Services\OrderService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -165,6 +166,24 @@ class PaymentArchitectureTest extends TestCase
             'reference_type' => Order::class,
             'reference_id' => $order->id,
         ]);
+    }
+
+    public function test_admin_style_order_update_cannot_forge_a_successful_payment(): void
+    {
+        $customer = User::factory()->create();
+        $order = $this->orderFor($customer, 100000);
+
+        try {
+            app(OrderService::class)->updateStatus(
+                $order,
+                'confirmed',
+                'paid'
+            );
+
+            $this->fail('A successful payment must not be forged by order status updates.');
+        } catch (HttpException $e) {
+            $this->assertSame(422, $e->getStatusCode());
+        }
     }
 
     public function test_zarinpal_gateway_uses_request_and_verify_provider_contract(): void

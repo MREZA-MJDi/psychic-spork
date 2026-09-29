@@ -106,8 +106,14 @@ class PaymentController extends Controller
         }
 
         try {
-            $orders->updateStatus(
+            $payments->markPaid(
                 $orderModel,
+                $gateway->name(),
+                $verified->reference_number
+            );
+
+            $orders->updateStatus(
+                $orderModel->fresh(),
                 'confirmed',
                 'paid'
             );
