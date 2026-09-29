@@ -10,7 +10,7 @@ use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminFinancialController;
 use App\Http\Controllers\Admin\AdminInventoryController;
 use App\Http\Controllers\Admin\AdminOrderController;
-use App\Http\Controllers\Admin\AdminProductController;
+use App\Http\Controllers\Admin\AdminProductController;\nuse App\Http\Controllers\Admin\AdminProductMediaController;
 use App\Http\Controllers\Admin\AdminProductVariantController;
 use App\Http\Controllers\Admin\AdminProfileController;
 use App\Http\Controllers\Admin\AdminSiteContentController;
@@ -214,6 +214,21 @@ Route::prefix('admin')
 
         Route::resource('products', AdminProductController::class)
             ->except(['show']);
+\n        Route::get('products/{product}/media', [AdminProductMediaController::class, 'index'])
+            ->name('products.media.index');
+
+        Route::post('products/{product}/media', [AdminProductMediaController::class, 'store'])
+            ->name('products.media.store');
+
+        Route::patch('products/{product}/media/{media}', [AdminProductMediaController::class, 'update'])
+            ->name('products.media.update');
+
+        Route::post('products/{product}/media/reorder', [AdminProductMediaController::class, 'reorder'])
+            ->name('products.media.reorder');
+
+        Route::delete('products/{product}/media/{media}', [AdminProductMediaController::class, 'destroy'])
+            ->name('products.media.destroy');
+
 
         Route::resource('products.variants', AdminProductVariantController::class)
             ->except(['show']);
