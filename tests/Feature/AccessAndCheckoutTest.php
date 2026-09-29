@@ -46,7 +46,7 @@ class AccessAndCheckoutTest extends TestCase
 
         $this->actingAs($admin)
             ->get('/account')
-            ->assertRedirect('/admin');
+            ->assertForbidden();
     }
 
     public function test_checkout_creates_pending_order_payment_and_redirects_to_gateway(): void

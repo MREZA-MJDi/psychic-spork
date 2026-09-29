@@ -13,6 +13,7 @@ class AdminCustomerController extends Controller
     {
         $customers = User::query()
             ->customers()
+            ->with(['wholesaleProfile', 'chequePermission'])
             ->withCount('orders')
             ->withSum('orders', 'total')
             ->when(

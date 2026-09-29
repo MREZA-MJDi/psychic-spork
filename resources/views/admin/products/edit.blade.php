@@ -84,6 +84,10 @@
             'variant' => $variant,
         ])
 
+        <div class="admin-form-section admin-form-section-full">
+            @include('admin.products._media-manager-inline', ['product' => $product])
+        </div>
+
 
         {{-- =====================================================
              ACTIONS

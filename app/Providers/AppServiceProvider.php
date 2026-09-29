@@ -6,7 +6,14 @@ use App\Contracts\PaymentGateway;
 use App\Models\Cart;
 use App\Models\SiteSetting;
 use App\Services\ZarinPalPaymentGateway;
+use App\Services\PaymentMethodManager;
+use App\Services\OnlinePaymentMethod;
+use App\Services\ChequePaymentMethod;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use RuntimeException;
@@ -26,10 +33,24 @@ class AppServiceProvider extends ServiceProvider
                 };
             }
         );
+
+        $this->app->singleton(PaymentMethodManager::class, function (): PaymentMethodManager {
+            return new PaymentMethodManager([
+                'online' => app(OnlinePaymentMethod::class),
+                'cheque' => app(ChequePaymentMethod::class),
+            ]);
+        });
     }
 
     public function boot(): void
     {
+        RateLimiter::for('login', function (Request $request): Limit {
+            $identifier = Str::lower(trim((string) $request->input('identifier')));
+
+            return Limit::perMinute(5)
+                ->by($identifier . '|' . $request->ip());
+        });
+
         $contactSettings = Schema::hasTable('site_settings')
             ? SiteSetting::query()
                 ->whereIn('key', [

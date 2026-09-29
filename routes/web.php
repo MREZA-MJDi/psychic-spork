@@ -3,12 +3,15 @@
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\Admin\AdminBrandController;
 use App\Http\Controllers\Admin\AdminCategoryController;
+use App\Http\Controllers\Admin\AdminChequeController;
+use App\Http\Controllers\Admin\AdminWholesaleController;
 use App\Http\Controllers\Admin\AdminCustomerController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminFinancialController;
 use App\Http\Controllers\Admin\AdminInventoryController;
 use App\Http\Controllers\Admin\AdminOrderController;
 use App\Http\Controllers\Admin\AdminProductController;
+use App\Http\Controllers\Admin\AdminProductMediaController;
 use App\Http\Controllers\Admin\AdminProductVariantController;
 use App\Http\Controllers\Admin\AdminProfileController;
 use App\Http\Controllers\Admin\AdminSiteContentController;
@@ -166,6 +169,7 @@ Route::middleware('guest')->group(function () {
         ->name('login');
 
     Route::post('/login', [AuthController::class, 'login'])
+        ->middleware('throttle:login')
         ->name('login.store');
 
     Route::get('/register', [AuthController::class, 'showRegister'])
@@ -211,6 +215,21 @@ Route::prefix('admin')
 
         Route::resource('products', AdminProductController::class)
             ->except(['show']);
+        Route::get('products/{product}/media', [AdminProductMediaController::class, 'index'])
+            ->name('products.media.index');
+
+        Route::post('products/{product}/media', [AdminProductMediaController::class, 'store'])
+            ->name('products.media.store');
+
+        Route::patch('products/{product}/media/{media}', [AdminProductMediaController::class, 'update'])
+            ->name('products.media.update');
+
+        Route::post('products/{product}/media/reorder', [AdminProductMediaController::class, 'reorder'])
+            ->name('products.media.reorder');
+
+        Route::delete('products/{product}/media/{media}', [AdminProductMediaController::class, 'destroy'])
+            ->name('products.media.destroy');
+
 
         Route::resource('products.variants', AdminProductVariantController::class)
             ->except(['show']);
@@ -230,6 +249,26 @@ Route::prefix('admin')
         Route::get('customers', [AdminCustomerController::class, 'index'])
             ->name('customers.index');
 
+        Route::patch(
+            'customers/{customer}/wholesale/approve',
+            [AdminWholesaleController::class, 'approve']
+        )->name('customers.wholesale.approve');
+
+        Route::patch(
+            'customers/{customer}/wholesale/suspend',
+            [AdminWholesaleController::class, 'suspend']
+        )->name('customers.wholesale.suspend');
+
+        Route::patch(
+            'customers/{customer}/cheque/enable',
+            [AdminWholesaleController::class, 'enableCheque']
+        )->name('customers.cheque.enable');
+
+        Route::patch(
+            'customers/{customer}/cheque/disable',
+            [AdminWholesaleController::class, 'disableCheque']
+        )->name('customers.cheque.disable');
+
         /*
         |--------------------------------------------------------------------------
         | Orders
@@ -244,6 +283,36 @@ Route::prefix('admin')
 
         Route::put('orders/{order}', [AdminOrderController::class, 'update'])
             ->name('orders.update');
+
+        Route::patch(
+            'cheques/{chequePayment}/review',
+            [AdminChequeController::class, 'review']
+        )->name('cheques.review');
+
+        Route::patch(
+            'cheques/{chequePayment}/accept',
+            [AdminChequeController::class, 'accept']
+        )->name('cheques.accept');
+
+        Route::patch(
+            'cheques/{chequePayment}/reject',
+            [AdminChequeController::class, 'reject']
+        )->name('cheques.reject');
+
+        Route::patch(
+            'cheques/{chequePayment}/deposit',
+            [AdminChequeController::class, 'deposit']
+        )->name('cheques.deposit');
+
+        Route::patch(
+            'cheques/{chequePayment}/clear',
+            [AdminChequeController::class, 'clear']
+        )->name('cheques.clear');
+
+        Route::patch(
+            'cheques/{chequePayment}/bounce',
+            [AdminChequeController::class, 'bounce']
+        )->name('cheques.bounce');
 
         /*
         |--------------------------------------------------------------------------

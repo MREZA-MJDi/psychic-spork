@@ -94,8 +94,21 @@ class HomeController extends Controller
 
         $signalTo = now()->endOfDay();
 
+        $popularSalesFilter = function ($query) use ($signalFrom, $signalTo) {
+            $query->whereHas('order', function ($orderQuery) use ($signalFrom, $signalTo) {
+                $orderQuery
+                    ->whereBetween('placed_at', [$signalFrom, $signalTo])
+                    ->whereNotIn(
+                        'status',
+                        Order::CANCEL_LIKE_STATUSES
+                    )
+                    ->where('payment_status', 'paid');
+            });
+        };
+
         $popularProducts = Product::query()
             ->active()
+            ->whereHas('orderItems', $popularSalesFilter)
             ->with([
                 'category:id,name',
                 'brand:id,name',
@@ -104,21 +117,10 @@ class HomeController extends Controller
             ])
             ->withSum(
                 [
-                    'orderItems as sales_quantity' => function ($query) use ($signalFrom, $signalTo) {
-                        $query->whereHas('order', function ($orderQuery) use ($signalFrom, $signalTo) {
-                            $orderQuery
-                                ->whereBetween('placed_at', [$signalFrom, $signalTo])
-                                ->whereNotIn(
-                                    'status',
-                                    Order::CANCEL_LIKE_STATUSES
-                                )
-                                ->where('payment_status', 'paid');
-                        });
-                    },
+                    'orderItems as sales_quantity' => $popularSalesFilter,
                 ],
                 'quantity'
             )
-            ->having('sales_quantity', '>', 0)
             ->orderByDesc('sales_quantity')
             ->orderByDesc('id')
             ->limit(4)

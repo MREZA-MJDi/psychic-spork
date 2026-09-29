@@ -49,6 +49,8 @@ final class MediaService
     ): Media {
         $path = $this->storeUploaded($file, $directory);
 
+        [$width, $height] = $this->dimensions($file);
+
         try {
             return $model->media()->create([
                 'collection' => $collection,
@@ -57,6 +59,8 @@ final class MediaService
                 'original_name' => $file->getClientOriginalName(),
                 'mime_type' => $file->getMimeType(),
                 'size' => $file->getSize(),
+                'width' => $width,
+                'height' => $height,
                 'alt_text' => $altText,
                 'sort_order' => $sortOrder,
                 'uploaded_by' => auth()->id(),
@@ -117,6 +121,16 @@ final class MediaService
             $this->deleteMedia($item);
             $item->delete();
         }
+    }
+
+    private function dimensions(UploadedFile $file): array
+    {
+        $size = @getimagesize($file->getRealPath());
+
+        return [
+            $size[0] ?? null,
+            $size[1] ?? null,
+        ];
     }
 
     public function delete(?string $path): void

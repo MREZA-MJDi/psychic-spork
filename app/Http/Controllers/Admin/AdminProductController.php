@@ -13,6 +13,7 @@ use App\Services\MediaService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Throwable;
 
@@ -132,7 +133,7 @@ class AdminProductController extends Controller
                 );
 
                 $product->variants()->create([
-                    'sku' => $data['sku']  ,
+                    'sku' => $data['sku'] ?? null,
                     'size' => $data['size'] ?? null,
                     'color' => $data['color'] ?? null,
                     'color_code' => $data['color_code'] ?? null,
@@ -245,7 +246,7 @@ class AdminProductController extends Controller
 
                 if (!$variant) {
                     $variant = $product->variants()->create([
-                        'sku' => $data['sku'],
+                        'sku' => $data['sku'] ?? null,
                         'size' => $data['size'] ?? null,
                         'color' => $data['color'] ?? null,
                         'color_code' => $data['color_code'] ?? null,
@@ -261,7 +262,7 @@ class AdminProductController extends Controller
                     ]);
                 } else {
                     $variant->update([
-                        'sku' => $data['sku'],
+                        'sku' => $data['sku'] ?? null,
                         'size' => $data['size'] ?? null,
                         'color' => $data['color'] ?? null,
                         'color_code' => $data['color_code'] ?? null,
@@ -421,6 +422,21 @@ class AdminProductController extends Controller
             'sort_order' =>
                 (int) ($data['sort_order'] ?? 0),
         ];
+    }
+
+    private function generateSlug(string $name): string
+    {
+        $base = Str::slug($name);
+        $base = $base !== '' ? $base : 'product';
+
+        $slug = $base;
+        $suffix = 2;
+
+        while (Product::query()->where('slug', $slug)->exists()) {
+            $slug = $base . '-' . $suffix++;
+        }
+
+        return $slug;
     }
 
     /*

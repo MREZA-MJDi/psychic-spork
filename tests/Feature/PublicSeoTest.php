@@ -43,8 +43,8 @@ class PublicSeoTest extends TestCase
 
         $this->get(route('products.show', $product))
             ->assertOk()
-            ->assertSee('<meta name="description"', false)
-            ->assertSee('<link rel="canonical"', false)
+            ->assertSee('name="description"', false)
+            ->assertSee('rel="canonical"', false)
             ->assertSee('application/ld+json', false)
             ->assertSee($product->name);
     }

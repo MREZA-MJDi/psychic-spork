@@ -257,27 +257,29 @@ class AdminDashboardController extends Controller
         | so cancelled/returned orders are handled correctly.
         |--------------------------------------------------------------------------
         */
+        $topProductSalesFilter = function ($query) use ($from, $to) {
+            $query->whereHas('order', function ($orderQuery) use ($from, $to) {
+                $orderQuery
+                    ->whereBetween('placed_at', [$from, $to])
+                    ->whereNotIn(
+                        'status',
+                        Order::CANCEL_LIKE_STATUSES
+                    )
+                    ->where('payment_status', 'paid');
+            });
+        };
+
         $topProducts = Product::query()
             ->with([
                 'category:id,name',
             ])
+            ->whereHas('orderItems', $topProductSalesFilter)
             ->withSum(
                 [
-                    'orderItems as sales_quantity' => function ($query) use ($from, $to) {
-                        $query->whereHas('order', function ($orderQuery) use ($from, $to) {
-                            $orderQuery
-                                ->whereBetween('placed_at', [$from, $to])
-                                ->whereNotIn(
-                                    'status',
-                                    Order::CANCEL_LIKE_STATUSES
-                                )
-                                ->where('payment_status', 'paid');
-                        });
-                    },
+                    'orderItems as sales_quantity' => $topProductSalesFilter,
                 ],
                 'quantity'
             )
-            ->having('sales_quantity', '>', 0)
             ->orderByDesc('sales_quantity')
             ->orderBy('id')
             ->limit(6)

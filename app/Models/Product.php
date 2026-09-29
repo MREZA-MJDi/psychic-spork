@@ -6,7 +6,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Product extends Model
@@ -43,6 +45,19 @@ class Product extends Model
             ->orderBy('sort_order')->orderBy('id');
     }
 
+    /**
+     * The single active variant used by catalog cards and lightweight listings.
+     *
+     * Keep full variants loading for the product detail page only.
+     */
+    public function primaryActiveVariant(): HasOne
+    {
+        return $this->hasOne(ProductVariant::class)->ofMany(
+            ['sort_order' => 'min', 'id' => 'min'],
+            fn ($query) => $query->where('is_active', true)
+        );
+    }
+
     public function orderItems(): HasMany { return $this->hasMany(OrderItem::class); }
     public function wishlistItems(): HasMany { return $this->hasMany(WishlistItem::class); }
     public function media(): MorphMany { return $this->morphMany(Media::class, 'mediable'); }
@@ -52,6 +67,22 @@ class Product extends Model
         return $this->morphMany(Media::class, 'mediable')
             ->where('collection', 'gallery')
             ->orderBy('sort_order')->orderBy('id');
+    }
+
+    /**
+     * The first gallery asset used by lightweight product listings.
+     */
+    public function primaryGalleryMedia(): MorphOne
+    {
+        return $this->morphOne(Media::class, 'mediable')->ofMany(
+            ['sort_order' => 'min', 'id' => 'min'],
+            fn ($query) => $query->where('collection', 'gallery')
+        );
+    }
+
+    public function integrationMappings(): MorphMany
+    {
+        return $this->morphMany(IntegrationMapping::class, 'entity');
     }
 
     public function defaultVariant(): ?ProductVariant

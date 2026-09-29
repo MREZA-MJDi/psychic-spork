@@ -4,10 +4,8 @@
 ])
 
 @php
-    $productVariant = $product->variants->first(
-        fn ($variant) => (bool) $variant->is_active
-    );
-    $image = $product->galleryMedia->first()?->url;
+    $productVariant = $product->primaryActiveVariant;
+    $image = $product->primaryGalleryMedia?->url;
     $stock = (int) ($productVariant?->stock ?? 0);
     $isOnSale = (bool) ($productVariant?->is_on_sale ?? false);
 
@@ -46,10 +44,7 @@
                     decoding="async"
                 >
             @else
-                <div
-                    class="product-image-placeholder"
-                    aria-hidden="true"
-                >
+                <div class="product-image-placeholder" aria-hidden="true">
                     <span>JANAN</span>
                 </div>
             @endif
