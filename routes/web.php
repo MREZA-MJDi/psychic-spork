@@ -166,6 +166,7 @@ Route::middleware('guest')->group(function () {
         ->name('login');
 
     Route::post('/login', [AuthController::class, 'login'])
+        ->middleware('throttle:login')
         ->name('login.store');
 
     Route::get('/register', [AuthController::class, 'showRegister'])
