@@ -42,7 +42,7 @@ class AdminProductMediaController extends Controller
             ],
         ]);
 
-        $nextOrder = ((int) $product->galleryMedia()->max('sort_order')) + 1;
+        $nextOrder = ((int) $product->galleryMedia()->max('sort_order')) + ($product->galleryMedia()->exists() ? 1 : 0);
 
         DB::transaction(function () use ($validated, $product, $media, &$nextOrder): void {
             foreach ($validated['images'] as $file) {
@@ -106,8 +106,11 @@ class AdminProductMediaController extends Controller
 
         DB::transaction(function () use ($product, $ids): void {
             foreach ($ids as $sortOrder => $mediaId) {
-                $product->galleryMedia()
+                Media::query()
                     ->whereKey($mediaId)
+                    ->where('mediable_type', $product->getMorphClass())
+                    ->where('mediable_id', $product->id)
+                    ->where('collection', 'gallery')
                     ->update(['sort_order' => $sortOrder]);
             }
         });
