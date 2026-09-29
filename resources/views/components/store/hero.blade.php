@@ -18,52 +18,6 @@
 >
     <div class="immersive-preloader" id="immersivePreloader" aria-hidden="true"></div>
 
-    <header class="immersive-header">
-        <div class="immersive-header__nav">
-            <a href="{{ route('home') }}" class="immersive-logo" aria-label="Janan">
-                <span class="immersive-logo__circles" aria-hidden="true">
-                    <span class="immersive-logo__circle immersive-logo__circle--one"></span>
-                    <span class="immersive-logo__circle immersive-logo__circle--two"></span>
-                </span>
-            </a>
-        </div>
-
-        <div class="immersive-header__section immersive-header__section--menu">
-            <h3>+Menu</h3>
-            <ul>
-                <li><a href="{{ route('products.index') }}">Products</a></li>
-                <li><a href="{{ route('categories.index') }}">Collections</a></li>
-                <li><a href="{{ route('about') }}">About</a></li>
-                <li><a href="{{ route('contact') }}">Contact</a></li>
-            </ul>
-        </div>
-
-        <div class="immersive-header__section">
-            <h3>+Studio</h3>
-            <p>JANAN</p>
-            <p>Online Store</p>
-        </div>
-
-        <div class="immersive-header__section">
-            <h3>+Connect</h3>
-            <p>
-                @if(!empty($siteStoreEmail))
-                    <a href="mailto:{{ $siteStoreEmail }}">{{ $siteStoreEmail }}</a>
-                @else
-                    <a href="{{ route('contact') }}">Contact Janan</a>
-                @endif
-            </p>
-        </div>
-
-        <div class="immersive-header__section immersive-header__section--social">
-            <h3>+Explore</h3>
-            <ul>
-                <li><a href="{{ route('cart') }}">Cart</a></li>
-                <li><a href="{{ auth()->check() ? route('account') : route('login') }}">Account</a></li>
-                <li><a href="{{ route('brands.index') }}">Brands</a></li>
-            </ul>
-        </div>
-    </header>
 
     <div class="immersive-vignette" aria-hidden="true"></div>
 
