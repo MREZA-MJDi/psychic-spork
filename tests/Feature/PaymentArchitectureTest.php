@@ -174,7 +174,7 @@ class PaymentArchitectureTest extends TestCase
     public function test_payment_idempotency_key_is_persisted(): void
     {
         $customer = User::factory()->create();
-        $order = $this->orderFor($customer, 100000);
+        $order = $this->orderFor($customer, 100000, false);
 
         $payment = app(\App\Services\PaymentService::class)->setStatus(
             $order,
@@ -265,7 +265,7 @@ class PaymentArchitectureTest extends TestCase
         $this->assertSame('REF-123', $verified->reference_number);
     }
 
-    private function orderFor(User $customer, float $total): Order
+    private function orderFor(User $customer, float $total, bool $seedPayment = true): Order
     {
         $order = Order::create([
             'user_id' => $customer->id,
@@ -284,12 +284,14 @@ class PaymentArchitectureTest extends TestCase
             'placed_at' => now(),
         ]);
 
-        $order->payments()->create([
-            'gateway' => 'cheque',
-            'idempotency_key' => 'seed:cheque:' . $order->id,
-            'amount' => $total,
-            'status' => 'pending',
-        ]);
+        if ($seedPayment) {
+            $order->payments()->create([
+                'gateway' => 'cheque',
+                'idempotency_key' => 'seed:cheque:' . $order->id,
+                'amount' => $total,
+                'status' => 'pending',
+            ]);
+        }
 
         return $order->fresh(['payments']);
     }
