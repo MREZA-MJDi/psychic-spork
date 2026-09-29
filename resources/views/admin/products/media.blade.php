@@ -17,7 +17,7 @@
         </a>
     </div>
 
-    <section class="admin-card admin-media-manager" data-product-media-manager>
+    <section class="admin-card admin-media-manager" data-product-media-manager data-reorder-url="{{ route('admin.products.media.reorder', $product) }}">
         <div class="admin-card-header">
             <div>
                 <h2 class="admin-card-title">گالری محصول</h2>
