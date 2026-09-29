@@ -44,7 +44,13 @@ class NilaCatalogImporterTest extends TestCase
 
     public function test_same_unmapped_sku_is_rejected_instead_of_hijacking_a_variant(): void
     {
-        $existingProduct = Product::factory()->create();
+        $existingProduct = Product::query()->create([
+            'name' => 'Existing Product',
+            'slug' => 'existing-product',
+            'is_active' => true,
+            'is_featured' => false,
+            'sort_order' => 0,
+        ]);
 
         $existingProduct->variants()->create([
             'sku' => 'JANAN-NILA-001',
