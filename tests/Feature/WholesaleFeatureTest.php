@@ -41,7 +41,7 @@ class WholesaleFeatureTest extends TestCase
         ]);
     }
 
-    public function test_unapproved_customer_cannot_place_wholesale_order(): void
+    public function test_customer_can_place_wholesale_order_without_wholesale_approval(): void
     {
         $customer = User::factory()->create([
             'is_admin' => false,
@@ -63,14 +63,31 @@ class WholesaleFeatureTest extends TestCase
             'quantity' => 2,
         ]);
 
+        Config::set('payment.driver', 'zarinpal');
+        Config::set('payment.zarinpal.merchant_id', 'test-merchant');
+
+        Http::fake([
+            'https://api.zarinpal.com/pg/v4/payment/request.json' =>
+                Http::response([
+                    'data' => [
+                        'code' => 100,
+                        'authority' => 'A000000000000000000000000099',
+                    ],
+                    'errors' => [],
+                ], 200),
+        ]);
+
         $this->actingAs($customer)
             ->post('/checkout', $this->checkoutData([
                 'order_type' => 'wholesale',
             ]))
-            ->assertForbidden();
+            ->assertRedirect();
 
-        $this->assertDatabaseCount('orders', 0);
-        $this->assertSame(10, $variant->fresh()->stock);
+        $order = Order::query()->firstOrFail();
+
+        $this->assertSame('wholesale', $order->order_type);
+        $this->assertSame('140000.00', (string) $order->total);
+        $this->assertSame(8, $variant->fresh()->stock);
     }
 
     public function test_approved_customer_uses_wholesale_price_and_minimums(): void
@@ -139,8 +156,7 @@ class WholesaleFeatureTest extends TestCase
 
         WholesaleProfile::create([
             'user_id' => $customer->id,
-            'status' => 'approved',
-            'approved_at' => now(),
+            'status' => 'pending',
             'minimum_order_amount' => 200000,
         ]);
 
@@ -178,8 +194,7 @@ class WholesaleFeatureTest extends TestCase
 
         WholesaleProfile::create([
             'user_id' => $customer->id,
-            'status' => 'approved',
-            'approved_at' => now(),
+            'status' => 'pending',
         ]);
 
         [, $variant] = $this->makeProduct(
