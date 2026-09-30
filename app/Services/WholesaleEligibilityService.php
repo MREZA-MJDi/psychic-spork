@@ -64,10 +64,17 @@ final class WholesaleEligibilityService
 
         $permission = $user->chequePermission;
 
+        if ($permission?->isPending()) {
+            abort(
+                403,
+                'درخواست پرداخت چکی این حساب در انتظار بررسی مدیریت است.'
+            );
+        }
+
         abort_unless(
             $permission?->allows($amount),
             403,
-            'پرداخت چکی برای این حساب یا این مبلغ مجاز نیست.'
+            'برای پرداخت چکی ابتدا باید مجوز این حساب توسط مدیریت فعال شود و سقف مجاز را رعایت کنی.'
         );
 
         return $permission;
