@@ -46,6 +46,12 @@ class WholesaleController extends Controller
             'درخواست عمده شما در حال بررسی مدیریت است.'
         );
 
+        abort_if(
+            $profile?->status === 'suspended',
+            403,
+            'دسترسی عمده این حساب توسط مدیریت تعلیق شده است.'
+        );
+
         WholesaleProfile::updateOrCreate(
             ['user_id' => $user->id],
             [
