@@ -82,17 +82,17 @@
         </a>
 
         <a
-            class="{{ request()->routeIs('categories.*') ? 'is-active' : '' }}"
-            href="{{ route('categories.index') }}"
-            aria-label="دسته‌بندی‌ها"
+            class="{{ request()->routeIs('wholesale.show') ? 'is-active' : '' }}"
+            href="{{ route('wholesale.show') }}"
+            aria-label="خرید عمده"
         >
             <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M5 5h6v6H5z"/>
-                <path d="M13 5h6v6h-6z"/>
-                <path d="M5 13h6v6H5z"/>
-                <path d="M13 13h6v6h-6z"/>
+                <path d="M4 7h16"/>
+                <path d="M6 7v12h12V7"/>
+                <path d="M9 11h6"/>
+                <path d="M9 15h4"/>
             </svg>
-            <span>دسته‌ها</span>
+            <span>عمده</span>
         </a>
 
         <a
