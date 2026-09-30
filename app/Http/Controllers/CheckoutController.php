@@ -6,6 +6,7 @@ use App\Services\PaymentMethodManager;
 use App\Http\Requests\CheckoutRequest;
 use App\Services\CartService;
 use App\Services\OrderService;
+use App\Services\WholesalePricingService;
 use Illuminate\Cache\LockTimeoutException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -41,7 +42,8 @@ class CheckoutController extends Controller
         CheckoutRequest $request,
         OrderService $orders,
         CartService $cart,
-        PaymentMethodManager $paymentMethods
+        PaymentMethodManager $paymentMethods,
+        WholesalePricingService $wholesalePricing
     ): RedirectResponse {
         $lockKey = $request->user()
             ? 'janan:checkout:user:' . $request->user()->id
@@ -60,9 +62,26 @@ class CheckoutController extends Controller
 
                     try {
                         $checkoutData = $request->validated();
-                        $checkoutData['checkout_total'] = (float) $cart
-                            ->items($cart->current($request))
-                            ->sum('line_total');
+                        $currentCart = $cart->current($request);
+
+                        if ($checkoutData['order_type'] === 'wholesale') {
+                            abort_unless(
+                                $request->user()?->isCustomer(),
+                                403,
+                                'خرید عمده فقط برای حساب مشتری مجاز است.'
+                            );
+
+                            $quote = $wholesalePricing->quote(
+                                $currentCart,
+                                $request->user()
+                            );
+
+                            $checkoutData['checkout_total'] = (float) $quote['subtotal'];
+                        } else {
+                            $checkoutData['checkout_total'] = (float) $cart
+                                ->items($currentCart)
+                                ->sum('line_total');
+                        }
 
                         $paymentMethods->validateCheckout(
                             $checkoutData['payment_method'],
@@ -70,7 +89,7 @@ class CheckoutController extends Controller
                             $checkoutData
                         );
                         $order = $orders->createFromCart(
-                            $cart->current($request),
+                            $currentCart,
                             $checkoutData,
                             $request->user()
                         );
