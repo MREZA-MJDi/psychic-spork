@@ -10,6 +10,36 @@ use Illuminate\Http\Request;
 
 class AdminChequeController extends Controller
 {
+    public function index(Request $request): View
+    {
+        $query = ChequePayment::query()
+            ->with(['order.user'])
+            ->latest('id');
+
+        if ($status = $request->string('status')->toString()) {
+            $query->where('status', $status);
+        }
+
+        if ($search = trim($request->string('q')->toString())) {
+            $query->where(function ($q) use ($search): void {
+                $q->where('cheque_number', 'like', "%{$search}%")
+                    ->orWhere('sayad_id', 'like', "%{$search}%")
+                    ->orWhere('bank_name', 'like', "%{$search}%")
+                    ->orWhereHas('order.user', function ($userQuery) use ($search): void {
+                        $userQuery->where('name', 'like', "%{$search}%")
+                            ->orWhere('phone', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        $cheques = $query->paginate(20)->withQueryString();
+
+        return view('admin.cheques.index', [
+            'cheques' => $cheques,
+            'statuses' => ChequePayment::STATUSES,
+        ]);
+    }
+
     public function review(
         ChequePayment $chequePayment,
         ChequePaymentService $cheques
