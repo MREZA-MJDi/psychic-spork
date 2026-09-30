@@ -85,7 +85,7 @@
         <section class="dashboard-v2__stats" aria-label="شاخص‌های اصلی">
             <article class="dashboard-v2__stat dashboard-v2__stat--dark">
                 <span>REVENUE</span>
-                <strong>{{ number_format((float) $revenue) }}</strong>
+                <strong>{{ strtr(number_format((float) $revenue), ['0' => '۰', '1' => '۱', '2' => '۲', '3' => '۳', '4' => '۴', '5' => '۵', '6' => '۶', '7' => '۷', '8' => '۸', '9' => '۹']) }}</strong>
                 <small>تومان درآمد پرداخت‌شده</small>
                 <i>01</i>
             </article>
