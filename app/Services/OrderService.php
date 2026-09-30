@@ -105,6 +105,7 @@ final class OrderService
             ]);
 
             $subtotal = 0;
+            $orderQuantity = 0;
             foreach ($cartItems as $cartItem) {
                 $variant = ProductVariant::query()
                     ->with([
@@ -140,6 +141,8 @@ final class OrderService
                     : (float) $variant->effective_price;
 
                 $lineTotal = $unitPrice * $quantity;
+
+                $orderQuantity += $quantity;
 
                 abort_if(
                     $unitPrice < 0 || $lineTotal < 0,
@@ -178,6 +181,15 @@ final class OrderService
             }
 
             // Wholesale orders are open for online checkout.
+            // Configured customer-specific minimums remain enforced transactionally.
+            if ($orderType === 'wholesale' && $user?->wholesaleProfile) {
+                $this->wholesalePricing->assertMinimums(
+                    $user->wholesaleProfile,
+                    $subtotal,
+                    $orderQuantity
+                );
+            }
+
             // Cheque authorization is enforced only by ChequePaymentMethod.
             abort_if(
                 $subtotal <= 0,
