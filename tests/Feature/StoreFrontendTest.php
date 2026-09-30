@@ -83,4 +83,65 @@ class StoreFrontendTest extends TestCase
             ->assertSee('محصول تست 1')
             ->assertSee('محصول تست 12');
     }
+
+    public function test_about_page_is_the_single_public_contact_destination(): void
+    {
+        $this->get(route('about'))
+            ->assertOk()
+            ->assertSee('درباره و تماس')
+            ->assertSee('ارسال پیام')
+            ->assertSee('id="contact"', false)
+            ->assertSee(route('contact.submit'), false);
+
+        $this->get(route('contact'))
+            ->assertRedirect(route('about') . '#contact');
+    }
+
+    public function test_product_catalog_sort_and_page_size_are_preserved_in_pagination(): void
+    {
+        $category = Category::create([
+            'name' => 'مرتب‌سازی تست',
+            'slug' => 'sort-test-' . uniqid(),
+            'is_active' => true,
+            'sort_order' => 1,
+        ]);
+
+        foreach ([
+            ['name' => 'محصول ارزان', 'price' => 50000],
+            ['name' => 'محصول گران', 'price' => 250000],
+        ] as $index => $item) {
+            $product = Product::create([
+                'category_id' => $category->id,
+                'name' => $item['name'],
+                'slug' => 'sort-product-' . $index . '-' . uniqid(),
+                'is_active' => true,
+                'is_featured' => false,
+                'sort_order' => $index + 1,
+            ]);
+
+            ProductVariant::create([
+                'product_id' => $product->id,
+                'sku' => 'SORT-' . $index . '-' . strtoupper(uniqid()),
+                'price' => $item['price'],
+                'sale_price' => null,
+                'stock' => 10,
+                'low_stock_threshold' => 2,
+                'is_active' => true,
+                'sort_order' => 1,
+            ]);
+        }
+
+        $this->get(route('products.index', [
+            'sort' => 'price_asc',
+            'per_page' => 12,
+        ]))
+            ->assertOk()
+            ->assertSeeInOrder([
+                'محصول ارزان',
+                'محصول گران',
+            ])
+            ->assertSee('name="sort"', false)
+            ->assertSee('name="per_page"', false);
+    }
+
 }
