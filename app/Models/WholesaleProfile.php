@@ -19,18 +19,26 @@ class WholesaleProfile extends Model
 
     protected $fillable = [
         'user_id',
+        'business_name',
+        'business_type',
+        'business_phone',
+        'business_address',
         'status',
         'approved_by',
         'approved_at',
         'suspended_by',
         'suspended_at',
         'admin_note',
+        'minimum_order_amount',
+        'minimum_order_quantity',
     ];
 
     protected function casts(): array
     {
         return [
             'approved_at' => 'datetime',
+            'minimum_order_amount' => 'decimal:2',
+            'minimum_order_quantity' => 'integer',
             'suspended_at' => 'datetime',
         ];
     }
