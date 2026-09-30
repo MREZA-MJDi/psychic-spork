@@ -29,7 +29,7 @@ class AdminWholesaleController extends Controller
             ]
         );
 
-        return back()->with('success', 'دسترسی خرید عمده مشتری تأیید شد.');
+        return back()->with('success', 'پروفایل خرید عمده مشتری تأیید شد.');
     }
 
     public function reject(User $customer, Request $request): RedirectResponse
@@ -92,15 +92,10 @@ class AdminWholesaleController extends Controller
                 'admin_note' => $request->input('note') ?: $profile->admin_note,
             ]);
 
-            $customer->chequePermission?->update([
-                'enabled' => false,
-                'disabled_by' => $request->user()->id,
-                'disabled_at' => now(),
-                'admin_note' => 'دسترسی عمده مشتری تعلیق شد.',
-            ]);
+            // Wholesale profile status and cheque permission are independent controls.
         });
 
-        return back()->with('success', 'دسترسی خرید عمده مشتری تعلیق شد.');
+        return back()->with('success', 'پروفایل خرید عمده مشتری تعلیق شد.');
     }
 
     public function enableCheque(User $customer, Request $request): RedirectResponse
@@ -111,12 +106,6 @@ class AdminWholesaleController extends Controller
             'max_order_amount' => ['nullable', 'numeric', 'min:0'],
             'note' => ['nullable', 'string', 'max:2000'],
         ]);
-
-        abort_unless(
-            $customer->wholesaleProfile?->isApproved(),
-            422,
-            'ابتدا باید دسترسی خرید عمده مشتری تأیید شود.'
-        );
 
         ChequePermission::updateOrCreate(
             ['user_id' => $customer->id],
