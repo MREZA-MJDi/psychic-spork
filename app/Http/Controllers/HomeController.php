@@ -41,8 +41,8 @@ class HomeController extends Controller
             ->with([
                 'category',
                 'brand',
-                'variants',
-                'galleryMedia',
+                'primaryActiveVariant',
+                'primaryGalleryMedia',
             ]);
 
         $featuredProducts = (clone $productsQuery)
@@ -80,8 +80,8 @@ class HomeController extends Controller
             ->with([
                 'category:id,name',
                 'brand:id,name',
-                'galleryMedia',
-                'variants',
+                'primaryGalleryMedia',
+                'primaryActiveVariant',
             ])
             ->latest('created_at')
             ->latest('id')
@@ -128,7 +128,7 @@ class HomeController extends Controller
 
         $heroProducts = Product::query()
             ->active()
-            ->with(['brand.logoMedia', 'category', 'galleryMedia', 'variants'])
+            ->with(['brand.logoMedia', 'category', 'primaryGalleryMedia', 'primaryActiveVariant'])
             ->orderByDesc('is_featured')
             ->latest('updated_at')
             ->latest('id')
@@ -138,7 +138,7 @@ class HomeController extends Controller
         $heroSlides = $heroProducts
             ->values()
             ->map(function (Product $product, int $index): array {
-                $productImage = $product->galleryMedia->first()?->url;
+                $productImage = $product->primaryGalleryMedia?->url;
                 $brandImage = $product->brand?->logoMedia?->url;
 
                 $description = trim((string) ($product->short_description ?: $product->description));
