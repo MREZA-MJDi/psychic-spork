@@ -69,7 +69,7 @@
         </div>
     </section>
 
-    <div class="container" style="margin-top:-1px;">
+    <div class="container customer-action-wrap">
         <div class="customer-action-strip">
             <div class="customer-action-strip__copy">
                 <small>BRAND / SHOPPING PATH</small>
