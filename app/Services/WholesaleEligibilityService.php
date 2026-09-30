@@ -24,7 +24,8 @@ final class WholesaleEligibilityService
         $profile = $this->assertWholesaleAllowed($user);
 
         if (
-            $profile->minimum_order_amount !== null
+            $profile
+            && $profile->minimum_order_amount !== null
             && $amount < (float) $profile->minimum_order_amount
         ) {
             abort(
@@ -36,7 +37,8 @@ final class WholesaleEligibilityService
         }
 
         if (
-            $profile->minimum_order_quantity !== null
+            $profile
+            && $profile->minimum_order_quantity !== null
             && $quantity < (int) $profile->minimum_order_quantity
         ) {
             abort(
