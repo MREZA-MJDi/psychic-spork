@@ -8,6 +8,7 @@ use App\Models\ProductVariant;
 use App\Models\User;
 use Database\Seeders\AdminUserSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Config;
 use Tests\TestCase;
 
@@ -74,14 +75,20 @@ class StoreFrontendTest extends TestCase
             ]);
         }
 
-        $this->get(route('home'))
-            ->assertOk()
-            ->assertSee('data-product-carousel', false)
-            ->assertSee('data-product-prev', false)
-            ->assertSee('data-product-next', false)
-            ->assertSee('دیدن بیشتر محصولات')
-            ->assertSee('محصول تست 1')
-            ->assertSee('محصول تست 12');
+        Model::preventLazyLoading(true);
+
+        try {
+            $this->get(route('home'))
+                ->assertOk()
+                ->assertSee('data-product-carousel', false)
+                ->assertSee('data-product-prev', false)
+                ->assertSee('data-product-next', false)
+                ->assertSee('دیدن بیشتر محصولات')
+                ->assertSee('محصول تست 1')
+                ->assertSee('محصول تست 12');
+        } finally {
+            Model::preventLazyLoading(false);
+        }
     }
 
     public function test_about_page_is_the_single_public_contact_destination(): void
