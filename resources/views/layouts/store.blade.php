@@ -110,12 +110,14 @@
         'resources/js/app.js',
         'resources/js/store-cart.js',
         'resources/js/store-search.js',
+        'resources/js/store-customer-uiux.js',
     ])
 
     {{-- Production/local storefront refinements --}}
     @unless(app()->environment('testing'))
         @vite([
             'resources/css/store-polish.css',
+            'resources/css/store-customer-uiux.css',
         ])
     @endunless
 
@@ -139,6 +141,9 @@
             ])
         @endunless
     @endif
+
+    {{-- GSAP powers the optional cart-flight micro interaction. The JS has a reduced-motion/no-GSAP fallback. --}}
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js" defer></script>
 
 </head>
 
