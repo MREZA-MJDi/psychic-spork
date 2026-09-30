@@ -1,25 +1,40 @@
 document.addEventListener('DOMContentLoaded', () => {
     const sidebar = document.querySelector('[data-admin-sidebar]');
     const menu = document.querySelector('[data-admin-menu]');
+    const backdrop = document.querySelector('[data-admin-sidebar-backdrop]');
 
-    menu?.addEventListener('click', () => {
-        const isOpen = sidebar?.classList.toggle('is-open') ?? false;
-        menu.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    if (!sidebar || !menu) return;
+
+    const setOpen = (open) => {
+        sidebar.classList.toggle('is-open', open);
+        backdrop?.classList.toggle('is-open', open);
+        menu.setAttribute('aria-expanded', open ? 'true' : 'false');
+        document.body.classList.toggle('admin-nav-open', open && window.innerWidth <= 900);
+
+        if (open) {
+            sidebar.querySelector('a, button')?.focus({ preventScroll: true });
+        }
+    };
+
+    menu.addEventListener('click', () => {
+        setOpen(!sidebar.classList.contains('is-open'));
     });
 
-    sidebar?.querySelectorAll('a').forEach((link) => {
-        link.addEventListener('click', () => {
-            sidebar.classList.remove('is-open');
-            menu?.setAttribute('aria-expanded', 'false');
-        });
+    backdrop?.addEventListener('click', () => setOpen(false));
+
+    sidebar.querySelectorAll('a').forEach((link) => {
+        link.addEventListener('click', () => setOpen(false));
     });
 
-    document.addEventListener('click', (event) => {
-        if (window.innerWidth > 820) return;
-        if (!sidebar?.classList.contains('is-open')) return;
-        if (sidebar.contains(event.target) || menu?.contains(event.target)) return;
-        sidebar.classList.remove('is-open');
-        menu?.setAttribute('aria-expanded', 'false');
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && sidebar.classList.contains('is-open')) {
+            setOpen(false);
+            menu.focus({ preventScroll: true });
+        }
+    });
+
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 900) setOpen(false);
     });
 });
 
