@@ -4172,3 +4172,71 @@ body.admin-nav-open {
         padding: 14px;
     }
 }
+
+
+.admin-inline-note {
+    margin: 14px 0;
+    padding: 12px 14px;
+    border: 1px solid var(--admin-border);
+    border-radius: 12px;
+    color: var(--admin-text-soft);
+    background: var(--admin-surface-soft);
+    font-size: 9px;
+    line-height: 1.9;
+}
+
+.admin-wholesale-cheque {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 12px 14px;
+    border: 1px solid var(--admin-border);
+    border-radius: 12px;
+    background: var(--admin-surface-soft);
+}
+
+.admin-wholesale-cheque > div:first-child {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.admin-wholesale-cheque strong {
+    color: var(--admin-text);
+    font-size: 10px;
+}
+
+.admin-inline-form {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    flex-wrap: wrap;
+}
+
+.admin-inline-form input {
+    width: 190px;
+    min-height: 34px;
+    padding: 7px 10px;
+    border: 1px solid var(--admin-border);
+    border-radius: 9px;
+    background: var(--admin-surface);
+    color: var(--admin-text);
+    font-size: 9px;
+}
+
+@media (max-width: 700px) {
+    .admin-wholesale-cheque {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .admin-inline-form {
+        align-items: stretch;
+    }
+
+    .admin-inline-form input,
+    .admin-inline-form .admin-btn {
+        width: 100%;
+    }
+}
