@@ -47,6 +47,11 @@ class StoreProductFilterRequest extends FormRequest
                 'max:160',
             ],
 
+            'sort' => [
+                'nullable',
+                'in:latest,price_asc,price_desc,name',
+            ],
+
             'page' => [
                 'nullable',
                 'integer',
@@ -90,6 +95,7 @@ class StoreProductFilterRequest extends FormRequest
             'q' => 'جستجو',
             'category' => 'دسته‌بندی',
             'brand' => 'برند',
+            'sort' => 'مرتب‌سازی',
             'page' => 'صفحه',
         ];
     }
