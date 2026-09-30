@@ -5,6 +5,7 @@ namespace App\Integrations\Nila;
 use App\Integrations\Nila\Data\ExternalProductData;
 use App\Integrations\Nila\Data\ExternalVariantData;
 use App\Models\IntegrationMapping;
+use App\Models\InventoryMovement;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use Illuminate\Support\Facades\DB;
@@ -25,6 +26,11 @@ final class NilaCatalogImporter
      * Import one product at a time so a bad record cannot roll back a whole
      * catalog batch. The caller can queue/chunk these calls as needed.
      */
+    public function importFrom(NilaCatalogSource $source): array
+    {
+        return $this->importMany($source->fetchProducts());
+    }
+
     public function importMany(iterable $products): array
     {
         $results = [];
@@ -127,6 +133,8 @@ final class NilaCatalogImporter
             }
         }
 
+        $previousStock = (int) ($variant->stock ?? 0);
+
         $variant->fill([
             'product_id' => $product->id,
             'sku' => $data->sku,
@@ -135,19 +143,36 @@ final class NilaCatalogImporter
             'color_code' => $data->colorCode,
             'price' => $data->price,
             'sale_price' => $data->salePrice,
-            'stock' => $data->stock,
             'is_active' => $data->isActive,
             'sort_order' => $data->sortOrder,
         ]);
         $variant->save();
 
-        $this->syncMapping(
+        $mapping = $this->syncMapping(
             ProductVariant::class,
             $variant->id,
             $data->externalId,
             $data->sku,
             $data->metadata
         );
+
+        $targetStock = $data->stock;
+        $delta = $targetStock - $previousStock;
+
+        if ($delta !== 0) {
+            $variant->update(['stock' => $targetStock]);
+
+            InventoryMovement::create([
+                'product_variant_id' => $variant->id,
+                'type' => 'adjustment',
+                'quantity' => $delta,
+                'stock_after' => $targetStock,
+                'reference_type' => IntegrationMapping::class,
+                'reference_id' => $mapping->id,
+                'note' => 'به‌روزرسانی موجودی از Nila',
+                'created_by' => null,
+            ]);
+        }
 
         return $variant;
     }
