@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\WholesaleApplicationRequest;
+use App\Models\ChequePermission;
 use App\Models\WholesaleProfile;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -16,9 +17,57 @@ class WholesaleController extends Controller
             ->wholesaleProfile()
             ->first();
 
+        $chequePermission = $request->user()
+            ->chequePermission()
+            ->first();
+
         return view('pages.wholesale', [
             'profile' => $profile,
+            'chequePermission' => $chequePermission,
         ]);
+    }
+
+
+    public function requestCheque(
+        Request $request
+    ): RedirectResponse {
+        $user = $request->user();
+
+        abort_unless(
+            $user->isCustomer(),
+            403,
+            'فقط حساب مشتری می‌تواند برای پرداخت چکی درخواست بدهد.'
+        );
+
+        $permission = $user->chequePermission()->first();
+
+        if ($permission?->isApproved()) {
+            return back()->with(
+                'success',
+                'پرداخت چکی برای این حساب در حال حاضر فعال است.'
+            );
+        }
+
+        if ($permission?->isPending()) {
+            return back()->with(
+                'success',
+                'درخواست پرداخت چکی شما قبلاً ثبت شده و در انتظار بررسی مدیریت است.'
+            );
+        }
+
+        ChequePermission::updateOrCreate(
+            ['user_id' => $user->id],
+            [
+                'enabled' => false,
+                'status' => ChequePermission::STATUS_PENDING,
+                'requested_at' => now(),
+            ]
+        );
+
+        return back()->with(
+            'success',
+            'درخواست پرداخت چکی ثبت شد و پس از بررسی مدیریت، نتیجه اعلام می‌شود.'
+        );
     }
 
     public function apply(
