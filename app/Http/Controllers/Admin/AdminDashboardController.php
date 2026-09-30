@@ -243,7 +243,7 @@ class AdminDashboardController extends Controller
         $nilaLastMappedAt = IntegrationMapping::query()
             ->where('integration', 'nila')
             ->latest('updated_at')
-            ->value('updated_at');
+            ->first()?->updated_at;
 
 
         /*
