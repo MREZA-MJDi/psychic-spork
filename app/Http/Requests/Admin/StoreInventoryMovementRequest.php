@@ -34,6 +34,16 @@ class StoreInventoryMovementRequest extends AdminFormRequest
             ]);
         }
 
+        $type = $this->input('type');
+
+        if (is_numeric($quantity) && in_array($type, ['purchase', 'return', 'sale', 'damage'], true)) {
+            $quantity = abs((int) $quantity);
+
+            if (in_array($type, ['sale', 'damage'], true)) {
+                $quantity *= -1;
+            }
+        }
+
         $this->merge([
             'quantity' => $quantity,
         ]);
