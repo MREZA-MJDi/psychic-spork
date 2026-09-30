@@ -56,7 +56,8 @@ class CheckoutController extends Controller
                     $request,
                     $orders,
                     $cart,
-                    $paymentMethods
+                    $paymentMethods,
+                    $wholesalePricing
                 ): RedirectResponse {
                     $order = null;
 
