@@ -174,7 +174,7 @@
                     <span class="dashboard-v2__control-icon">نیلا</span>
                     <div>
                         <strong>مرز داده نیلا</strong>
-                        <small>{{ number_format((int) $nilaProductMappings) }} محصول و {{ number_format((int) $nilaVariantMappings) }} واریانت mapping شده‌اند؛ همگام‌سازی API تا زمان قرارداد واقعی عمداً ادعا نمی‌شود.</small>
+                        <small>{{ number_format((int) $nilaProductMappings) }} محصول و {{ number_format((int) $nilaVariantMappings) }} واریانت mapping شده‌اند؛ آخرین تغییر mapping: <span data-admin-date="{{ optional($nilaLastMappedAt)->toIso8601String() }}" data-admin-date-format="day">{{ optional($nilaLastMappedAt)->format('Y/m/d') ?: '—' }}</span>. همگام‌سازی API تا زمان قرارداد واقعی عمداً ادعا نمی‌شود.</small>
                     </div>
                     <span class="dashboard-v2__control-state">Foundation</span>
                 </div>
