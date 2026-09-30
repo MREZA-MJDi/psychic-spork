@@ -109,6 +109,16 @@
                 </div>
 
                 <div class="catalog-filter-bar__field">
+                    <span>مرتب‌سازی</span>
+                    <select name="sort" aria-label="مرتب‌سازی محصولات">
+                        <option value="latest" @selected(request('sort', 'latest') === 'latest')>جدیدترین</option>
+                        <option value="price_asc" @selected(request('sort') === 'price_asc')>ارزان‌ترین</option>
+                        <option value="price_desc" @selected(request('sort') === 'price_desc')>گران‌ترین</option>
+                        <option value="name" @selected(request('sort') === 'name')>الفبایی</option>
+                    </select>
+                </div>
+
+                <div class="catalog-filter-bar__field">
                     <span>برند</span>
                     <select name="brand">
                         <option value="">همه برندها</option>
