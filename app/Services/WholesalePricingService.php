@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Models\Cart;
 use App\Models\ProductVariant;
 use App\Models\User;
-use Illuminate\Support\Collection;
 
 final class WholesalePricingService
 {
