@@ -12,22 +12,18 @@
                     <span class="eyebrow">JANAN / WHOLESALE</span>
                     <h1>برای خرید عمده، یک مسیر حرفه‌ای داشته باش.</h1>
                     <p>
-                        حساب عمده برای فروشگاه‌ها و مجموعه‌های تجاری طراحی شده است.
-                        درخواستت را ثبت کن، بعد از بررسی مدیریت شرایط اختصاصی حساب برایت فعال می‌شود.
+                        مسیر خرید عمده جانان برای سفارش آنلاین باز است و برای قیمت عمده لازم نیست منتظر تأیید مدیریت بمانی.
+                        تنها پرداخت چکی یک مجوز جداگانه روی حساب کاربری می‌خواهد.
                     </p>
 
                     <div class="customer-action-strip customer-action-strip--spaced-top">
                         <div class="customer-action-strip__copy">
                             <small>YOUR BUSINESS ACCESS</small>
-                            <strong>وضعیت حساب را همین‌جا ببین.</strong>
+                            <strong>خرید عمده آنلاین برای همه باز است.</strong>
                         </div>
                         <div class="customer-action-strip__actions">
                             <a class="button button--ghost" href="{{ route('products.index') }}">دیدن کاتالوگ</a>
-                            @if($profile?->isApproved())
-                                <a class="button button--primary" href="{{ route('checkout') }}">شروع سفارش</a>
-                            @else
-                                <a class="button button--primary" href="#wholesale-form">درخواست دسترسی</a>
-                            @endif
+                            <a class="button button--primary" href="{{ route('products.index') }}">شروع خرید عمده</a>
                         </div>
                     </div>
                 </div>
@@ -40,24 +36,24 @@
                     @endif
 
                     @if($profile?->isApproved())
-                        <div class="wholesale-status__state">فعال</div>
+                        <div class="wholesale-status__state">مجاز برای خرید</div>
                         <div class="wholesale-status__hint">
-                            حساب عمده شما تأیید شده و می‌توانید از شرایط عمده برای سفارش استفاده کنید.
+                            خرید عمده آنلاین برای این حساب باز است. مجوز چک، در صورت وجود، جداگانه بررسی می‌شود.
                         </div>
                     @elseif($profile?->status === 'pending')
-                        <div class="wholesale-status__state">در حال بررسی</div>
+                        <div class="wholesale-status__state">خرید آنلاین آزاد</div>
                         <div class="wholesale-status__hint">
-                            درخواست ثبت شده و بعد از بررسی مدیریت، نتیجه از همین حساب قابل پیگیری است.
+                            وضعیت درخواست قبلی شما مانع سفارش عمده آنلاین نیست؛ فقط پرداخت چکی نیازمند مجوز است.
                         </div>
                     @elseif($profile?->status === 'suspended')
-                        <div class="wholesale-status__state">تعلیق‌شده</div>
+                        <div class="wholesale-status__state">خرید آنلاین آزاد</div>
                         <div class="wholesale-status__hint">
-                            دسترسی عمده این حساب فعلاً متوقف شده است. برای پیگیری با پشتیبانی ارتباط بگیر.
+                            حتی با وضعیت غیر‌فعال پروفایل عمده، سفارش آنلاین قابل ثبت است؛ مجوز چک مستقل است.
                         </div>
                     @else
-                        <div class="wholesale-status__state">هنوز فعال نیست</div>
+                        <div class="wholesale-status__state">عمومی / آماده خرید</div>
                         <div class="wholesale-status__hint">
-                            فرم پایین را کامل کن تا بررسی دسترسی عمده شروع شود.
+                            می‌توانی همین حالا کاتالوگ را ببینی و سفارش عمده را با پرداخت آنلاین ثبت کنی.
                         </div>
                     @endif
                 </aside>
@@ -67,32 +63,32 @@
                 <article class="wholesale-benefit">
                     <span>01</span>
                     <div>
-                        <strong>قیمت اختصاصی</strong>
-                        <p>قیمت‌گذاری عمده فقط روی حساب و محصولاتی اعمال می‌شود که شرایط آن را دارند.</p>
+                        <strong>قیمت عمده</strong>
+                        <p>قیمت عمده روی واریانت‌هایی اعمال می‌شود که قیمت عمده برایشان ثبت شده است.</p>
                     </div>
                 </article>
 
                 <article class="wholesale-benefit">
                     <span>02</span>
                     <div>
-                        <strong>شرایط حساب</strong>
-                        <p>حداقل مبلغ و تعداد سفارش از پروفایل عمده حساب شما خوانده می‌شود.</p>
+                        <strong>سفارش آزاد</strong>
+                        <p>برای خرید آنلاین عمده، تأیید قبلی پروفایل مانع شروع سفارش نیست.</p>
                     </div>
                 </article>
 
                 <article class="wholesale-benefit">
                     <span>03</span>
                     <div>
-                        <strong>فرآیند کنترل‌شده</strong>
-                        <p>تأیید دسترسی توسط مدیریت انجام می‌شود و وضعیت حساب شفاف باقی می‌ماند.</p>
+                        <strong>چک با مجوز</strong>
+                        <p>فقط پرداخت چکی به مجوز فعال مدیر برای همان حساب کاربری وابسته است.</p>
                     </div>
                 </article>
 
                 <article class="wholesale-benefit">
                     <span>04</span>
                     <div>
-                        <strong>سفارش واقعی</strong>
-                        <p>بعد از تأیید، سفارش عمده از همان checkout فروشگاه ثبت می‌شود.</p>
+                        <strong>درگاه آنلاین</strong>
+                        <p>سفارش عمده از همان checkout فروشگاه به پرداخت آنلاین می‌رود.</p>
                     </div>
                 </article>
             </div>
@@ -105,9 +101,9 @@
                 <header class="section-head">
                     <div>
                         <span class="eyebrow">BUSINESS PROFILE</span>
-                        <h2>{{ $profile?->isApproved() ? 'اطلاعات حساب عمده' : 'درخواست دسترسی عمده' }}</h2>
+                        <h2>{{ $profile ? 'اطلاعات پروفایل عمده' : 'خرید عمده و مجوزهای پرداخت' }}</h2>
                         <p>
-                            اطلاعات کسب‌وکار را دقیق وارد کن تا بررسی سریع‌تر و بدون رفت‌وبرگشت انجام شود.
+                            سفارش آنلاین نیاز به تأیید عمده ندارد؛ فرم کسب‌وکار فقط برای ثبت یا تکمیل پروفایل شماست.
                         </p>
                     </div>
                 </header>
@@ -131,6 +127,7 @@
                         </p>
                     </div>
                 @else
+                    @auth
                     <form method="POST" action="{{ route('wholesale.apply') }}" class="checkout-form">
                         @csrf
 
@@ -161,6 +158,16 @@
                             <span aria-hidden="true">↗</span>
                         </button>
                     </form>
+                    @else
+                        <div class="customer-inline-status">
+                            <strong>برای ثبت یا ویرایش پروفایل کسب‌وکار وارد شو.</strong>
+                            <p>برای دیدن کاتالوگ و خرید عمده آنلاین نیازی به این فرم نداری.</p>
+                            <div class="customer-action-strip__actions">
+                                <a class="button button--primary" href="{{ route('login') }}">ورود</a>
+                                <a class="button button--ghost" href="{{ route('register') }}">ساخت حساب</a>
+                            </div>
+                        </div>
+                    @endauth
                 @endif
             </section>
 
