@@ -111,6 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 zoom.value = '1';
                 draw();
                 editor.hidden = false;
+                field.classList.add('is-cropping');
                 fileName.textContent = name;
             };
 
@@ -216,6 +217,7 @@ document.addEventListener('DOMContentLoaded', () => {
             previewImage.src = URL.createObjectURL(input.files[0]);
             preview.replaceChildren(previewImage);
             fileName.textContent = input.files[0].name;
+            field.classList.remove('is-cropping');
             editor.hidden = true;
         };
 
@@ -223,6 +225,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         cancel?.addEventListener('click', () => {
             editor.hidden = true;
+            field.classList.remove('is-cropping');
             input.value = '';
         });
 
@@ -232,6 +235,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const saved = await replaceInputWithCrop();
                 if (saved) {
                     editor.hidden = true;
+                    field.classList.remove('is-cropping');
                     field.closest('form').requestSubmit();
                 }
             }
