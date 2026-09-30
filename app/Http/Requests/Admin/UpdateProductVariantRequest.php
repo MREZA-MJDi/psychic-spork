@@ -25,6 +25,7 @@ class UpdateProductVariantRequest extends FormRequest
 
             'price' => $this->normalizeNumber($this->input('price')),
             'sale_price' => $this->normalizeNumber($this->input('sale_price')),
+            'wholesale_price' => $this->normalizeNumber($this->input('wholesale_price')),
             'stock' => $this->normalizeNumber($this->input('stock')),
             'low_stock_threshold' => $this->normalizeNumber(
                 $this->input('low_stock_threshold')
@@ -110,6 +111,12 @@ class UpdateProductVariantRequest extends FormRequest
                 'min:0',
             ],
 
+            'wholesale_price' => [
+                'nullable',
+                'numeric',
+                'min:0',
+            ],
+
             'stock' => [
                 'required',
                 'integer',
@@ -145,6 +152,7 @@ class UpdateProductVariantRequest extends FormRequest
             'color_code' => 'رنگ',
             'price' => 'قیمت',
             'sale_price' => 'قیمت فروش ویژه',
+            'wholesale_price' => 'قیمت عمده',
             'stock' => 'موجودی',
             'low_stock_threshold' => 'حد هشدار موجودی',
             'is_active' => 'وضعیت',
@@ -169,6 +177,8 @@ class UpdateProductVariantRequest extends FormRequest
             'price.min' => 'قیمت نمی‌تواند منفی باشد.',
 
             'sale_price.numeric' => 'قیمت فروش ویژه باید به‌صورت عدد وارد شود.',
+            'wholesale_price.numeric' => 'قیمت عمده باید به‌صورت عدد وارد شود.',
+            'wholesale_price.min' => 'قیمت عمده نمی‌تواند منفی باشد.',
             'sale_price.min' => 'قیمت فروش ویژه نمی‌تواند منفی باشد.',
 
             'stock.required' => 'موجودی را وارد کنید.',
