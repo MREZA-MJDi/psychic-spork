@@ -35,6 +35,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const preview = field.querySelector('[data-media-preview]');
         const fileName = field.querySelector('[data-media-file-name]');
         const ctx = canvas?.getContext('2d');
+        const ratioValue = field.dataset.mediaRatio || '1:1';
+        const [ratioW, ratioH] = ratioValue.split(':').map(Number);
+        const ratio = ratioW > 0 && ratioH > 0 ? ratioW / ratioH : 1;
+        const fitButton = field.querySelector('[data-media-fit]');
 
         if (!input || !editor || !canvas || !zoom || !apply || !ctx) return;
 
@@ -47,6 +51,19 @@ document.addEventListener('DOMContentLoaded', () => {
         let dragStartY = 0;
 
         const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+
+        const resizeCanvas = () => {
+            const max = 720;
+            if (ratio >= 1) {
+                canvas.width = max;
+                canvas.height = Math.round(max / ratio);
+            } else {
+                canvas.height = max;
+                canvas.width = Math.round(max * ratio);
+            }
+        };
+
+        resizeCanvas();
 
         const draw = () => {
             if (!image) return;
@@ -176,22 +193,26 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 'image/webp', 0.88);
         });
 
+        fitButton?.addEventListener('click', () => {
+            offsetX = 0;
+            offsetY = 0;
+            scale = 1;
+            zoom.value = '1';
+            draw();
+        });
+
         const saveCropToPreview = async () => {
             if (!image) return;
 
             const saved = await replaceInputWithCrop();
             if (!saved) return;
 
-            let previewImage = preview.querySelector('[data-media-preview-image]');
-
-            if (!previewImage) {
-                previewImage = document.createElement('img');
-                previewImage.setAttribute('data-media-preview-image', '');
-                preview.appendChild(previewImage);
-            }
-
+            const previewImage = document.createElement('img');
+            previewImage.setAttribute('data-media-preview-image', '');
+            previewImage.alt = input.files[0].name || 'پیش‌نمایش تصویر';
             previewImage.src = URL.createObjectURL(input.files[0]);
-            preview.querySelector('.admin-media-field__empty')?.remove();
+
+            preview.replaceChildren(previewImage);
             fileName.textContent = input.files[0].name;
             editor.hidden = true;
         };
@@ -361,6 +382,10 @@ document.addEventListener('DOMContentLoaded', () => {
         'shipping_cost',
         'discount_amount',
         'total_amount',
+        'wholesale_price',
+        'max_order_amount',
+        'minimum_order_amount',
+        'amount_toman',
     ]);
 
     const faNumber = new Intl.NumberFormat('fa-IR');
@@ -403,7 +428,7 @@ document.addEventListener('DOMContentLoaded', () => {
         visible.autocomplete = 'off';
         visible.name = originalName + '_display';
         visible.value = formatMoney(input.value);
-        visible.placeholder = 'مثلاً ۱٬۵۰۰٬۰۰۰';
+        visible.placeholder = 'مثلاً ۱٬۵۰۰٬۰۰۰ تومان';
         visible.dir = 'ltr';
         visible.required = wasRequired;
 
