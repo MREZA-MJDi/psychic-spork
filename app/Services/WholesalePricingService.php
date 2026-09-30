@@ -71,11 +71,9 @@ final class WholesalePricingService
             $subtotal += $unitPrice * $count;
         }
 
-        $this->assertMinimums(
-            $profile,
-            $subtotal,
-            $quantity
-        );
+        if ($profile) {
+            $this->assertMinimums($profile, $subtotal, $quantity);
+        }
 
         return [
             'profile' => $profile,
