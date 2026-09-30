@@ -51,7 +51,14 @@
             <div class="admin-media-crop" data-media-crop hidden>
                 <div class="admin-media-crop__head">
                     <strong>برش تصویر</strong>
-                    <button type="button" class="admin-btn admin-btn--ghost admin-btn--sm" data-media-reset>بازنشانی</button>
+                    <div class="admin-media-crop__tools">
+                        <select data-media-ratio aria-label="نسبت برش">
+                            <option value="1">مربع ۱:۱</option>
+                            <option value="0.8">پرتره ۴:۵</option>
+                            <option value="1.7777778">افقی ۱۶:۹</option>
+                        </select>
+                        <button type="button" class="admin-btn admin-btn--ghost admin-btn--sm" data-media-reset>بازنشانی</button>
+                    </div>
                 </div>
                 <div class="admin-media-crop__stage">
                     <canvas data-media-canvas></canvas>
@@ -87,6 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const apply = root.querySelector('[data-media-crop-apply]');
         const reset = root.querySelector('[data-media-reset]');
         const fit = root.querySelector('[data-media-fit]');
+        const ratioInput = root.querySelector('[data-media-ratio]');
         let sourceImage = null;
         let objectUrl = null;
 
@@ -169,20 +177,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
         apply?.addEventListener('click', () => {
             if (!sourceImage) return;
-            const size = Math.min(sourceImage.width, sourceImage.height);
+            const ratio = Number(ratioInput?.value || 1);
+            const sourceRatio = sourceImage.width / sourceImage.height;
+            let cropWidth = sourceImage.width;
+            let cropHeight = sourceImage.height;
+
+            if (sourceRatio > ratio) {
+                cropWidth = sourceImage.height * ratio;
+            } else {
+                cropHeight = sourceImage.width / ratio;
+            }
+
             const output = document.createElement('canvas');
-            output.width = size;
-            output.height = size;
+            output.width = Math.round(cropWidth);
+            output.height = Math.round(cropHeight);
             output.getContext('2d').drawImage(
                 sourceImage,
-                (sourceImage.width - size) / 2,
-                (sourceImage.height - size) / 2,
-                size,
-                size,
+                (sourceImage.width - cropWidth) / 2,
+                (sourceImage.height - cropHeight) / 2,
+                cropWidth,
+                cropHeight,
                 0,
                 0,
-                size,
-                size
+                output.width,
+                output.height
             );
             output.toBlob((blob) => {
                 if (!blob) return;
