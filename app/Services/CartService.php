@@ -50,10 +50,14 @@ final class CartService
                 ->first();
 
             if (! $cart) {
-                $cart = Cart::query()->create([
-                    'user_id' => $user->id,
-                    'last_activity_at' => now(),
-                ]);
+                $cart = Cart::query()->createOrFirst(
+                    ['user_id' => $user->id],
+                    ['last_activity_at' => now()],
+                );
+
+                $cart = Cart::query()
+                    ->lockForUpdate()
+                    ->findOrFail($cart->id);
             }
 
             if (! $guest || $guest->id === $cart->id) {
