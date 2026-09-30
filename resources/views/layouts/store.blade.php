@@ -107,6 +107,7 @@
         'resources/css/app.css',
         'resources/css/responsive-shell.css',
         'resources/css/store-structure.css',
+        'resources/css/store-responsive.css',
         'resources/js/app.js',
         'resources/js/store-cart.js',
         'resources/js/store-search.js',
