@@ -387,6 +387,10 @@ document.addEventListener('DOMContentLoaded', () => {
         'shipping_cost',
         'discount_amount',
         'total_amount',
+        'wholesale_price',
+        'max_order_amount',
+        'minimum_order_amount',
+        'amount_toman',
     ]);
 
     const faNumber = new Intl.NumberFormat('fa-IR');
@@ -429,7 +433,7 @@ document.addEventListener('DOMContentLoaded', () => {
         visible.autocomplete = 'off';
         visible.name = originalName + '_display';
         visible.value = formatMoney(input.value);
-        visible.placeholder = 'مثلاً ۱٬۵۰۰٬۰۰۰';
+        visible.placeholder = 'مثلاً ۱٬۵۰۰٬۰۰۰ تومان';
         visible.dir = 'ltr';
         visible.required = wasRequired;
 
