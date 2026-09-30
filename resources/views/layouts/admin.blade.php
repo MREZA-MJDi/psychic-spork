@@ -140,6 +140,14 @@
         </div>
     </aside>
 
+    <button
+        type="button"
+        class="admin-sidebar-backdrop"
+        data-admin-sidebar-backdrop
+        aria-label="بستن منوی مدیریت"
+        tabindex="-1"
+    ></button>
+
     <main class="admin-main">
 
         <header class="admin-header">
