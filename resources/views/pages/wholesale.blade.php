@@ -44,7 +44,7 @@
 
                     <label>
                         شماره تماس کاری
-                        <input name="business_phone" value="{{ old('business_phone', $profile?->business_phone)" }}" inputmode="tel">
+                        <input name="business_phone" value="{{ old('business_phone', $profile?->business_phone) }}" inputmode="tel">
                     </label>
 
                     <label class="form-grid__full">
