@@ -97,6 +97,22 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    document.querySelectorAll('[data-auth-form]').forEach((form) => {
+        form.addEventListener('submit', () => {
+            if (form.dataset.submitting === '1') return;
+
+            form.dataset.submitting = '1';
+            const submit = form.querySelector('[data-auth-submit]');
+
+            if (submit) {
+                submit.disabled = true;
+                submit.setAttribute('aria-busy', 'true');
+                submit.dataset.originalLabel = submit.textContent.trim();
+                submit.innerHTML = '<span class="auth-submit-spinner" aria-hidden="true"></span><span>در حال بررسی...</span>';
+            }
+        });
+    });
+
     const passwordSource = document.querySelector('[data-password-meter-source]');
     const passwordMeter = document.querySelector('[data-password-meter]');
 
