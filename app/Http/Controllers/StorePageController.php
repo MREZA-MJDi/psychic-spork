@@ -40,8 +40,24 @@ class StorePageController extends Controller
             'cta_text' => 'محصولی که دنبالش هستی را پیدا کن یا مستقیم با تیم جانان در ارتباط باش.',
         ];
 
+        $settingKeys = collect(array_keys($defaults))
+            ->map(fn ($key) => "about.{$key}")
+            ->push(
+                'contact.phone',
+                'contact.email',
+                'contact.address',
+                'contact.working_hours',
+            )
+            ->all();
+
+        $settings = SiteSetting::query()
+            ->whereIn('key', $settingKeys)
+            ->pluck('value', 'key');
+
         $about = collect($defaults)
-            ->mapWithKeys(fn ($default, $key) => [$key => SiteSetting::getValue("about.{$key}", $default)])
+            ->mapWithKeys(fn ($default, $key) => [
+                $key => $settings->get("about.{$key}", $default),
+            ])
             ->all();
 
         return view('pages.about', [
@@ -58,10 +74,10 @@ class StorePageController extends Controller
                 'brands' => Brand::query()->active()->count(),
             ],
             'contactStore' => [
-                'phone' => SiteSetting::getValue('contact.phone', env('JANAN_STORE_PHONE')),
-                'email' => SiteSetting::getValue('contact.email', env('JANAN_STORE_EMAIL')),
-                'address' => SiteSetting::getValue('contact.address', env('JANAN_STORE_ADDRESS')),
-                'working_hours' => SiteSetting::getValue('contact.working_hours', env('JANAN_STORE_WORKING_HOURS')),
+                'phone' => $settings->get('contact.phone', env('JANAN_STORE_PHONE')),
+                'email' => $settings->get('contact.email', env('JANAN_STORE_EMAIL')),
+                'address' => $settings->get('contact.address', env('JANAN_STORE_ADDRESS')),
+                'working_hours' => $settings->get('contact.working_hours', env('JANAN_STORE_WORKING_HOURS')),
             ],
         ]);
     }
