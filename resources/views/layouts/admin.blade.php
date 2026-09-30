@@ -90,6 +90,22 @@
             </a>
 
             <a
+                href="{{ route('admin.wholesale.index') }}"
+                class="admin-link {{ request()->routeIs('admin.wholesale.*') || request()->routeIs('admin.customers.wholesale.*') || request()->routeIs('admin.customers.cheque.*') ? 'active' : '' }}"
+            >
+                <span class="admin-link-icon">ع</span>
+                <span>عمده و مجوز چک</span>
+            </a>
+
+            <a
+                href="{{ route('admin.cheques.index') }}"
+                class="admin-link {{ request()->routeIs('admin.cheques.*') ? 'active' : '' }}"
+            >
+                <span class="admin-link-icon">▣</span>
+                <span>پرداخت‌های چکی</span>
+            </a>
+
+            <a
                 href="{{ route('admin.contact.index') }}"
                 class="admin-link {{ request()->routeIs('admin.contact.*') ? 'active' : '' }}"
             >
@@ -116,6 +132,14 @@
             </a>
 
             <a
+                href="{{ route('admin.nila.index') }}"
+                class="admin-link {{ request()->routeIs('admin.nila.*') ? 'active' : '' }}"
+            >
+                <span class="admin-link-icon">N</span>
+                <span>نیلا</span>
+            </a>
+
+            <a
                 href="{{ route('admin.accounting.index') }}"
                 class="admin-link {{ request()->routeIs('admin.accounting.*') ? 'active' : '' }}"
             >
@@ -139,6 +163,14 @@
             </form>
         </div>
     </aside>
+
+    <button
+        type="button"
+        class="admin-sidebar-backdrop"
+        data-admin-sidebar-backdrop
+        aria-label="بستن منوی مدیریت"
+        tabindex="-1"
+    ></button>
 
     <main class="admin-main">
 
