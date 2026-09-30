@@ -133,22 +133,19 @@
                                 خرید عادی
                             </label>
 
-                            @if($wholesaleApproved)
-                                <label>
-                                    <input
-                                        type="radio"
-                                        name="order_type"
-                                        value="wholesale"
-                                        @checked(old('order_type') === 'wholesale')
-                                        data-order-type="wholesale"
-                                    >
-                                    خرید عمده
-                                </label>
-                            @else
-                                <small class="admin-help checkout-option-help">
-                                    خرید عمده فقط بعد از تأیید حساب توسط مدیریت فعال می‌شود.
-                                </small>
-                            @endif
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="order_type"
+                                    value="wholesale"
+                                    @checked(old('order_type') === 'wholesale')
+                                    data-order-type="wholesale"
+                                >
+                                خرید عمده
+                            </label>
+                            <small class="admin-help checkout-option-help">
+                                سفارش عمده آنلاین برای همه باز است؛ فقط پرداخت چکی نیاز به مجوز مدیر دارد.
+                            </small>
                         </div>
                     </div>
 
@@ -187,7 +184,7 @@
 
                         @if($chequeEnabled)
                             <p data-cheque-help hidden class="checkout-payment-help">
-                                مجوز پرداخت چکی این حساب فعال است.
+                                مجوز پرداخت چکی این حساب فعال است و فقط برای همین حساب قابل استفاده است.
                                 @if($chequeMaxOrderAmount !== null)
                                     سقف هر سفارش:
                                     {{ number_format((float) $chequeMaxOrderAmount) }}
