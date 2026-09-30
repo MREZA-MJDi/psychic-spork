@@ -90,6 +90,14 @@
             </a>
 
             <a
+                href="{{ route('admin.cheques.index') }}"
+                class="admin-link {{ request()->routeIs('admin.cheques.*') ? 'active' : '' }}"
+            >
+                <span class="admin-link-icon">▣</span>
+                <span>پرداخت‌های چکی</span>
+            </a>
+
+            <a
                 href="{{ route('admin.contact.index') }}"
                 class="admin-link {{ request()->routeIs('admin.contact.*') ? 'active' : '' }}"
             >
