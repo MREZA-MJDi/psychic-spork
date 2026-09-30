@@ -22,7 +22,7 @@
             <div>
                 <h2 class="admin-card-title">گالری محصول</h2>
                 <p class="admin-card-description">
-                    تا ۱۲ تصویر در هر بار آپلود. تصویر اول، تصویر اصلی فروشگاه خواهد بود.
+                    تا ۱۲ رسانه در هر بار آپلود. تصویر اول، تصویر اصلی فروشگاه خواهد بود؛ ویدئوی کوتاه هم قابل ثبت است.
                 </p>
             </div>
             <span class="admin-badge admin-badge--info">{{ $media->count() }} تصویر</span>
@@ -40,14 +40,14 @@
                 <input
                     type="file"
                     name="images[]"
-                    accept="image/jpeg,image/png,image/webp,image/avif"
+                    accept="image/jpeg,image/png,image/webp,image/avif,video/mp4,video/webm"
                     multiple
                     hidden
                     data-media-upload-input
                 >
                 <span class="admin-media-dropzone__icon" aria-hidden="true">＋</span>
-                <strong>تصاویر را اینجا رها کنید یا انتخاب کنید</strong>
-                <small>JPG، PNG، WebP یا AVIF — حداکثر ۵ مگابایت برای هر تصویر</small>
+                <strong>تصویر یا ویدئو را اینجا رها کنید یا انتخاب کنید</strong>
+                <small>JPG، PNG، WebP یا AVIF — و MP4/WebM کوتاه؛ حداکثر ۱۰ مگابایت برای هر رسانه</small>
                 <span class="admin-media-upload-count" data-media-upload-count></span>
             </label>
 
@@ -63,9 +63,13 @@
                 @foreach($media as $item)
                     <article class="admin-media-item" draggable="true" data-media-id="{{ $item->id }}">
                         <div class="admin-media-item__image">
-                            <img src="{{ $item->url }}" alt="{{ $item->alt_text ?: $product->name }}" loading="lazy">
+                            @if(str_starts_with((string) $item->mime_type, 'video/'))
+                                <video src="{{ $item->url }}" muted playsinline controls preload="metadata"></video>
+                            @else
+                                <img src="{{ $item->url }}" alt="{{ $item->alt_text ?: $product->name }}" loading="lazy">
+                            @endif
                             @if($loop->first)
-                                <span class="admin-media-item__primary">تصویر اصلی</span>
+                                <span class="admin-media-item__primary">رسانه اصلی</span>
                             @endif
                         </div>
 
@@ -113,8 +117,8 @@
             </p>
         @else
             <div class="admin-empty-state">
-                <strong>هنوز تصویری برای این محصول ثبت نشده است.</strong>
-                <span>اولین تصویر آپلودشده به‌عنوان تصویر اصلی فروشگاه استفاده می‌شود.</span>
+                <strong>هنوز رسانه‌ای برای این محصول ثبت نشده است.</strong>
+                <span>اولین رسانه آپلودشده به‌عنوان رسانه اصلی فروشگاه استفاده می‌شود.</span>
             </div>
         @endif
     </section>
