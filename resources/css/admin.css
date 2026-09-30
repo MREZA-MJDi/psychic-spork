@@ -4266,3 +4266,5 @@ body.admin-nav-open {
  .admin-media-placeholder,.admin-media-placeholder img,.admin-media-placeholder video,.admin-media-preview img,.admin-media-preview video{height:180px}
  .admin-media-uploader__hint{display:grid}
 }
+
+.admin-media-item__image video,.admin-media-upload-preview__asset{display:block;width:100%;height:220px;object-fit:cover;border-radius:14px}.admin-media-upload-preview__item{display:grid;gap:8px}.admin-media-upload-preview__item span{font-size:.82rem;color:var(--admin-muted,#6b7280)}
