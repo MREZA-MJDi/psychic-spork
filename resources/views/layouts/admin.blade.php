@@ -124,6 +124,14 @@
             </a>
 
             <a
+                href="{{ route('admin.nila.index') }}"
+                class="admin-link {{ request()->routeIs('admin.nila.*') ? 'active' : '' }}"
+            >
+                <span class="admin-link-icon">N</span>
+                <span>نیلا</span>
+            </a>
+
+            <a
                 href="{{ route('admin.accounting.index') }}"
                 class="admin-link {{ request()->routeIs('admin.accounting.*') ? 'active' : '' }}"
             >
