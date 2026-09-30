@@ -133,6 +133,54 @@
             </article>
         </section>
 
+        <section class="dashboard-v2__control-center" aria-label="مرکز اقدام مدیریت">
+            <div class="dashboard-v2__control-head">
+                <div>
+                    <span class="dashboard-v2__kicker">ACTION CENTER</span>
+                    <h2>کارهایی که الان باید کنترل شوند</h2>
+                    <p>این بخش فقط وضعیت‌هایی را نشان می‌دهد که واقعاً نیاز به تصمیم یا اقدام مدیریتی دارند.</p>
+                </div>
+            </div>
+
+            <div class="dashboard-v2__control-grid">
+                <a href="{{ route('admin.cheques.index') }}" class="dashboard-v2__control-item {{ $chequesAwaitingReview > 0 ? 'is-attention' : '' }}">
+                    <span class="dashboard-v2__control-icon">چک</span>
+                    <div>
+                        <strong>پرداخت‌های چکی</strong>
+                        <small>{{ number_format((int) $chequesAwaitingReview) }} مورد نیازمند بررسی · {{ number_format((float) $chequesAwaitingReviewAmount) }} تومان</small>
+                    </div>
+                    <b aria-hidden="true">←</b>
+                </a>
+
+                <a href="{{ route('admin.wholesale.index', ['status' => 'pending']) }}" class="dashboard-v2__control-item {{ $pendingWholesaleApplications > 0 ? 'is-attention' : '' }}">
+                    <span class="dashboard-v2__control-icon">عمده</span>
+                    <div>
+                        <strong>درخواست‌های عمده</strong>
+                        <small>{{ number_format((int) $pendingWholesaleApplications) }} درخواست در انتظار تصمیم مدیریتی</small>
+                    </div>
+                    <b aria-hidden="true">←</b>
+                </a>
+
+                <a href="{{ route('admin.inventory.index') }}" class="dashboard-v2__control-item {{ $lowStock > 0 ? 'is-attention' : '' }}">
+                    <span class="dashboard-v2__control-icon">انبار</span>
+                    <div>
+                        <strong>کنترل موجودی</strong>
+                        <small>{{ number_format((int) $lowStock) }} واریانت در محدوده هشدار · ارزش موجودی {{ number_format((float) $inventoryValue) }} تومان</small>
+                    </div>
+                    <b aria-hidden="true">←</b>
+                </a>
+
+                <a href="{{ route('admin.nila.index') }}" class="dashboard-v2__control-item">
+                    <span class="dashboard-v2__control-icon">نیلا</span>
+                    <div>
+                        <strong>مرز داده نیلا</strong>
+                        <small>{{ number_format((int) $nilaProductMappings) }} محصول و {{ number_format((int) $nilaVariantMappings) }} واریانت mapping شده‌اند؛ آخرین تغییر mapping: <span data-admin-date="{{ optional($nilaLastMappedAt)->toIso8601String() }}" data-admin-date-format="day">{{ optional($nilaLastMappedAt)->format('Y/m/d') ?: '—' }}</span>.</small>
+                    </div>
+                    <span class="dashboard-v2__control-state">کنترل نیلا ←</span>
+                </a>
+            </div>
+        </section>
+
         <section class="dashboard-v2__grid dashboard-v2__grid--main">
 
             <article class="dashboard-v2__panel dashboard-v2__panel--chart">
@@ -372,6 +420,26 @@
             </header>
 
             @if($recentOrders->isNotEmpty())
+                <div class="dashboard-v2__orders-mobile" aria-label="آخرین سفارش‌ها در موبایل">
+                    @foreach($recentOrders as $order)
+                        @php
+                            $customerName = $order->user?->name ?? $order->customer_name ?? 'مشتری';
+                        @endphp
+                        <article class="dashboard-v2__order-card">
+                            <div class="dashboard-v2__order-card-head">
+                                <strong>{{ $order->order_number }}</strong>
+                                <span class="admin-badge admin-badge--{{ $statusClasses[$order->status] ?? 'neutral' }}">{{ $statusNames[$order->status] ?? $order->status }}</span>
+                            </div>
+                            <div class="dashboard-v2__order-card-body">
+                                <div><small>مشتری</small><strong>{{ $customerName }}</strong></div>
+                                <div><small>مبلغ</small><strong>{{ number_format((float) $order->total) }} <em>تومان</em></strong></div>
+                                <div><small>پرداخت</small><strong>{{ $order->payment_status === 'paid' ? 'پرداخت‌شده' : ($order->payment_status === 'pending' ? 'در انتظار' : $order->payment_status) }}</strong></div>
+                                <a href="{{ route('admin.orders.show', $order) }}" class="dashboard-v2__order-card-link">جزئیات <span aria-hidden="true">←</span></a>
+                            </div>
+                        </article>
+                    @endforeach
+                </div>
+
                 <div class="dashboard-v2__orders-table">
                     <table>
                         <thead>
