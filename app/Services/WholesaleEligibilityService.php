@@ -8,7 +8,7 @@ use App\Models\WholesaleProfile;
 
 final class WholesaleEligibilityService
 {
-    public function assertWholesaleAllowed(User $user): WholesaleProfile
+    public function assertWholesaleAllowed(User $user): ?WholesaleProfile
     {
         abort_if(
             ! $user->isCustomer(),
@@ -16,13 +16,38 @@ final class WholesaleEligibilityService
             'فقط حساب مشتری می‌تواند خرید عمده انجام دهد.'
         );
 
-        $profile = $user->wholesaleProfile;
+        return $user->wholesaleProfile;
+    }
 
-        abort_unless(
-            $profile?->isApproved(),
-            403,
-            'دسترسی خرید عمده این حساب هنوز توسط مدیریت تأیید نشده است.'
-        );
+    public function assertWholesaleOrder(User $user, float $amount, int $quantity): ?WholesaleProfile
+    {
+        $profile = $this->assertWholesaleAllowed($user);
+
+        if (
+            $profile
+            && $profile->minimum_order_amount !== null
+            && $amount < (float) $profile->minimum_order_amount
+        ) {
+            abort(
+                422,
+                'حداقل مبلغ سفارش عمده '
+                . number_format((float) $profile->minimum_order_amount)
+                . ' تومان است.'
+            );
+        }
+
+        if (
+            $profile
+            && $profile->minimum_order_quantity !== null
+            && $quantity < (int) $profile->minimum_order_quantity
+        ) {
+            abort(
+                422,
+                'حداقل تعداد سفارش عمده '
+                . number_format((int) $profile->minimum_order_quantity)
+                . ' عدد است.'
+            );
+        }
 
         return $profile;
     }
@@ -31,7 +56,11 @@ final class WholesaleEligibilityService
         User $user,
         float $amount
     ): ChequePermission {
-        $this->assertWholesaleAllowed($user);
+        abort_if(
+            ! $user->isCustomer(),
+            403,
+            'فقط حساب مشتری می‌تواند پرداخت چکی داشته باشد.'
+        );
 
         $permission = $user->chequePermission;
 

@@ -41,6 +41,19 @@ class CheckoutRequest extends FormRequest
         }
     }
 
+    protected function passedValidation(): void
+    {
+        if (
+            $this->input('order_type') === 'wholesale'
+            && ! $this->user()?->isCustomer()
+        ) {
+            abort(
+                403,
+                'خرید عمده فقط برای حساب مشتری مجاز است.'
+            );
+        }
+    }
+
     public function rules(): array
     {
         $addressRule = Rule::exists('addresses', 'id')

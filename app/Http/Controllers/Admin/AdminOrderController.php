@@ -50,6 +50,13 @@ class AdminOrderController extends Controller
                 )
             )
             ->when(
+                $request->filled('order_type'),
+                fn ($query) => $query->where(
+                    'order_type',
+                    $request->input('order_type')
+                )
+            )
+            ->when(
                 $request->filled('payment_status'),
                 fn ($query) => $query->where(
                     'payment_status',
@@ -65,6 +72,10 @@ class AdminOrderController extends Controller
             'orders' => $orders,
 
             'statusNames' => $this->statusNames(),
+            'orderTypeNames' => [
+                'retail' => 'خرده',
+                'wholesale' => 'عمده',
+            ],
         ]);
     }
 

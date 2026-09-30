@@ -108,6 +108,26 @@
                 </div>
 
 
+                {{-- ORDER TYPE --}}
+
+                <div class="admin-field">
+
+                    <label for="order_type">
+                        نوع سفارش
+                    </label>
+
+                    <select
+                        id="order_type"
+                        name="order_type"
+                    >
+                        <option value="">همه</option>
+                        <option value="retail" @selected(request('order_type') === 'retail')>خرده</option>
+                        <option value="wholesale" @selected(request('order_type') === 'wholesale')>عمده</option>
+                    </select>
+
+                </div>
+
+
                 {{-- PAYMENT STATUS --}}
 
                 <div class="admin-field">
@@ -215,6 +235,10 @@
 
                         <th>
                             مشتری
+                        </th>
+
+                        <th>
+                            نوع
                         </th>
 
                         <th>
@@ -331,6 +355,15 @@
 
                                 @endif
 
+                            </td>
+
+
+                            {{-- TYPE --}}
+
+                            <td>
+                                <span class="admin-badge admin-badge--{{ $order->isWholesale() ? 'info' : 'neutral' }}">
+                                    {{ $order->isWholesale() ? 'عمده' : 'خرده' }}
+                                </span>
                             </td>
 
 

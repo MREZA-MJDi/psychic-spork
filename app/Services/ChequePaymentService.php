@@ -66,19 +66,13 @@ final class ChequePaymentService
                     ->lockForUpdate()
                     ->findOrFail($order->id);
 
-                $profile = WholesaleProfile::query()
-                    ->where('user_id', $user->id)
-                    ->lockForUpdate()
-                    ->first();
-
                 $permission = ChequePermission::query()
                     ->where('user_id', $user->id)
                     ->lockForUpdate()
                     ->first();
 
                 abort_unless(
-                    $profile?->isApproved()
-                    && $permission?->allows((float) $lockedOrder->total),
+                    $permission?->allows((float) $lockedOrder->total),
                     403,
                     'دسترسی پرداخت چکی این حساب در حال حاضر مجاز نیست.'
                 );
