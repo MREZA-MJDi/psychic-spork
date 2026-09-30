@@ -16,7 +16,7 @@
                         درخواستت را ثبت کن، بعد از بررسی مدیریت شرایط اختصاصی حساب برایت فعال می‌شود.
                     </p>
 
-                    <div class="customer-action-strip" style="margin-top:22px;">
+                    <div class="customer-action-strip customer-action-strip--spaced-top">
                         <div class="customer-action-strip__copy">
                             <small>YOUR BUSINESS ACCESS</small>
                             <strong>وضعیت حساب را همین‌جا ببین.</strong>
@@ -124,9 +124,9 @@
                         </div>
                     </div>
                 @elseif($profile?->status === 'pending')
-                    <div class="customer-surface" style="padding:16px;background:rgba(255,255,255,.55);">
+                    <div class="customer-inline-status">
                         <strong>درخواست شما قبلاً ثبت شده است.</strong>
-                        <p style="margin:5px 0 0;color:var(--janan-muted);font-size:9px;">
+                        <p>
                             تا مشخص شدن نتیجه، ارسال دوباره درخواست لازم نیست.
                         </p>
                     </div>
@@ -166,7 +166,7 @@
 
             <aside class="customer-surface wholesale-process">
                 <span class="eyebrow">HOW IT WORKS</span>
-                <h2 style="margin:8px 0 0;color:var(--customer-ink);font-size:24px;">چهار قدم تا خرید عمده</h2>
+                <h2 class="customer-panel-title">چهار قدم تا خرید عمده</h2>
 
                 <ol>
                     <li>
