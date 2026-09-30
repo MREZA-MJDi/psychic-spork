@@ -13,6 +13,32 @@ use Illuminate\View\View;
 
 class AdminWholesaleController extends Controller
 {
+    public function index(Request $request): View
+    {
+        $profiles = WholesaleProfile::query()
+            ->with(['user.chequePermission'])
+            ->when($request->filled('q'), function ($query) use ($request): void {
+                $term = $request->string('q')->toString();
+
+                $query->whereHas('user', function ($userQuery) use ($term): void {
+                    $userQuery->where('name', 'like', "%{$term}%")
+                        ->orWhere('email', 'like', "%{$term}%")
+                        ->orWhere('phone', 'like', "%{$term}%");
+                })->orWhere('business_name', 'like', "%{$term}%");
+            })
+            ->when($request->filled('status'), fn ($query) =>
+                $query->where('status', $request->string('status')->toString())
+            )
+            ->latest('updated_at')
+            ->paginate(20)
+            ->withQueryString();
+
+        return view('admin.wholesale.index', [
+            'profiles' => $profiles,
+            'statuses' => WholesaleProfile::STATUSES,
+        ]);
+    }
+
     public function approve(User $customer, Request $request): RedirectResponse
     {
         abort_unless($customer->isCustomer(), 404);
