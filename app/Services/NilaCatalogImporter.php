@@ -6,8 +6,10 @@ use App\Data\ExternalProductData;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\IntegrationMapping;
+use App\Models\InventoryMovement;
 use App\Models\Product;
 use App\Models\ProductVariant;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -120,9 +122,33 @@ final class NilaCatalogImporter
         $variant->price = $data['price'] ?? null;
         $variant->sale_price = $data['sale_price'] ?? null;
         $variant->wholesale_price = $data['wholesale_price'] ?? null;
-        $variant->stock = isset($data['stock']) ? (int) $data['stock'] : $variant->stock ?? 0;
+        $previousStock = (int) ($variant->stock ?? 0);
         $variant->is_active = (bool) ($data['is_active'] ?? true);
         $variant->save();
+
+        if (array_key_exists('stock', $data) && $data['stock'] !== null) {
+            $targetStock = max(0, (int) $data['stock']);
+            $delta = $targetStock - $previousStock;
+
+            if ($delta !== 0) {
+                $variant->update(['stock' => $targetStock]);
+
+                InventoryMovement::create([
+                    'product_variant_id' => $variant->id,
+                    'type' => 'adjustment',
+                    'quantity' => $delta,
+                    'stock_after' => $targetStock,
+                    'reference_type' => IntegrationMapping::class,
+                    'reference_id' => IntegrationMapping::query()
+                        ->where('integration', 'nila')
+                        ->where('entity_type', ProductVariant::class)
+                        ->where('external_id', $externalId)
+                        ->value('id'),
+                    'note' => 'به‌روزرسانی موجودی از Nila',
+                    'created_by' => null,
+                ]);
+            }
+        }
 
         IntegrationMapping::updateOrCreate(
             [
