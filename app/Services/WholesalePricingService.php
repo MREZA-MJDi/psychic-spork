@@ -8,11 +8,6 @@ use App\Models\User;
 
 final class WholesalePricingService
 {
-    public function __construct(
-        private readonly WholesaleEligibilityService $eligibility,
-    ) {
-    }
-
     public function quote(
         Cart $cart,
         ?User $user = null
