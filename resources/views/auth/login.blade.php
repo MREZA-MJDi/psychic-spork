@@ -100,6 +100,7 @@
             @endif
 
             <form
+                data-auth-form
                 method="POST"
                 action="{{ route('login.store') }}"
                 class="auth-form"
@@ -178,6 +179,7 @@
                 <button
                     class="auth-button"
                     type="submit"
+                    data-auth-submit
                 >
                     ورود به جانان
                     <span aria-hidden="true">↗</span>
