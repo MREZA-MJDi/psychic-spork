@@ -184,14 +184,8 @@ final class OrderService
                 ]);
             }
 
-            if ($orderType === 'wholesale' && $user?->isCustomer()) {
-                $this->wholesaleEligibility->assertWholesaleOrder(
-                    $user,
-                    $subtotal,
-                    $wholesaleQuantity
-                );
-            }
-
+            // Wholesale orders are open for online checkout.
+            // Cheque authorization is enforced only by ChequePaymentMethod.
             abort_if(
                 $subtotal <= 0,
                 422,
