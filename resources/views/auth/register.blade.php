@@ -25,7 +25,7 @@
             <div class="auth-alert auth-alert--error" role="alert">{{ $errors->first() }}</div>
         @endif
 
-        <form method="POST" action="{{ route('register.store') }}" class="auth-form">
+        <form data-auth-form method="POST" action="{{ route('register.store') }}" class="auth-form">
             @csrf
 
             <label class="auth-field">
@@ -63,7 +63,7 @@
                 </div>
             </label>
 
-            <button class="auth-button" type="submit">ساخت حساب جانان <span aria-hidden="true">↗</span></button>
+            <button class="auth-button" type="submit" data-auth-submit>ساخت حساب جانان <span aria-hidden="true">↗</span></button>
         </form>
 
         <p class="auth-switch">
