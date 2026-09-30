@@ -27,6 +27,37 @@ final class WholesaleEligibilityService
         return $profile;
     }
 
+    public function assertWholesaleOrder(User $user, float $amount, int $quantity): WholesaleProfile
+    {
+        $profile = $this->assertWholesaleAllowed($user);
+
+        if (
+            $profile->minimum_order_amount !== null
+            && $amount < (float) $profile->minimum_order_amount
+        ) {
+            abort(
+                422,
+                'حداقل مبلغ سفارش عمده '
+                . number_format((float) $profile->minimum_order_amount)
+                . ' تومان است.'
+            );
+        }
+
+        if (
+            $profile->minimum_order_quantity !== null
+            && $quantity < (int) $profile->minimum_order_quantity
+        ) {
+            abort(
+                422,
+                'حداقل تعداد سفارش عمده '
+                . number_format((int) $profile->minimum_order_quantity)
+                . ' عدد است.'
+            );
+        }
+
+        return $profile;
+    }
+
     public function assertChequeAllowed(
         User $user,
         float $amount
