@@ -101,18 +101,127 @@
                     </label>
                 </div>
 
-                <div class="checkout-payment">
-                    <div>
-                        <span class="eyebrow">PAYMENT</span>
-                        <strong>پرداخت آنلاین</strong>
-                        <p>
-                            مبلغ نهایی پس از ثبت سفارش به درگاه امن پرداخت منتقل می‌شود.
-                        </p>
+                <div class="checkout-payment" data-checkout-options>
+                    <div style="margin-bottom:18px;">
+                        <span class="eyebrow">ORDER TYPE</span>
+                        <strong>نوع خرید</strong>
+                        <div class="form-grid" style="margin-top:12px;">
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="order_type"
+                                    value="retail"
+                                    @checked(old('order_type', 'retail') === 'retail')
+                                    data-order-type="retail"
+                                >
+                                خرید عادی
+                            </label>
+
+                            @if($wholesaleApproved)
+                                <label>
+                                    <input
+                                        type="radio"
+                                        name="order_type"
+                                        value="wholesale"
+                                        @checked(old('order_type') === 'wholesale')
+                                        data-order-type="wholesale"
+                                    >
+                                    خرید عمده
+                                </label>
+                            @else
+                                <small class="admin-help" style="grid-column:1/-1;">
+                                    خرید عمده فقط بعد از تأیید حساب توسط مدیریت فعال می‌شود.
+                                </small>
+                            @endif
+                        </div>
                     </div>
 
-                    <span class="checkout-payment__badge">
-                        ONLINE
-                    </span>
+                    <div>
+                        <span class="eyebrow">PAYMENT</span>
+                        <strong>روش پرداخت</strong>
+                        <div class="form-grid" style="margin-top:12px;">
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="payment_method"
+                                    value="online"
+                                    @checked(old('payment_method', 'online') === 'online')
+                                    data-payment-method="online"
+                                >
+                                پرداخت آنلاین
+                            </label>
+
+                            @if($chequeEnabled)
+                                <label data-cheque-method-option>
+                                    <input
+                                        type="radio"
+                                        name="payment_method"
+                                        value="cheque"
+                                        @checked(old('payment_method') === 'cheque')
+                                        data-payment-method="cheque"
+                                    >
+                                    پرداخت چکی
+                                </label>
+                            @endif
+                        </div>
+
+                        <p data-online-help style="margin-top:10px;">
+                            مبلغ نهایی پس از ثبت سفارش به درگاه امن پرداخت منتقل می‌شود.
+                        </p>
+
+                        @if($chequeEnabled)
+                            <p data-cheque-help hidden style="margin-top:10px;">
+                                مجوز پرداخت چکی این حساب فعال است.
+                                @if($chequeMaxOrderAmount !== null)
+                                    سقف هر سفارش:
+                                    {{ number_format((float) $chequeMaxOrderAmount) }}
+                                    تومان.
+                                @else
+                                    سقف مبلغی برای این مجوز تعیین نشده است.
+                                @endif
+                            </p>
+                        @endif
+                    </div>
+
+                    @if($chequeEnabled)
+                        <div
+                            data-cheque-fields
+                            hidden
+                            style="margin-top:18px;padding-top:18px;border-top:1px solid rgba(0,0,0,.08);"
+                        >
+                            <div class="form-grid">
+                                <label>
+                                    شناسه صیادی *
+                                    <input name="sayad_id" inputmode="numeric" maxlength="16" data-cheque-required>
+                                </label>
+
+                                <label>
+                                    شماره چک *
+                                    <input name="cheque_number" maxlength="100" data-cheque-required>
+                                </label>
+
+                                <label>
+                                    نام بانک *
+                                    <input name="bank_name" maxlength="120" data-cheque-required>
+                                </label>
+
+                                <label>
+                                    صاحب حساب
+                                    <input name="account_holder" maxlength="160">
+                                </label>
+
+                                <label>
+                                    تاریخ سررسید *
+                                    <input type="date" name="due_date" data-cheque-required>
+                                </label>
+
+                                <label>
+                                    تصویر چک *
+                                    <input type="file" name="cheque_image" accept="image/jpeg,image/png,image/webp" data-cheque-required>
+                                </label>
+                            </div>
+                        </div>
+                    @endif
                 </div>
 
                 <button
@@ -121,6 +230,55 @@
                 >
                     ادامه و پرداخت
                 </button>
+
+                <script>
+                    document.addEventListener('DOMContentLoaded', () => {
+                        const orderTypeInputs = document.querySelectorAll('[data-order-type]');
+                        const paymentInputs = document.querySelectorAll('[data-payment-method]');
+                        const chequeOption = document.querySelector('[data-cheque-method-option]');
+                        const chequePayment = document.querySelector('[data-payment-method="cheque"]');
+                        const chequeFields = document.querySelector('[data-cheque-fields]');
+                        const chequeRequired = document.querySelectorAll('[data-cheque-required]');
+                        const onlineHelp = document.querySelector('[data-online-help]');
+                        const chequeHelp = document.querySelector('[data-cheque-help]');
+
+                        const syncCheckoutOptions = () => {
+                            const orderType = document.querySelector('[data-order-type]:checked')?.value || 'retail';
+                            const isWholesale = orderType === 'wholesale';
+
+                            if (chequeOption) {
+                                chequeOption.hidden = !isWholesale;
+                            }
+
+                            if (!isWholesale && chequePayment?.checked) {
+                                const online = document.querySelector('[data-payment-method="online"]');
+                                if (online) online.checked = true;
+                            }
+
+                            const paymentMethod = document.querySelector('[data-payment-method]:checked')?.value || 'online';
+                            const isCheque = isWholesale && paymentMethod === 'cheque';
+
+                            if (chequeFields) chequeFields.hidden = !isCheque;
+                            chequeRequired.forEach((input) => {
+                                input.required = isCheque;
+                                input.disabled = !isCheque;
+                            });
+
+                            if (onlineHelp) onlineHelp.hidden = isCheque;
+                            if (chequeHelp) chequeHelp.hidden = !isCheque;
+                        };
+
+                        orderTypeInputs.forEach((input) => {
+                            input.addEventListener('change', syncCheckoutOptions);
+                        });
+
+                        paymentInputs.forEach((input) => {
+                            input.addEventListener('change', syncCheckoutOptions);
+                        });
+
+                        syncCheckoutOptions();
+                    });
+                </script>
             </form>
         </section>
 
