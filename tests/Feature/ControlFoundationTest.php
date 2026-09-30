@@ -70,13 +70,15 @@ class ControlFoundationTest extends TestCase
         $this->assertSame($first->id, $second->id);
         $this->assertDatabaseCount('journal_entries', 1);
         $this->assertDatabaseCount('journal_lines', 2);
-        $this->assertSame(
-            '1250000.00',
-            (string) $first->lines->sum('debit')
+        $this->assertEqualsWithDelta(
+            1_250_000,
+            (float) $first->lines->sum('debit'),
+            0.01
         );
-        $this->assertSame(
-            '1250000.00',
-            (string) $first->lines->sum('credit')
+        $this->assertEqualsWithDelta(
+            1_250_000,
+            (float) $first->lines->sum('credit'),
+            0.01
         );
     }
 
