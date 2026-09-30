@@ -312,6 +312,12 @@ Route::prefix('admin')
         Route::put('orders/{order}', [AdminOrderController::class, 'update'])
             ->name('orders.update');
 
+        Route::get('cheques', [AdminChequeController::class, 'index'])
+            ->name('cheques.index');
+
+        Route::get('cheques/{chequePayment}/image', [AdminChequeController::class, 'image'])
+            ->name('cheques.image');
+
         Route::patch(
             'cheques/{chequePayment}/review',
             [AdminChequeController::class, 'review']
