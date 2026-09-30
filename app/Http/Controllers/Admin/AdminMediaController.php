@@ -40,8 +40,7 @@ class AdminMediaController extends Controller
         }
 
         DB::transaction(function () use ($model, $collection, $directory, $file, $media, $validated): void {
-            $media->removeCollection($model, $collection);
-            $media->attach(
+            $media->replace(
                 $model,
                 $collection,
                 $file,
