@@ -3778,3 +3778,210 @@
         grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 }
+
+
+/* =========================================================
+   PHASE A / MOBILE NAV + DASHBOARD UX
+========================================================= */
+
+.admin-sidebar-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    display: none;
+    border: 0;
+    padding: 0;
+    background: rgba(10, 14, 17, .42);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+}
+
+.admin-sidebar-backdrop.is-open {
+    display: block;
+}
+
+body.admin-nav-open {
+    overflow: hidden;
+}
+
+.admin-menu-toggle:focus-visible,
+.admin-sidebar-backdrop:focus-visible {
+    outline: 2px solid rgba(121,185,210,.65);
+    outline-offset: 2px;
+}
+
+.dashboard-v2__orders-mobile {
+    display: none;
+}
+
+.dashboard-v2__order-card {
+    display: grid;
+    gap: 12px;
+    padding: 15px;
+    border-bottom: 1px solid var(--admin-border);
+}
+
+.dashboard-v2__order-card:last-child {
+    border-bottom: 0;
+}
+
+.dashboard-v2__order-card-head,
+.dashboard-v2__order-card-body {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.dashboard-v2__order-card-head strong {
+    color: var(--admin-text);
+    font-size: 10px;
+}
+
+.dashboard-v2__order-card-body {
+    align-items: stretch;
+    flex-wrap: wrap;
+}
+
+.dashboard-v2__order-card-body > div {
+    min-width: 0;
+    flex: 1 1 30%;
+    display: grid;
+    gap: 3px;
+}
+
+.dashboard-v2__order-card-body small {
+    color: var(--admin-muted);
+    font-size: 6.5px;
+}
+
+.dashboard-v2__order-card-body strong {
+    color: var(--admin-text-soft);
+    font-size: 8px;
+}
+
+.dashboard-v2__order-card-body em {
+    color: var(--admin-muted);
+    font-size: 6px;
+    font-style: normal;
+    font-weight: 500;
+}
+
+.dashboard-v2__order-card-link {
+    flex: 1 1 100%;
+    min-height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-inline: 11px;
+    border: 1px solid var(--admin-border);
+    border-radius: 10px;
+    color: var(--admin-text-soft);
+    background: var(--admin-surface-soft);
+    font-size: 7px;
+    font-weight: 800;
+}
+
+@media (max-width: 900px) {
+    .admin-sidebar {
+        z-index: 100;
+    }
+
+    .dashboard-v2__hero {
+        border-radius: 20px;
+        padding: 22px;
+    }
+
+    .dashboard-v2__hero h1 {
+        font-size: clamp(29px, 8vw, 44px);
+    }
+
+    .dashboard-v2__stats {
+        gap: 9px;
+    }
+
+    .dashboard-v2__stat {
+        min-height: 132px;
+        padding: 15px;
+        border-radius: 16px;
+    }
+
+    .dashboard-v2__panel {
+        border-radius: 17px;
+    }
+
+    .dashboard-v2__panel-head {
+        padding: 17px 16px 14px;
+    }
+
+    .dashboard-v2__chart-wrap {
+        padding-inline: 14px;
+    }
+
+    .dashboard-v2__orders-mobile {
+        display: grid;
+    }
+
+    .dashboard-v2__orders-table {
+        display: none;
+    }
+}
+
+@media (max-width: 560px) {
+    .admin-header__left {
+        justify-content: space-between;
+    }
+
+    .admin-header-link {
+        flex: 1;
+        justify-content: center;
+    }
+
+    .dashboard-v2 {
+        gap: 12px;
+    }
+
+    .dashboard-v2__hero-actions {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-v2__stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .dashboard-v2__stat {
+        min-height: 118px;
+        padding: 13px;
+    }
+
+    .dashboard-v2__stat > strong {
+        font-size: 20px;
+    }
+
+    .dashboard-v2__stat > i {
+        font-size: 22px;
+    }
+
+    .dashboard-v2__order-card {
+        padding: 14px;
+    }
+
+    .dashboard-v2__order-card-body > div {
+        flex-basis: 45%;
+    }
+}
+
+@media (max-width: 390px) {
+    .dashboard-v2__stats {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .dashboard-v2__stat {
+        min-height: 110px;
+        padding: 12px;
+    }
+
+    .dashboard-v2__stat > strong {
+        font-size: 18px;
+    }
+}
