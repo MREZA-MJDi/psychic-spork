@@ -122,6 +122,54 @@
                                     </form>
                                 @endif
                             </div>
+
+                            <div style="margin-top:12px;padding:12px;border:1px solid var(--admin-border);border-radius:14px;background:var(--admin-surface-soft);">
+                                <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px;">
+                                    <div>
+                                        <strong style="display:block;">اجازه خرید چکی</strong>
+                                        <small class="admin-muted">
+                                            این مجوز جدا از تأیید خرید عمده است و فقط برای همین مشتری اعمال می‌شود.
+                                        </small>
+                                    </div>
+                                    @if($profile->user?->chequePermission?->enabled)
+                                        <span class="admin-badge admin-badge--success">فعال</span>
+                                    @else
+                                        <span class="admin-badge admin-badge--neutral">غیرفعال</span>
+                                    @endif
+                                </div>
+
+                                @if($profile->user?->chequePermission?->enabled)
+                                    <form method="POST" action="{{ route('admin.customers.cheque.disable', $profile->user) }}" style="display:flex;gap:8px;align-items:end;flex-wrap:wrap;">
+                                        @csrf
+                                        @method('PATCH')
+                                        <div class="admin-field" style="min-width:220px;flex:1;">
+                                            <label>سقف هر سفارش</label>
+                                            <input
+                                                type="text"
+                                                value="{{ $profile->user->chequePermission->max_order_amount !== null ? number_format((float) $profile->user->chequePermission->max_order_amount) . ' تومان' : 'بدون سقف' }}"
+                                                readonly
+                                            >
+                                        </div>
+                                        <button class="admin-btn admin-btn--ghost" type="submit">غیرفعال کردن چک</button>
+                                    </form>
+                                @else
+                                    <form method="POST" action="{{ route('admin.customers.cheque.enable', $profile->user) }}" style="display:flex;gap:8px;align-items:end;flex-wrap:wrap;">
+                                        @csrf
+                                        @method('PATCH')
+                                        <div class="admin-field" style="min-width:220px;flex:1;">
+                                            <label>سقف هر سفارش</label>
+                                            <input
+                                                type="number"
+                                                name="max_order_amount"
+                                                min="0"
+                                                step="1"
+                                                placeholder="خالی = بدون سقف"
+                                            >
+                                        </div>
+                                        <button class="admin-btn admin-btn--secondary" type="submit">فعال کردن خرید چکی</button>
+                                    </form>
+                                @endif
+                            </div>
                         </td>
                     </tr>
                     <tr>
