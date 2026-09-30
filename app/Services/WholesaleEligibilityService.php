@@ -8,7 +8,7 @@ use App\Models\WholesaleProfile;
 
 final class WholesaleEligibilityService
 {
-    public function assertWholesaleAllowed(User $user): WholesaleProfile
+    public function assertWholesaleAllowed(User $user): ?WholesaleProfile
     {
         abort_if(
             ! $user->isCustomer(),
@@ -16,18 +16,10 @@ final class WholesaleEligibilityService
             'فقط حساب مشتری می‌تواند خرید عمده انجام دهد.'
         );
 
-        $profile = $user->wholesaleProfile;
-
-        abort_unless(
-            $profile?->isApproved(),
-            403,
-            'دسترسی خرید عمده این حساب هنوز توسط مدیریت تأیید نشده است.'
-        );
-
-        return $profile;
+        return $user->wholesaleProfile;
     }
 
-    public function assertWholesaleOrder(User $user, float $amount, int $quantity): WholesaleProfile
+    public function assertWholesaleOrder(User $user, float $amount, int $quantity): ?WholesaleProfile
     {
         $profile = $this->assertWholesaleAllowed($user);
 
@@ -62,7 +54,11 @@ final class WholesaleEligibilityService
         User $user,
         float $amount
     ): ChequePermission {
-        $this->assertWholesaleAllowed($user);
+        abort_if(
+            ! $user->isCustomer(),
+            403,
+            'فقط حساب مشتری می‌تواند پرداخت چکی داشته باشد.'
+        );
 
         $permission = $user->chequePermission;
 
