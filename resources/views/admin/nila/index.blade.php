@@ -89,7 +89,7 @@
                     <tbody>
                     @foreach($recentMappings as $mapping)
                         <tr>
-                            <td>{{ $mapping->entity_type === Product::class ? 'محصول' : 'واریانت' }}</td>
+                            <td>{{ $mapping->entity_type === \App\Models\Product::class ? 'محصول' : 'واریانت' }}</td>
                             <td>{{ $mapping->entity_id }}</td>
                             <td dir="ltr">{{ $mapping->external_id }}</td>
                             <td dir="ltr">{{ $mapping->external_sku ?: '—' }}</td>
