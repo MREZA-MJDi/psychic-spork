@@ -4240,3 +4240,29 @@ body.admin-nav-open {
         width: 100%;
     }
 }
+
+
+/* --------------------------------------------------------------------------
+   Reusable media upload / crop
+   -------------------------------------------------------------------------- */
+.admin-media-uploader{display:grid;gap:18px}
+.admin-media-uploader__body{display:grid;gap:14px}
+.admin-media-dropzone{position:relative;display:grid;gap:12px;min-height:250px;padding:18px;border:1px dashed var(--admin-border,#d7dde5);border-radius:18px;background:linear-gradient(135deg,rgba(125,190,255,.08),rgba(240,190,205,.08));cursor:pointer;transition:.2s ease}
+.admin-media-dropzone:hover,.admin-media-dropzone.is-dragging{border-color:#7dbbff;transform:translateY(-1px)}
+.admin-media-placeholder{display:grid;place-items:center;align-content:center;gap:8px;min-height:210px;text-align:center;overflow:hidden;border-radius:14px;background:rgba(255,255,255,.55)}
+.admin-media-placeholder img,.admin-media-placeholder video,.admin-media-preview img,.admin-media-preview video{display:block;width:100%;height:210px;object-fit:cover;border-radius:14px}
+.admin-media-placeholder__icon{font-size:34px}
+.admin-media-placeholder small,.admin-media-uploader__hint,.admin-media-uploader__meta small{color:var(--admin-muted,#6b7280)}
+.admin-media-preview{overflow:hidden}
+.admin-media-crop{display:grid;gap:12px;padding:14px;border:1px solid var(--admin-border,#d7dde5);border-radius:16px;background:#fff}
+.admin-media-crop__head,.admin-media-crop__actions{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.admin-media-crop__stage{display:grid;place-items:center;min-height:220px;overflow:hidden;border-radius:12px;background:#111}
+.admin-media-crop canvas{max-width:100%;height:auto}
+.admin-media-uploader__meta{display:grid;gap:8px}
+.admin-media-uploader__meta input{width:100%}
+.admin-media-uploader__hint{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:.82rem}
+@media(max-width:600px){
+ .admin-media-dropzone{min-height:210px}
+ .admin-media-placeholder,.admin-media-placeholder img,.admin-media-placeholder video,.admin-media-preview img,.admin-media-preview video{height:180px}
+ .admin-media-uploader__hint{display:grid}
+}
