@@ -14,6 +14,7 @@ use App\Models\ChequePermission;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 use Illuminate\Http\UploadedFile;
 use Tests\TestCase;
 
@@ -64,17 +65,29 @@ class WholesaleFeatureTest extends TestCase
             wholesalePrice: 70000
         );
 
-        $this->get(route('wholesale.show'))
-            ->assertOk();
+        /*
+         * The test suite uses SESSION_DRIVER=array, so keep the guest
+         * identity explicit across requests. The production browser already
+         * persists this cookie normally.
+         */
+        $sessionId = Str::random(40);
 
-        $this->post(route('cart.store', $variant), [
+        $this->withCookie(config('session.cookie'), $sessionId)
+            ->post(route('cart.store', $variant), [
+                'quantity' => 2,
+            ])
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('cart_items', [
+            'product_variant_id' => $variant->id,
             'quantity' => 2,
-        ])->assertRedirect();
+        ]);
 
-        $this->post('/checkout', $this->checkoutData([
-            'order_type' => 'wholesale',
-            'payment_method' => 'online',
-        ]))
+        $this->withCookie(config('session.cookie'), $sessionId)
+            ->post('/checkout', $this->checkoutData([
+                'order_type' => 'wholesale',
+                'payment_method' => 'online',
+            ]))
             ->assertRedirect();
 
         $this->assertDatabaseHas('orders', [
