@@ -21,14 +21,8 @@ final class OnlinePaymentMethod implements PaymentMethod
 
     public function validateCheckout(?User $user, array $data): void
     {
-        if (($data['order_type'] ?? 'retail') === 'wholesale') {
-            abort_unless(
-                $user && $user->isCustomer(),
-                403,
-                'برای خرید عمده باید وارد حساب مشتری شوید.'
-            );
-
-        }
+        // Online wholesale checkout is public. Cheque authorization is enforced
+        // separately by ChequePaymentMethod + ChequePermission.
     }
 
     public function start(
