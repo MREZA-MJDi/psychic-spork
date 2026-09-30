@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\AdminCustomerController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminFinancialController;
 use App\Http\Controllers\Admin\AdminInventoryController;
+use App\Http\Controllers\Admin\AdminNilaController;
 use App\Http\Controllers\Admin\AdminOrderController;
 use App\Http\Controllers\Admin\AdminProductController;
 use App\Http\Controllers\Admin\AdminProductMediaController;
@@ -356,6 +357,9 @@ Route::prefix('admin')
 
         Route::get('inventory', [AdminInventoryController::class, 'index'])
             ->name('inventory.index');
+
+        Route::get('nila', [AdminNilaController::class, 'index'])
+            ->name('nila.index');
 
         Route::post('inventory', [AdminInventoryController::class, 'store'])
             ->name('inventory.store');
