@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\Admin\AdminBrandController;
+use App\Http\Controllers\Admin\AdminMediaController;
 use App\Http\Controllers\Admin\AdminCategoryController;
 use App\Http\Controllers\Admin\AdminChequeController;
 use App\Http\Controllers\Admin\AdminWholesaleController;
@@ -255,6 +256,20 @@ Route::prefix('admin')
 
         Route::resource('brands', AdminBrandController::class)
             ->except(['show']);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Reusable media
+        |--------------------------------------------------------------------------
+        */
+
+        Route::post('media/{type}/{id}', [AdminMediaController::class, 'store'])
+            ->whereIn('type', ['brand', 'category', 'variant'])
+            ->name('media.store');
+
+        Route::delete('media/{type}/{id}/{media}', [AdminMediaController::class, 'destroy'])
+            ->whereIn('type', ['brand', 'category', 'variant'])
+            ->name('media.destroy');
 
         /*
         |--------------------------------------------------------------------------
