@@ -79,20 +79,14 @@ class StoreProductController extends Controller
             ->when($filters['sort'] ?? 'latest', function ($query, $sort) {
                 match ($sort) {
                     'price_asc' => $query
-                        ->leftJoin('product_variants as sort_variants', function ($join) {
-                            $join->on('products.id', '=', 'sort_variants.product_id')
-                                ->where('sort_variants.is_active', true);
-                        })
-                        ->select('products.*')
-                        ->orderBy('sort_variants.price', 'asc')
-                        ->orderBy('products.id', 'desc'),
+                        ->orderByRaw(
+                            '(select min(pv.price) from product_variants pv where pv.product_id = products.id and pv.is_active = 1) asc'
+                        )
+                        ->orderByDesc('products.id'),
                     'price_desc' => $query
-                        ->leftJoin('product_variants as sort_variants', function ($join) {
-                            $join->on('products.id', '=', 'sort_variants.product_id')
-                                ->where('sort_variants.is_active', true);
-                        })
-                        ->select('products.*')
-                        ->orderByDesc('sort_variants.price')
+                        ->orderByRaw(
+                            '(select max(pv.price) from product_variants pv where pv.product_id = products.id and pv.is_active = 1) desc'
+                        )
                         ->orderByDesc('products.id'),
                     'name' => $query->orderBy('name')->orderByDesc('id'),
                     default => $query->latest('updated_at')->latest('id'),
