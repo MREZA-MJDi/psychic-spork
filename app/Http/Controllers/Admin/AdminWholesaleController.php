@@ -40,14 +40,23 @@ class AdminWholesaleController extends Controller
             ->where('user_id', $customer->id)
             ->firstOrFail();
 
-        $profile->update([
-            'status' => 'rejected',
-            'approved_by' => null,
-            'approved_at' => null,
-            'suspended_by' => null,
-            'suspended_at' => null,
-            'admin_note' => $request->input('note') ?: $profile->admin_note,
-        ]);
+        DB::transaction(function () use ($profile, $customer, $request): void {
+            $profile->update([
+                'status' => 'rejected',
+                'approved_by' => null,
+                'approved_at' => null,
+                'suspended_by' => null,
+                'suspended_at' => null,
+                'admin_note' => $request->input('note') ?: $profile->admin_note,
+            ]);
+
+            $customer->chequePermission?->update([
+                'enabled' => false,
+                'disabled_by' => $request->user()->id,
+                'disabled_at' => now(),
+                'admin_note' => 'درخواست خرید عمده مشتری رد شد.',
+            ]);
+        });
 
         return back()->with('success', 'درخواست خرید عمده مشتری رد شد.');
     }
