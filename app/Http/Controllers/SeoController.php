@@ -38,7 +38,6 @@ class SeoController extends Controller
             ['loc' => route('categories.index')],
             ['loc' => route('brands.index')],
             ['loc' => route('about')],
-            ['loc' => route('contact')],
             ['loc' => route('shipping')],
             ['loc' => route('returns')],
             ['loc' => route('faq')],
