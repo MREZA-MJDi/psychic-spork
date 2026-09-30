@@ -127,7 +127,7 @@ final class CartService
             ->with([
                 'productVariant.product.category',
                 'productVariant.product.brand',
-                'productVariant.product.galleryMedia',
+                'productVariant.product.primaryGalleryMedia',
             ])
             ->get();
 
@@ -166,7 +166,7 @@ final class CartService
                     'quantity' => $quantity,
                     'unit_price' => $unitPrice,
                     'line_total' => $quantity * $unitPrice,
-                    'image' => $product->galleryMedia->first()?->url,
+                    'image' => $product->primaryGalleryMedia?->url,
                 ];
             })
             ->filter()
