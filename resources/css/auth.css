@@ -17,7 +17,10 @@
     --auth-wine-deep: #4e2636;
     --auth-rose: #b97b8f;
     --auth-rose-soft: #f2e2e7;
-    --auth-gold: #b79872;
+    --auth-gold: #9aa8b1;
+    --auth-sky: #79b9d2;
+    --auth-sky-soft: #eaf5fa;
+    --auth-pink-soft: #f5e7ed;
 
     min-height: 100vh;
     margin: 0;
@@ -27,7 +30,6 @@
         radial-gradient(circle at 8% 8%, rgba(185,123,143,.12), transparent 25rem),
         radial-gradient(circle at 94% 86%, rgba(183,152,114,.09), transparent 24rem),
         var(--auth-pearl);
-    font-family: 'Vazirmatn', Tahoma, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
 }
@@ -1018,5 +1020,67 @@
     .auth-card__top {
         animation: none !important;
         transition: none !important;
+    }
+}
+
+
+/* =========================================================
+   FINAL AUTH POLISH / JANAN CURRENT PALETTE
+   Preserve the editorial split-screen concept; unify it with
+   the Janan sky / cool-gray / very-soft-pink system.
+========================================================= */
+.auth-page {
+    background:
+        radial-gradient(circle at 8% 8%, rgba(121,185,210,.13), transparent 25rem),
+        radial-gradient(circle at 94% 86%, rgba(214,166,188,.10), transparent 24rem),
+        var(--auth-pearl);
+}
+
+.auth-page .auth-welcome,
+.auth-page .auth-button {
+    -webkit-tap-highlight-color: transparent;
+}
+
+.auth-button {
+    border-color: #5c8fa5;
+    background: linear-gradient(135deg, #6faac2 0%, #527f94 58%, #3d626f 100%);
+    box-shadow: 0 18px 36px rgba(72,111,127,.18), inset 0 1px 0 rgba(255,255,255,.18);
+}
+
+.auth-button:hover {
+    box-shadow: 0 24px 44px rgba(72,111,127,.22), inset 0 1px 0 rgba(255,255,255,.20);
+}
+
+.auth-password-toggle:hover,
+.auth-password-toggle[aria-pressed="true"],
+.auth-form__row a,
+.auth-switch a {
+    color: #557f91;
+}
+
+.auth-form input:not([type="checkbox"]):focus {
+    border-color: rgba(121,185,210,.75);
+    box-shadow: 0 0 0 4px rgba(121,185,210,.10), 0 15px 32px rgba(65,85,96,.06);
+}
+
+.auth-meter__bar {
+    background: linear-gradient(90deg, #b9dbe8, #6f9fb2);
+}
+
+.auth-visual {
+    background:
+        linear-gradient(180deg, rgba(26,34,39,.08), rgba(26,34,39,.52)),
+        linear-gradient(135deg, rgba(72,126,150,.34), rgba(204,155,177,.18)),
+        url('/hero/banner2.jpg') center center / cover no-repeat,
+        #536b76;
+}
+
+@media (max-width: 600px) {
+    .auth-page {
+        background: #f6f8f9;
+    }
+
+    .auth-visual {
+        background: linear-gradient(145deg, #557f91, #8a6878);
     }
 }
