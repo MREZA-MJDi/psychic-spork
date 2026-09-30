@@ -26,6 +26,7 @@ use App\Http\Controllers\StoreCategoryController;
 use App\Http\Controllers\StoreMediaController;
 use App\Http\Controllers\StorePageController;
 use App\Http\Controllers\StoreProductController;
+use App\Http\Controllers\WholesaleController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -146,6 +147,20 @@ Route::post('/checkout', [CheckoutController::class, 'store'])
 Route::get('/checkout/success', [CheckoutController::class, 'success'])
     ->name('checkout.success');
 
+/* 
+|--------------------------------------------------------------------------
+| Wholesale
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth', 'customer'])->group(function () {
+    Route::get('/wholesale', [WholesaleController::class, 'show'])
+        ->name('wholesale.show');
+
+    Route::post('/wholesale/apply', [WholesaleController::class, 'apply'])
+        ->name('wholesale.apply');
+});
+
 /*
 |--------------------------------------------------------------------------
 | Online payment callbacks
@@ -249,10 +264,23 @@ Route::prefix('admin')
         Route::get('customers', [AdminCustomerController::class, 'index'])
             ->name('customers.index');
 
+        Route::get('wholesale', [AdminWholesaleController::class, 'index'])
+            ->name('wholesale.index');
+
         Route::patch(
             'customers/{customer}/wholesale/approve',
             [AdminWholesaleController::class, 'approve']
         )->name('customers.wholesale.approve');
+
+        Route::patch(
+            'customers/{customer}/wholesale/reject',
+            [AdminWholesaleController::class, 'reject']
+        )->name('customers.wholesale.reject');
+
+        Route::patch(
+            'customers/{customer}/wholesale/terms',
+            [AdminWholesaleController::class, 'updateTerms']
+        )->name('customers.wholesale.terms');
 
         Route::patch(
             'customers/{customer}/wholesale/suspend',
