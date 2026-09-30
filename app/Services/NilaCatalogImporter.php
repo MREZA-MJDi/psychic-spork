@@ -15,7 +15,12 @@ use Illuminate\Support\Str;
 
 final class NilaCatalogImporter
 {
-    public function import(array|iterable $records): int
+    public function importFrom(NilaCatalogSource $source): int
+    {
+        return $this->import($source->fetchProducts());
+    }
+
+    public function import(iterable $records): int
     {
         $count = 0;
 
