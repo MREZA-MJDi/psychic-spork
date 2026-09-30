@@ -22,7 +22,7 @@ class PaymentArchitectureTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_cheque_requires_approved_wholesale_and_explicit_permission(): void
+    public function test_cheque_requires_explicit_admin_permission(): void
     {
         $customer = User::factory()->create();
 
@@ -72,6 +72,7 @@ class PaymentArchitectureTest extends TestCase
         ChequePermission::create([
             'user_id' => $customer->id,
             'enabled' => true,
+            'status' => ChequePermission::STATUS_APPROVED,
             'max_order_amount' => 200000,
             'approved_at' => now(),
         ]);
