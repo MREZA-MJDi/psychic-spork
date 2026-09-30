@@ -128,6 +128,7 @@ class PaymentArchitectureTest extends TestCase
         ChequePermission::create([
             'user_id' => $customer->id,
             'enabled' => true,
+            'status' => ChequePermission::STATUS_APPROVED,
             'max_order_amount' => 200000,
             'approved_at' => now(),
         ]);
@@ -168,6 +169,71 @@ class PaymentArchitectureTest extends TestCase
             'reference_type' => Order::class,
             'reference_id' => $order->id,
         ]);
+    }
+
+    public function test_pending_cheque_permission_can_be_approved_without_wholesale_profile(): void
+    {
+        $admin = User::factory()->create()->forceFill(['is_admin' => true]);
+        $admin->save();
+
+        $customer = User::factory()->create();
+
+        $response = $this->actingAs($customer)
+            ->post(route('wholesale.cheque.request'));
+
+        $response
+            ->assertRedirect()
+            ->assertSessionHas('success');
+
+        $this->assertDatabaseHas('cheque_permissions', [
+            'user_id' => $customer->id,
+            'status' => ChequePermission::STATUS_PENDING,
+            'enabled' => false,
+        ]);
+
+        $this->actingAs($admin)
+            ->patch(route('admin.customers.cheque.enable', $customer), [
+                'max_order_amount' => 300000,
+            ])
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('cheque_permissions', [
+            'user_id' => $customer->id,
+            'status' => ChequePermission::STATUS_APPROVED,
+            'enabled' => true,
+            'max_order_amount' => 300000,
+            'approved_by' => $admin->id,
+        ]);
+    }
+
+    public function test_customer_cannot_submit_cheque_while_permission_is_pending(): void
+    {
+        $customer = User::factory()->create();
+
+        ChequePermission::create([
+            'user_id' => $customer->id,
+            'enabled' => false,
+            'status' => ChequePermission::STATUS_PENDING,
+            'requested_at' => now(),
+        ]);
+
+        $order = $this->orderFor($customer, 100000);
+
+        try {
+            app(ChequePaymentService::class)->submit(
+                $order,
+                $customer,
+                [
+                    'sayad_id' => '1234567890123456',
+                    'bank_name' => 'Test Bank',
+                    'due_date' => now()->addDays(10)->toDateString(),
+                ]
+            );
+
+            $this->fail('Pending cheque permission should have been rejected.');
+        } catch (HttpException $e) {
+            $this->assertSame(403, $e->getStatusCode());
+        }
     }
 
     public function test_payment_idempotency_key_is_persisted(): void
