@@ -8,11 +8,9 @@
     $primary = $products->first();
     $secondary = $products->skip(1)->first();
 
-    $variant = $primary?->variants?->first(
-        fn ($item) => (bool) $item->is_active
-    );
+    $variant = $primary?->primaryActiveVariant;
 
-    $image = $primary?->galleryMedia?->first()?->url;
+    $image = $primary?->primaryGalleryMedia?->url;
     $stock = (int) ($variant?->stock ?? 0);
     $isOnSale = (bool) ($variant?->is_on_sale ?? false);
 
@@ -130,7 +128,7 @@
             >
                 <div class="discovery-card__media">
                     @php
-                        $secondaryImage = $secondary?->galleryMedia?->first()?->url;
+                        $secondaryImage = $secondary?->primaryGalleryMedia?->url;
                     @endphp
 
                     @if($secondaryImage)
