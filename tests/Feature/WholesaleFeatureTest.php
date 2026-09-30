@@ -64,20 +64,12 @@ class WholesaleFeatureTest extends TestCase
             wholesalePrice: 70000
         );
 
-        $this->get(route('wholesale.show'))->assertOk();
+        $this->get(route('wholesale.show'))
+            ->assertOk();
 
-        $sessionId = $this->app['session']->getId();
-
-        $cart = Cart::create([
-            'session_id' => $sessionId,
-            'last_activity_at' => now(),
-        ]);
-
-        CartItem::create([
-            'cart_id' => $cart->id,
-            'product_variant_id' => $variant->id,
+        $this->post(route('cart.store', $variant), [
             'quantity' => 2,
-        ]);
+        ])->assertRedirect();
 
         $this->post('/checkout', $this->checkoutData([
             'order_type' => 'wholesale',
