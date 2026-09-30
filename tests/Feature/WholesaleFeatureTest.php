@@ -220,7 +220,8 @@ class WholesaleFeatureTest extends TestCase
             ->post('/checkout', $this->checkoutData([
                 'order_type' => 'wholesale',
             ]))
-            ->assertStatus(422);
+            ->assertRedirect()
+            ->assertSessionHas('error');
 
         $this->assertDatabaseCount('orders', 0);
         $this->assertSame(10, $variant->fresh()->stock);
