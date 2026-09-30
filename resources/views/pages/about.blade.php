@@ -171,6 +171,143 @@
         </div>
     </section>
 
+    <section id="contact" class="store-page__section store-page__section--soft contact-page">
+        <div class="container">
+
+            @if(session('success'))
+                <div class="contact-alert contact-alert--success" role="status">
+                    <strong>پیام ثبت شد.</strong>
+                    <span>{{ session('success') }}</span>
+                </div>
+            @endif
+
+            @if(session('error'))
+                <div class="contact-alert contact-alert--error" role="alert">
+                    <strong>ارسال انجام نشد.</strong>
+                    <span>{{ session('error') }}</span>
+                </div>
+            @endif
+
+            @if($errors->any())
+                <div class="contact-alert contact-alert--error" role="alert">
+                    <strong>اطلاعات فرم را بررسی کن.</strong>
+                    <ul>
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            <div class="contact-layout">
+                <section class="contact-form-card">
+                    <div class="contact-form-card__head">
+                        <div>
+                            <span class="eyebrow">JANAN / CONTACT</span>
+                            <h2>درباره ما را خواندی؛ حالا با ما در ارتباط باش.</h2>
+                            <p>
+                                سوالی درباره محصول یا سفارش داری؟ پیام را همین‌جا بفرست تا مستقیماً وارد سیستم پشتیبانی شود.
+                            </p>
+                        </div>
+                        <span class="contact-form-card__count">02</span>
+                    </div>
+
+                    <form method="POST" action="{{ route('contact.submit') }}" class="contact-form">
+                        @csrf
+
+                        <div class="contact-form__grid">
+                            <label class="contact-field">
+                                <span>نام و نام خانوادگی <b>*</b></span>
+                                <input type="text" name="name" value="{{ old('name', auth()->user()?->name) }}" autocomplete="name" required>
+                            </label>
+
+                            <label class="contact-field">
+                                <span>ایمیل</span>
+                                <input type="email" name="email" value="{{ old('email', auth()->user()?->email) }}" autocomplete="email">
+                            </label>
+
+                            <label class="contact-field">
+                                <span>شماره تماس</span>
+                                <input type="tel" name="phone" value="{{ old('phone', auth()->user()?->phone) }}" autocomplete="tel" dir="ltr">
+                            </label>
+
+                            <label class="contact-field">
+                                <span>موضوع</span>
+                                <input type="text" name="subject" value="{{ old('subject') }}" autocomplete="off">
+                            </label>
+
+                            <label class="contact-field contact-field--full">
+                                <span>پیام <b>*</b></span>
+                                <textarea name="message" rows="7" maxlength="5000" required>{{ old('message') }}</textarea>
+                            </label>
+                        </div>
+
+                        <div class="contact-form__foot">
+                            <p>اطلاعات این فرم فقط برای پیگیری همین درخواست استفاده می‌شود.</p>
+                            <button class="button button--primary" type="submit">
+                                ارسال پیام <span aria-hidden="true">↗</span>
+                            </button>
+                        </div>
+                    </form>
+                </section>
+
+                <aside class="contact-info-card">
+                    <div>
+                        <span class="eyebrow">JANAN / SUPPORT</span>
+                        <h2>راه‌های ارتباط</h2>
+                        <p>اگر تماس مستقیم برایت راحت‌تر است، از یکی از مسیرهای زیر استفاده کن.</p>
+                    </div>
+
+                    <div class="contact-info-list">
+                        <div class="contact-info-item">
+                            <span>01</span>
+                            <div>
+                                <small>PHONE</small>
+                                @if($contactStore['phone'] ?? null)
+                                    <a href="tel:{{ preg_replace('/\s+/', '', $contactStore['phone']) }}" dir="ltr">{{ $contactStore['phone'] }}</a>
+                                @else
+                                    <strong>شماره تماس ثبت نشده</strong>
+                                @endif
+                            </div>
+                        </div>
+
+                        <div class="contact-info-item">
+                            <span>02</span>
+                            <div>
+                                <small>EMAIL</small>
+                                @if($contactStore['email'] ?? null)
+                                    <a href="mailto:{{ $contactStore['email'] }}" dir="ltr">{{ $contactStore['email'] }}</a>
+                                @else
+                                    <strong>ایمیل ثبت نشده</strong>
+                                @endif
+                            </div>
+                        </div>
+
+                        <div class="contact-info-item">
+                            <span>03</span>
+                            <div>
+                                <small>ADDRESS</small>
+                                @if($contactStore['address'] ?? null)
+                                    <strong>{{ $contactStore['address'] }}</strong>
+                                @else
+                                    <strong>آدرس ثبت نشده</strong>
+                                @endif
+                            </div>
+                        </div>
+
+                        <div class="contact-info-item">
+                            <span>04</span>
+                            <div>
+                                <small>WORKING HOURS</small>
+                                <strong>{{ $contactStore['working_hours'] ?? 'ساعت کاری ثبت نشده' }}</strong>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </div>
+    </section>
+
     <section class="store-page__section">
         <div class="container">
             <div class="page-cta-panel about-page__cta">
@@ -182,7 +319,7 @@
 
                 <div class="store-page__actions">
                     <a class="button button--primary" href="{{ route('products.index') }}">کشف محصولات</a>
-                    <a class="button button--ghost" href="{{ route('contact') }}">تماس با ما</a>
+                    <a class="button button--ghost" href="#contact">تماس با ما</a>
                 </div>
             </div>
         </div>
