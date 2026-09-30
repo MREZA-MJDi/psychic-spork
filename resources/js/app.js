@@ -80,6 +80,44 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    const demoFill = document.querySelector('[data-demo-fill]');
+
+    if (demoFill) {
+        demoFill.addEventListener('click', () => {
+            const email = document.querySelector('[data-demo-email]')?.textContent?.trim();
+            const password = document.querySelector('[data-demo-password]')?.textContent?.trim();
+            const identifier = document.querySelector('input[name="identifier"]');
+            const passwordInput = document.querySelector('input[name="password"]');
+
+            if (identifier && email) identifier.value = email;
+            if (passwordInput && password) passwordInput.value = password;
+            identifier?.focus();
+        });
+    }
+
+    document.querySelectorAll('[data-copy-target]').forEach((button) => {
+        button.addEventListener('click', async () => {
+            const target = button.dataset.copyTarget;
+            const selector = target === 'email'
+                ? '[data-demo-email]'
+                : '[data-demo-password]';
+            const value = document.querySelector(selector)?.textContent?.trim();
+
+            if (!value || !navigator.clipboard) return;
+
+            try {
+                await navigator.clipboard.writeText(value);
+                const original = button.textContent;
+                button.textContent = 'کپی شد';
+                window.setTimeout(() => {
+                    button.textContent = original;
+                }, 1200);
+            } catch {
+                // Clipboard access may be unavailable on non-secure local contexts.
+            }
+        });
+    });
+
     document.querySelectorAll('[data-password-toggle]').forEach((toggle) => {
         toggle.addEventListener('click', () => {
             const wrapper = toggle.closest('.auth-password-wrap');
