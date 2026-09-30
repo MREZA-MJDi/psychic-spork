@@ -15,6 +15,8 @@ final class OrderService
     public function __construct(
         private readonly PaymentService $payment,
         private readonly CartService $cart,
+        private readonly WholesaleEligibilityService $wholesaleEligibility,
+        private readonly WholesalePricingService $wholesalePricing,
     ) {
     }
 
@@ -28,6 +30,19 @@ final class OrderService
             $customer,
             $user
         ): Order {
+            $orderType = $customer['order_type'] ?? 'retail';
+
+            abort_unless(
+                in_array($orderType, ['retail', 'wholesale'], true),
+                422,
+                'نوع سفارش نامعتبر است.'
+            );
+
+            if ($orderType === 'wholesale') {
+                abort_unless($user, 403, 'خرید عمده فقط برای مشتری واردشده مجاز است.');
+                $this->wholesaleEligibility->assertWholesaleAllowed($user);
+            }
+
             $cartItems = $cart->items()
                 ->with([
                     'productVariant.product.galleryMedia',
@@ -81,7 +96,7 @@ final class OrderService
                 'status' => 'pending',
                 'payment_status' => 'pending',
                 'payment_method' => $customer['payment_method'] ?? 'online',
-                'order_type' => $customer['order_type'] ?? 'retail',
+                'order_type' => $orderType,
 
                 'subtotal' => 0,
                 'discount' => 0,
@@ -96,6 +111,7 @@ final class OrderService
             ]);
 
             $subtotal = 0;
+            $wholesaleQuantity = 0;
 
             foreach ($cartItems as $cartItem) {
                 $variant = ProductVariant::query()
@@ -127,7 +143,14 @@ final class OrderService
                     "موجودی «{$variant->product->name}» برای سفارش کافی نیست."
                 );
 
-                $unitPrice = (float) $variant->effective_price;
+                $unitPrice = $orderType === 'wholesale'
+                    ? $this->wholesalePricing->unitPrice($variant)
+                    : (float) $variant->effective_price;
+
+                if ($orderType === 'wholesale') {
+                    $wholesaleQuantity += $quantity;
+                }
+
                 $lineTotal = $unitPrice * $quantity;
 
                 abort_if(
@@ -164,6 +187,20 @@ final class OrderService
                     'note' => "کسر موجودی سفارش {$order->order_number}",
                     'created_by' => $user?->id,
                 ]);
+            }
+
+            if ($orderType === 'wholesale') {
+                abort_unless(
+                    $user,
+                    403,
+                    'خرید عمده فقط برای مشتری واردشده مجاز است.'
+                );
+
+                $this->wholesaleEligibility->assertWholesaleOrder(
+                    $user,
+                    $subtotal,
+                    $wholesaleQuantity
+                );
             }
 
             abort_if(
