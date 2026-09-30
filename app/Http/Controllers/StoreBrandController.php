@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Brand;
 use App\Models\Product;
+use App\Models\ProductVariant;
+use Illuminate\Http\Request;
 use App\Services\SeoService;
 use Illuminate\View\View;
 
@@ -32,11 +34,32 @@ class StoreBrandController extends Controller
         ]);
     }
 
-    public function show(Brand $brand, SeoService $seo): View
+    public function show(Brand $brand, SeoService $seo, Request $request): View
     {
         abort_unless($brand->is_active, 404);
 
         $brand->load('logoMedia');
+
+        $sort = in_array($request->query('sort'), [
+            'newest',
+            'oldest',
+            'price_asc',
+            'price_desc',
+            'name_asc',
+            'name_desc',
+        ], true) ? $request->query('sort') : 'newest';
+
+        $perPage = in_array((int) $request->query('per_page', 12), [12, 24, 36], true)
+            ? (int) $request->query('per_page', 12)
+            : 12;
+
+        $priceSubquery = ProductVariant::query()
+            ->selectRaw('COALESCE(sale_price, price)')
+            ->whereColumn('product_id', 'products.id')
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->limit(1);
 
         $products = Product::query()
             ->active()
@@ -47,9 +70,13 @@ class StoreBrandController extends Controller
                 'primaryGalleryMedia',
             ])
             ->where('brand_id', $brand->id)
-            ->latest('updated_at')
-            ->latest('id')
-            ->paginate(12)
+            ->when($sort === 'oldest', fn ($query) => $query->orderBy('updated_at')->orderBy('id'))
+            ->when($sort === 'price_asc', fn ($query) => $query->orderBy($priceSubquery, 'asc')->orderBy('id'))
+            ->when($sort === 'price_desc', fn ($query) => $query->orderBy($priceSubquery, 'desc')->orderBy('id'))
+            ->when($sort === 'name_asc', fn ($query) => $query->orderBy('name')->orderBy('id'))
+            ->when($sort === 'name_desc', fn ($query) => $query->orderByDesc('name')->orderBy('id'))
+            ->when($sort === 'newest', fn ($query) => $query->latest('updated_at')->latest('id'))
+            ->paginate($perPage)
             ->withQueryString();
 
         $brandProfile = $this->profileFor($brand);
@@ -58,6 +85,8 @@ class StoreBrandController extends Controller
             'seo' => $seo->brand($brand),
             'brand' => $brand,
             'products' => $products,
+            'sort' => $sort,
+            'perPage' => $perPage,
             'brandProfile' => $brandProfile,
         ]);
     }
