@@ -126,6 +126,15 @@
                     </tr>
                     <tr>
                         <td colspan="5">
+                            <div class="admin-inline-note">
+                                <strong>تفکیک دسترسی:</strong>
+                                تأیید این پروفایل فقط وضعیت پرونده عمده را مدیریت می‌کند؛ خرید عمده با پرداخت آنلاین/نقدی وابسته به این تأیید نیست. پرداخت چکی فقط از طریق Permission مستقل زیر کنترل می‌شود.
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td colspan="5">
                             <form method="POST" action="{{ route('admin.customers.wholesale.terms', $profile->user) }}" class="admin-form-grid">
                                 @csrf
                                 @method('PATCH')
@@ -145,6 +154,36 @@
                                     <button class="admin-btn admin-btn--ghost" type="submit">ذخیره شرایط</button>
                                 </div>
                             </form>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="5">
+                            <div class="admin-wholesale-cheque">
+                                <div>
+                                    <strong>دسترسی پرداخت چکی</strong>
+                                    <span class="admin-muted">
+                                        @if($profile->user?->chequePermission?->enabled)
+                                            فعال{{ $profile->user->chequePermission->max_order_amount !== null ? ' · سقف ' . number_format((float) $profile->user->chequePermission->max_order_amount) . ' تومان' : ' · بدون سقف مبلغ' }}
+                                        @else
+                                            غیرفعال
+                                        @endif
+                                    </span>
+                                </div>
+                                <div class="admin-action-stack">
+                                    @if($profile->user?->chequePermission?->enabled)
+                                        <form method="POST" action="{{ route('admin.customers.cheque.disable', $profile->user) }}">
+                                            @csrf @method('PATCH')
+                                            <button class="admin-btn admin-btn--danger admin-btn--sm" type="submit">غیرفعال کردن چک</button>
+                                        </form>
+                                    @else
+                                        <form method="POST" action="{{ route('admin.customers.cheque.enable', $profile->user) }}" class="admin-inline-form">
+                                            @csrf @method('PATCH')
+                                            <input type="number" name="max_order_amount" min="0" step="1" placeholder="سقف مبلغ؛ اختیاری">
+                                            <button class="admin-btn admin-btn--secondary admin-btn--sm" type="submit">فعال کردن چک</button>
+                                        </form>
+                                    @endif
+                                </div>
+                            </div>
                         </td>
                     </tr>
                 @endforeach
