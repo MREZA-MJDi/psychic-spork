@@ -35,6 +35,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const preview = field.querySelector('[data-media-preview]');
         const fileName = field.querySelector('[data-media-file-name]');
         const ctx = canvas?.getContext('2d');
+        const ratioValue = field.dataset.mediaRatio || '1:1';
+        const [ratioW, ratioH] = ratioValue.split(':').map(Number);
+        const ratio = ratioW > 0 && ratioH > 0 ? ratioW / ratioH : 1;
+        const fitButton = field.querySelector('[data-media-fit]');
 
         if (!input || !editor || !canvas || !zoom || !apply || !ctx) return;
 
@@ -43,10 +47,24 @@ document.addEventListener('DOMContentLoaded', () => {
         let offsetY = 0;
         let scale = 1;
         let dragging = false;
+        let objectUrl = null;
         let dragStartX = 0;
         let dragStartY = 0;
 
         const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+
+        const resizeCanvas = () => {
+            const max = 720;
+            if (ratio >= 1) {
+                canvas.width = max;
+                canvas.height = Math.round(max / ratio);
+            } else {
+                canvas.height = max;
+                canvas.width = Math.round(max * ratio);
+            }
+        };
+
+        resizeCanvas();
 
         const draw = () => {
             if (!image) return;
@@ -174,6 +192,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Never post the canvas as a base64 hidden field.
                 resolve(true);
             }, 'image/webp', 0.88);
+        });
+
+        fitButton?.addEventListener('click', () => {
+            offsetX = 0;
+            offsetY = 0;
+            scale = 1;
+            zoom.value = '1';
+            draw();
         });
 
         const saveCropToPreview = async () => {
