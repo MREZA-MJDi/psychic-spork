@@ -174,116 +174,29 @@
 ========================================================= --}}
 
 <div class="admin-card admin-form-section">
-
     <div class="admin-card-header">
-
         <div>
-
-            <h2 class="admin-card-title">
-                لوگوی برند
-            </h2>
-
+            <h2 class="admin-card-title">لوگوی برند</h2>
             <p class="admin-card-description">
-                لوگوی برند را انتخاب کنید.
+                تصویر را انتخاب کن و قبل از ذخیره، کادر دقیق نمایش لوگو را مشخص کن.
             </p>
-
         </div>
-
     </div>
-
 
     <div class="admin-card-body">
-
-        {{-- CURRENT LOGO --}}
-
-        @if($logo?->url)
-
-            <div
-                class="admin-current-image"
-                id="brand-current-logo"
-            >
-
-                <img
-                    src="{{ $logo->url }}"
-                    alt="{{ $brand->name }}"
-                >
-
-                <div>
-
-                    <strong>
-                        لوگوی فعلی
-                    </strong>
-
-                    <p class="admin-muted">
-                        با انتخاب تصویر جدید، لوگوی فعلی جایگزین می‌شود.
-                    </p>
-
-                </div>
-
-            </div>
-
-        @endif
-
-
-        {{-- NEW LOGO PREVIEW --}}
-
-        <div
-            class="admin-current-image"
-            id="brand-logo-preview"
-            hidden
-            style="margin-bottom:16px;"
-        >
-
-            <img
-                id="brand-logo-preview-image"
-                src=""
-                alt="پیش‌نمایش لوگوی جدید"
-            >
-
-            <div>
-
-                <strong>
-                    پیش‌نمایش لوگوی جدید
-                </strong>
-
-                <p class="admin-muted">
-                    این تصویر قبل از ذخیره فقط برای پیش‌نمایش است.
-                </p>
-
-            </div>
-
-        </div>
-
-
-        {{-- FILE INPUT --}}
-
-        <div class="admin-field">
-
-            <label for="logo_file">
-                انتخاب لوگو
-            </label>
-
-            <input
-                id="logo_file"
-                type="file"
-                name="logo_file"
-                accept="image/jpeg,image/png,image/webp"
-            >
-
-            <small class="admin-help">
-                JPG، PNG یا WebP — حداکثر ۲ مگابایت
-            </small>
-
-            @error('logo_file')
-            <small class="admin-help" style="color:var(--admin-danger);">
-                {{ $message }}
-            </small>
-            @enderror
-
-        </div>
-
+        @include('admin.components.media-picker', [
+            'name' => 'logo_file',
+            'id' => 'logo_file',
+            'label' => 'انتخاب لوگو',
+            'help' => 'لوگو را بکش و زوم کن تا دقیقاً همان قسمت موردنظر در فروشگاه نمایش داده شود.',
+            'currentUrl' => $logo?->url,
+            'currentAlt' => $brand->name,
+            'ratio' => '1:1',
+        ])
+        @error('logo_file')
+            <small class="admin-help" style="color:var(--admin-danger);">{{ $message }}</small>
+        @enderror
     </div>
-
 </div>
 
 
@@ -310,177 +223,3 @@
 </div>
 
 
-{{-- =========================================================
-    BRAND FORM JS
-========================================================= --}}
-
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-
-        const nameInput = document.getElementById('name');
-        const slugInput = document.getElementById('slug');
-        const slugButton = document.getElementById('generate-brand-slug');
-
-        const logoInput = document.getElementById('logo_file');
-        const preview = document.getElementById('brand-logo-preview');
-        const previewImage = document.getElementById('brand-logo-preview-image');
-
-
-        /*
-         * Persian / Arabic characters → Latin
-         */
-
-        const persianMap = {
-            'ا': 'a',
-            'آ': 'a',
-            'ب': 'b',
-            'پ': 'p',
-            'ت': 't',
-            'ث': 's',
-            'ج': 'j',
-            'چ': 'ch',
-            'ح': 'h',
-            'خ': 'kh',
-            'د': 'd',
-            'ذ': 'z',
-            'ر': 'r',
-            'ز': 'z',
-            'ژ': 'zh',
-            'س': 's',
-            'ش': 'sh',
-            'ص': 's',
-            'ض': 'z',
-            'ط': 't',
-            'ظ': 'z',
-            'ع': 'a',
-            'غ': 'gh',
-            'ف': 'f',
-            'ق': 'gh',
-            'ک': 'k',
-            'گ': 'g',
-            'ل': 'l',
-            'م': 'm',
-            'ن': 'n',
-            'و': 'v',
-            'ه': 'h',
-            'ی': 'y',
-            'ي': 'y',
-            'ئ': 'y',
-            'ة': 'h',
-            'ء': '',
-            'ؤ': 'v'
-        };
-
-
-        const generateSlug = (value) => {
-
-            let text = String(value || '').trim().toLowerCase();
-
-            text = text
-                .split('')
-                .map(char => persianMap[char] ?? char)
-                .join('');
-
-            return text
-                .replace(/['’"`]/g, '')
-                .replace(/[^a-z0-9]+/g, '-')
-                .replace(/^-+|-+$/g, '')
-                .replace(/-+/g, '-');
-
-        };
-
-
-        const syncSlug = () => {
-
-            if (!nameInput || !slugInput) {
-                return;
-            }
-
-            slugInput.value = generateSlug(nameInput.value);
-
-        };
-
-
-        slugButton?.addEventListener('click', syncSlug);
-
-
-        /*
-         * Auto-generate slug only while the user has not manually
-         * customized it.
-         */
-
-        nameInput?.addEventListener('input', () => {
-
-            if (
-                !slugInput.value ||
-                slugInput.dataset.autoGenerated === 'true'
-            ) {
-                syncSlug();
-                slugInput.dataset.autoGenerated = 'true';
-            }
-
-        });
-
-
-        slugInput?.addEventListener('input', () => {
-
-            slugInput.dataset.autoGenerated = 'false';
-
-        });
-
-
-        /*
-         * Logo preview
-         */
-
-        logoInput?.addEventListener('change', () => {
-
-            const file = logoInput.files?.[0];
-
-            if (!file) {
-                preview.hidden = true;
-                previewImage.removeAttribute('src');
-                return;
-            }
-
-
-            if (!file.type.startsWith('image/')) {
-
-                logoInput.value = '';
-                preview.hidden = true;
-                previewImage.removeAttribute('src');
-
-                return;
-
-            }
-
-
-            const reader = new FileReader();
-
-
-            reader.onload = (event) => {
-
-                previewImage.src = String(event.target?.result || '');
-                preview.hidden = false;
-
-            };
-
-
-            reader.readAsDataURL(file);
-
-        });
-
-
-        /*
-         * Initial slug state
-         */
-
-        if (
-            slugInput?.value &&
-            nameInput?.value
-        ) {
-            slugInput.dataset.autoGenerated = 'false';
-        }
-
-    });
-</script>
