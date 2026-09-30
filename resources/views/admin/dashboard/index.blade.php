@@ -133,6 +133,54 @@
             </article>
         </section>
 
+        <section class="dashboard-v2__control-center" aria-label="مرکز اقدام مدیریت">
+            <div class="dashboard-v2__control-head">
+                <div>
+                    <span class="dashboard-v2__kicker">ACTION CENTER</span>
+                    <h2>کارهایی که الان باید کنترل شوند</h2>
+                    <p>این بخش فقط وضعیت‌هایی را نشان می‌دهد که واقعاً نیاز به تصمیم یا اقدام مدیریتی دارند.</p>
+                </div>
+            </div>
+
+            <div class="dashboard-v2__control-grid">
+                <a href="{{ route('admin.cheques.index', ['status' => 'under_review']) }}" class="dashboard-v2__control-item {{ $chequesAwaitingReview > 0 ? 'is-attention' : '' }}">
+                    <span class="dashboard-v2__control-icon">چک</span>
+                    <div>
+                        <strong>پرداخت‌های چکی</strong>
+                        <small>{{ number_format((int) $chequesAwaitingReview) }} مورد نیازمند بررسی · {{ number_format((float) $chequesAwaitingReviewAmount) }} تومان</small>
+                    </div>
+                    <b aria-hidden="true">←</b>
+                </a>
+
+                <a href="{{ route('admin.wholesale.index', ['status' => 'pending']) }}" class="dashboard-v2__control-item {{ $pendingWholesaleApplications > 0 ? 'is-attention' : '' }}">
+                    <span class="dashboard-v2__control-icon">عمده</span>
+                    <div>
+                        <strong>درخواست‌های عمده</strong>
+                        <small>{{ number_format((int) $pendingWholesaleApplications) }} درخواست در انتظار تصمیم مدیریتی</small>
+                    </div>
+                    <b aria-hidden="true">←</b>
+                </a>
+
+                <a href="{{ route('admin.inventory.index') }}" class="dashboard-v2__control-item {{ $lowStock > 0 ? 'is-attention' : '' }}">
+                    <span class="dashboard-v2__control-icon">انبار</span>
+                    <div>
+                        <strong>کنترل موجودی</strong>
+                        <small>{{ number_format((int) $lowStock) }} واریانت در محدوده هشدار · ارزش موجودی {{ number_format((float) $inventoryValue) }} تومان</small>
+                    </div>
+                    <b aria-hidden="true">←</b>
+                </a>
+
+                <div class="dashboard-v2__control-item dashboard-v2__control-item--static">
+                    <span class="dashboard-v2__control-icon">نیلا</span>
+                    <div>
+                        <strong>مرز داده نیلا</strong>
+                        <small>{{ number_format((int) $nilaProductMappings) }} محصول و {{ number_format((int) $nilaVariantMappings) }} واریانت mapping شده‌اند؛ همگام‌سازی API تا زمان قرارداد واقعی عمداً ادعا نمی‌شود.</small>
+                    </div>
+                    <span class="dashboard-v2__control-state">Foundation</span>
+                </div>
+            </div>
+        </section>
+
         <section class="dashboard-v2__grid dashboard-v2__grid--main">
 
             <article class="dashboard-v2__panel dashboard-v2__panel--chart">
