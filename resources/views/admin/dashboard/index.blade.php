@@ -372,6 +372,26 @@
             </header>
 
             @if($recentOrders->isNotEmpty())
+                <div class="dashboard-v2__orders-mobile" aria-label="آخرین سفارش‌ها در موبایل">
+                    @foreach($recentOrders as $order)
+                        @php
+                            $customerName = $order->user?->name ?? $order->customer_name ?? 'مشتری';
+                        @endphp
+                        <article class="dashboard-v2__order-card">
+                            <div class="dashboard-v2__order-card-head">
+                                <strong>{{ $order->order_number }}</strong>
+                                <span class="admin-badge admin-badge--{{ $statusClasses[$order->status] ?? 'neutral' }}">{{ $statusNames[$order->status] ?? $order->status }}</span>
+                            </div>
+                            <div class="dashboard-v2__order-card-body">
+                                <div><small>مشتری</small><strong>{{ $customerName }}</strong></div>
+                                <div><small>مبلغ</small><strong>{{ number_format((float) $order->total) }} <em>تومان</em></strong></div>
+                                <div><small>پرداخت</small><strong>{{ $order->payment_status === 'paid' ? 'پرداخت‌شده' : ($order->payment_status === 'pending' ? 'در انتظار' : $order->payment_status) }}</strong></div>
+                                <a href="{{ route('admin.orders.show', $order) }}" class="dashboard-v2__order-card-link">جزئیات <span aria-hidden="true">←</span></a>
+                            </div>
+                        </article>
+                    @endforeach
+                </div>
+
                 <div class="dashboard-v2__orders-table">
                     <table>
                         <thead>
