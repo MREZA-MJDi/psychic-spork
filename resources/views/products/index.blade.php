@@ -33,7 +33,7 @@
         </div>
     </section>
 
-    <section class="section-block section-block--compact" style="padding-bottom:14px;">
+    <section class="section-block section-block--compact customer-discovery-preamble">
         <div class="container">
             <div class="customer-action-strip">
                 <div class="customer-action-strip__copy">
