@@ -10,6 +10,7 @@ use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\User;
 use App\Models\WholesaleProfile;
+use App\Models\ChequePermission;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
@@ -221,6 +222,60 @@ class WholesaleFeatureTest extends TestCase
 
         $this->assertDatabaseCount('orders', 0);
         $this->assertSame(10, $variant->fresh()->stock);
+    }
+
+    public function test_pending_wholesale_profile_can_use_cash_payment_but_not_cheque(): void
+    {
+        $customer = User::factory()->create(['is_admin' => false]);
+
+        WholesaleProfile::create([
+            'user_id' => $customer->id,
+            'status' => 'pending',
+        ]);
+
+        [, $variant] = $this->makeProduct(stock: 10, wholesalePrice: 70000);
+
+        $cart = Cart::create([
+            'user_id' => $customer->id,
+            'last_activity_at' => now(),
+        ]);
+
+        CartItem::create([
+            'cart_id' => $cart->id,
+            'product_variant_id' => $variant->id,
+            'quantity' => 2,
+        ]);
+
+        Config::set('payment.driver', 'zarinpal');
+        Config::set('payment.zarinpal.merchant_id', 'test-merchant');
+
+        Http::fake([
+            'https://api.zarinpal.com/pg/v4/payment/request.json' =>
+                Http::response([
+                    'data' => [
+                        'code' => 100,
+                        'authority' => 'A000000000000000000000000099',
+                    ],
+                    'errors' => [],
+                ], 200),
+        ]);
+
+        $this->actingAs($customer)
+            ->post('/checkout', $this->checkoutData([
+                'order_type' => 'wholesale',
+                'payment_method' => 'online',
+            ]))
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('orders', [
+            'user_id' => $customer->id,
+            'order_type' => 'wholesale',
+        ]);
+
+        ChequePermission::create([
+            'user_id' => $customer->id,
+            'enabled' => false,
+        ]);
     }
 
     private function checkoutData(array $overrides = []): array
