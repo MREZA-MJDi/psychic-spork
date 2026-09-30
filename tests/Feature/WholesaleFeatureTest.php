@@ -43,6 +43,56 @@ class WholesaleFeatureTest extends TestCase
         ]);
     }
 
+    public function test_guest_can_place_wholesale_order_online(): void
+    {
+        Config::set('payment.driver', 'zarinpal');
+        Config::set('payment.zarinpal.merchant_id', 'test-merchant');
+
+        Http::fake([
+            'https://api.zarinpal.com/pg/v4/payment/request.json' =>
+                Http::response([
+                    'data' => [
+                        'code' => 100,
+                        'authority' => 'A000000000000000000000000099',
+                    ],
+                    'errors' => [],
+                ], 200),
+        ]);
+
+        [, $variant] = $this->makeProduct(
+            stock: 10,
+            wholesalePrice: 70000
+        );
+
+        $this->get(route('wholesale.show'))->assertOk();
+
+        $sessionId = $this->app['session']->getId();
+
+        $cart = Cart::create([
+            'session_id' => $sessionId,
+            'last_activity_at' => now(),
+        ]);
+
+        CartItem::create([
+            'cart_id' => $cart->id,
+            'product_variant_id' => $variant->id,
+            'quantity' => 2,
+        ]);
+
+        $this->post('/checkout', $this->checkoutData([
+            'order_type' => 'wholesale',
+            'payment_method' => 'online',
+        ]))
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('orders', [
+            'user_id' => null,
+            'order_type' => 'wholesale',
+        ]);
+
+        $this->assertSame(8, $variant->fresh()->stock);
+    }
+
     public function test_unapproved_customer_can_place_wholesale_order_online(): void
     {
         Config::set('payment.driver', 'zarinpal');
