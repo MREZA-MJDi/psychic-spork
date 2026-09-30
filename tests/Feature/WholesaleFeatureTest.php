@@ -211,13 +211,14 @@ class WholesaleFeatureTest extends TestCase
         $this->assertSame(10, $variant->fresh()->stock);
     }
 
-    public function test_pending_wholesale_profile_can_use_cash_payment_but_not_cheque(): void
+    public function test_approved_wholesale_profile_can_use_online_payment_but_not_cheque_without_permission(): void
     {
         $customer = User::factory()->create(['is_admin' => false]);
 
         WholesaleProfile::create([
             'user_id' => $customer->id,
-            'status' => 'pending',
+            'status' => 'approved',
+            'approved_at' => now(),
         ]);
 
         [, $variant] = $this->makeProduct(stock: 10, wholesalePrice: 70000);
