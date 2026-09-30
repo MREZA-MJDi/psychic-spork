@@ -27,6 +27,20 @@ class AdminControlCenterTest extends TestCase
             ->assertSee('مرز داده نیلا');
     }
 
+    public function test_nila_control_center_loads_without_claiming_api_sync(): void
+    {
+        $admin = User::factory()->create([
+            'is_admin' => true,
+        ]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.nila.index'))
+            ->assertOk()
+            ->assertSee('مرکز کنترل نیلا')
+            ->assertSee('همگام‌سازی API بدون قرارداد واقعی اجرا نمی‌شود')
+            ->assertSee('مرز مالکیت داده');
+    }
+
     public function test_cheque_permission_can_be_enabled_without_wholesale_approval(): void
     {
         $admin = User::factory()->create([
