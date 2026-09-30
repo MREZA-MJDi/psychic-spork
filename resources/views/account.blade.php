@@ -13,6 +13,16 @@
 
 <section class="section-block section-block--soft">
     <div class="container account-page">
+        <div class="customer-action-strip account-action-strip">
+            <div class="customer-action-strip__copy">
+                <small>MY JANAN / QUICK ACTIONS</small>
+                <strong>حسابت را مدیریت کن یا مستقیم به خرید برگرد.</strong>
+            </div>
+            <div class="customer-action-strip__actions">
+                <a class="button button--primary" href="{{ route('products.index') }}">کشف محصولات</a>
+                <a class="button button--ghost" href="{{ route('wholesale.show') }}">خرید عمده</a>
+            </div>
+        </div>
         <div class="account-card">
             <div>
                 <span class="eyebrow">PROFILE</span>
