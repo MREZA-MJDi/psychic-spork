@@ -71,23 +71,6 @@ class StorePageController extends Controller
         return redirect()->to(route('about') . '#contact');
     }
 
-    public function contactPageLegacy(SeoService $seo): View
-    {
-        return view('pages.contact', [
-            'seo' => $seo->page(
-                'تماس با جانان — ' . config('app.store_name', 'Janan'),
-                'راه‌های ارتباط با فروشگاه و ارسال پیام به پشتیبانی جانان.',
-                route('contact')
-            ),
-            'contactStore' => [
-                'phone' => SiteSetting::getValue('contact.phone', env('JANAN_STORE_PHONE')),
-                'email' => SiteSetting::getValue('contact.email', env('JANAN_STORE_EMAIL')),
-                'address' => SiteSetting::getValue('contact.address', env('JANAN_STORE_ADDRESS')),
-                'working_hours' => SiteSetting::getValue('contact.working_hours', env('JANAN_STORE_WORKING_HOURS')),
-            ],
-        ]);
-    }
-
     public function submitContact(Request $request): RedirectResponse
     {
         $data = $request->validate([
