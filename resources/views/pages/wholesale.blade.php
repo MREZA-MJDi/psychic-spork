@@ -173,35 +173,35 @@
 
             <aside class="customer-surface wholesale-process">
                 <span class="eyebrow">HOW IT WORKS</span>
-                <h2 class="customer-panel-title">چهار قدم تا خرید عمده</h2>
+                <h2 class="customer-panel-title">مسیر خرید عمده</h2>
 
                 <ol>
                     <li>
                         <span>01</span>
                         <div>
-                            <strong>ثبت اطلاعات</strong>
-                            <p>فرم کسب‌وکار را کامل و دقیق ارسال کن.</p>
+                            <strong>انتخاب محصول</strong>
+                            <p>از کاتالوگ، واریانت‌های دارای قیمت عمده را انتخاب کن.</p>
                         </div>
                     </li>
                     <li>
                         <span>02</span>
                         <div>
-                            <strong>بررسی مدیریت</strong>
-                            <p>اطلاعات برای فعال‌سازی حساب عمده بررسی می‌شود.</p>
+                            <strong>انتخاب خرید عمده</strong>
+                            <p>در checkout نوع سفارش را روی خرید عمده بگذار.</p>
                         </div>
                     </li>
                     <li>
                         <span>03</span>
                         <div>
-                            <strong>فعال‌سازی</strong>
-                            <p>بعد از تأیید، قیمت‌ها و شرایط عمده قابل استفاده می‌شوند.</p>
+                            <strong>پرداخت آنلاین</strong>
+                            <p>بدون تأیید قبلی پروفایل، سفارش را از درگاه پرداخت کن.</p>
                         </div>
                     </li>
                     <li>
                         <span>04</span>
                         <div>
-                            <strong>ثبت سفارش</strong>
-                            <p>محصولات را انتخاب کن و checkout را با نوع خرید عمده کامل کن.</p>
+                            <strong>پرداخت چکی</strong>
+                            <p>فقط این روش به تأیید مدیریت و مجوز فعال همان حساب نیاز دارد.</p>
                         </div>
                     </li>
                 </ol>
