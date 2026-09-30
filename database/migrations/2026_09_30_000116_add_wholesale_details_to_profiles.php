@@ -1,11 +1,13 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
+use Illuminate\\Database\\Migrations\\Migration;
+use Illuminate\\Database\\Schema\\Blueprint;
+use Illuminate\\Support\\Facades\\Schema;
 
 return new class extends Migration
 {
+    private const INDEX_NAME = 'wholesale_profiles_status_minimums_index';
+
     public function up(): void
     {
         Schema::table('wholesale_profiles', function (Blueprint $table): void {
@@ -20,22 +22,17 @@ return new class extends Migration
                 ->nullable()
                 ->after('minimum_order_amount');
 
-            $table->index([
-                'status',
-                'minimum_order_amount',
-                'minimum_order_quantity',
-            ]);
+            $table->index(
+                ['status', 'minimum_order_amount', 'minimum_order_quantity'],
+                self::INDEX_NAME
+            );
         });
     }
 
     public function down(): void
     {
         Schema::table('wholesale_profiles', function (Blueprint $table): void {
-            $table->dropIndex([
-                'status',
-                'minimum_order_amount',
-                'minimum_order_quantity',
-            ]);
+            $table->dropIndex(self::INDEX_NAME);
 
             $table->dropColumn([
                 'business_name',
