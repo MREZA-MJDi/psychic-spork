@@ -16,7 +16,7 @@ final class CartService
     public function current(Request $request): Cart
     {
         if ($request->user()) {
-            return Cart::query()->firstOrCreate(
+            return Cart::query()->createOrFirst(
                 ['user_id' => $request->user()->id],
                 ['last_activity_at' => now()]
             );
@@ -24,7 +24,7 @@ final class CartService
 
         $sessionId = $request->session()->getId();
 
-        return Cart::query()->firstOrCreate(
+        return Cart::query()->createOrFirst(
             ['session_id' => $sessionId],
             ['last_activity_at' => now()]
         );
