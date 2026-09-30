@@ -35,12 +35,19 @@ class AdminProductMediaController extends Controller
             'images.*' => [
                 'required',
                 'file',
-                'image',
-                'mimes:jpg,jpeg,png,webp,avif',
-                'max:5120',
-                'dimensions:min_width=300,min_height=300,max_width=6000,max_height=6000',
+                'mimetypes:image/jpeg,image/png,image/webp,image/avif,video/mp4,video/webm',
+                'max:10240',
             ],
         ]);
+
+        foreach ($validated['images'] as $file) {
+            if (str_starts_with((string) $file->getMimeType(), 'image/')) {
+                validator(
+                    ['file' => $file],
+                    ['file' => ['image', 'dimensions:min_width=300,min_height=300,max_width=6000,max_height=6000']]
+                )->validate();
+            }
+        }
 
         $nextOrder = ((int) $product->galleryMedia()->max('sort_order')) + ($product->galleryMedia()->exists() ? 1 : 0);
 
