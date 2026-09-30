@@ -3,12 +3,15 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\ChequePayment;
 use App\Models\ContactMessage;
 use App\Models\FinancialTransaction;
+use App\Models\IntegrationMapping;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\User;
+use App\Models\WholesaleProfile;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -211,6 +214,40 @@ class AdminDashboardController extends Controller
 
         /*
         |--------------------------------------------------------------------------
+        | Action center / operational alerts
+        |--------------------------------------------------------------------------
+        */
+
+        $pendingWholesaleApplications = WholesaleProfile::query()
+            ->where('status', 'pending')
+            ->count();
+
+        $chequesAwaitingReview = ChequePayment::query()
+            ->whereIn('status', ['submitted', 'under_review'])
+            ->count();
+
+        $chequesAwaitingReviewAmount = (float) ChequePayment::query()
+            ->whereIn('status', ['submitted', 'under_review'])
+            ->sum('amount');
+
+        $nilaProductMappings = IntegrationMapping::query()
+            ->where('integration', 'nila')
+            ->where('entity_type', Product::class)
+            ->count();
+
+        $nilaVariantMappings = IntegrationMapping::query()
+            ->where('integration', 'nila')
+            ->where('entity_type', ProductVariant::class)
+            ->count();
+
+        $nilaLastMappedAt = IntegrationMapping::query()
+            ->where('integration', 'nila')
+            ->latest('updated_at')
+            ->value('updated_at');
+
+
+        /*
+        |--------------------------------------------------------------------------
         | Recent orders
         |
         | This is intentionally global/latest, not period-limited.
@@ -329,6 +366,18 @@ class AdminDashboardController extends Controller
                 'customers' => $customers,
 
                 'unreadContactMessages' => $unreadContactMessages,
+
+                'pendingWholesaleApplications' => $pendingWholesaleApplications,
+
+                'chequesAwaitingReview' => $chequesAwaitingReview,
+
+                'chequesAwaitingReviewAmount' => $chequesAwaitingReviewAmount,
+
+                'nilaProductMappings' => $nilaProductMappings,
+
+                'nilaVariantMappings' => $nilaVariantMappings,
+
+                'nilaLastMappedAt' => $nilaLastMappedAt,
 
                 'lowStock' => $lowStock,
 
