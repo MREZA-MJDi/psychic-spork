@@ -14,6 +14,7 @@
     class="admin-media-picker"
     data-media-picker
     data-media-ratio="{{ $ratio }}"
+    style="--media-ratio: {{ str_replace(':', ' / ', $ratio) }};"
 >
     <div class="admin-media-picker__stage">
         <div class="admin-media-picker__preview" data-media-preview>
