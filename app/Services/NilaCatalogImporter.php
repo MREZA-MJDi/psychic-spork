@@ -131,6 +131,19 @@ final class NilaCatalogImporter
         $variant->is_active = (bool) ($data['is_active'] ?? true);
         $variant->save();
 
+        $mapping = IntegrationMapping::updateOrCreate(
+            [
+                'integration' => 'nila',
+                'entity_type' => ProductVariant::class,
+                'external_id' => $externalId,
+            ],
+            [
+                'entity_id' => $variant->id,
+                'external_sku' => $variant->sku,
+                'metadata' => ['source' => 'nila_import'],
+            ]
+        );
+
         if (array_key_exists('stock', $data) && $data['stock'] !== null) {
             $targetStock = max(0, (int) $data['stock']);
             $delta = $targetStock - $previousStock;
@@ -144,29 +157,12 @@ final class NilaCatalogImporter
                     'quantity' => $delta,
                     'stock_after' => $targetStock,
                     'reference_type' => IntegrationMapping::class,
-                    'reference_id' => IntegrationMapping::query()
-                        ->where('integration', 'nila')
-                        ->where('entity_type', ProductVariant::class)
-                        ->where('external_id', $externalId)
-                        ->value('id'),
+                    'reference_id' => $mapping->id,
                     'note' => 'به‌روزرسانی موجودی از Nila',
                     'created_by' => null,
                 ]);
             }
         }
-
-        IntegrationMapping::updateOrCreate(
-            [
-                'integration' => 'nila',
-                'entity_type' => ProductVariant::class,
-                'external_id' => $externalId,
-            ],
-            [
-                'entity_id' => $variant->id,
-                'external_sku' => $variant->sku,
-                'metadata' => ['source' => 'nila_import'],
-            ]
-        );
 
         return $variant;
     }
