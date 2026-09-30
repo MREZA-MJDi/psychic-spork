@@ -42,6 +42,17 @@
             'brand' => $brand,
         ])
 
+    @include('admin.components.media-uploader', [
+        'mediaItem' => $brand->logoMedia,
+        'uploadType' => 'brand',
+        'uploadId' => $brand->id,
+        'title' => 'لوگوی برند',
+        'description' => 'لوگوی برند را آپلود کن، پیش‌نمایش ببین و قبل از ذخیره crop کن.',
+        'videoAllowed' => false,
+        'accept' => 'image/jpeg,image/png,image/webp,image/avif',
+    ])
+
+
     </form>
 
 @endsection
