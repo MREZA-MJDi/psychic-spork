@@ -160,6 +160,9 @@ Route::middleware(['auth', 'customer'])->group(function () {
 
     Route::post('/wholesale/apply', [WholesaleController::class, 'apply'])
         ->name('wholesale.apply');
+
+    Route::post('/wholesale/cheque/request', [WholesaleController::class, 'requestCheque'])
+        ->name('wholesale.cheque.request');
 });
 
 /*
