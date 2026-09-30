@@ -1084,3 +1084,44 @@
         background: linear-gradient(145deg, #557f91, #8a6878);
     }
 }
+
+
+/* Auth submit state */
+.auth-button:disabled {
+    cursor: wait;
+    opacity: .82;
+    transform: none;
+    filter: none;
+}
+
+.auth-submit-spinner {
+    width: 14px;
+    height: 14px;
+    display: inline-block;
+    flex: 0 0 14px;
+    border: 2px solid rgba(255,255,255,.35);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: auth-submit-spin .65s linear infinite;
+}
+
+@keyframes auth-submit-spin {
+    to { transform: rotate(360deg); }
+}
+
+@media (max-width: 600px) {
+    .auth-form input:not([type="checkbox"]),
+    .auth-button {
+        min-height: 58px;
+    }
+
+    .auth-card {
+        padding-bottom: calc(34px + env(safe-area-inset-bottom));
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .auth-submit-spinner {
+        animation: none;
+    }
+}
