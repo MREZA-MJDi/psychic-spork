@@ -272,7 +272,8 @@ class WholesaleFeatureTest extends TestCase
 
         WholesaleProfile::create([
             'user_id' => $customer->id,
-            'status' => 'pending',
+            'status' => 'approved',
+            'approved_at' => now(),
         ]);
 
         [, $variant] = $this->makeProduct(stock: 10, wholesalePrice: 70000);
