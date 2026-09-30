@@ -57,10 +57,21 @@ class StorePageController extends Controller
                 'categories' => Category::query()->active()->count(),
                 'brands' => Brand::query()->active()->count(),
             ],
+            'contactStore' => [
+                'phone' => SiteSetting::getValue('contact.phone', env('JANAN_STORE_PHONE')),
+                'email' => SiteSetting::getValue('contact.email', env('JANAN_STORE_EMAIL')),
+                'address' => SiteSetting::getValue('contact.address', env('JANAN_STORE_ADDRESS')),
+                'working_hours' => SiteSetting::getValue('contact.working_hours', env('JANAN_STORE_WORKING_HOURS')),
+            ],
         ]);
     }
 
-    public function contact(SeoService $seo): View
+    public function contact(SeoService $seo): RedirectResponse
+    {
+        return redirect()->to(route('about') . '#contact');
+    }
+
+    public function contactPageLegacy(SeoService $seo): View
     {
         return view('pages.contact', [
             'seo' => $seo->page(
@@ -93,11 +104,14 @@ class StorePageController extends Controller
                 'status' => ContactMessage::STATUS_NEW,
             ]);
 
-            return back()->with('success', 'پیامت با موفقیت ثبت شد. تیم جانان بعد از بررسی با تو در ارتباط می‌شود.');
+            return redirect()
+                ->to(route('about') . '#contact')
+                ->with('success', 'پیامت با موفقیت ثبت شد. تیم جانان بعد از بررسی با تو در ارتباط می‌شود.');
         } catch (Throwable $e) {
             report($e);
 
-            return back()
+            return redirect()
+                ->to(route('about') . '#contact')
                 ->withInput()
                 ->with('error', 'ثبت پیام انجام نشد. لطفاً دوباره تلاش کن.');
         }
