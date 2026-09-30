@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\ChequePayment;
 use App\Models\ContactMessage;
 use App\Models\FinancialTransaction;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\User;
+use App\Models\JournalLine;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -239,6 +241,10 @@ class AdminDashboardController extends Controller
             ->unread()
             ->count();
 
+        $chequesAwaitingReview = ChequePayment::query()
+            ->whereIn('status', ['submitted', 'under_review'])
+            ->count();
+
 
         /*
         |--------------------------------------------------------------------------
@@ -364,6 +370,8 @@ class AdminDashboardController extends Controller
                 'customers' => $customers,
 
                 'unreadContactMessages' => $unreadContactMessages,
+
+                'chequesAwaitingReview' => $chequesAwaitingReview,
 
                 'lowStock' => $lowStock,
 
