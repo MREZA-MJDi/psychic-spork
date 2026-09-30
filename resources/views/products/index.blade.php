@@ -123,12 +123,33 @@
                     </select>
                 </div>
 
+                <div class="catalog-filter-bar__field">
+                    <span>مرتب‌سازی</span>
+                    <select name="sort">
+                        <option value="newest" @selected($sort === 'newest')>جدیدترین</option>
+                        <option value="oldest" @selected($sort === 'oldest')>قدیمی‌ترین</option>
+                        <option value="price_asc" @selected($sort === 'price_asc')>ارزان‌ترین</option>
+                        <option value="price_desc" @selected($sort === 'price_desc')>گران‌ترین</option>
+                        <option value="name_asc" @selected($sort === 'name_asc')>نام: الف تا ی</option>
+                        <option value="name_desc" @selected($sort === 'name_desc')>نام: ی تا الف</option>
+                    </select>
+                </div>
+
+                <div class="catalog-filter-bar__field">
+                    <span>نمایش</span>
+                    <select name="per_page">
+                        <option value="12" @selected($perPage === 12)>۱۲ در صفحه</option>
+                        <option value="24" @selected($perPage === 24)>۲۴ در صفحه</option>
+                        <option value="36" @selected($perPage === 36)>۳۶ در صفحه</option>
+                    </select>
+                </div>
+
                 <div class="catalog-filter-bar__actions">
                     <button class="button button--primary" type="submit">
                         اعمال فیلتر
                     </button>
 
-                    @if(request()->hasAny(['q', 'category', 'brand']))
+                    @if(request()->hasAny(['q', 'category', 'brand', 'sort', 'per_page']))
                         <a
                             class="button button--ghost"
                             href="{{ route('products.index') }}"
@@ -158,10 +179,13 @@
                         </h2>
                     </div>
 
-                    <span class="catalog-results__page">
-                        صفحه {{ $products->currentPage() }}
-                        از {{ $products->lastPage() }}
-                    </span>
+                    <div class="catalog-results__page">
+                        <span>
+                            صفحه {{ $products->currentPage() }}
+                            از {{ $products->lastPage() }}
+                        </span>
+                        <small>{{ number_format($products->perPage()) }} نمایش در هر صفحه</small>
+                    </div>
                 </header>
 
                 <div class="product-grid">

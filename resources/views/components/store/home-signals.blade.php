@@ -48,10 +48,8 @@
                     <div class="home-signal-list">
                         @foreach($recentProducts as $product)
                             @php
-                                $variant = $product->variants?->first(
-                                    fn ($item) => (bool) $item->is_active
-                                );
-                                $image = $product->galleryMedia?->first()?->url;
+                                $variant = $product->primaryActiveVariant;
+                                $image = $product->primaryGalleryMedia?->url;
                             @endphp
 
                             <a

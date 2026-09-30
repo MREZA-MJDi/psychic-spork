@@ -313,6 +313,9 @@ Route::prefix('admin')
         Route::put('orders/{order}', [AdminOrderController::class, 'update'])
             ->name('orders.update');
 
+        Route::get('cheques', [AdminChequeController::class, 'index'])
+            ->name('cheques.index');
+
         Route::patch(
             'cheques/{chequePayment}/review',
             [AdminChequeController::class, 'review']

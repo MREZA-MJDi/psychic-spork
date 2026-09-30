@@ -3,12 +3,18 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Brand;
+use App\Models\Category;
+use App\Models\ChequePayment;
 use App\Models\ContactMessage;
 use App\Models\FinancialTransaction;
+use App\Models\IntegrationMapping;
+use App\Models\JournalLine;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\User;
+use App\Models\WholesaleProfile;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -239,6 +245,60 @@ class AdminDashboardController extends Controller
             ->unread()
             ->count();
 
+        /*
+        |--------------------------------------------------------------------------
+        | Catalog control metrics
+        |--------------------------------------------------------------------------
+        */
+
+        $catalogProducts = Product::query()->count();
+        $catalogBrands = Brand::query()->count();
+        $catalogCategories = Category::query()->count();
+        $catalogVariants = ProductVariant::query()->where('is_active', true)->count();
+        $catalogWholesalePricedVariants = ProductVariant::query()
+            ->where('is_active', true)
+            ->whereNotNull('wholesale_price')
+            ->count();
+
+        /*
+        |--------------------------------------------------------------------------
+        | Management queues
+        |--------------------------------------------------------------------------
+        */
+
+        $chequesAwaitingReview = ChequePayment::query()
+            ->whereIn('status', ['submitted', 'under_review'])
+            ->count();
+
+        $chequesAwaitingReviewAmount = (float) ChequePayment::query()
+            ->whereIn('status', ['submitted', 'under_review'])
+            ->sum('amount');
+
+        $pendingWholesaleApplications = WholesaleProfile::query()
+            ->where('status', 'pending')
+            ->count();
+
+        /*
+        |--------------------------------------------------------------------------
+        | Nila mapping metrics
+        |--------------------------------------------------------------------------
+        */
+
+        $nilaMappings = IntegrationMapping::query()
+            ->where('integration', 'nila');
+
+        $nilaProductMappings = (clone $nilaMappings)
+            ->where('entity_type', Product::class)
+            ->count();
+
+        $nilaVariantMappings = (clone $nilaMappings)
+            ->where('entity_type', ProductVariant::class)
+            ->count();
+
+        $nilaLastMappedAt = (clone $nilaMappings)
+            ->latest('updated_at')
+            ->value('updated_at');
+
 
         /*
         |--------------------------------------------------------------------------
@@ -364,6 +424,20 @@ class AdminDashboardController extends Controller
                 'customers' => $customers,
 
                 'unreadContactMessages' => $unreadContactMessages,
+
+                'catalogProducts' => $catalogProducts,
+                'catalogBrands' => $catalogBrands,
+                'catalogCategories' => $catalogCategories,
+                'catalogVariants' => $catalogVariants,
+                'catalogWholesalePricedVariants' => $catalogWholesalePricedVariants,
+
+                'chequesAwaitingReview' => $chequesAwaitingReview,
+                'chequesAwaitingReviewAmount' => $chequesAwaitingReviewAmount,
+                'pendingWholesaleApplications' => $pendingWholesaleApplications,
+
+                'nilaProductMappings' => $nilaProductMappings,
+                'nilaVariantMappings' => $nilaVariantMappings,
+                'nilaLastMappedAt' => $nilaLastMappedAt,
 
                 'lowStock' => $lowStock,
 

@@ -43,7 +43,7 @@ class WholesaleFeatureTest extends TestCase
         ]);
     }
 
-    public function test_customer_can_place_wholesale_order_without_wholesale_approval(): void
+    public function test_unapproved_customer_cannot_place_wholesale_order(): void
     {
         $customer = User::factory()->create([
             'is_admin' => false,
@@ -65,31 +65,15 @@ class WholesaleFeatureTest extends TestCase
             'quantity' => 2,
         ]);
 
-        Config::set('payment.driver', 'zarinpal');
-        Config::set('payment.zarinpal.merchant_id', 'test-merchant');
-
-        Http::fake([
-            'https://api.zarinpal.com/pg/v4/payment/request.json' =>
-                Http::response([
-                    'data' => [
-                        'code' => 100,
-                        'authority' => 'A000000000000000000000000099',
-                    ],
-                    'errors' => [],
-                ], 200),
-        ]);
-
         $this->actingAs($customer)
             ->post('/checkout', $this->checkoutData([
                 'order_type' => 'wholesale',
             ]))
-            ->assertRedirect();
+            ->assertRedirect()
+            ->assertSessionHas('error');
 
-        $order = Order::query()->firstOrFail();
-
-        $this->assertSame('wholesale', $order->order_type);
-        $this->assertSame('140000.00', (string) $order->total);
-        $this->assertSame(8, $variant->fresh()->stock);
+        $this->assertDatabaseCount('orders', 0);
+        $this->assertSame(10, $variant->fresh()->stock);
     }
 
     public function test_approved_customer_uses_wholesale_price_and_minimums(): void
@@ -227,13 +211,14 @@ class WholesaleFeatureTest extends TestCase
         $this->assertSame(10, $variant->fresh()->stock);
     }
 
-    public function test_pending_wholesale_profile_can_use_cash_payment_but_not_cheque(): void
+    public function test_approved_wholesale_profile_can_use_online_payment_but_not_cheque_without_permission(): void
     {
         $customer = User::factory()->create(['is_admin' => false]);
 
         WholesaleProfile::create([
             'user_id' => $customer->id,
-            'status' => 'pending',
+            'status' => 'approved',
+            'approved_at' => now(),
         ]);
 
         [, $variant] = $this->makeProduct(stock: 10, wholesalePrice: 70000);
@@ -287,7 +272,8 @@ class WholesaleFeatureTest extends TestCase
 
         WholesaleProfile::create([
             'user_id' => $customer->id,
-            'status' => 'pending',
+            'status' => 'approved',
+            'approved_at' => now(),
         ]);
 
         [, $variant] = $this->makeProduct(stock: 10, wholesalePrice: 70000);

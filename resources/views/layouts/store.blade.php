@@ -119,6 +119,13 @@
         ])
     @endunless
 
+    {{-- Responsive layer must win over production polish overrides. --}}
+    @unless(app()->environment('testing'))
+        @vite([
+            'resources/css/store-responsive.css',
+        ])
+    @endunless
+
     @if(request()->routeIs('products.show'))
         @unless(app()->environment('testing'))
             @vite(['resources/js/product-show.js'])

@@ -10,7 +10,7 @@
     $isCategories = request()->routeIs('categories.*');
     $isBrands = request()->routeIs('brands.*');
     $isAbout = request()->routeIs('about');
-    $isContact = request()->routeIs('contact');
+    $isWholesale = request()->routeIs('wholesale.show');
 @endphp
 
 <header class="store-header {{ $isHome ? 'store-header--immersive' : '' }}">
@@ -75,15 +75,15 @@
                 class="store-nav__link {{ $isAbout ? 'is-active' : '' }}"
                 @if($isAbout) aria-current="page" @endif
             >
-                درباره ما
+                درباره و تماس
             </a>
 
             <a
-                href="{{ route('contact') }}"
-                class="store-nav__link {{ $isContact ? 'is-active' : '' }}"
-                @if($isContact) aria-current="page" @endif
+                href="{{ route('wholesale.show') }}"
+                class="store-nav__link {{ $isWholesale ? 'is-active' : '' }}"
+                @if($isWholesale) aria-current="page" @endif
             >
-                تماس با ما
+                خرید عمده
             </a>
         </nav>
 

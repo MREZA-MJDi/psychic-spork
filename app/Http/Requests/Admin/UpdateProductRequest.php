@@ -182,6 +182,13 @@ class UpdateProductRequest extends FormRequest
                 'max:999999999999.99',
             ],
 
+            'wholesale_price' => [
+                'nullable',
+                'numeric',
+                'min:0',
+                'max:999999999999.99',
+            ],
+
             'stock' => [
                 'required',
                 'integer',
@@ -227,6 +234,7 @@ class UpdateProductRequest extends FormRequest
             'color_code' => 'رنگ',
             'price' => 'قیمت',
             'sale_price' => 'قیمت فروش ویژه',
+            'wholesale_price' => 'قیمت عمده',
             'stock' => 'موجودی',
             'low_stock_threshold' => 'حد هشدار موجودی',
             'image_file' => 'تصویر محصول',

@@ -32,9 +32,23 @@ class CheckoutController extends Controller
                 );
         }
 
+        $user = $request->user();
+        $wholesaleApproved = (bool) (
+            $user?->isCustomer()
+            && $user->wholesaleProfile?->isApproved()
+        );
+
+        $chequePermission = $user?->chequePermission;
+
+        $chequeEnabled = $wholesaleApproved
+            && (bool) $chequePermission?->enabled;
+
         return view('pages.checkout', [
             'items' => $items,
             'total' => (float) $items->sum('line_total'),
+            'wholesaleApproved' => $wholesaleApproved,
+            'chequeEnabled' => $chequeEnabled,
+            'chequeMaxOrderAmount' => $chequePermission?->max_order_amount,
         ]);
     }
 

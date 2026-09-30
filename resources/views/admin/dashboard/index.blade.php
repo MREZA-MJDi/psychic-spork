@@ -133,6 +133,56 @@
             </article>
         </section>
 
+        <section class="dashboard-v2__panel" aria-label="وضعیت کاتالوگ">
+            <header class="dashboard-v2__panel-head">
+                <div>
+                    <span class="dashboard-v2__kicker">CATALOG CONTROL</span>
+                    <h2>وضعیت کاتالوگ و قیمت‌گذاری</h2>
+                    <p>تعداد واقعی محصولات، برندها، دسته‌بندی‌ها، واریانت‌ها و قیمت‌های عمده از دیتابیس.</p>
+                </div>
+                <a href="{{ route('admin.products.index') }}" class="dashboard-v2__small-link">
+                    مدیریت محصولات <span aria-hidden="true">↗</span>
+                </a>
+            </header>
+
+            <div class="dashboard-v2__stats" style="margin-top:0;">
+                <article class="dashboard-v2__stat">
+                    <span>PRODUCTS</span>
+                    <strong>{{ number_format((int) $catalogProducts) }}</strong>
+                    <small>محصول ثبت‌شده</small>
+                    <i>01</i>
+                </article>
+
+                <article class="dashboard-v2__stat">
+                    <span>BRANDS</span>
+                    <strong>{{ number_format((int) $catalogBrands) }}</strong>
+                    <small>برند فعال در کاتالوگ</small>
+                    <i>02</i>
+                </article>
+
+                <article class="dashboard-v2__stat">
+                    <span>CATEGORIES</span>
+                    <strong>{{ number_format((int) $catalogCategories) }}</strong>
+                    <small>دسته‌بندی</small>
+                    <i>03</i>
+                </article>
+
+                <article class="dashboard-v2__stat">
+                    <span>VARIANTS</span>
+                    <strong>{{ number_format((int) $catalogVariants) }}</strong>
+                    <small>واریانت فعال</small>
+                    <i>04</i>
+                </article>
+
+                <article class="dashboard-v2__stat dashboard-v2__stat--accent">
+                    <span>WHOLESALE PRICE</span>
+                    <strong>{{ number_format((int) $catalogWholesalePricedVariants) }}</strong>
+                    <small>واریانت دارای قیمت عمده</small>
+                    <i>05</i>
+                </article>
+            </div>
+        </section>
+
         <section class="dashboard-v2__control-center" aria-label="مرکز اقدام مدیریت">
             <div class="dashboard-v2__control-head">
                 <div>

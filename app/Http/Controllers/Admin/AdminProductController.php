@@ -139,6 +139,7 @@ class AdminProductController extends Controller
                     'color_code' => $data['color_code'] ?? null,
                     'price' => $data['price'],
                     'sale_price' => $data['sale_price'] ?? null,
+                    'wholesale_price' => $data['wholesale_price'] ?? null,
                     'stock' => (int) ($data['stock'] ?? 0),
                     'low_stock_threshold' => (int) (
                         $data['low_stock_threshold'] ?? 5
@@ -252,6 +253,7 @@ class AdminProductController extends Controller
                         'color_code' => $data['color_code'] ?? null,
                         'price' => $data['price'],
                         'sale_price' => $data['sale_price'] ?? null,
+                        'wholesale_price' => $data['wholesale_price'] ?? null,
                         'stock' => (int) ($data['stock'] ?? 0),
                         'low_stock_threshold' => (int) (
                             $data['low_stock_threshold'] ?? 5
