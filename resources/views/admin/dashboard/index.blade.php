@@ -6,6 +6,12 @@
 @section('content')
 
     @php
+        $formatToman = static fn (float|int $value): string => strtr(number_format((float) $value), [
+            ',' => '٬',
+            '0' => '۰', '1' => '۱', '2' => '۲', '3' => '۳', '4' => '۴',
+            '5' => '۵', '6' => '۶', '7' => '۷', '8' => '۸', '9' => '۹',
+        ]);
+
         $statusClasses = [
             'pending' => 'warning',
             'confirmed' => 'info',
@@ -85,14 +91,14 @@
         <section class="dashboard-v2__stats" aria-label="شاخص‌های اصلی">
             <article class="dashboard-v2__stat dashboard-v2__stat--dark">
                 <span>REVENUE</span>
-                <strong>{{ strtr(number_format((float) $revenue), ['0' => '۰', '1' => '۱', '2' => '۲', '3' => '۳', '4' => '۴', '5' => '۵', '6' => '۶', '7' => '۷', '8' => '۸', '9' => '۹']) }}</strong>
+                <strong>{{ $formatToman($revenue) }}</strong>
                 <small>تومان درآمد پرداخت‌شده</small>
                 <i>01</i>
             </article>
 
             <article class="dashboard-v2__stat">
                 <span>NET CASH</span>
-                <strong>{{ number_format((float) $netCash) }}</strong>
+                <strong>{{ $formatToman($netCash) }}</strong>
                 <small>خالص جریان نقدی</small>
                 <i>02</i>
             </article>
@@ -147,7 +153,7 @@
                     <span class="dashboard-v2__control-icon">چک</span>
                     <div>
                         <strong>پرداخت‌های چکی</strong>
-                        <small>{{ number_format((int) $chequesAwaitingReview) }} مورد نیازمند بررسی · {{ number_format((float) $chequesAwaitingReviewAmount) }} تومان</small>
+                        <small>{{ number_format((int) $chequesAwaitingReview) }} مورد نیازمند بررسی · {{ $formatToman($chequesAwaitingReviewAmount) }} تومان</small>
                     </div>
                     <b aria-hidden="true">←</b>
                 </a>
@@ -155,8 +161,8 @@
                 <a href="{{ route('admin.wholesale.index', ['status' => 'pending']) }}" class="dashboard-v2__control-item {{ $pendingWholesaleApplications > 0 ? 'is-attention' : '' }}">
                     <span class="dashboard-v2__control-icon">عمده</span>
                     <div>
-                        <strong>درخواست‌های عمده</strong>
-                        <small>{{ number_format((int) $pendingWholesaleApplications) }} درخواست در انتظار تصمیم مدیریتی</small>
+                        <strong>پروفایل‌های عمده</strong>
+                        <small>{{ number_format((int) $pendingWholesaleApplications) }} پروفایل در انتظار بررسی اطلاعات کسب‌وکار</small>
                     </div>
                     <b aria-hidden="true">←</b>
                 </a>
@@ -165,7 +171,7 @@
                     <span class="dashboard-v2__control-icon">انبار</span>
                     <div>
                         <strong>کنترل موجودی</strong>
-                        <small>{{ number_format((int) $lowStock) }} واریانت در محدوده هشدار · ارزش موجودی {{ number_format((float) $inventoryValue) }} تومان</small>
+                        <small>{{ number_format((int) $lowStock) }} واریانت در محدوده هشدار · ارزش موجودی {{ $formatToman($inventoryValue) }} تومان</small>
                     </div>
                     <b aria-hidden="true">←</b>
                 </a>
@@ -289,15 +295,15 @@
                 <div class="dashboard-v2__cash-list">
                     <div>
                         <span>درآمد پرداخت‌شده</span>
-                        <strong>{{ number_format((float) $revenue) }} <small>تومان</small></strong>
+                        <strong>{{ $formatToman($revenue) }} <small>تومان</small></strong>
                     </div>
                     <div>
                         <span>هزینه‌ها</span>
-                        <strong>{{ number_format((float) $expenses) }} <small>تومان</small></strong>
+                        <strong>{{ $formatToman($expenses) }} <small>تومان</small></strong>
                     </div>
                     <div class="dashboard-v2__cash-total">
                         <span>خالص</span>
-                        <strong>{{ number_format((float) $netCash) }} <small>تومان</small></strong>
+                        <strong>{{ $formatToman($netCash) }} <small>تومان</small></strong>
                     </div>
                 </div>
 

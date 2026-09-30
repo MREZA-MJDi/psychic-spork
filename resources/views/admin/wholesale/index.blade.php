@@ -97,7 +97,7 @@
 <div class="admin-card">
     <div class="admin-card-header">
         <div>
-            <h2 class="admin-card-title">درخواست‌های عمده</h2>
+            <h2 class="admin-card-title">پروفایل‌های عمده</h2>
             <p class="admin-card-description">{{ number_format($profiles->total()) }} حساب</p>
         </div>
     </div>
@@ -236,7 +236,7 @@
     @else
         <div class="admin-empty">
             <h3 class="admin-empty__title">درخواستی وجود ندارد</h3>
-            <p class="admin-empty__text">هنوز حساب عمده‌ای مطابق فیلتر فعلی پیدا نشده است.</p>
+            <p class="admin-empty__text">هنوز پروفایل کسب‌وکار مطابق فیلتر فعلی پیدا نشده است.</p>
         </div>
     @endif
 </div>

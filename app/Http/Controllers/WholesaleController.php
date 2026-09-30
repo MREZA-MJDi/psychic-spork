@@ -120,7 +120,7 @@ class WholesaleController extends Controller
             ->route('wholesale.show')
             ->with(
                 'success',
-                'درخواست خرید عمده ثبت شد و پس از بررسی مدیریت فعال می‌شود.'
+                'اطلاعات کسب‌وکار ثبت شد؛ تأیید این اطلاعات شرط خرید عمده نیست.'
             );
     }
 }
