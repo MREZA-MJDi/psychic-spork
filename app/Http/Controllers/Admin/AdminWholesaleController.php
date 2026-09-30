@@ -54,7 +54,7 @@ class AdminWholesaleController extends Controller
             ]
         );
 
-        return back()->with('success', 'دسترسی خرید عمده مشتری تأیید شد.');
+        return back()->with('success', 'پروفایل خرید عمده مشتری تأیید شد.');
     }
 
     public function reject(User $customer, Request $request): RedirectResponse
@@ -121,7 +121,7 @@ class AdminWholesaleController extends Controller
             // Suspending a wholesale profile must not silently revoke cheque permission.
         });
 
-        return back()->with('success', 'دسترسی خرید عمده مشتری تعلیق شد.');
+        return back()->with('success', 'پروفایل خرید عمده مشتری تعلیق شد.');
     }
 
     public function enableCheque(User $customer, Request $request): RedirectResponse
