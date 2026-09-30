@@ -82,7 +82,7 @@ class StorePageController extends Controller
         ]);
     }
 
-    public function contact(SeoService $seo): RedirectResponse
+    public function contact(): RedirectResponse
     {
         return redirect()->to(route('about') . '#contact');
     }
