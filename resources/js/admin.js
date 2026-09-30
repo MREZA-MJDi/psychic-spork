@@ -664,34 +664,71 @@ document.addEventListener('DOMContentLoaded', () => {
         const submit = manager.querySelector('[data-media-upload-submit]');
         const sortable = manager.querySelector('[data-media-sortable]');
 
-        const renderFiles = (files) => {
+        const renderFiles = async (files) => {
             if (!input || !preview || !submit) return;
 
             preview.innerHTML = '';
-            const validFiles = [...files].filter((file) => file.type.startsWith('image/'));
+            const selected = [...files].slice(0, 12);
+            const accepted = [];
 
-            validFiles.forEach((file) => {
-                const item = document.createElement('div');
-                item.className = 'admin-media-upload-preview__item';
+            for (const file of selected) {
+                if (file.type.startsWith('video/')) {
+                    const url = URL.createObjectURL(file);
+                    const video = document.createElement('video');
+                    video.muted = true;
+                    video.playsInline = true;
+                    video.preload = 'metadata';
+                    video.src = url;
 
-                const image = document.createElement('img');
-                image.alt = file.name;
-                image.src = URL.createObjectURL(file);
+                    await new Promise((resolve) => {
+                        video.onloadedmetadata = () => {
+                            if (video.duration <= 5.01) {
+                                accepted.push(file);
+                                video.controls = true;
+                                video.className = 'admin-media-upload-preview__asset';
+                                const item = document.createElement('div');
+                                item.className = 'admin-media-upload-preview__item';
+                                const name = document.createElement('span');
+                                name.textContent = file.name + ' · ویدئو';
+                                item.append(video, name);
+                                preview.appendChild(item);
+                            }
+                            resolve();
+                        };
+                        video.onerror = () => resolve();
+                    });
+                    continue;
+                }
 
-                const name = document.createElement('span');
-                name.textContent = file.name;
+                if (file.type.startsWith('image/')) {
+                    accepted.push(file);
+                    const item = document.createElement('div');
+                    item.className = 'admin-media-upload-preview__item';
 
-                item.append(image, name);
-                preview.appendChild(item);
-            });
+                    const image = document.createElement('img');
+                    image.alt = file.name;
+                    image.src = URL.createObjectURL(file);
+                    image.className = 'admin-media-upload-preview__asset';
 
-            if (count) {
-                count.textContent = validFiles.length
-                    ? `${validFiles.length} تصویر انتخاب شده`
-                    : '';
+                    const name = document.createElement('span');
+                    name.textContent = file.name + ' · تصویر';
+
+                    item.append(image, name);
+                    preview.appendChild(item);
+                }
             }
 
-            submit.disabled = validFiles.length === 0;
+            const transfer = new DataTransfer();
+            accepted.forEach((file) => transfer.items.add(file));
+            input.files = transfer.files;
+
+            if (count) {
+                count.textContent = accepted.length
+                    ? '\${accepted.length} رسانه انتخاب شده'
+                    : 'رسانه معتبر انتخاب نشده است';
+            }
+
+            submit.disabled = accepted.length === 0;
         };
 
         input?.addEventListener('change', () => renderFiles(input.files));
@@ -712,12 +749,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         dropzone?.addEventListener('drop', (event) => {
             const files = event.dataTransfer?.files;
-            if (!files?.length || !input) return;
-
-            const transfer = new DataTransfer();
-            [...files].slice(0, 12).forEach((file) => transfer.items.add(file));
-            input.files = transfer.files;
-            renderFiles(input.files);
+            if (!files?.length) return;
+            renderFiles(files);
         });
 
         let dragged = null;
@@ -737,22 +770,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     .filter(Boolean);
 
                 try {
-                    const response = await fetch(
-                        manager.dataset.reorderUrl,
-                        {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Accept': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
-                            },
-                            body: JSON.stringify({ media: ids }),
-                        }
-                    );
+                    const response = await fetch(manager.dataset.reorderUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                        },
+                        body: JSON.stringify({ media: ids }),
+                    });
 
-                    if (!response.ok) {
-                        throw new Error('reorder failed');
-                    }
+                    if (!response.ok) throw new Error('reorder failed');
                 } catch {
                     window.location.reload();
                 }
@@ -767,11 +795,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const rect = item.getBoundingClientRect();
                 const after = event.clientY > rect.top + rect.height / 2;
 
-                if (after) {
-                    item.after(dragged);
-                } else {
-                    item.before(dragged);
-                }
+                if (after) item.after(dragged);
+                else item.before(dragged);
             });
         });
     });
