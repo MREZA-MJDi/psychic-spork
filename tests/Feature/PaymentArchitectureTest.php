@@ -45,6 +45,23 @@ class PaymentArchitectureTest extends TestCase
         }
     }
 
+    public function test_wholesale_page_is_public(): void
+    {
+        $this->get(route('wholesale.show'))
+            ->assertOk()
+            ->assertSee('خرید عمده آنلاین برای همه باز است.');
+    }
+
+    public function test_guest_online_wholesale_payment_does_not_require_approval(): void
+    {
+        app(OnlinePaymentMethod::class)->validateCheckout(
+            null,
+            ['order_type' => 'wholesale']
+        );
+
+        $this->assertTrue(true);
+    }
+
     public function test_online_wholesale_checkout_does_not_require_wholesale_approval(): void
     {
         $customer = User::factory()->create();
