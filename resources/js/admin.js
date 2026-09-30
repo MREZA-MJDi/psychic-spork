@@ -47,7 +47,6 @@ document.addEventListener('DOMContentLoaded', () => {
         let offsetY = 0;
         let scale = 1;
         let dragging = false;
-        let objectUrl = null;
         let dragStartX = 0;
         let dragStartY = 0;
 
@@ -208,16 +207,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const saved = await replaceInputWithCrop();
             if (!saved) return;
 
-            let previewImage = preview.querySelector('[data-media-preview-image]');
-
-            if (!previewImage) {
-                previewImage = document.createElement('img');
-                previewImage.setAttribute('data-media-preview-image', '');
-                preview.appendChild(previewImage);
-            }
-
+            const previewImage = document.createElement('img');
+            previewImage.setAttribute('data-media-preview-image', '');
+            previewImage.alt = input.files[0].name || 'پیش‌نمایش تصویر';
             previewImage.src = URL.createObjectURL(input.files[0]);
-            preview.querySelector('.admin-media-field__empty')?.remove();
+
+            preview.replaceChildren(previewImage);
             fileName.textContent = input.files[0].name;
             editor.hidden = true;
         };
