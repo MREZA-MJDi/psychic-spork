@@ -7,6 +7,20 @@
 
 <section class="section-block">
 <div class="container">
+    <div class="customer-stepper" aria-label="مراحل خرید">
+        <div class="customer-stepper__item" aria-current="step">
+            <span class="customer-stepper__index">01</span>
+            <div><strong>سبد خرید</strong><span>مرور انتخاب‌ها</span></div>
+        </div>
+        <div class="customer-stepper__item">
+            <span class="customer-stepper__index">02</span>
+            <div><strong>تکمیل سفارش</strong><span>اطلاعات ارسال</span></div>
+        </div>
+        <div class="customer-stepper__item">
+            <span class="customer-stepper__index">03</span>
+            <div><strong>پرداخت</strong><span>تأیید نهایی</span></div>
+        </div>
+    </div>
 @if($items->isEmpty())
     <div class="cart-empty reveal-up"><div class="cart-empty__ring">۰</div><span class="eyebrow">YOUR BAG / 00 ITEMS</span><h2>سبد خرید خالی است.</h2><a class="button button--primary" href="{{ route('products.index') }}">مشاهده کالکشن</a></div>
 @else
@@ -25,7 +39,9 @@
                 <span>{{ number_format($item['unit_price']) }} تومان</span>
                 <form method="POST" action="{{ route('cart.update',$item['item']) }}" class="cart-quantity-form">
                     @csrf @method('PUT')
-                    <input type="number" name="quantity" min="0" max="{{ $item['variant']->stock }}" value="{{ $item['quantity'] }}">
+                    <button type="button" aria-label="کاهش تعداد" disabled>−</button>
+                    <input type="number" name="quantity" min="0" max="{{ $item['variant']->stock }}" value="{{ $item['quantity'] }}" inputmode="numeric">
+                    <button type="button" aria-label="افزایش تعداد" disabled>+</button>
                     <button type="submit">به‌روزرسانی</button>
                 </form>
             </div>
@@ -39,7 +55,10 @@
 <span class="eyebrow">ORDER SUMMARY</span><h2>جمع سبد</h2>
 <div class="cart-summary__row"><span>تعداد اقلام</span><strong>{{ number_format($items->sum('quantity')) }}</strong></div>
 <div class="cart-summary__row"><span>مبلغ قابل پرداخت</span><strong>{{ number_format($total) }} تومان</strong></div>
-<div class="cart-summary__actions"><a class="button button--ghost" href="{{ route('products.index') }}">ادامه خرید</a><a class="button button--primary" href="{{ route('checkout') }}">ثبت سفارش</a></div>
+<div class="cart-summary__actions">
+    <a class="button button--ghost" href="{{ route('products.index') }}">ادامه خرید <span aria-hidden="true">↗</span></a>
+    <a class="button button--primary" href="{{ route('checkout') }}">ثبت سفارش <span aria-hidden="true">←</span></a>
+</div>
 </aside>
 </div>
 @endif
