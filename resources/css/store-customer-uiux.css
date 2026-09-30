@@ -587,3 +587,94 @@
     .collection-card,
     .brand-mosaic__item { transition:none !important; }
 }
+
+
+/* =========================================================
+   HOME BALANCE PASS
+   Keep the immersive hero intact; make the content after it
+   feel like one editorial system instead of unrelated blocks.
+========================================================= */
+
+.home-page > section,
+.home-page > .home-section,
+.home-page > .home-editorial-section {
+    scroll-margin-top: 80px;
+}
+
+.home-page .home-section,
+.home-page .home-editorial-section {
+    padding-block: var(--store-section-y);
+}
+
+.home-page .container {
+    width: min(var(--store-max), calc(100% - (var(--store-gutter) * 2)));
+}
+
+.home-page .home-section + .home-section,
+.home-page .home-editorial-section + .home-section,
+.home-page .home-section + .home-editorial-section {
+    margin-top: 0;
+}
+
+.home-page .home-section__head,
+.home-page .section-head {
+    max-width: 1320px;
+    margin-inline: auto;
+}
+
+.home-page .product-grid {
+    gap: clamp(12px, 1.7vw, 22px);
+}
+
+.home-page .product-card {
+    box-shadow: 0 14px 42px rgba(35,58,68,.055);
+}
+
+.home-page .product-card__media {
+    aspect-ratio: 4 / 5;
+}
+
+.home-page .janan-trust {
+    border-radius: 28px;
+}
+
+.home-page .home-brand-tile,
+.home-page .home-category-card,
+.home-page .home-signal-card,
+.home-page .home-discovery-card {
+    border-radius: 22px;
+}
+
+.home-page .home-editorial-section {
+    background:
+        radial-gradient(circle at 10% 20%, rgba(223,243,250,.58), transparent 24rem),
+        radial-gradient(circle at 90% 75%, rgba(247,232,239,.48), transparent 26rem),
+        #fff;
+}
+
+.home-page .immersive-grid-hero {
+    min-height: max(680px, 100svh);
+}
+
+.home-page .immersive-title-overlay__link {
+    border-bottom: 1px solid rgba(255,255,255,.45);
+    padding-bottom: 7px;
+}
+
+.home-page .immersive-grid-hero::after {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    height: 22vh;
+    z-index: 9997;
+    pointer-events: none;
+    background: linear-gradient(180deg, transparent, rgba(0,0,0,.30));
+}
+
+@media (max-width: 720px) {
+    .home-page .home-section,
+    .home-page .home-editorial-section {
+        padding-block: 58px;
+    }
+}
