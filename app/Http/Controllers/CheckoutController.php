@@ -43,7 +43,6 @@ class CheckoutController extends Controller
         return view('pages.checkout', [
             'items' => $items,
             'total' => (float) $items->sum('line_total'),
-            'wholesaleAvailable' => true,
             'chequeEnabled' => $chequeEnabled,
             'chequeMaxOrderAmount' => $chequePermission?->max_order_amount,
         ]);
