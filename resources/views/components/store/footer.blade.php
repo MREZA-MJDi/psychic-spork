@@ -39,8 +39,13 @@
                     <b aria-hidden="true">↗</b>
                 </a>
 
-                <a href="{{ route('contact') }}">
-                    <span>پشتیبانی</span>
+                <a href="{{ route('about') }}#contact">
+                    <span>درباره و تماس</span>
+                    <b aria-hidden="true">↗</b>
+                </a>
+
+                <a href="{{ route('wholesale.show') }}">
+                    <span>خرید عمده</span>
                     <b aria-hidden="true">↗</b>
                 </a>
             </div>
@@ -113,8 +118,12 @@
                     سوالات متداول
                 </a>
 
-                <a href="{{ route('contact') }}">
-                    پشتیبانی
+                <a href="{{ route('about') }}#contact">
+                    درباره و تماس
+                </a>
+
+                <a href="{{ route('wholesale.show') }}">
+                    خرید عمده
                 </a>
 
             </nav>
