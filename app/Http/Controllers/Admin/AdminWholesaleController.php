@@ -9,6 +9,7 @@ use App\Models\WholesaleProfile;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\View\View;
 
 class AdminWholesaleController extends Controller
 {
@@ -29,6 +30,49 @@ class AdminWholesaleController extends Controller
         );
 
         return back()->with('success', 'دسترسی خرید عمده مشتری تأیید شد.');
+    }
+
+    public function reject(User $customer, Request $request): RedirectResponse
+    {
+        abort_unless($customer->isCustomer(), 404);
+
+        $profile = WholesaleProfile::query()
+            ->where('user_id', $customer->id)
+            ->firstOrFail();
+
+        $profile->update([
+            'status' => 'rejected',
+            'approved_by' => null,
+            'approved_at' => null,
+            'suspended_by' => null,
+            'suspended_at' => null,
+            'admin_note' => $request->input('note') ?: $profile->admin_note,
+        ]);
+
+        return back()->with('success', 'درخواست خرید عمده مشتری رد شد.');
+    }
+
+    public function updateTerms(User $customer, Request $request): RedirectResponse
+    {
+        abort_unless($customer->isCustomer(), 404);
+
+        $data = $request->validate([
+            'minimum_order_amount' => ['nullable', 'numeric', 'min:0'],
+            'minimum_order_quantity' => ['nullable', 'integer', 'min:1'],
+            'note' => ['nullable', 'string', 'max:2000'],
+        ]);
+
+        $profile = WholesaleProfile::query()
+            ->where('user_id', $customer->id)
+            ->firstOrFail();
+
+        $profile->update([
+            'minimum_order_amount' => $data['minimum_order_amount'] ?? null,
+            'minimum_order_quantity' => $data['minimum_order_quantity'] ?? null,
+            'admin_note' => $data['note'] ?? $profile->admin_note,
+        ]);
+
+        return back()->with('success', 'شرایط خرید عمده مشتری به‌روزرسانی شد.');
     }
 
     public function suspend(User $customer, Request $request): RedirectResponse
