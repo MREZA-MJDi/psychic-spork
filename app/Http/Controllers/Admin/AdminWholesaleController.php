@@ -37,9 +37,16 @@ class AdminWholesaleController extends Controller
             ->paginate(20)
             ->withQueryString();
 
+        $chequeRequests = ChequePermission::query()
+            ->with('user')
+            ->where('status', ChequePermission::STATUS_PENDING)
+            ->latest('requested_at')
+            ->get();
+
         return view('admin.wholesale.index', [
             'profiles' => $profiles,
             'statuses' => WholesaleProfile::STATUSES,
+            'chequeRequests' => $chequeRequests,
         ]);
     }
 
@@ -141,6 +148,7 @@ class AdminWholesaleController extends Controller
             ['user_id' => $customer->id],
             [
                 'enabled' => true,
+                'status' => ChequePermission::STATUS_APPROVED,
                 'max_order_amount' => $data['max_order_amount'] ?? null,
                 'approved_by' => $request->user()->id,
                 'approved_at' => now(),
@@ -162,6 +170,7 @@ class AdminWholesaleController extends Controller
         if ($permission) {
             $permission->update([
                 'enabled' => false,
+                'status' => ChequePermission::STATUS_DISABLED,
                 'disabled_by' => $request->user()->id,
                 'disabled_at' => now(),
                 'admin_note' => $request->input('note') ?: $permission->admin_note,
