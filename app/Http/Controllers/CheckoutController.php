@@ -116,13 +116,15 @@ class CheckoutController extends Controller
                             'total' => (float) $order->total,
                             'orderStatus' => $order->status,
                             'paymentStatus' => $order->payment_status,
+                            'paymentMethod' => $order->payment_method,
+                            'orderType' => $order->order_type,
                         ]);
 
                         return redirect()
                             ->route('checkout.success')
                             ->with(
                                 'success',
-                                'درخواست پرداخت چکی ثبت شد و در انتظار بررسی مدیریت است.'
+                                'درخواست پرداخت چکی ثبت شد و اطلاعات چک در انتظار بررسی مدیریت است.'
                             );
                     } catch (Throwable $e) {
                         if ($order) {
