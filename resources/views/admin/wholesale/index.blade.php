@@ -7,9 +7,56 @@
 <div class="admin-page-head">
     <div>
         <h1 class="admin-page-head__title">مدیریت عمده‌فروشی</h1>
-        <p class="admin-page-head__text">درخواست‌ها، وضعیت دسترسی و شرایط خرید عمده مشتریان.</p>
+        <p class="admin-page-head__text">اطلاعات کسب‌وکار عمده مشتریان و مجوز مستقل پرداخت چکی.</p>
     </div>
 </div>
+
+@if($chequeRequests->count())
+    <div class="admin-card" style="margin-bottom:20px;">
+        <div class="admin-card-header">
+            <div>
+                <h2 class="admin-card-title">درخواست‌های پرداخت چکی</h2>
+                <p class="admin-card-description">{{ number_format($chequeRequests->count()) }} درخواست در انتظار بررسی</p>
+            </div>
+        </div>
+
+        <div class="admin-table-wrap">
+            <table class="admin-table">
+                <thead>
+                <tr>
+                    <th>مشتری</th>
+                    <th>تاریخ درخواست</th>
+                    <th>سقف چک</th>
+                    <th>عملیات</th>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach($chequeRequests as $permission)
+                    <tr>
+                        <td>
+                            <div class="admin-product-name">{{ $permission->user?->name ?: 'بدون نام' }}</div>
+                            <div class="admin-muted" dir="ltr">{{ $permission->user?->phone ?: $permission->user?->email ?: '—' }}</div>
+                        </td>
+                        <td>{{ $permission->requested_at?->format('Y/m/d H:i') ?: '—' }}</td>
+                        <td>پس از تأیید تعیین می‌شود</td>
+                        <td>
+                            <form method="POST" action="{{ route('admin.customers.cheque.enable', $permission->user) }}" style="display:flex;gap:8px;flex-wrap:wrap;align-items:end;">
+                                @csrf
+                                @method('PATCH')
+                                <div class="admin-field" style="min-width:180px;">
+                                    <label>سقف هر سفارش (تومان)</label>
+                                    <input type="number" name="max_order_amount" min="0" step="1" placeholder="بدون سقف">
+                                </div>
+                                <button class="admin-btn admin-btn--secondary" type="submit">تأیید و فعال‌سازی چک</button>
+                            </form>
+                        </td>
+                    </tr>
+                @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
+@endif
 
 <div class="admin-card admin-filter-card">
     <form method="GET" action="{{ route('admin.wholesale.index') }}">
@@ -64,6 +111,7 @@
                     <th>کسب‌وکار</th>
                     <th>وضعیت</th>
                     <th>حداقل سفارش</th>
+                    <th>مجوز چک</th>
                     <th>عملیات</th>
                 </tr>
                 </thead>
@@ -97,6 +145,20 @@
                             </div>
                         </td>
                         <td>
+                            @if($profile->user?->chequePermission?->status === 'approved' && $profile->user?->chequePermission?->enabled)
+                                <span class="admin-badge">فعال</span>
+                                @if($profile->user->chequePermission->max_order_amount !== null)
+                                    <div class="admin-muted">{{ number_format((float) $profile->user->chequePermission->max_order_amount) }} تومان سقف</div>
+                                @endif
+                            @elseif($profile->user?->chequePermission?->status === 'pending')
+                                <span class="admin-badge">در انتظار تأیید</span>
+                            @elseif($profile->user?->chequePermission?->status === 'disabled')
+                                <span class="admin-muted">غیرفعال</span>
+                            @else
+                                <span class="admin-muted">درخواستی ثبت نشده</span>
+                            @endif
+                        </td>
+                        <td>
                             <div style="display:flex;gap:8px;flex-wrap:wrap;">
                                 @if(in_array($profile->status, ['pending', 'rejected', 'suspended'], true))
                                     <form method="POST" action="{{ route('admin.customers.wholesale.approve', $profile->user) }}">
@@ -114,6 +176,22 @@
                                     </form>
                                 @endif
 
+                                @if($profile->user?->chequePermission?->status === 'approved' && $profile->user?->chequePermission?->enabled)
+                                    <form method="POST" action="{{ route('admin.customers.cheque.disable', $profile->user) }}">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button class="admin-btn admin-btn--ghost" type="submit">غیرفعال‌سازی چک</button>
+                                    </form>
+                                @endif
+
+                                @if($profile->user?->chequePermission?->status === 'pending')
+                                    <form method="POST" action="{{ route('admin.customers.cheque.enable', $profile->user) }}">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button class="admin-btn admin-btn--secondary" type="submit">تأیید چک</button>
+                                    </form>
+                                @endif
+
                                 @if($profile->status === 'approved')
                                     <form method="POST" action="{{ route('admin.customers.wholesale.suspend', $profile->user) }}">
                                         @csrf
@@ -125,7 +203,7 @@
                         </td>
                     </tr>
                     <tr>
-                        <td colspan="5">
+                        <td colspan="6">
                             <form method="POST" action="{{ route('admin.customers.wholesale.terms', $profile->user) }}" class="admin-form-grid">
                                 @csrf
                                 @method('PATCH')
