@@ -45,20 +45,18 @@ class PaymentArchitectureTest extends TestCase
         }
     }
 
-    public function test_online_wholesale_checkout_also_requires_wholesale_approval(): void
+    public function test_online_wholesale_checkout_does_not_require_wholesale_approval(): void
     {
         $customer = User::factory()->create();
 
-        try {
-            app(OnlinePaymentMethod::class)->validateCheckout(
-                $customer,
-                ['order_type' => 'wholesale']
-            );
+        app(OnlinePaymentMethod::class)->validateCheckout(
+            $customer,
+            ['order_type' => 'wholesale']
+        );
 
-            $this->fail('Wholesale approval should be required.');
-        } catch (HttpException $e) {
-            $this->assertSame(403, $e->getStatusCode());
-        }
+        $this->assertDatabaseMissing('wholesale_profiles', [
+            'user_id' => $customer->id,
+        ]);
     }
 
     public function test_approved_customer_can_submit_only_one_cheque_for_an_order(): void
