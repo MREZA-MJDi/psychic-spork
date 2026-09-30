@@ -38,14 +38,6 @@ final class OrderService
                 'نوع سفارش نامعتبر است.'
             );
 
-            if ($orderType === 'wholesale') {
-                abort_unless(
-                    $user?->isCustomer(),
-                    403,
-                    'خرید عمده فقط برای حساب مشتری مجاز است.'
-                );
-            }
-
             $cartItems = $cart->items()
                 ->with([
                     'productVariant.product.galleryMedia',
@@ -192,13 +184,7 @@ final class OrderService
                 ]);
             }
 
-            if ($orderType === 'wholesale') {
-                abort_unless(
-                    $user,
-                    403,
-                    'خرید عمده فقط برای مشتری واردشده مجاز است.'
-                );
-
+            if ($orderType === 'wholesale' && $user?->isCustomer()) {
                 $this->wholesaleEligibility->assertWholesaleOrder(
                     $user,
                     $subtotal,
