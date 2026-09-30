@@ -20,11 +20,15 @@ class AdminWholesaleController extends Controller
             ->when($request->filled('q'), function ($query) use ($request): void {
                 $term = $request->string('q')->toString();
 
-                $query->whereHas('user', function ($userQuery) use ($term): void {
-                    $userQuery->where('name', 'like', "%{$term}%")
-                        ->orWhere('email', 'like', "%{$term}%")
-                        ->orWhere('phone', 'like', "%{$term}%");
-                })->orWhere('business_name', 'like', "%{$term}%");
+                $query->where(function ($searchQuery) use ($term): void {
+                    $searchQuery->whereHas('user', function ($userQuery) use ($term): void {
+                        $userQuery->where(function ($userSearch) use ($term): void {
+                            $userSearch->where('name', 'like', "%{$term}%")
+                                ->orWhere('email', 'like', "%{$term}%")
+                                ->orWhere('phone', 'like', "%{$term}%");
+                        });
+                    })->orWhere('business_name', 'like', "%{$term}%");
+                });
             })
             ->when($request->filled('status'), fn ($query) =>
                 $query->where('status', $request->string('status')->toString())
