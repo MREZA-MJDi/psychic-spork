@@ -13,6 +13,31 @@ use Illuminate\View\View;
 
 class AdminWholesaleController extends Controller
 {
+    public function index(Request $request): View
+    {
+        $statuses = ['pending', 'approved', 'suspended', 'rejected'];
+
+        $profiles = WholesaleProfile::query()
+            ->with([
+                'user.chequePermission',
+            ])
+            ->when($request->filled('q'), function ($query) use ($request): void {
+                $search = $request->string('q')->toString();
+
+                $query->whereHas('user', function ($userQuery) use ($search): void {
+                    $userQuery->where('name', 'like', '%' . $search . '%')
+                        ->orWhere('email', 'like', '%' . $search . '%')
+                        ->orWhere('phone', 'like', '%' . $search . '%');
+                });
+            })
+            ->when($request->filled('status'), fn ($query) => $query->where('status', $request->input('status')))
+            ->latest('updated_at')
+            ->paginate(20)
+            ->withQueryString();
+
+        return view('admin.wholesale.index', compact('profiles', 'statuses'));
+    }
+
     public function approve(User $customer, Request $request): RedirectResponse
     {
         abort_unless($customer->isCustomer(), 404);
@@ -92,12 +117,8 @@ class AdminWholesaleController extends Controller
                 'admin_note' => $request->input('note') ?: $profile->admin_note,
             ]);
 
-            $customer->chequePermission?->update([
-                'enabled' => false,
-                'disabled_by' => $request->user()->id,
-                'disabled_at' => now(),
-                'admin_note' => 'دسترسی عمده مشتری تعلیق شد.',
-            ]);
+            // Wholesale profile status and cheque permission are separate business controls.
+            // Suspending a wholesale profile must not silently revoke cheque permission.
         });
 
         return back()->with('success', 'دسترسی خرید عمده مشتری تعلیق شد.');
@@ -112,11 +133,8 @@ class AdminWholesaleController extends Controller
             'note' => ['nullable', 'string', 'max:2000'],
         ]);
 
-        abort_unless(
-            $customer->wholesaleProfile?->isApproved(),
-            422,
-            'ابتدا باید دسترسی خرید عمده مشتری تأیید شود.'
-        );
+        // Cheque access is an explicit admin permission. It is intentionally
+        // independent from the wholesale profile status.
 
         ChequePermission::updateOrCreate(
             ['user_id' => $customer->id],
