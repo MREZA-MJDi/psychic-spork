@@ -33,20 +33,17 @@ class CheckoutController extends Controller
         }
 
         $user = $request->user();
-        $wholesaleApproved = (bool) (
-            $user?->isCustomer()
-            && $user->wholesaleProfile?->isApproved()
-        );
-
         $chequePermission = $user?->chequePermission;
 
-        $chequeEnabled = $wholesaleApproved
-            && (bool) $chequePermission?->enabled;
+        $chequeEnabled = (bool) (
+            $user?->isCustomer()
+            && $chequePermission?->enabled
+        );
 
         return view('pages.checkout', [
             'items' => $items,
             'total' => (float) $items->sum('line_total'),
-            'wholesaleApproved' => $wholesaleApproved,
+            'wholesaleAvailable' => true,
             'chequeEnabled' => $chequeEnabled,
             'chequeMaxOrderAmount' => $chequePermission?->max_order_amount,
         ]);
@@ -80,12 +77,6 @@ class CheckoutController extends Controller
                         $currentCart = $cart->current($request);
 
                         if ($checkoutData['order_type'] === 'wholesale') {
-                            abort_unless(
-                                $request->user()?->isCustomer(),
-                                403,
-                                'خرید عمده فقط برای حساب مشتری مجاز است.'
-                            );
-
                             $quote = $wholesalePricing->quote(
                                 $currentCart,
                                 $request->user()
