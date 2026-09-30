@@ -36,7 +36,7 @@
     <section class="directory-stage directory-stage--collections">
         <div class="container">
 
-            <div class="customer-action-strip" style="margin-bottom:22px;">
+            <div class="customer-action-strip customer-action-strip--spaced">
                 <div class="customer-action-strip__copy">
                     <small>JANAN / COLLECTION MAP</small>
                     <strong>دسته را انتخاب کن و مستقیم وارد محصولات همان مسیر شو.</strong>
