@@ -13,206 +13,213 @@
     ])
 </head>
 
-<body class="auth-page">
+<body class="auth-page" data-auth-page="login">
     @php
         $isLocalDemo = app()->environment(['local', 'testing']);
         $demoEmail = config('app.admin.email');
         $demoPassword = config('app.admin.password');
     @endphp
 
-    <main class="auth-shell">
-
-        <section class="auth-card" aria-labelledby="login-title">
-
-            <div class="auth-card__top">
-                <a
-                    href="{{ route('home') }}"
-                    class="auth-brand"
-                    aria-label="{{ config('app.store_name', 'Janan') }}"
-                >
-                    <span class="auth-brand__latin">janan</span>
-                    <span class="auth-brand__fa">جانان</span>
-                </a>
-
-                <span class="auth-card__edition">
-                    PRIVATE / {{ date('Y') }}
+    <main class="auth-app">
+        <header class="auth-topbar">
+            <a href="{{ route('home') }}" class="auth-brand" aria-label="بازگشت به جانان">
+                <span class="auth-brand__mark" aria-hidden="true">J</span>
+                <span>
+                    <strong>janan</strong>
+                    <small>STORE / PRIVATE ACCESS</small>
                 </span>
+            </a>
+
+            <div class="auth-topbar__meta" aria-label="وضعیت سامانه">
+                <span class="auth-status"><i aria-hidden="true"></i> سیستم فعال</span>
+                <span class="auth-index">01 / 02</span>
             </div>
+        </header>
 
-            <div class="auth-intro">
-                <span class="eyebrow">WELCOME BACK</span>
+        <div class="auth-canvas">
+            <div class="auth-grid" aria-hidden="true"></div>
+            <div class="auth-orbit auth-orbit--one" aria-hidden="true"></div>
+            <div class="auth-orbit auth-orbit--two" aria-hidden="true"></div>
 
-                <h1 id="login-title">
-                    خوش برگشتی.
-                </h1>
-
-                <p>
-                    برای ادامه خرید یا ورود به داشبورد مدیریت، اطلاعات حساب را وارد کن.
-                </p>
-            </div>
-
-            @if(session('success'))
-                <div
-                    class="auth-alert auth-alert--success"
-                    role="status"
-                >
-                    {{ session('success') }}
+            <section class="auth-workspace" aria-labelledby="login-title">
+                <div class="auth-workspace__rail" aria-hidden="true">
+                    <span>AUTH</span>
+                    <span>01</span>
+                    <span class="auth-workspace__line"></span>
+                    <span>JANAN</span>
                 </div>
-            @endif
 
-            @if(session('error'))
-                <div
-                    class="auth-alert auth-alert--error"
-                    role="alert"
-                >
-                    {{ session('error') }}
-                </div>
-            @endif
-
-            @if($errors->any())
-                <div
-                    class="auth-alert auth-alert--error"
-                    role="alert"
-                >
-                    {{ $errors->first() }}
-                </div>
-            @endif
-
-            @if($isLocalDemo && $demoEmail && $demoPassword)
-                <div class="auth-demo" role="note">
-                    <div class="auth-demo__head">
-                        <span class="auth-demo__badge">LOCAL DEMO</span>
-                        <strong>حساب تست مدیریت</strong>
-                    </div>
-
-                    <div class="auth-demo__grid">
+                <div class="auth-panel">
+                    <div class="auth-panel__head">
                         <div>
-                            <small>USERNAME / EMAIL</small>
-                            <code>{{ $demoEmail }}</code>
+                            <span class="auth-kicker">WELCOME / BACK</span>
+                            <h1 id="login-title">دوباره وارد شو.</h1>
                         </div>
 
-                        <div>
-                            <small>PASSWORD</small>
-                            <code>{{ $demoPassword }}</code>
+                        <span class="auth-panel__code">A-01</span>
+                    </div>
+
+                    <p class="auth-lead">
+                        یک ورود، دو مسیر: حساب مشتری برای خرید و حساب مدیریت برای کنترل فروشگاه.
+                    </p>
+
+                    @if(session('success'))
+                        <div class="auth-alert auth-alert--success" role="status">
+                            {{ session('success') }}
                         </div>
-                    </div>
-                </div>
-            @endif
+                    @endif
 
-            <form
-                method="POST"
-                action="{{ route('login.store') }}"
-                class="auth-form"
-            >
-                @csrf
+                    @if(session('error'))
+                        <div class="auth-alert auth-alert--error" role="alert">
+                            {{ session('error') }}
+                        </div>
+                    @endif
 
-                <label class="auth-field">
-                    <span>
-                        ایمیل یا نام کاربری
-                        <small class="auth-field__hint">IDENTIFIER</small>
-                    </span>
+                    @if($errors->any())
+                        <div class="auth-alert auth-alert--error" role="alert">
+                            {{ $errors->first() }}
+                        </div>
+                    @endif
 
-                    <div class="auth-input-wrap">
-                        <input
-                            type="text"
-                            name="identifier"
-                            value="{{ old('identifier', $isLocalDemo ? $demoEmail : '') }}"
-                            placeholder="you@example.com"
-                            autocomplete="username"
-                            autocapitalize="none"
-                            spellcheck="false"
-                            maxlength="255"
-                            required
-                            autofocus
-                        >
-                    </div>
-                </label>
+                    @if($isLocalDemo && $demoEmail && $demoPassword)
+                        <section class="auth-demo" aria-label="دسترسی سریع مدیریت">
+                            <div class="auth-demo__top">
+                                <div>
+                                    <span class="auth-demo__eyebrow">LOCAL CONTROL</span>
+                                    <strong>ورود سریع به داشبورد</strong>
+                                </div>
+                                <button type="button" class="auth-demo__fill" data-demo-fill>
+                                    پر کردن خودکار
+                                    <span aria-hidden="true">↗</span>
+                                </button>
+                            </div>
 
-                <label class="auth-field">
-                    <span>
-                        رمز عبور
-                        <small class="auth-field__hint">PASSWORD</small>
-                    </span>
+                            <div class="auth-demo__credentials">
+                                <div class="auth-demo__credential">
+                                    <span>EMAIL</span>
+                                    <code data-demo-email>{{ $demoEmail }}</code>
+                                    <button type="button" data-copy-target="email" aria-label="کپی ایمیل مدیریت">کپی</button>
+                                </div>
+                                <div class="auth-demo__credential">
+                                    <span>PASSWORD</span>
+                                    <code data-demo-password>{{ $demoPassword }}</code>
+                                    <button type="button" data-copy-target="password" aria-label="کپی رمز مدیریت">کپی</button>
+                                </div>
+                            </div>
+                        </section>
+                    @endif
 
-                    <div class="auth-input-wrap auth-password-wrap">
-                        <input
-                            type="password"
-                            name="password"
-                            value="{{ $isLocalDemo ? $demoPassword : '' }}"
-                            placeholder="رمز عبور"
-                            autocomplete="current-password"
-                            required
-                            data-password-input
-                        >
+                    <form method="POST" action="{{ route('login.store') }}" class="auth-form">
+                        @csrf
 
-                        <button
-                            class="auth-password-toggle"
-                            type="button"
-                            data-password-toggle
-                            aria-label="نمایش رمز عبور"
-                            aria-pressed="false"
-                        >
-                            <svg viewBox="0 0 24 24" aria-hidden="true">
-                                <path d="M2.5 12s3.5-5 9.5-5 9.5 5 9.5 5-3.5 5-9.5 5-9.5-5-9.5-5Z"/>
-                                <circle cx="12" cy="12" r="2.5"/>
-                            </svg>
+                        <label class="auth-field">
+                            <span class="auth-field__label">
+                                ایمیل یا نام کاربری
+                                <small>IDENTIFIER</small>
+                            </span>
+
+                            <div class="auth-input-wrap">
+                                <span class="auth-input-index" aria-hidden="true">01</span>
+                                <input
+                                    type="text"
+                                    name="identifier"
+                                    value="{{ old('identifier', $isLocalDemo ? $demoEmail : '') }}"
+                                    placeholder="you@example.com"
+                                    autocomplete="username"
+                                    autocapitalize="none"
+                                    spellcheck="false"
+                                    maxlength="255"
+                                    required
+                                    autofocus
+                                >
+                            </div>
+                        </label>
+
+                        <label class="auth-field">
+                            <span class="auth-field__label">
+                                رمز عبور
+                                <small>PASSWORD</small>
+                            </span>
+
+                            <div class="auth-input-wrap auth-password-wrap">
+                                <span class="auth-input-index" aria-hidden="true">02</span>
+                                <input
+                                    type="password"
+                                    name="password"
+                                    value="{{ $isLocalDemo ? $demoPassword : '' }}"
+                                    placeholder="رمز عبور"
+                                    autocomplete="current-password"
+                                    required
+                                    data-password-input
+                                >
+
+                                <button
+                                    class="auth-password-toggle"
+                                    type="button"
+                                    data-password-toggle
+                                    aria-label="نمایش رمز عبور"
+                                    aria-pressed="false"
+                                >
+                                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                                        <path d="M2.5 12s3.5-5 9.5-5 9.5 5 9.5 5-3.5 5-9.5 5-9.5-5-9.5-5Z"/>
+                                        <circle cx="12" cy="12" r="2.5"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </label>
+
+                        <div class="auth-form__row">
+                            <label class="auth-check">
+                                <input type="checkbox" name="remember" value="1">
+                                <span>مرا به خاطر بسپار</span>
+                            </label>
+
+                            <a href="{{ route('home') }}">بازگشت به فروشگاه</a>
+                        </div>
+
+                        <button class="auth-button" type="submit">
+                            <span>ورود امن</span>
+                            <b aria-hidden="true">↗</b>
                         </button>
-                    </div>
-                </label>
+                    </form>
 
-                <div class="auth-form__row">
-                    <label class="auth-check">
-                        <input
-                            type="checkbox"
-                            name="remember"
-                            value="1"
-                        >
-                        <span>مرا به خاطر بسپار</span>
-                    </label>
-
-                    <a href="{{ route('home') }}">
-                        بازگشت به فروشگاه
-                    </a>
+                    <footer class="auth-panel__foot">
+                        <span>SECURE SESSION / CSRF PROTECTED</span>
+                        <span>حساب مشتری نداری؟ <a href="{{ route('register') }}">حساب جدید بساز</a></span>
+                    </footer>
                 </div>
 
-                <button
-                    class="auth-button"
-                    type="submit"
-                >
-                    ورود به جانان
-                    <span aria-hidden="true">↗</span>
-                </button>
-            </form>
+                <aside class="auth-context" aria-label="مسیرهای دسترسی">
+                    <span class="auth-context__kicker">CHOOSE YOUR SPACE</span>
+                    <strong>فضای درست<br>برای کار درست.</strong>
 
-            <div class="auth-divider">
-                <span></span>
-                <small>OR</small>
-                <span></span>
-            </div>
+                    <div class="auth-context__items">
+                        <div class="auth-context__item is-active">
+                            <span>01</span>
+                            <div>
+                                <strong>ورود</strong>
+                                <small>مشتری / مدیریت</small>
+                            </div>
+                            <b aria-hidden="true">↗</b>
+                        </div>
 
-            <p class="auth-switch">
-                حساب مشتری نداری؟
-                <a href="{{ route('register') }}">ساخت حساب جدید</a>
-            </p>
+                        <a href="{{ route('register') }}" class="auth-context__item">
+                            <span>02</span>
+                            <div>
+                                <strong>ثبت‌نام</strong>
+                                <small>ساخت حساب مشتری</small>
+                            </div>
+                            <b aria-hidden="true">↗</b>
+                        </a>
+                    </div>
 
-        </section>
-
-        <aside
-            class="auth-visual"
-            aria-hidden="true"
-        >
-            <div class="auth-visual__orb auth-visual__orb--one"></div>
-            <div class="auth-visual__orb auth-visual__orb--two"></div>
-            <div class="auth-visual__veil"></div>
-
-            <div class="auth-visual__frame">
-                <span class="auth-visual__frame-index">01 / JANAN</span>
-                <span class="auth-visual__nasta">کالکشن جانان</span>
-                <span class="auth-visual__frame-caption">PRIVATE ACCESS · STORE / ADMIN</span>
-            </div>
-
-        </aside>
-
+                    <div class="auth-context__note">
+                        <i aria-hidden="true"></i>
+                        <span>مجوزهای مدیریتی فقط برای حساب‌هایی که <b>is_admin</b> فعال دارند برقرار است.</span>
+                    </div>
+                </aside>
+            </section>
+        </div>
     </main>
 </body>
 </html>
