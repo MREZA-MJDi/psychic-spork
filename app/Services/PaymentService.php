@@ -9,6 +9,11 @@ use Illuminate\Support\Facades\DB;
 
 final class PaymentService
 {
+    public function __construct(
+        private readonly DoubleEntryAccountingService $accounting,
+    ) {
+    }
+
     public function matchStatus(Order $order, string $status): void
     {
         match ($status) {
@@ -109,6 +114,14 @@ final class PaymentService
                     $reference ?? $payment->reference_number,
             ]);
 
+            $this->accounting->recordSale(
+                reference: $order,
+                amount: (float) $order->total,
+                settlementAccount: $this->settlementAccountForGateway($gateway ?? $payment->gateway),
+                sourceKey: 'sale:order:' . $order->id,
+                description: "فروش سفارش {$order->order_number}",
+            );
+
             FinancialTransaction::firstOrCreate([
                 'type' => 'income',
                 'category' => 'order',
@@ -165,6 +178,14 @@ final class PaymentService
                 'payment_status' => 'refunded',
             ]);
 
+            $this->accounting->recordRefund(
+                reference: $order,
+                amount: (float) $order->total,
+                settlementAccount: $this->settlementAccountForGateway($payment->gateway),
+                sourceKey: 'refund:order:' . $order->id,
+                description: "بازپرداخت سفارش {$order->order_number}",
+            );
+
             FinancialTransaction::firstOrCreate([
                 'type' => 'expense',
                 'category' => 'refund',
@@ -179,5 +200,13 @@ final class PaymentService
 
             return $payment->fresh();
         });
+    }
+    private function settlementAccountForGateway(?string $gateway): string
+    {
+        return match ($gateway) {
+            'cash', 'manual' => 'cash',
+            'cheque' => 'bank',
+            default => 'bank',
+        };
     }
 }
