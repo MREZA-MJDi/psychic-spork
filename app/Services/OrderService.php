@@ -39,8 +39,11 @@ final class OrderService
             );
 
             if ($orderType === 'wholesale') {
-                abort_unless($user, 403, 'خرید عمده فقط برای مشتری واردشده مجاز است.');
-                $this->wholesaleEligibility->assertWholesaleAllowed($user);
+                abort_unless(
+                    $user?->isCustomer(),
+                    403,
+                    'خرید عمده فقط برای حساب مشتری مجاز است.'
+                );
             }
 
             $cartItems = $cart->items()
