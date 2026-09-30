@@ -767,77 +767,23 @@
     ========================================================== --}}
 
     <section class="admin-card admin-form-section admin-form-section-full">
-
         <div class="admin-card-header">
-
             <div>
-
-                <h2 class="admin-card-title">
-                    تصویر محصول
-                </h2>
-
-                <p class="admin-card-description">
-                    قبل از ذخیره می‌توانید تصویر انتخاب‌شده را ببینید.
-                </p>
-
+                <h2 class="admin-card-title">تصویر اصلی محصول</h2>
+                <p class="admin-card-description">تصویر را انتخاب کن و قبل از ذخیره کادر دقیق نمایش محصول را مشخص کن.</p>
             </div>
-
         </div>
-
-
         <div style="padding:20px 22px 22px;">
-
-            <div
-                id="image-preview-wrap"
-                @if(!$imagePreviewUrl) style="display:none;" @endif
-            >
-
-                <div class="admin-current-image">
-
-                    <img
-                        id="image-preview"
-                        src="{{ $imagePreviewUrl ?: '' }}"
-                        alt="{{ $product?->name ?: 'پیش‌نمایش تصویر' }}"
-                    >
-
-                    <div>
-
-                        <strong>
-                            پیش‌نمایش تصویر
-                        </strong>
-
-                        <p class="admin-muted">
-                            این تصویر قبل از ذخیره به شما نمایش داده می‌شود.
-                        </p>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <div class="admin-field">
-
-                <label for="image_file">
-                    انتخاب تصویر
-                </label>
-
-                <input
-                    id="image_file"
-                    type="file"
-                    name="image_file"
-                    accept="image/jpeg,image/png,image/webp"
-                >
-
-                <small class="admin-help">
-                    JPG، PNG یا WebP — حداکثر 2MB
-                </small>
-
-            </div>
-
+            @include('admin.components.media-picker', [
+                'name' => 'image_file',
+                'id' => 'image_file',
+                'label' => 'انتخاب تصویر اصلی',
+                'help' => 'عکس را بکش و زوم کن تا دقیقاً همان قسمت موردنظر در کارت و صفحه محصول دیده شود.',
+                'currentUrl' => $imagePreviewUrl,
+                'currentAlt' => $product?->name ?: 'محصول',
+                'ratio' => '4:5',
+            ])
         </div>
-
     </section>
 
 </div>
