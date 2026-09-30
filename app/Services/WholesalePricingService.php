@@ -15,9 +15,9 @@ final class WholesalePricingService
 
     public function quote(
         Cart $cart,
-        User $user
+        ?User $user = null
     ): array {
-        $profile = $this->eligibility->assertWholesaleAllowed($user);
+        $profile = $user?->wholesaleProfile;
 
         $items = $cart->items()
             ->with([
@@ -71,7 +71,7 @@ final class WholesalePricingService
             $subtotal += $unitPrice * $count;
         }
 
-        if ($profile) {
+        if ($profile?->isApproved()) {
             $this->assertMinimums($profile, $subtotal, $quantity);
         }
 
