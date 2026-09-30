@@ -36,6 +36,17 @@
     <section class="directory-stage directory-stage--brands">
         <div class="container">
 
+            <div class="customer-action-strip" style="margin-bottom:22px;">
+                <div class="customer-action-strip__copy">
+                    <small>JANAN / BRAND MAP</small>
+                    <strong>هویت برند را ببین و بعد مستقیم وارد محصولاتش شو.</strong>
+                </div>
+                <div class="customer-action-strip__actions">
+                    <a class="button button--primary" href="{{ route('products.index') }}">همه محصولات</a>
+                    <a class="button button--ghost" href="{{ route('categories.index') }}">دسته‌ها</a>
+                </div>
+            </div>
+
             <header class="directory-intro">
                 <div>
                     <span class="eyebrow">MEET THE HOUSES</span>
