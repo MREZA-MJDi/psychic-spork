@@ -28,7 +28,7 @@
                 <h2>مسیر مرجوعی باید روشن و قابل پیگیری باشد.</h2>
             </div>
 
-            <div class="customer-action-strip" style="margin-bottom:18px;">
+            <div class="customer-action-strip customer-action-strip--spaced">
                 <div class="customer-action-strip__copy"><small>JANAN / RETURN PATH</small><strong>سیاست واقعی را ببین و در صورت نیاز با پشتیبانی ارتباط بگیر.</strong></div>
                 <div class="customer-action-strip__actions"><a class="button button--ghost" href="{{ route('faq') }}">سوالات متداول</a><a class="button button--primary" href="{{ route('about') }}#contact">پشتیبانی</a></div>
             </div>
