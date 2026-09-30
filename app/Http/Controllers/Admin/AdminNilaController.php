@@ -29,7 +29,6 @@ class AdminNilaController extends Controller
 
         $recentMappings = IntegrationMapping::query()
             ->where('integration', 'nila')
-            ->with('entity')
             ->latest('updated_at')
             ->limit(12)
             ->get();
