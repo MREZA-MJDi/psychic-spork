@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\ChequePayment;
 use App\Models\ContactMessage;
 use App\Models\FinancialTransaction;
+use App\Models\IntegrationMapping;
 use App\Models\Order;
+use App\Models\WholesaleProfile;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\User;
@@ -241,9 +243,31 @@ class AdminDashboardController extends Controller
             ->unread()
             ->count();
 
-        $chequesAwaitingReview = ChequePayment::query()
-            ->whereIn('status', ['submitted', 'under_review'])
+        $chequesAwaitingReviewQuery = ChequePayment::query()
+            ->whereIn('status', ['submitted', 'under_review']);
+
+        $chequesAwaitingReview = (clone $chequesAwaitingReviewQuery)->count();
+
+        $chequesAwaitingReviewAmount = (float) (clone $chequesAwaitingReviewQuery)->sum('amount');
+
+        $pendingWholesaleApplications = WholesaleProfile::query()
+            ->where('status', 'pending')
             ->count();
+
+        $nilaMappings = IntegrationMapping::query()
+            ->where('integration', 'nila');
+
+        $nilaProductMappings = (clone $nilaMappings)
+            ->where('entity_type', Product::class)
+            ->count();
+
+        $nilaVariantMappings = (clone $nilaMappings)
+            ->where('entity_type', ProductVariant::class)
+            ->count();
+
+        $nilaLastMappedAt = (clone $nilaMappings)
+            ->latest('updated_at')
+            ->value('updated_at');
 
 
         /*
@@ -372,6 +396,11 @@ class AdminDashboardController extends Controller
                 'unreadContactMessages' => $unreadContactMessages,
 
                 'chequesAwaitingReview' => $chequesAwaitingReview,
+                'chequesAwaitingReviewAmount' => $chequesAwaitingReviewAmount,
+                'pendingWholesaleApplications' => $pendingWholesaleApplications,
+                'nilaProductMappings' => $nilaProductMappings,
+                'nilaVariantMappings' => $nilaVariantMappings,
+                'nilaLastMappedAt' => $nilaLastMappedAt,
 
                 'lowStock' => $lowStock,
 
