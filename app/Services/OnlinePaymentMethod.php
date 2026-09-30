@@ -11,7 +11,6 @@ final class OnlinePaymentMethod implements PaymentMethod
 {
     public function __construct(
         private readonly PaymentGateway $gateway,
-        private readonly WholesaleEligibilityService $eligibility,
     ) {
     }
 
@@ -29,7 +28,6 @@ final class OnlinePaymentMethod implements PaymentMethod
                 'برای خرید عمده باید وارد حساب مشتری شوید.'
             );
 
-            $this->eligibility->assertWholesaleAllowed($user);
         }
     }
 
