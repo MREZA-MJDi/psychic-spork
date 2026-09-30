@@ -16,7 +16,7 @@
 </section>
 <section class="section-block catalog-stage">
 <div class="container">
-    <div class="customer-action-strip" style="margin-bottom:18px;">
+    <div class="customer-action-strip customer-action-strip--spaced">
         <div class="customer-action-strip__copy">
             <small>COLLECTION / {{ strtoupper($category->slug) }}</small>
             <strong>{{ number_format($products->total()) }} انتخاب در این کالکشن</strong>
