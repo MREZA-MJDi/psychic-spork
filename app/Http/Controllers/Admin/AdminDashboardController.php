@@ -46,13 +46,42 @@ class AdminDashboardController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | Financial summary
+        | Accounting summary
+        |
+        | The dashboard reads recognized revenue and settled cash/bank
+        | from the double-entry ledger. Legacy manual expenses remain
+        | visible until the manual-expense posting path is migrated.
         |--------------------------------------------------------------------------
         */
 
-        $revenue = (float) (clone $baseOrders)
-            ->where('payment_status', 'paid')
-            ->sum('total');
+        $ledgerLines = JournalLine::query()
+            ->with('account')
+            ->whereHas('entry', function ($query) use ($from, $to): void {
+                $query->whereBetween('entry_date', [
+                    $from->toDateString(),
+                    $to->toDateString(),
+                ]);
+            });
+
+        $revenue = (float) (clone $ledgerLines)
+            ->whereHas('account', fn ($query) => $query->where('code', 'sales'))
+            ->sum('credit');
+
+        $salesReturns = (float) (clone $ledgerLines)
+            ->whereHas('account', fn ($query) => $query->where('code', 'sales_returns'))
+            ->sum('debit');
+
+        $revenue = max(0, $revenue - $salesReturns);
+
+        $settledFundsIn = (float) (clone $ledgerLines)
+            ->whereHas('account', fn ($query) => $query->whereIn('code', ['cash', 'bank']))
+            ->sum('debit');
+
+        $settledFundsOut = (float) (clone $ledgerLines)
+            ->whereHas('account', fn ($query) => $query->whereIn('code', ['cash', 'bank']))
+            ->sum('credit');
+
+        $settledFunds = $settledFundsIn - $settledFundsOut;
 
         $expenses = (float) FinancialTransaction::query()
             ->where('type', 'expense')
@@ -61,6 +90,8 @@ class AdminDashboardController extends Controller
                 $to->toDateString(),
             ])
             ->sum('amount');
+
+        $netCash = $settledFunds - $expenses;
 
 
         /*
@@ -318,7 +349,11 @@ class AdminDashboardController extends Controller
 
                 'expenses' => $expenses,
 
-                'netCash' => $revenue - $expenses,
+                'netCash' => $netCash,
+
+                'settledFunds' => $settledFunds,
+
+                'salesReturns' => $salesReturns,
 
                 'paidOrdersCount' => $paidOrdersCount,
 
