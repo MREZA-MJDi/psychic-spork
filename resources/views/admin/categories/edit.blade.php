@@ -43,6 +43,17 @@
             'parentCategories' => $parentCategories,
         ])
 
+    @include('admin.components.media-uploader', [
+        'mediaItem' => $category->coverMedia,
+        'uploadType' => 'category',
+        'uploadId' => $category->id,
+        'title' => 'تصویر دسته‌بندی',
+        'description' => 'تصویر دسته‌بندی را راحت آپلود کن، پیش‌نمایش بگیر و در صورت نیاز crop کن.',
+        'videoAllowed' => false,
+        'accept' => 'image/jpeg,image/png,image/webp,image/avif',
+    ])
+
+
     </form>
 
 @endsection
