@@ -143,7 +143,7 @@
             </div>
 
             <div class="dashboard-v2__control-grid">
-                <a href="{{ route('admin.cheques.index', ['status' => 'under_review']) }}" class="dashboard-v2__control-item {{ $chequesAwaitingReview > 0 ? 'is-attention' : '' }}">
+                <a href="{{ route('admin.cheques.index') }}" class="dashboard-v2__control-item {{ $chequesAwaitingReview > 0 ? 'is-attention' : '' }}">
                     <span class="dashboard-v2__control-icon">چک</span>
                     <div>
                         <strong>پرداخت‌های چکی</strong>
