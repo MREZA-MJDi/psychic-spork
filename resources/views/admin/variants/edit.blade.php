@@ -44,6 +44,15 @@
             'variant' => $variant,
         ])
 
+    @include('admin.components.media-uploader', [
+        'mediaItem' => $variant->galleryMedia->first(),
+        'uploadType' => 'variant',
+        'uploadId' => $variant->id,
+        'title' => 'تصویر یا ویدئوی واریانت',
+        'description' => 'برای هر رنگ یا سایز می‌توانی تصویر اختصاصی داشته باشی؛ ویدئوی کوتاه هم پشتیبانی می‌شود.',
+    ])
+
+
     </form>
 
 @endsection
