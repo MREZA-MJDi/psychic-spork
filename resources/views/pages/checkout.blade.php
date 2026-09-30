@@ -144,12 +144,13 @@
                                 </div>
 
                                 @if($isCustomer && ! $chequePending)
-                                    <form method="POST" action="{{ route('wholesale.cheque.request') }}">
-                                        @csrf
-                                        <button type="submit" class="button button--ghost">
-                                            درخواست مجوز چک
-                                        </button>
-                                    </form>
+                                    <button
+                                        type="submit"
+                                        form="cheque-permission-request"
+                                        class="button button--ghost"
+                                    >
+                                        درخواست مجوز چک
+                                    </button>
                                 @endif
                             </div>
                         @endif
@@ -311,6 +312,17 @@
                     ادامه و ثبت سفارش
                 </button>
             </form>
+
+            @if($isCustomer && ! $chequeApproved && ! $chequePending)
+                <form
+                    id="cheque-permission-request"
+                    method="POST"
+                    action="{{ route('wholesale.cheque.request') }}"
+                    hidden
+                >
+                    @csrf
+                </form>
+            @endif
         </section>
 
         <aside class="checkout-card checkout-card--summary">
