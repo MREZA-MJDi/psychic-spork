@@ -73,7 +73,7 @@
 
 (() => {
     const syncCheckoutChoices = () => {
-        const form = document.querySelector('.checkout-form[action="{{ route('checkout.store') }}"]');
+        const form = document.querySelector('.checkout-form');
         if (!form) return;
 
         const wholesale = form.querySelector('input[name="order_type"]:checked')?.value === 'wholesale';
