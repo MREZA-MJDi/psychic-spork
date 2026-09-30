@@ -39,9 +39,7 @@
                 <span>{{ number_format($item['unit_price']) }} تومان</span>
                 <form method="POST" action="{{ route('cart.update',$item['item']) }}" class="cart-quantity-form">
                     @csrf @method('PUT')
-                    <button type="button" aria-label="کاهش تعداد" disabled>−</button>
                     <input type="number" name="quantity" min="0" max="{{ $item['variant']->stock }}" value="{{ $item['quantity'] }}" inputmode="numeric">
-                    <button type="button" aria-label="افزایش تعداد" disabled>+</button>
                     <button type="submit">به‌روزرسانی</button>
                 </form>
             </div>
