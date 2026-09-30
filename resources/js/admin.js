@@ -1,25 +1,40 @@
 document.addEventListener('DOMContentLoaded', () => {
     const sidebar = document.querySelector('[data-admin-sidebar]');
     const menu = document.querySelector('[data-admin-menu]');
+    const backdrop = document.querySelector('[data-admin-sidebar-backdrop]');
 
-    menu?.addEventListener('click', () => {
-        const isOpen = sidebar?.classList.toggle('is-open') ?? false;
-        menu.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    if (!sidebar || !menu) return;
+
+    const setOpen = (open) => {
+        sidebar.classList.toggle('is-open', open);
+        backdrop?.classList.toggle('is-open', open);
+        menu.setAttribute('aria-expanded', open ? 'true' : 'false');
+        document.body.classList.toggle('admin-nav-open', open && window.innerWidth <= 900);
+
+        if (open) {
+            sidebar.querySelector('a, button')?.focus({ preventScroll: true });
+        }
+    };
+
+    menu.addEventListener('click', () => {
+        setOpen(!sidebar.classList.contains('is-open'));
     });
 
-    sidebar?.querySelectorAll('a').forEach((link) => {
-        link.addEventListener('click', () => {
-            sidebar.classList.remove('is-open');
-            menu?.setAttribute('aria-expanded', 'false');
-        });
+    backdrop?.addEventListener('click', () => setOpen(false));
+
+    sidebar.querySelectorAll('a').forEach((link) => {
+        link.addEventListener('click', () => setOpen(false));
     });
 
-    document.addEventListener('click', (event) => {
-        if (window.innerWidth > 820) return;
-        if (!sidebar?.classList.contains('is-open')) return;
-        if (sidebar.contains(event.target) || menu?.contains(event.target)) return;
-        sidebar.classList.remove('is-open');
-        menu?.setAttribute('aria-expanded', 'false');
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && sidebar.classList.contains('is-open')) {
+            setOpen(false);
+            menu.focus({ preventScroll: true });
+        }
+    });
+
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 900) setOpen(false);
     });
 });
 
@@ -54,15 +69,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const resizeCanvas = () => {
             const max = 720;
-            if (ratio >= 1) {
-                canvas.width = max;
-                canvas.height = Math.round(max / ratio);
-            } else {
-                canvas.height = max;
-                canvas.width = Math.round(max * ratio);
-            }
+            if (ratio >= 1) { canvas.width = max; canvas.height = Math.round(max / ratio); }
+            else { canvas.height = max; canvas.width = Math.round(max * ratio); }
         };
-
         resizeCanvas();
 
         const draw = () => {
@@ -193,13 +202,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 'image/webp', 0.88);
         });
 
-        fitButton?.addEventListener('click', () => {
-            offsetX = 0;
-            offsetY = 0;
-            scale = 1;
-            zoom.value = '1';
-            draw();
-        });
+        fitButton?.addEventListener('click', () => { offsetX = 0; offsetY = 0; scale = 1; zoom.value = '1'; draw(); });
 
         const saveCropToPreview = async () => {
             if (!image) return;
@@ -211,7 +214,6 @@ document.addEventListener('DOMContentLoaded', () => {
             previewImage.setAttribute('data-media-preview-image', '');
             previewImage.alt = input.files[0].name || 'پیش‌نمایش تصویر';
             previewImage.src = URL.createObjectURL(input.files[0]);
-
             preview.replaceChildren(previewImage);
             fileName.textContent = input.files[0].name;
             editor.hidden = true;
@@ -674,34 +676,71 @@ document.addEventListener('DOMContentLoaded', () => {
         const submit = manager.querySelector('[data-media-upload-submit]');
         const sortable = manager.querySelector('[data-media-sortable]');
 
-        const renderFiles = (files) => {
+        const renderFiles = async (files) => {
             if (!input || !preview || !submit) return;
 
             preview.innerHTML = '';
-            const validFiles = [...files].filter((file) => file.type.startsWith('image/'));
+            const selected = [...files].slice(0, 12);
+            const accepted = [];
 
-            validFiles.forEach((file) => {
-                const item = document.createElement('div');
-                item.className = 'admin-media-upload-preview__item';
+            for (const file of selected) {
+                if (file.type.startsWith('video/')) {
+                    const url = URL.createObjectURL(file);
+                    const video = document.createElement('video');
+                    video.muted = true;
+                    video.playsInline = true;
+                    video.preload = 'metadata';
+                    video.src = url;
 
-                const image = document.createElement('img');
-                image.alt = file.name;
-                image.src = URL.createObjectURL(file);
+                    await new Promise((resolve) => {
+                        video.onloadedmetadata = () => {
+                            if (video.duration <= 5.01) {
+                                accepted.push(file);
+                                video.controls = true;
+                                video.className = 'admin-media-upload-preview__asset';
+                                const item = document.createElement('div');
+                                item.className = 'admin-media-upload-preview__item';
+                                const name = document.createElement('span');
+                                name.textContent = file.name + ' · ویدئو';
+                                item.append(video, name);
+                                preview.appendChild(item);
+                            }
+                            resolve();
+                        };
+                        video.onerror = () => resolve();
+                    });
+                    continue;
+                }
 
-                const name = document.createElement('span');
-                name.textContent = file.name;
+                if (file.type.startsWith('image/')) {
+                    accepted.push(file);
+                    const item = document.createElement('div');
+                    item.className = 'admin-media-upload-preview__item';
 
-                item.append(image, name);
-                preview.appendChild(item);
-            });
+                    const image = document.createElement('img');
+                    image.alt = file.name;
+                    image.src = URL.createObjectURL(file);
+                    image.className = 'admin-media-upload-preview__asset';
 
-            if (count) {
-                count.textContent = validFiles.length
-                    ? `${validFiles.length} تصویر انتخاب شده`
-                    : '';
+                    const name = document.createElement('span');
+                    name.textContent = file.name + ' · تصویر';
+
+                    item.append(image, name);
+                    preview.appendChild(item);
+                }
             }
 
-            submit.disabled = validFiles.length === 0;
+            const transfer = new DataTransfer();
+            accepted.forEach((file) => transfer.items.add(file));
+            input.files = transfer.files;
+
+            if (count) {
+                count.textContent = accepted.length
+                    ? '\${accepted.length} رسانه انتخاب شده'
+                    : 'رسانه معتبر انتخاب نشده است';
+            }
+
+            submit.disabled = accepted.length === 0;
         };
 
         input?.addEventListener('change', () => renderFiles(input.files));
@@ -722,12 +761,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         dropzone?.addEventListener('drop', (event) => {
             const files = event.dataTransfer?.files;
-            if (!files?.length || !input) return;
-
-            const transfer = new DataTransfer();
-            [...files].slice(0, 12).forEach((file) => transfer.items.add(file));
-            input.files = transfer.files;
-            renderFiles(input.files);
+            if (!files?.length) return;
+            renderFiles(files);
         });
 
         let dragged = null;
@@ -747,22 +782,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     .filter(Boolean);
 
                 try {
-                    const response = await fetch(
-                        manager.dataset.reorderUrl,
-                        {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Accept': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
-                            },
-                            body: JSON.stringify({ media: ids }),
-                        }
-                    );
+                    const response = await fetch(manager.dataset.reorderUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                        },
+                        body: JSON.stringify({ media: ids }),
+                    });
 
-                    if (!response.ok) {
-                        throw new Error('reorder failed');
-                    }
+                    if (!response.ok) throw new Error('reorder failed');
                 } catch {
                     window.location.reload();
                 }
@@ -777,11 +807,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const rect = item.getBoundingClientRect();
                 const after = event.clientY > rect.top + rect.height / 2;
 
-                if (after) {
-                    item.after(dragged);
-                } else {
-                    item.before(dragged);
-                }
+                if (after) item.after(dragged);
+                else item.before(dragged);
             });
         });
     });
