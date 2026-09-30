@@ -3985,3 +3985,190 @@ body.admin-nav-open {
         font-size: 18px;
     }
 }
+
+
+/* =========================================================
+   OPERATIONAL CONTROL CENTER
+========================================================= */
+
+.admin-control-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+.admin-control-card {
+    min-width: 0;
+    padding: 18px;
+    border: 1px solid var(--admin-border);
+    border-radius: var(--admin-radius-md);
+    background: var(--admin-surface);
+}
+
+.admin-control-card--attention {
+    border-color: rgba(165, 109, 22, .22);
+    background: var(--admin-warning-bg);
+}
+
+.admin-control-card span,
+.admin-control-card small {
+    display: block;
+    color: var(--admin-muted);
+    font-size: 9px;
+}
+
+.admin-control-card strong {
+    display: block;
+    margin: 7px 0 3px;
+    color: var(--admin-text);
+    font-size: 18px;
+    font-weight: 850;
+}
+
+.admin-action-stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+}
+
+.dashboard-v2__control-center {
+    margin: 18px 0 24px;
+    padding: 20px;
+    border: 1px solid var(--admin-border);
+    border-radius: var(--admin-radius-xl);
+    background: var(--admin-surface);
+    box-shadow: var(--admin-shadow-xs);
+}
+
+.dashboard-v2__control-head {
+    margin-bottom: 14px;
+}
+
+.dashboard-v2__control-head h2 {
+    margin: 4px 0;
+    color: var(--admin-text);
+    font-size: 17px;
+    font-weight: 850;
+}
+
+.dashboard-v2__control-head p {
+    margin: 0;
+    color: var(--admin-muted);
+    font-size: 9px;
+    line-height: 1.9;
+}
+
+.dashboard-v2__control-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.dashboard-v2__control-item {
+    min-width: 0;
+    min-height: 76px;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+    padding: 13px 14px;
+    border: 1px solid var(--admin-border);
+    border-radius: 14px;
+    color: var(--admin-text);
+    background: var(--admin-surface-soft);
+    transition: border-color var(--admin-transition), background var(--admin-transition), transform var(--admin-transition);
+}
+
+.dashboard-v2__control-item:hover {
+    border-color: var(--admin-border-strong);
+    background: var(--admin-surface);
+    transform: translateY(-1px);
+}
+
+.dashboard-v2__control-item.is-attention {
+    border-color: rgba(165, 109, 22, .22);
+    background: var(--admin-warning-bg);
+}
+
+.dashboard-v2__control-item--static {
+    cursor: default;
+}
+
+.dashboard-v2__control-icon {
+    min-width: 48px;
+    height: 38px;
+    display: inline-grid;
+    place-items: center;
+    padding: 0 8px;
+    border-radius: 10px;
+    color: var(--admin-text-soft);
+    background: var(--admin-surface-muted);
+    font-size: 9px;
+    font-weight: 800;
+}
+
+.dashboard-v2__control-item.is-attention .dashboard-v2__control-icon {
+    color: var(--admin-warning);
+    background: rgba(165, 109, 22, .10);
+}
+
+.dashboard-v2__control-item strong,
+.dashboard-v2__control-item small {
+    display: block;
+}
+
+.dashboard-v2__control-item strong {
+    margin-bottom: 3px;
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.dashboard-v2__control-item small {
+    color: var(--admin-muted);
+    font-size: 8px;
+    line-height: 1.8;
+}
+
+.dashboard-v2__control-item > b {
+    color: var(--admin-muted);
+    font-size: 13px;
+}
+
+.dashboard-v2__control-state {
+    align-self: start;
+    color: var(--admin-info);
+    font-size: 8px;
+    font-weight: 800;
+}
+
+@media (max-width: 900px) {
+    .admin-control-grid,
+    .dashboard-v2__control-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-v2__control-center {
+        padding: 15px;
+        border-radius: 18px;
+    }
+}
+
+@media (max-width: 560px) {
+    .dashboard-v2__control-item {
+        min-height: 70px;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        padding: 11px;
+    }
+
+    .dashboard-v2__control-icon {
+        min-width: 42px;
+        height: 34px;
+        font-size: 8px;
+    }
+
+    .admin-control-card {
+        padding: 14px;
+    }
+}
