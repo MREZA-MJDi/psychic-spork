@@ -33,6 +33,18 @@
         </div>
     </section>
 
+    <section class="section-block section-block--compact">
+        <div class="container">
+            <div class="customer-action-strip">
+                <div class="customer-action-strip__copy"><small>JANAN / START HERE</small><strong>کاتالوگ، دسته‌ها و ارتباط؛ همه در یک مسیر.</strong></div>
+                <div class="customer-action-strip__actions">
+                    <a class="button button--primary" href="{{ route('products.index') }}">کشف محصولات</a>
+                    <a class="button button--ghost" href="#contact">ارتباط با جانان</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <section class="store-page__section">
         <div class="container">
 
