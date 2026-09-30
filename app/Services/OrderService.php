@@ -15,7 +15,6 @@ final class OrderService
     public function __construct(
         private readonly PaymentService $payment,
         private readonly CartService $cart,
-        private readonly WholesaleEligibilityService $wholesaleEligibility,
         private readonly WholesalePricingService $wholesalePricing,
     ) {
     }
@@ -106,8 +105,6 @@ final class OrderService
             ]);
 
             $subtotal = 0;
-            $wholesaleQuantity = 0;
-
             foreach ($cartItems as $cartItem) {
                 $variant = ProductVariant::query()
                     ->with([
@@ -141,10 +138,6 @@ final class OrderService
                 $unitPrice = $orderType === 'wholesale'
                     ? $this->wholesalePricing->unitPrice($variant)
                     : (float) $variant->effective_price;
-
-                if ($orderType === 'wholesale') {
-                    $wholesaleQuantity += $quantity;
-                }
 
                 $lineTotal = $unitPrice * $quantity;
 
