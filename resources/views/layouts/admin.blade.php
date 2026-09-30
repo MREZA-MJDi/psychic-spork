@@ -90,6 +90,14 @@
             </a>
 
             <a
+                href="{{ route('admin.wholesale.index') }}"
+                class="admin-link {{ request()->routeIs('admin.wholesale.*') || request()->routeIs('admin.customers.wholesale.*') || request()->routeIs('admin.customers.cheque.*') ? 'active' : '' }}"
+            >
+                <span class="admin-link-icon">ع</span>
+                <span>عمده و مجوز چک</span>
+            </a>
+
+            <a
                 href="{{ route('admin.cheques.index') }}"
                 class="admin-link {{ request()->routeIs('admin.cheques.*') ? 'active' : '' }}"
             >
