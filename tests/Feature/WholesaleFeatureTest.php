@@ -14,6 +14,7 @@ use App\Models\ChequePermission;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Http\UploadedFile;
 use Tests\TestCase;
 
 class WholesaleFeatureTest extends TestCase
@@ -276,6 +277,48 @@ class WholesaleFeatureTest extends TestCase
             'user_id' => $customer->id,
             'enabled' => false,
         ]);
+    }
+
+    public function test_wholesale_cheque_requires_admin_granted_permission(): void
+    {
+        $customer = User::factory()->create(['is_admin' => false]);
+
+        WholesaleProfile::create([
+            'user_id' => $customer->id,
+            'status' => 'pending',
+        ]);
+
+        [, $variant] = $this->makeProduct(stock: 10, wholesalePrice: 70000);
+
+        $cart = Cart::create([
+            'user_id' => $customer->id,
+            'last_activity_at' => now(),
+        ]);
+
+        CartItem::create([
+            'cart_id' => $cart->id,
+            'product_variant_id' => $variant->id,
+            'quantity' => 2,
+        ]);
+
+        $this->actingAs($customer)
+            ->post('/checkout', array_merge(
+                $this->checkoutData([
+                    'order_type' => 'wholesale',
+                    'payment_method' => 'cheque',
+                    'sayad_id' => '1234567890123456',
+                    'cheque_number' => 'CHK-1',
+                    'bank_name' => 'بانک تست',
+                    'account_holder' => 'کاربر عمده',
+                    'due_date' => now()->addDays(30)->toDateString(),
+                ]),
+                [
+                    'cheque_image' => UploadedFile::fake()->image('cheque.jpg'),
+                ]
+            ))
+            ->assertForbidden();
+
+        $this->assertDatabaseCount('orders', 0);
     }
 
     private function checkoutData(array $overrides = []): array
