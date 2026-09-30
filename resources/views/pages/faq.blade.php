@@ -20,6 +20,18 @@
         </div>
     </section>
 
+    <section class="section-block section-block--compact">
+        <div class="container">
+            <div class="customer-action-strip">
+                <div class="customer-action-strip__copy"><small>JANAN / NEED HELP</small><strong>اول جواب را ببین؛ بعد مستقیم به مسیر خرید برگرد.</strong></div>
+                <div class="customer-action-strip__actions">
+                    <a class="button button--primary" href="{{ route('products.index') }}">مشاهده محصولات</a>
+                    <a class="button button--ghost" href="{{ route('about') }}#contact">تماس</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <section class="store-page__section">
         <div class="container store-page__faq">
 
