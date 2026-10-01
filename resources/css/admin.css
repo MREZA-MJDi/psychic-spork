@@ -3987,6 +3987,79 @@ body.admin-nav-open {
 }
 
 
+
+.admin-hero-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 118px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.admin-hero-toggle input {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.admin-hero-toggle > span[aria-hidden="true"] {
+    position: relative;
+    inline-size: 36px;
+    block-size: 22px;
+    flex: 0 0 36px;
+    border-radius: 999px;
+    background: var(--admin-surface-muted);
+    border: 1px solid var(--admin-border);
+    transition: background var(--admin-transition), border-color var(--admin-transition);
+}
+
+.admin-hero-toggle > span[aria-hidden="true"]::after {
+    content: "";
+    position: absolute;
+    inset-block-start: 3px;
+    inset-inline-start: 3px;
+    inline-size: 14px;
+    block-size: 14px;
+    border-radius: 50%;
+    background: var(--admin-muted);
+    transition: transform var(--admin-transition), background var(--admin-transition);
+}
+
+.admin-hero-toggle input:checked + span[aria-hidden="true"] {
+    background: var(--admin-info);
+    border-color: var(--admin-info);
+}
+
+.admin-hero-toggle input:checked + span[aria-hidden="true"]::after {
+    transform: translateX(-14px);
+    background: #fff;
+}
+
+.admin-hero-toggle input:focus-visible + span[aria-hidden="true"] {
+    outline: 2px solid var(--admin-info);
+    outline-offset: 3px;
+}
+
+.admin-hero-toggle__text {
+    color: var(--admin-text-soft);
+    font-size: 9px;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+    .admin-hero-toggle {
+        min-width: 0;
+    }
+
+    .admin-hero-toggle__text {
+        display: none;
+    }
+}
+
 /* =========================================================
    OPERATIONAL CONTROL CENTER
 ========================================================= */
