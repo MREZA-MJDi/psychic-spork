@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\AdminBrandController;
 use App\Http\Controllers\Admin\AdminCategoryController;
 use App\Http\Controllers\Admin\AdminChequeController;
 use App\Http\Controllers\Admin\AdminWholesaleController;
+use App\Http\Controllers\Admin\AdminWholesalePackController;
 use App\Http\Controllers\Admin\AdminCustomerController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminFinancialController;
@@ -266,6 +267,9 @@ Route::prefix('admin')
 
         Route::get('wholesale', [AdminWholesaleController::class, 'index'])
             ->name('wholesale.index');
+
+        Route::resource('wholesale-packs', AdminWholesalePackController::class)
+            ->except(['show']);
 
         Route::patch(
             'customers/{customer}/wholesale/approve',
