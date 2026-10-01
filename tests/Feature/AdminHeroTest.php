@@ -50,7 +50,7 @@ class AdminHeroTest extends TestCase
             ->assertSee('Hero Product 3');
     }
 
-    public function test_hero_selection_is_capped_at_ninety_products(): void
+    public function test_hero_selection_is_capped_at_six_products(): void
     {
         $admin = User::factory()->create(['is_admin' => true]);
 
@@ -64,6 +64,6 @@ class AdminHeroTest extends TestCase
             ])
             ->assertRedirect();
 
-        $this->assertDatabaseCount('hero_slides', 90);
+        $this->assertDatabaseCount('hero_slides', 6);
     }
 }
