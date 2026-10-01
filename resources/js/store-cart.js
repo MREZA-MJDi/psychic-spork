@@ -1,3 +1,7 @@
+(() => {
+    if (window.__JANAN_STORE_CART_INITIALIZED__) return;
+    window.__JANAN_STORE_CART_INITIALIZED__ = true;
+
 const csrfToken = document
     .querySelector('meta[name="csrf-token"]')
     ?.getAttribute('content') || '';
@@ -9,6 +13,37 @@ const quickPreviewName = quickPreview?.querySelector('[data-cart-preview-name]')
 const quickPreviewMeta = quickPreview?.querySelector('[data-cart-preview-meta]');
 
 let quickPreviewTimer = null;
+let actionMessageTimer = null;
+let cartTaskQueue = Promise.resolve();
+
+const enqueueCartTask = (task) => {
+    const run = cartTaskQueue.then(task, task);
+    cartTaskQueue = run.catch(() => undefined);
+
+    return run;
+};
+
+const showStoreMessage = (message, type = 'error') => {
+    let region = document.querySelector('[data-store-action-message]');
+
+    if (!region) {
+        region = document.createElement('div');
+        region.className = 'store-action-message';
+        region.dataset.storeActionMessage = 'true';
+        region.setAttribute('role', 'status');
+        region.setAttribute('aria-live', 'polite');
+        document.body.appendChild(region);
+    }
+
+    region.textContent = String(message || 'عملیات انجام نشد.');
+    region.dataset.type = type;
+    region.classList.add('is-visible');
+
+    window.clearTimeout(actionMessageTimer);
+    actionMessageTimer = window.setTimeout(() => {
+        region.classList.remove('is-visible');
+    }, 3200);
+};
 
 const cartState = {
     count: 0,
@@ -384,7 +419,7 @@ const openDrawer = async (refresh = true) => {
     if (!refresh) return;
 
     try {
-        await fetchCart();
+        await enqueueCartTask(() => fetchCart());
     } catch (error) {
         if (body) {
             body.textContent = error.message;
@@ -393,17 +428,6 @@ const openDrawer = async (refresh = true) => {
 };
 
 
-
-// Bind the real storefront cart buttons directly as well as through delegation.
-// This keeps the cart reliable when the immersive homepage has touch/drag layers.
-document.querySelectorAll('[data-cart-open]').forEach((trigger) => {
-    trigger.addEventListener('click', async (event) => {
-        event.preventDefault();
-        event.stopPropagation();
-        hideQuickPreview();
-        await openDrawer();
-    });
-});
 
 const closeDrawer = () => {
     if (!drawer) return;
@@ -458,13 +482,15 @@ document.addEventListener('click', async (event) => {
         const quantity = Math.max(0, Number(item.quantity) + delta);
 
         try {
-            await mutateCart(
-                '/cart/' + item.id,
-                'PUT',
-                { quantity }
+            await enqueueCartTask(() =>
+                mutateCart(
+                    '/cart/' + item.id,
+                    'PUT',
+                    { quantity }
+                )
             );
         } catch (error) {
-            window.alert(error.message);
+            showStoreMessage(error.message);
         }
 
         return;
@@ -474,9 +500,11 @@ document.addEventListener('click', async (event) => {
         event.preventDefault();
 
         try {
-            await mutateCart(
-                '/cart/' + removeTrigger.dataset.cartRemove,
-                'DELETE'
+            await enqueueCartTask(() =>
+                mutateCart(
+                    '/cart/' + removeTrigger.dataset.cartRemove,
+                    'DELETE'
+                )
             );
         } catch (error) {
             window.alert(error.message);
@@ -516,34 +544,33 @@ document.addEventListener('submit', async (event) => {
     }
 
     try {
-        const response = await fetch(form.action, {
-            method: 'POST',
-            headers: {
-                Accept: 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-            },
-            body: formData,
-        });
+        await enqueueCartTask(async () => {
+            const response = await fetch(form.action, {
+                method: 'POST',
+                headers: {
+                    Accept: 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                body: formData,
+            });
 
-        const payload = await response.json();
+            const payload = await response.json();
 
-        if (!response.ok) {
-            throw new Error(payload.message || 'افزودن به سبد انجام نشد.');
-        }
+            if (!response.ok) {
+                throw new Error(payload.message || 'افزودن به سبد انجام نشد.');
+            }
 
-        setCartCount(payload.count);
+            setCartCount(payload.count);
 
-        // Only animate after the server confirms the real cart mutation.
-        animateProductToCart(form);
+            // Only animate after the server confirms the real cart mutation.
+            animateProductToCart(form);
 
-        // نمایش فوری کنار آیکن سبد؛ رندر کامل Drawer بعد از آن انجام می‌شود.
-        showQuickPreview(payload, form);
-
-        window.setTimeout(() => {
+            // نمایش فوری کنار آیکن سبد؛ رندر Drawer از همین پاسخ قطعی انجام می‌شود.
+            showQuickPreview(payload, form);
             renderCart(payload);
-        }, 0);
+        });
     } catch (error) {
-        window.alert(error.message);
+        showStoreMessage(error.message);
     } finally {
         if (button) {
             button.disabled = false;
@@ -569,3 +596,5 @@ document.addEventListener('keydown', (event) => {
         closeDrawer();
     }
 });
+
+})();
