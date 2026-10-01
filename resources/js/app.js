@@ -54,6 +54,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    document.addEventListener('click', (event) => {
+        if (
+            !mobileMenu?.classList.contains('is-open') ||
+            mobileMenu.contains(event.target) ||
+            menuToggle?.contains(event.target)
+        ) {
+            return;
+        }
+
+        mobileMenu.classList.remove('is-open');
+        mobileMenu.setAttribute('aria-hidden', 'true');
+        menuToggle?.setAttribute('aria-expanded', 'false');
+    });
+
     document.addEventListener('keydown', (event) => {
         if (event.key === 'Escape' && searchPanel?.classList.contains('is-open')) {
             setSearchOpen(false);
