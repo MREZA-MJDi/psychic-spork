@@ -27,7 +27,7 @@
 
     <div class="immersive-split-screen" id="immersiveSplitScreen">
         <div class="immersive-split-screen__left" id="immersiveSplitLeft">
-            <div class="immersive-zoom-target" id="immersiveZoomTarget"></div>
+            <a class="immersive-zoom-target" id="immersiveZoomTarget" href="{{ route('products.index') }}" aria-label="مشاهده محصول انتخاب‌شده"></a>
         </div>
 
         <div class="immersive-split-screen__right" id="immersiveSplitRight"></div>
