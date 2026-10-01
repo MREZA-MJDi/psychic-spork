@@ -204,7 +204,7 @@ class StoreProductController extends Controller
             'category',
             'brand',
             'activeVariants.galleryMedia',
-            'galleryMedia',
+            'galleryMedia' => fn ($query) => $query->orderBy('sort_order')->orderBy('id')->limit(8),
         ]);
 
         $relatedProducts = Product::query()
