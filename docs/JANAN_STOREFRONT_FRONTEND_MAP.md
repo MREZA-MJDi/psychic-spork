@@ -1,6 +1,6 @@
 # Janan storefront frontend map
 
-The storefront uses one shared shell and one shared responsive source of truth.
+The storefront uses one shared shell and one store CSS entry; responsive behavior has one source of truth.
 
 ## Shared shell
 
@@ -30,12 +30,14 @@ Product detail: `resources/views/products/show.blade.php` owns the visual/galler
 
 ## Styling ownership
 
+`resources/css/store.css` is the single storefront stylesheet entry. It imports the base/store layers in order and keeps responsive CSS last.
+
 `resources/css/core.css` — reset and shared font faces.
-`resources/css/app.css` — Janan tokens and shared storefront base.
-`resources/css/store-structure.css` — shared layout primitives and structural surfaces.
-`resources/css/store-polish.css` — component/detail presentation and interaction polish.
-`resources/css/store-customer-uiux.css` — customer-facing catalog/UI layer.
-`resources/css/store-responsive.css` — shared storefront responsive behavior, mobile navigation, and immersive viewport rules.
+`resources/css/app.css` — Janan tokens and shared storefront base, imported by `store.css`.
+`resources/css/store-structure.css` — shared layout primitives and structural surfaces, imported by `store.css`.
+`resources/css/store-polish.css` — component/detail presentation and interaction polish, imported by `store.css`.
+`resources/css/store-customer-uiux.css` — customer-facing catalog/UI layer, imported by `store.css`.
+`resources/css/store-responsive.css` — shared storefront responsive behavior, mobile navigation, and immersive viewport rules; imported last by `store.css`.
 `resources/css/home.css` — Home-only visual component styling.
 `resources/css/editorial-hero.css` — immersive hero visual behavior.
 `resources/css/wholesale.css` — wholesale-only styling.
