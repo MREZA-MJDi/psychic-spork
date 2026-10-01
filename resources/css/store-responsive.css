@@ -2665,8 +2665,8 @@
     }
 
     .product-gallery-v2__main {
-        height: min(560px, 56vw);
-        min-height: 390px;
+        height: min(520px, 52vw);
+        min-height: 360px;
     }
 
     .product-variant-visuals__grid {
@@ -2697,8 +2697,8 @@
     }
 
     .product-gallery-v2__main {
-        height: min(620px, 78vw);
-        min-height: 420px;
+        height: min(560px, 72vw);
+        min-height: 390px;
     }
 
     .product-detail-v2__purchase {
@@ -2749,9 +2749,9 @@
     }
 
     .product-gallery-v2__main {
-        height: 102vw;
-        min-height: 360px;
-        max-height: 500px;
+        height: min(108vw, 480px);
+        min-height: 330px;
+        max-height: 480px;
     }
 
     .product-gallery-v2__main img {
@@ -2858,9 +2858,9 @@
     }
 
     .product-gallery-v2__main {
-        height: 108vw;
-        min-height: 330px;
-        max-height: 440px;
+        height: min(112vw, 430px);
+        min-height: 310px;
+        max-height: 430px;
     }
 
     .product-detail-v2__sku {
