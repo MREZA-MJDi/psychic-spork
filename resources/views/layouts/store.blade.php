@@ -48,7 +48,6 @@
 
     @php
         $storeAssets = [
-            'resources/css/store.css',
             'resources/js/app.js',
             'resources/js/store-cart.js',
             'resources/js/store-search.js',
@@ -74,7 +73,7 @@
         }
 
         if (!app()->environment('testing')) {
-            $storeAssets[] = 'resources/css/store-responsive.css';
+            $storeAssets[] = 'resources/css/store.css';
         }
     @endphp
 
