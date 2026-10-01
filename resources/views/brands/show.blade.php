@@ -8,15 +8,13 @@
         <div class="container brand-hero">
 
             <div class="brand-hero__logo">
-                @if($brand->logoMedia?->url)
-                    <img
-                        src="{{ $brand->logoMedia->url }}"
-                        alt="لوگوی {{ $brand->name }}"
-                        fetchpriority="high"
-                    >
-                @else
-                    <span>{{ mb_substr($brand->name, 0, 1) }}</span>
-                @endif
+                <x-store.image
+                    :src="$brand->logoMedia?->url"
+                    :alt="'لوگوی ' . $brand->name"
+                    fetchpriority="high"
+                    fallback-tag="span"
+                    :fallback="mb_substr($brand->name, 0, 1)"
+                />
             </div>
 
             <div class="brand-hero__copy">
