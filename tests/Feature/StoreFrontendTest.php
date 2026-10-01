@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Category;
+use App\Models\Media;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\User;
@@ -252,6 +253,54 @@ class StoreFrontendTest extends TestCase
             ->assertSee('125,000', false)
             ->assertSee('DETAIL-', false)
             ->assertSee('افزودن به سبد خرید');
+    }
+
+
+    public function test_product_detail_renders_variant_media_as_visual_options(): void
+    {
+        $category = Category::create([
+            'name' => 'تصویر واریانت',
+            'slug' => 'variant-media-' . uniqid(),
+            'is_active' => true,
+            'sort_order' => 1,
+        ]);
+
+        $product = Product::create([
+            'category_id' => $category->id,
+            'name' => 'محصول با تصویر واریانت',
+            'slug' => 'variant-media-product-' . uniqid(),
+            'is_active' => true,
+            'is_featured' => false,
+            'sort_order' => 1,
+        ]);
+
+        $variant = ProductVariant::create([
+            'product_id' => $product->id,
+            'sku' => 'VAR-MEDIA-' . strtoupper(uniqid()),
+            'price' => 180000,
+            'sale_price' => null,
+            'stock' => 4,
+            'low_stock_threshold' => 1,
+            'is_active' => true,
+            'sort_order' => 1,
+        ]);
+
+        Media::create([
+            'mediable_type' => $variant->getMorphClass(),
+            'mediable_id' => $variant->id,
+            'collection' => 'gallery',
+            'disk' => 'public',
+            'path' => 'variants/test-variant.webp',
+            'original_name' => 'test-variant.webp',
+            'mime_type' => 'image/webp',
+            'sort_order' => 0,
+        ]);
+
+        $this->get(route('products.show', $product))
+            ->assertOk()
+            ->assertSee('product-variant-visual', false)
+            ->assertSee('data-variant-image="/media/variants/test-variant.webp"', false)
+            ->assertSee($variant->display_name);
     }
 
 }
