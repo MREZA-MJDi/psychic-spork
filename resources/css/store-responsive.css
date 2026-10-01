@@ -1848,7 +1848,7 @@ width:
     }
 
     .store-header__inner .brand {
-        grid-column: 2;
+        grid-column: 1;
         justify-self: center;
         align-self: center;
         width: 42px;
