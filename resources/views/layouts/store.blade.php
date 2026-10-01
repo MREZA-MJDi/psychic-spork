@@ -46,24 +46,42 @@
         </script>
     @endif
 
-    @vite([
-        'resources/css/app.css',
-        'resources/css/store-structure.css',
-        'resources/js/app.js',
-        'resources/js/store-cart.js',
-        'resources/js/store-search.js',
-        'resources/js/store-customer-uiux.js',
-    ])
-
-    @unless(app()->environment('testing'))
-        @vite([
+    @php
+        $storeAssets = [
+            'resources/css/app.css',
+            'resources/css/store-structure.css',
             'resources/css/store-polish.css',
-            'resources/css/store-responsive.css',
             'resources/css/store-customer-uiux.css',
-        ])
-    @endunless
+            'resources/js/app.js',
+            'resources/js/store-cart.js',
+            'resources/js/store-search.js',
+            'resources/js/store-customer-uiux.js',
+        ];
 
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js" defer></script>
+        if (request()->routeIs('wholesale.show')) {
+            $storeAssets[] = 'resources/css/wholesale.css';
+        }
+
+        if (request()->routeIs('products.show')) {
+            $storeAssets[] = 'resources/js/product-show.js';
+        }
+
+        if ($isHome) {
+            $storeAssets[] = 'resources/css/home.css';
+            $storeAssets[] = 'resources/css/editorial-hero.css';
+            $storeAssets[] = 'resources/js/editorial-hero.js';
+
+            if (!app()->environment('testing')) {
+                $storeAssets[] = 'resources/js/home-product-carousel.js';
+            }
+        }
+
+        if (!app()->environment('testing')) {
+            $storeAssets[] = 'resources/css/store-responsive.css';
+        }
+    @endphp
+
+    @vite($storeAssets)
 
 </head>
 
