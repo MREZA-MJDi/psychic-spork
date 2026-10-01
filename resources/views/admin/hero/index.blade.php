@@ -12,7 +12,7 @@
             <p>فقط محصولاتی که تیک می‌زنی در Hero صفحه اصلی نمایش داده می‌شوند. ترتیب انتخاب، ترتیب نمایش است.</p>
         </div>
         <div class="admin-page-head__meta">
-            <strong>{{ $selectedIds->count() }}/6</strong>
+            <strong>{{ $selectedIds->count() }}/90</strong>
             <span>اسلاید فعال</span>
         </div>
     </div>
@@ -35,7 +35,7 @@
         @endif
     </form>
 
-    <form method="POST" action="{{ route('admin.hero.update') }}">
+    <form method="POST" action="{{ route('admin.hero.update') }}" data-hero-form>
         @csrf
         @method('PUT')
 
@@ -78,8 +78,10 @@
             </nav>
         @endif
 
+        <div class="hero-admin-hidden" data-hero-hidden></div>
+
         <div class="hero-admin-actions">
-            <span>حداکثر ۶ محصول انتخاب کن.</span>
+            <span>حداکثر ۹۰ محصول انتخاب کن.</span>
             <button class="button button--primary" type="submit">ذخیره Hero</button>
         </div>
     </form>
@@ -88,7 +90,7 @@
 
 @push('styles')
 <style>
-.hero-admin-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px}
+ .hero-admin-hidden{display:none}.hero-admin-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px}
 .hero-product-card{position:relative;display:flex;flex-direction:column;gap:10px;padding:10px;border:1px solid var(--admin-border,#ddd);border-radius:18px;background:var(--admin-surface,#fff);cursor:pointer}
 .hero-product-card input{position:absolute;opacity:0;pointer-events:none}
 .hero-product-card__image{display:block;aspect-ratio:1/1;overflow:hidden;border-radius:13px;background:#f2f2f2}
@@ -107,12 +109,50 @@
 <script>
 document.addEventListener('DOMContentLoaded',function(){
     const boxes=[...document.querySelectorAll('[data-hero-product]')];
-    const sync=()=>boxes.forEach(box=>box.closest('.hero-product-card')?.classList.toggle('is-selected',box.checked));
+    const form=document.querySelector('[data-hero-form]');
+    const hidden=document.querySelector('[data-hero-hidden]');
+    const key='janan:admin:hero:selected:v1';
+    let selected=new Set(@json($selectedIds->map(fn($id)=>(string)$id)->values()));
+
+    try{
+        const saved=JSON.parse(sessionStorage.getItem(key)||'[]');
+        if(Array.isArray(saved)) saved.forEach(id=>selected.add(String(id)));
+    }catch(e){}
+
+    const sync=()=>{
+        boxes.forEach(box=>{
+            const checked=selected.has(String(box.value));
+            box.checked=checked;
+            box.closest('.hero-product-card')?.classList.toggle('is-selected',checked);
+        });
+        if(hidden){
+            hidden.replaceChildren(...[...selected].slice(0,90).map(id=>{
+                const input=document.createElement('input');
+                input.type='hidden';
+                input.name='product_ids[]';
+                input.value=id;
+                return input;
+            }));
+        }
+        try{sessionStorage.setItem(key,JSON.stringify([...selected].slice(0,90)))}catch(e){}
+    };
+
     boxes.forEach(box=>box.addEventListener('change',function(){
-        const selected=boxes.filter(item=>item.checked);
-        if(selected.length>6)this.checked=false;
+        const id=String(this.value);
+        if(this.checked){
+            if(selected.size>=90){this.checked=false;return}
+            selected.add(id);
+        }else{
+            selected.delete(id);
+        }
         sync();
     }));
+
+    form?.addEventListener('submit',function(){
+        try{sessionStorage.removeItem(key)}catch(e){}
+        boxes.forEach(box=>box.removeAttribute('name'));
+    });
+
     sync();
 });
 </script>

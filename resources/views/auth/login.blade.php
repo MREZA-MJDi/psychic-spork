@@ -53,7 +53,7 @@
                     <div class="auth-panel__head">
                         <div>
                             <span class="auth-kicker">WELCOME / BACK</span>
-                            <h1 id="login-title">دوباره وارد شو.</h1>
+                            <h1 id="login-title">خوش برگشتی.</h1>
                         </div>
 
                         <span class="auth-panel__code">A-01</span>
@@ -178,7 +178,7 @@
                         </div>
 
                         <button class="auth-button" type="submit">
-                            <span>ورود امن</span>
+                            <span>ورود به جانان</span>
                             <b aria-hidden="true">↗</b>
                         </button>
                     </form>

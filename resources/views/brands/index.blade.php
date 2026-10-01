@@ -36,7 +36,7 @@
     <section class="directory-stage directory-stage--brands">
         <div class="container">
 
-            <div class="customer-action-strip" style="margin-bottom:22px;">
+            <div class="customer-action-strip customer-action-strip--spaced">
                 <div class="customer-action-strip__copy">
                     <small>JANAN / BRAND MAP</small>
                     <strong>هویت برند را ببین و بعد مستقیم وارد محصولاتش شو.</strong>

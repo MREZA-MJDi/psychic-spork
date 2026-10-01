@@ -128,8 +128,14 @@ class HomeController extends Controller
             ->limit(4)
             ->get();
 
+        $heroVersion = Cache::remember(
+            'store:home:hero:version',
+            now()->addYear(),
+            fn () => '1'
+        );
+
         $heroSlides = Cache::remember(
-            'store:home:hero',
+            'store:home:hero:' . $heroVersion,
             now()->addMinutes(30),
             fn () => HeroSlide::query()
                 ->active()
@@ -142,7 +148,7 @@ class HomeController extends Controller
                 ])
                 ->orderBy('sort_order')
                 ->orderBy('id')
-                ->limit(6)
+                ->limit(90)
                 ->get()
                 ->values()
                 ->map(function (HeroSlide $slide, int $index): array {
