@@ -57,6 +57,23 @@ body.home-immersive {
   text-decoration: none;
 }
 
+.immersive-preloader {
+  position: absolute;
+  inset: 0;
+  z-index: 100000;
+  display: grid;
+  place-items: center;
+  background: #000;
+  opacity: 1;
+  pointer-events: all;
+}
+
+.immersive-preloader canvas {
+  width: 300px;
+  height: 300px;
+  display: block;
+}
+
 .immersive-grid-hero p,
 .immersive-grid-hero h3,
 .immersive-grid-hero h1 {
