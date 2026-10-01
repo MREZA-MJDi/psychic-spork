@@ -24,8 +24,11 @@ class StoreNavigationTest extends TestCase
             'href="' . route('categories.index') . '" class="store-nav__link'
         );
 
-        $response->assertSee(
-            'href="' . route('club') . '" class="store-nav__link'
+        $response->assertSee('href="' . route('club') . '"');
+        $response->assertSee('DrClubz');
+        $response->assertMatchesRegularExpression(
+            '/href="' . preg_quote(route('club'), '/') . '"\\s+class="store-nav__link(?:\\s+is-active)?"/',
+            $response->getContent()
         );
 
         // The mobile storefront bar keeps the same customer-focused five-item
