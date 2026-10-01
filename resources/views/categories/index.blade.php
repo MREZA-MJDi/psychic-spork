@@ -77,7 +77,7 @@
                                     <div class="card-image-placeholder" aria-hidden="true">
                                         <span>{{ $category->name }}</span>
                                     </div>
-                                @endif>
+                                @endif
 
                                 <span class="collection-card__number">
                                     {{ sprintf('%02d', $loop->iteration) }}
