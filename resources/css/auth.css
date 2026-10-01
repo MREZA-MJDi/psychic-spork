@@ -458,7 +458,7 @@
     background:
         linear-gradient(180deg, rgba(40,50,59,.08), rgba(40,50,59,.52)),
         linear-gradient(135deg, rgba(98,178,209,.30), rgba(218,142,169,.18)),
-        url('/hero/banner2.jpg') center center / cover no-repeat,
+        url('/images/auth.webp') center center / cover no-repeat,
         linear-gradient(135deg, #4f91ad, #cb7694);
 }
 
