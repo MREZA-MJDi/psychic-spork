@@ -1,4 +1,7 @@
 (() => {
+    if (window.__JANAN_PRODUCT_SHOW_INITIALIZED__) return;
+    window.__JANAN_PRODUCT_SHOW_INITIALIZED__ = true;
+
     const root = document.querySelector('[data-product-purchase]');
     if (!root) return;
 
@@ -6,6 +9,9 @@
     const galleryMain = gallery?.querySelector('[data-gallery-main]');
     const galleryThumbs = [...(gallery?.querySelectorAll('[data-gallery-thumb]') || [])];
     const galleryCurrent = gallery?.querySelector('[data-gallery-current]');
+    const galleryMode = gallery?.querySelector('[data-gallery-mode]');
+    const galleryTotal = gallery?.querySelector('[data-gallery-total]');
+
 
     const variants = [...root.querySelectorAll('[data-product-variant]')];
     const form = root.querySelector('.product-purchase-form');
@@ -17,7 +23,7 @@
     const regularPrice = root.querySelector('[data-product-regular-price]');
     const wholesalePrice = root.querySelector('[data-product-wholesale-price]');
     const stock = root.querySelector('[data-product-stock]');
-    const sku = document.querySelector('[data-product-sku]');
+    const skuNodes = [...document.querySelectorAll('[data-product-sku]')];
     const variantLabel = root.querySelector('[data-product-variant-label]');
     const addButton = root.querySelector('[data-product-add-button]');
     const addLabel = root.querySelector('[data-product-add-label]');
@@ -54,6 +60,9 @@
         const action = button.dataset.variantAction || '';
         const label = button.dataset.variantLabel || '';
         const variantSku = button.dataset.variantSku || '';
+        const variantImage = button.dataset.variantImage || '';
+        const variantImageAlt = button.dataset.variantImageAlt || '';
+
 
         if (form && action) {
             form.action = action;
@@ -79,8 +88,33 @@
             variantLabel.textContent = label || 'انتخاب نشده';
         }
 
-        if (sku) {
-            sku.textContent = variantSku || '—';
+        skuNodes.forEach((node) => {
+            node.textContent = variantSku || '—';
+        });
+
+        if (galleryMain && variantImage) {
+            galleryMain.src = variantImage;
+            galleryMain.alt = variantImageAlt || galleryMain.alt || '';
+            galleryThumbs.forEach((item) => {
+                item.classList.remove('is-active');
+                item.setAttribute('aria-pressed', 'false');
+            });
+
+            if (galleryMode) {
+                galleryMode.textContent = 'VARIANT';
+            }
+
+            if (galleryCurrent) {
+                galleryCurrent.textContent = String(button.dataset.variantIndex || '01').padStart(2, '0');
+            }
+
+            if (galleryTotal) {
+                galleryTotal.textContent = String(variants.length).padStart(2, '0');
+            }
+
+            if (form) {
+                form.dataset.productImage = variantImage;
+            }
         }
 
         if (stock) {
@@ -142,8 +176,20 @@
                 item.setAttribute('aria-pressed', String(active));
             });
 
+            if (galleryMode) {
+                galleryMode.textContent = 'PRODUCT';
+            }
+
             if (galleryCurrent) {
                 galleryCurrent.textContent = thumb.dataset.galleryIndex || '01';
+            }
+
+            if (galleryTotal) {
+                galleryTotal.textContent = String(galleryThumbs.length).padStart(2, '0');
+            }
+
+            if (form && !variants.some((item) => item.classList.contains('is-selected') && item.dataset.variantImage)) {
+                form.dataset.productImage = thumb.dataset.gallerySrc || '';
             }
         });
     });
