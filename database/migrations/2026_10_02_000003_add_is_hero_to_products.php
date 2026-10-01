@@ -29,7 +29,6 @@ return new class extends Migration
                 ->update(['is_hero' => true]);
         }
 
-        Schema::dropIfExists('hero_slides');
     }
 
     public function down(): void
