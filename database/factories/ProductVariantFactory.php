@@ -15,7 +15,7 @@ class ProductVariantFactory extends Factory
     public function definition(): array
     {
         return [
-            'product_id' => null,
+            'product_id' => Product::factory(),
             'sku' => 'SKU-' . strtoupper(fake()->unique()->bothify('????-#####')),
             'size' => fake()->randomElement(['S', 'M', 'L', 'XL']),
             'color' => fake()->randomElement(['مشکی', 'سفید', 'کرم', 'نود']),
