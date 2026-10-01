@@ -1564,8 +1564,8 @@ width:
     .immersive-grid-hero .immersive-close-button {
         top: 78px;
         right: 12px;
-        width: 44px;
-        height: 44px;
+        width: 40px;
+        height: 40px;
         z-index: 8;
     }
 
@@ -6108,8 +6108,8 @@ body.home-immersive .immersive-grid-hero{
         grid-column: 2;
         justify-self: center;
         align-self: center;
-        width: 48px;
-        height: 48px;
+        width: 42px;
+        height: 42px;
         display: grid;
         place-items: center;
         padding: 0;
@@ -6130,7 +6130,7 @@ body.home-immersive .immersive-grid-hero{
         margin: 0;
         color: var(--janan-pink-ink);
         font-family: 'IranNastaliq', serif;
-        font-size: 22px;
+        font-size: 20px;
         font-weight: 400;
         line-height: 1;
         white-space: nowrap;
