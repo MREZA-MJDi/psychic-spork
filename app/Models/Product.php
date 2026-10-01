@@ -17,7 +17,7 @@ class Product extends Model
 
     protected $fillable = [
         'category_id','brand_id','name','slug','short_description','description','attributes',
-        'meta_title','meta_description','is_active','is_featured','sort_order',
+        'meta_title','meta_description','is_active','is_featured','is_hero','sort_order',
     ];
 
     protected function casts(): array
@@ -26,6 +26,7 @@ class Product extends Model
             'attributes' => 'array',
             'is_active' => 'boolean',
             'is_featured' => 'boolean',
+            'is_hero' => 'boolean',
             'sort_order' => 'integer',
         ];
     }
