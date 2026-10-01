@@ -34,7 +34,7 @@ class StoreNavigationTest extends TestCase
         // The mobile storefront bar keeps the same customer-focused five-item
         // contract and must not silently fall back to the wholesale link.
         $response->assertSee('store-mobile-bottom');
-        $response->assertSee('aria-label="باشگاه مشتریان DrClubz"');
-        $response->assertDontSee('aria-label="خرید عمده"');
+        $response->assertSee('aria-label="باشگاه مشتریان DrClubz"', false);
+        $response->assertDontSee('aria-label="خرید عمده"', false);
     }
 }
