@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use Database\Seeders\DemoDataSeeder;
 use App\Models\Order;
 use App\Models\User;
 use Illuminate\Console\Command;
@@ -29,11 +30,6 @@ class ResetDemoData extends Command
                 DB::table('cheque_payments')
                     ->whereIn('order_id', $orderIds)
                     ->delete();
-
-                $paymentIds = DB::table('payments')
-                    ->whereIn('order_id', $orderIds)
-                    ->pluck('id');
-
                 DB::table('payments')
                     ->whereIn('order_id', $orderIds)
                     ->delete();
