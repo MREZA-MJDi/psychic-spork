@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -14,6 +15,21 @@ return new class extends Migration
                 ->index()
                 ->after('is_featured');
         });
+
+        $heroProductIds = DB::table('hero_slides')
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->limit(6)
+            ->pluck('product_id');
+
+        if ($heroProductIds->isNotEmpty()) {
+            DB::table('products')
+                ->whereIn('id', $heroProductIds)
+                ->update(['is_hero' => true]);
+        }
+
+        Schema::dropIfExists('hero_slides');
     }
 
     public function down(): void
