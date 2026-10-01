@@ -299,7 +299,10 @@ class StoreFrontendTest extends TestCase
         $this->get(route('products.show', $product))
             ->assertOk()
             ->assertSee('product-variant-visual', false)
-            ->assertSee('data-variant-image="/media/variants/test-variant.webp"', false)
+            ->assertSee(
+                'data-variant-image="' . route('store.media', ['path' => 'variants/test-variant.webp']) . '"',
+                false
+            )
             ->assertSee($variant->display_name);
     }
 
