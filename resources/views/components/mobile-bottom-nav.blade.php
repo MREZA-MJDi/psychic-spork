@@ -7,7 +7,7 @@
 @endphp
 
 <nav
-    class="mobile-bottom-nav mobile-bottom-nav--{{ $isAdmin ? 'admin' : 'store' }} {{ $isAdmin ? 'admin-mobile-nav' : 'store-mobile-bottom' }}"
+    class="mobile-bottom-nav mobile-bottom-nav--{{ $isAdmin ? 'admin' : 'store' }}"
     aria-label="{{ $isAdmin ? 'دسترسی سریع مدیریت' : 'منوی سریع فروشگاه' }}"
 >
     @if($isAdmin)
