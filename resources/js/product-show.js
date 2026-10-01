@@ -15,6 +15,7 @@
 
     const price = root.querySelector('[data-product-price]');
     const regularPrice = root.querySelector('[data-product-regular-price]');
+    const wholesalePrice = root.querySelector('[data-product-wholesale-price]');
     const stock = root.querySelector('[data-product-stock]');
     const sku = document.querySelector('[data-product-sku]');
     const variantLabel = root.querySelector('[data-product-variant-label]');
@@ -48,6 +49,7 @@
         const isLowStock = button.dataset.variantLowStock === '1';
         const onSale = button.dataset.variantSale === '1';
         const variantPrice = Number(button.dataset.variantPrice || 0);
+        const variantWholesale = button.dataset.variantWholesale || '';
         const regular = Number(button.dataset.variantRegular || 0);
         const action = button.dataset.variantAction || '';
         const label = button.dataset.variantLabel || '';
@@ -64,6 +66,13 @@
         if (regularPrice) {
             regularPrice.textContent = formatMoney(regular);
             regularPrice.hidden = !onSale;
+        }
+
+        if (wholesalePrice) {
+            wholesalePrice.textContent = variantWholesale
+                ? `عمده: ${formatMoney(variantWholesale)} تومان`
+                : '';
+            wholesalePrice.hidden = !variantWholesale;
         }
 
         if (variantLabel) {
