@@ -63,6 +63,10 @@
         ])
     @endunless
 
+    @if(request()->routeIs('wholesale.show'))
+        @vite(['resources/css/wholesale.css'])
+    @endif
+
     @if(request()->routeIs('products.show'))
         @unless(app()->environment('testing'))
             @vite(['resources/js/product-show.js'])
