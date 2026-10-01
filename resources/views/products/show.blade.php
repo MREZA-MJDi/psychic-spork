@@ -137,6 +137,8 @@
                                             alt=""
                                             loading="{{ $loop->first ? 'eager' : 'lazy' }}"
                                             decoding="async"
+                                            data-store-image-fallback="JANAN"
+                                            data-store-image-fallback-class="product-gallery__thumb-fallback"
                                         >
                                     </button>
                                 @endforeach
