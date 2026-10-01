@@ -5,6 +5,9 @@ window.Alpine = Alpine;
 Alpine.start();
 
 document.addEventListener('DOMContentLoaded', () => {
+    if (window.__JANAN_APP_INITIALIZED__) return;
+    window.__JANAN_APP_INITIALIZED__ = true;
+
     const menuToggle = document.querySelector('[data-menu-toggle]');
     const mobileMenu = document.querySelector('[data-mobile-menu]');
     const storeNav = document.querySelector('.store-nav');
