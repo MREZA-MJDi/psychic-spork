@@ -4,7 +4,7 @@
 
 @section('content')
 @php
-    $gallery = $product->galleryMedia->take(8)->values();
+    $gallery = $product->galleryMedia->values();
     $variants = $product->activeVariants->values();
 
     $variant = $variants->first(
@@ -160,7 +160,7 @@
                                 <div class="product-variant-visuals__grid">
                                     @foreach($variants as $variantOption)
                                         @php
-                                            $variantImage = $variantOption->galleryMedia->first()?->url;
+                                            $variantImage = $variantOption->primaryGalleryMedia?->url;
                                             $variantColorCode = (string) ($variantOption->color_code ?? '');
                                             $variantSafeColor = preg_match('/^#[0-9A-Fa-f]{3,8}$/', $variantColorCode)
                                                 ? $variantColorCode
@@ -317,7 +317,7 @@
                                 class="product-purchase-form product-purchase-form--v2"
                                 data-cart-add
                                 data-product-name="{{ $product->name }}"
-                                data-product-image="{{ $variant?->galleryMedia->first()?->url ?: $image ?: '' }}"
+                                data-product-image="{{ $variant?->primaryGalleryMedia?->url ?: $image ?: '' }}"
                             >
                                 @csrf
 

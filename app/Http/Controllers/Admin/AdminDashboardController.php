@@ -328,8 +328,8 @@ class AdminDashboardController extends Controller
         $recentProducts = Product::query()
             ->with([
                 'category:id,name',
-                'galleryMedia',
-                'variants',
+                'primaryGalleryMedia',
+                'primaryActiveVariant',
             ])
             ->latest('created_at')
             ->latest('id')

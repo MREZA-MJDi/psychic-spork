@@ -203,8 +203,8 @@ class StoreProductController extends Controller
         $product->load([
             'category',
             'brand',
-            'activeVariants.galleryMedia',
-            'galleryMedia',
+            'activeVariants.primaryGalleryMedia',
+            'galleryMedia' => fn ($query) => $query->orderBy('sort_order')->orderBy('id')->limit(8),
         ]);
 
         $relatedProducts = Product::query()

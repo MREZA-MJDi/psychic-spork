@@ -62,6 +62,7 @@ Route::get('/products', [StoreProductController::class, 'index'])
     ->name('products.index');
 
 Route::get('/search/suggestions', [StoreProductController::class, 'suggestions'])
+    ->middleware('throttle:60,1')
     ->name('search.suggestions');
 
 Route::get('/products/{product:slug}', [StoreProductController::class, 'show'])
