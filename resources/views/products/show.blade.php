@@ -168,7 +168,7 @@
                         </div>
 
                         @if($variant?->sku)
-                            <span class="product-detail-v2__sku">
+                            <span class="product-detail-v2__sku" data-product-sku>
                                 SKU / {{ $variant->sku }}
                             </span>
                         @endif
