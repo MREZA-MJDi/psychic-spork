@@ -74,18 +74,12 @@
                 class="discovery-card"
             >
                 <div class="discovery-card__media">
-                    @if($image)
-                        <img
-                            src="{{ $image }}"
-                            alt="{{ $primary?->name ?? 'محصول منتخب جانان' }}"
-                            loading="lazy"
-                            decoding="async"
-                        >
-                    @else
-                        <div class="discovery-card__placeholder" aria-hidden="true">
-                            <span>JANAN</span>
-                        </div>
-                    @endif
+                    <x-store.image
+                            :src="$image"
+                            :alt="$primary?->name ?? 'محصول منتخب جانان'"
+                            fallback-class="discovery-card__placeholder"
+                            fallback="JANAN"
+                        />
                 </div>
 
                 <div class="discovery-card__overlay" aria-hidden="true"></div>
@@ -131,18 +125,12 @@
                         $secondaryImage = $secondary?->primaryGalleryMedia?->url;
                     @endphp
 
-                    @if($secondaryImage)
-                        <img
-                            src="{{ $secondaryImage }}"
-                            alt="{{ $secondary?->name ?? 'محصول جانان' }}"
-                            loading="lazy"
-                            decoding="async"
-                        >
-                    @else
-                        <div class="discovery-card__placeholder" aria-hidden="true">
-                            <span>JANAN</span>
-                        </div>
-                    @endif
+                    <x-store.image
+                            :src="$secondaryImage"
+                            :alt="$secondary?->name ?? 'محصول جانان'"
+                            fallback-class="discovery-card__placeholder"
+                            fallback="JANAN"
+                        />
                 </div>
 
                 <div class="discovery-card__overlay" aria-hidden="true"></div>
