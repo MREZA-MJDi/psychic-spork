@@ -1810,7 +1810,7 @@
    34. MOBILE NAV
 ========================================================= */
 
-.admin-mobile-nav {
+.mobile-bottom-nav--admin {
     display: none;
 }
 
@@ -1907,7 +1907,7 @@
         grid-template-columns: 1fr;
     }
 
-    .admin-mobile-nav {
+    .mobile-bottom-nav--admin {
         position: fixed;
         right: 12px;
         left: 12px;
@@ -1934,7 +1934,7 @@
         backdrop-filter: blur(12px);
     }
 
-    .admin-mobile-nav a {
+    .mobile-bottom-nav--admin a {
         min-width: 0;
 
         display: flex;
@@ -1956,8 +1956,8 @@
             color var(--admin-transition);
     }
 
-    .admin-mobile-nav a:hover,
-    .admin-mobile-nav a.active {
+    .mobile-bottom-nav--admin a:hover,
+    .mobile-bottom-nav--admin a.active {
         color: #ffffff;
         background: rgba(255, 255, 255, 0.08);
     }
@@ -2161,7 +2161,7 @@
         font-size: 18px;
     }
 
-    .admin-mobile-nav {
+    .mobile-bottom-nav--admin {
         right: 8px;
         left: 8px;
         bottom: 8px;
