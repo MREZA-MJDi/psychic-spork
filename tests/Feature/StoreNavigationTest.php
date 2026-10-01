@@ -2,10 +2,13 @@
 
 namespace Tests\Feature;
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class StoreNavigationTest extends TestCase
 {
+    use RefreshDatabase;
+
     public function test_drclubz_route_and_store_navigation_contract_are_available(): void
     {
         $response = $this->get(route('club'));
