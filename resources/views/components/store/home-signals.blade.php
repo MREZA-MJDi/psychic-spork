@@ -103,10 +103,8 @@
                     <div class="home-signal-list">
                         @foreach($popularProducts as $product)
                             @php
-                                $variant = $product->variants?->first(
-                                    fn ($item) => (bool) $item->is_active
-                                );
-                                $image = $product->galleryMedia?->first()?->url;
+                                $variant = $product->primaryActiveVariant;
+                                $image = $product->primaryGalleryMedia?->url;
                                 $sales = (int) ($product->sales_quantity ?? 0);
                             @endphp
 
