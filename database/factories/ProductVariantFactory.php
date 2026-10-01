@@ -1,9 +1,10 @@
 <?php
 
-namespace DatabaseFactories;
+namespace Database\Factories;
 
-use AppModelsProductVariant;
-use IlluminateDatabaseEloquentFactoriesFactory;
+use App\Models\Product;
+use App\Models\ProductVariant;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
  * @extends Factory<ProductVariant>

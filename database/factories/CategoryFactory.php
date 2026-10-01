@@ -1,10 +1,10 @@
 <?php
 
-namespace DatabaseFactories;
+namespace Database\Factories;
 
-use AppModelsCategory;
-use IlluminateDatabaseEloquentFactoriesFactory;
-use IlluminateSupportStr;
+use App\Models\Category;
+use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
 /**
  * @extends Factory<Category>
