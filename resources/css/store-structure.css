@@ -831,3 +831,6 @@
         padding-inline: 12px;
     }
 }
+
+
+.product-wholesale-price{display:inline-flex;align-items:center;margin-inline-start:10px;padding:5px 8px;border-radius:999px;background:var(--janan-sky-100);color:var(--janan-blue-ink);font-size:8px;font-weight:700;white-space:nowrap;}
