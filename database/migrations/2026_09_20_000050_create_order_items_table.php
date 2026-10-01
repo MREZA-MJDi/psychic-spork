@@ -44,11 +44,6 @@ return new class extends Migration
                 'order_id',
                 'product_variant_id',
             ]);
-
-            $table->index([
-                'product_id',
-                'order_id',
-            ]);
         });
     }
 
