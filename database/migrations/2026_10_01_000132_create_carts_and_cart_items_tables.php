@@ -97,7 +97,10 @@ return new class extends Migration
         foreach (Schema::getIndexes($table) as $existing) {
             $indexedColumns = array_values($existing['columns'] ?? []);
 
-            if ($indexedColumns === $columns) {
+            if (
+                $indexedColumns === $columns
+                && ($type !== 'UNIQUE' || (bool) ($existing['unique'] ?? false))
+            ) {
                 return;
             }
         }
