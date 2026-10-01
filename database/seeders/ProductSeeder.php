@@ -23,14 +23,14 @@ class ProductSeeder extends Seeder
             ->keyBy('slug');
 
         $products = [
-            ['category' => 'bras', 'brand' => 'isabella', 'name' => 'سوتین دانتل ایزابلا', 'slug' => 'isabella-lace-bra', 'sku' => 'JAN-ISA-BRA-001', 'short' => 'سوتین ظریف با طراحی دانتل و فرم راحت', 'description' => 'مدلی ظریف و زنانه با طراحی مناسب استفاده روزمره.', 'size' => '75', 'color' => 'مشکی', 'color_code' => '#211e20', 'price' => 1290000, 'sale_price' => 1090000, 'stock' => 18, 'featured' => true],
-            ['category' => 'bras', 'brand' => 'paniz', 'name' => 'سوتین کلاسیک پانیذ', 'slug' => 'paniz-classic-bra', 'sku' => 'JAN-PAN-BRA-001', 'short' => 'مدل کلاسیک و راحت برای استفاده روزمره', 'description' => 'طراحی ساده و کاربردی با تمرکز بر راحتی.', 'size' => '75', 'color' => 'نود', 'color_code' => '#d9b6a7', 'price' => 990000, 'sale_price' => null, 'stock' => 22, 'featured' => true],
-            ['category' => 'panties', 'brand' => 'avina', 'name' => 'شورت نخی آوینا', 'slug' => 'avina-cotton-panty', 'sku' => 'JAN-AVI-PAN-001', 'short' => 'شورت نخی نرم و لطیف', 'description' => 'انتخابی راحت برای استفاده روزمره با طراحی ساده.', 'size' => 'M', 'color' => 'سفید', 'color_code' => '#f7f7f2', 'price' => 420000, 'sale_price' => 360000, 'stock' => 35, 'featured' => false],
-            ['category' => 'panties', 'brand' => 'nosheh', 'name' => 'شورت فانتزی نوشه', 'slug' => 'nosheh-fancy-panty', 'sku' => 'JAN-NOS-PAN-001', 'short' => 'مدلی ظریف با طراحی فانتزی', 'description' => 'طراحی زنانه و ظریف برای کالکشن فانتزی.', 'size' => 'M', 'color' => 'زرشکی', 'color_code' => '#7a2638', 'price' => 540000, 'sale_price' => 470000, 'stock' => 14, 'featured' => true],
-            ['category' => 'lingerie-sets', 'brand' => 'laya', 'name' => 'ست ظریف لعیا', 'slug' => 'laya-delicate-set', 'sku' => 'JAN-LAY-SET-001', 'short' => 'ست هماهنگ با طراحی کلاسیک', 'description' => 'ست زنانه با طراحی ظریف و هماهنگ.', 'size' => '75/M', 'color' => 'کرم', 'color_code' => '#e9d6c5', 'price' => 1890000, 'sale_price' => 1590000, 'stock' => 11, 'featured' => true],
-            ['category' => 'sleepwear', 'brand' => 'emma', 'name' => 'لباس خواب مدرن اما', 'slug' => 'emma-modern-sleepwear', 'sku' => 'JAN-EMM-SLP-001', 'short' => 'لباس خواب لطیف با طراحی مدرن', 'description' => 'مدلی راحت و ظریف برای کالکشن لباس خواب.', 'size' => 'M', 'color' => 'صورتی پودری', 'color_code' => '#d9adb7', 'price' => 1450000, 'sale_price' => null, 'stock' => 9, 'featured' => false],
-            ['category' => 'bodysuits', 'brand' => 'jan-janan', 'name' => 'بادی جان جانان', 'slug' => 'jan-janan-bodysuit', 'sku' => 'JAN-JAN-BOD-001', 'short' => 'بادی اختصاصی جانان با طراحی ظریف', 'description' => 'طراحی اختصاصی جانان با تمرکز بر ظرافت و فرم.', 'size' => 'M', 'color' => 'مشکی', 'color_code' => '#1d1a1b', 'price' => 1690000, 'sale_price' => 1490000, 'stock' => 12, 'featured' => true],
-            ['category' => 'fantasy', 'brand' => 'isabella', 'name' => 'کالکشن فانتزی ایزابلا', 'slug' => 'isabella-fantasy-collection', 'sku' => 'JAN-ISA-FAN-001', 'short' => 'مدلی خاص از کالکشن فانتزی ایزابلا', 'description' => 'طراحی خاص و ظریف برای کالکشن فانتزی.', 'size' => 'M', 'color' => 'آلبالویی', 'color_code' => '#6d2635', 'price' => 1590000, 'sale_price' => 1390000, 'stock' => 8, 'featured' => true],
+            ['category' => 'bras', 'brand' => 'isabella', 'name' => 'سوتین دانتل ایزابلا', 'slug' => 'isabella-lace-bra', 'sku' => 'JAN-ISA-BRA-001', 'short' => 'سوتین ظریف با طراحی دانتل و فرم راحت', 'description' => 'مدلی ظریف و زنانه با طراحی مناسب استفاده روزمره.', 'size' => '75', 'color' => 'مشکی', 'color_code' => '#211e20', 'price' => 1290000, 'sale_price' => 1090000, 'wholesale_price' => 900000, 'stock' => 18, 'featured' => true],
+            ['category' => 'bras', 'brand' => 'paniz', 'name' => 'سوتین کلاسیک پانیذ', 'slug' => 'paniz-classic-bra', 'sku' => 'JAN-PAN-BRA-001', 'short' => 'مدل کلاسیک و راحت برای استفاده روزمره', 'description' => 'طراحی ساده و کاربردی با تمرکز بر راحتی.', 'size' => '75', 'color' => 'نود', 'color_code' => '#d9b6a7', 'price' => 990000, 'sale_price' => null, 'wholesale_price' => 690000, 'stock' => 22, 'featured' => true],
+            ['category' => 'panties', 'brand' => 'avina', 'name' => 'شورت نخی آوینا', 'slug' => 'avina-cotton-panty', 'sku' => 'JAN-AVI-PAN-001', 'short' => 'شورت نخی نرم و لطیف', 'description' => 'انتخابی راحت برای استفاده روزمره با طراحی ساده.', 'size' => 'M', 'color' => 'سفید', 'color_code' => '#f7f7f2', 'price' => 420000, 'sale_price' => 360000, 'wholesale_price' => 260000, 'stock' => 35, 'featured' => false],
+            ['category' => 'panties', 'brand' => 'nosheh', 'name' => 'شورت فانتزی نوشه', 'slug' => 'nosheh-fancy-panty', 'sku' => 'JAN-NOS-PAN-001', 'short' => 'مدلی ظریف با طراحی فانتزی', 'description' => 'طراحی زنانه و ظریف برای کالکشن فانتزی.', 'size' => 'M', 'color' => 'زرشکی', 'color_code' => '#7a2638', 'price' => 540000, 'sale_price' => 470000, 'wholesale_price' => 320000, 'stock' => 14, 'featured' => true],
+            ['category' => 'lingerie-sets', 'brand' => 'laya', 'name' => 'ست ظریف لعیا', 'slug' => 'laya-delicate-set', 'sku' => 'JAN-LAY-SET-001', 'short' => 'ست هماهنگ با طراحی کلاسیک', 'description' => 'ست زنانه با طراحی ظریف و هماهنگ.', 'size' => '75/M', 'color' => 'کرم', 'color_code' => '#e9d6c5', 'price' => 1890000, 'sale_price' => 1590000, 'wholesale_price' => 1250000, 'stock' => 11, 'featured' => true],
+            ['category' => 'sleepwear', 'brand' => 'emma', 'name' => 'لباس خواب مدرن اما', 'slug' => 'emma-modern-sleepwear', 'sku' => 'JAN-EMM-SLP-001', 'short' => 'لباس خواب لطیف با طراحی مدرن', 'description' => 'مدلی راحت و ظریف برای کالکشن لباس خواب.', 'size' => 'M', 'color' => 'صورتی پودری', 'color_code' => '#d9adb7', 'price' => 1450000, 'sale_price' => null, 'wholesale_price' => 980000, 'stock' => 9, 'featured' => false],
+            ['category' => 'bodysuits', 'brand' => 'jan-janan', 'name' => 'بادی جان جانان', 'slug' => 'jan-janan-bodysuit', 'sku' => 'JAN-JAN-BOD-001', 'short' => 'بادی اختصاصی جانان با طراحی ظریف', 'description' => 'طراحی اختصاصی جانان با تمرکز بر ظرافت و فرم.', 'size' => 'M', 'color' => 'مشکی', 'color_code' => '#1d1a1b', 'price' => 1690000, 'sale_price' => 1490000, 'wholesale_price' => 1100000, 'stock' => 12, 'featured' => true],
+            ['category' => 'fantasy', 'brand' => 'isabella', 'name' => 'کالکشن فانتزی ایزابلا', 'slug' => 'isabella-fantasy-collection', 'sku' => 'JAN-ISA-FAN-001', 'short' => 'مدلی خاص از کالکشن فانتزی ایزابلا', 'description' => 'طراحی خاص و ظریف برای کالکشن فانتزی.', 'size' => 'M', 'color' => 'آلبالویی', 'color_code' => '#6d2635', 'price' => 1590000, 'sale_price' => 1390000, 'wholesale_price' => 1050000, 'stock' => 8, 'featured' => true],
         ];
 
         foreach ($products as $index => $data) {
@@ -58,7 +58,7 @@ class ProductSeeder extends Seeder
                 ]
             );
 
-            $variant = ProductVariant::firstOrCreate(
+            $variant = ProductVariant::updateOrCreate(
                 ['sku' => $data['sku']],
                 [
                     'product_id' => $product->id,
@@ -67,6 +67,7 @@ class ProductSeeder extends Seeder
                     'color_code' => $data['color_code'],
                     'price' => $data['price'],
                     'sale_price' => $data['sale_price'],
+                    'wholesale_price' => $data['wholesale_price'],
                     'stock' => $data['stock'],
                     'low_stock_threshold' => 5,
                     'is_active' => true,
