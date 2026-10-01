@@ -1962,7 +1962,7 @@
         background: rgba(255, 255, 255, 0.08);
     }
 
-    .admin-mobile-nav__icon {
+    .mobile-bottom-nav--admin .mobile-bottom-nav__icon {
         font-size: 13px;
         line-height: 1;
     }
@@ -4289,3 +4289,101 @@ body.admin-nav-open {
 .admin-media-picker__controls{display:flex;gap:10px;align-items:end;flex-wrap:wrap}
 .admin-media-picker__controls .admin-field{flex:1 1 240px}
 @media(max-width:700px){.admin-media-picker__stage{grid-template-columns:1fr}.admin-media-picker__preview{width:min(360px,100%);justify-self:center}.admin-media-picker__editor-head{flex-direction:column}.admin-media-picker__editor canvas{max-height:52vh}.admin-media-picker__controls>*{width:100%}}
+
+
+/* =========================================================
+   ADMIN FINAL VIEWPORT GUARDRAILS
+========================================================= */
+
+.admin-body {
+    min-width: 320px;
+    overflow-x: hidden;
+}
+
+.admin-shell,
+.admin-main,
+.admin-content,
+.admin-header,
+.admin-page-head,
+.admin-card,
+.admin-form-grid,
+.admin-dashboard-grid,
+.admin-dashboard-grid--equal,
+.admin-dashboard-grid--three,
+.dashboard-v2,
+.dashboard-v2__grid,
+.dashboard-v2__stats,
+.dashboard-v2__panel,
+.dashboard-v2__hero,
+.dashboard-v2__control-grid,
+.dashboard-v2__control-item {
+    min-width: 0;
+    max-width: 100%;
+}
+
+.admin-header__right > *,
+.admin-header__left > *,
+.admin-page-head > *,
+.dashboard-v2__hero > *,
+.dashboard-v2__hero-actions > *,
+.dashboard-v2__panel-head > *,
+.dashboard-v2__control-item > * {
+    min-width: 0;
+    max-width: 100%;
+}
+
+.admin-table-wrap,
+.admin-table-responsive,
+.dashboard-v2__orders-table,
+.dashboard-v2__chart-wrap {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+}
+
+.admin-table {
+    width: max-content;
+    min-width: 100%;
+}
+
+@media (max-width: 900px) {
+    .admin-main {
+        margin-right: 0;
+        padding-bottom: calc(92px + env(safe-area-inset-bottom));
+    }
+
+    .dashboard-v2__hero-actions,
+    .dashboard-v2__control-grid {
+        min-width: 0;
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 640px) {
+    .admin-main {
+        padding-inline: 10px;
+    }
+
+    .admin-header,
+    .admin-card,
+    .dashboard-v2__panel,
+    .dashboard-v2__hero,
+    .dashboard-v2__control-center {
+        max-width: 100%;
+    }
+
+    .admin-page-head,
+    .admin-card-header,
+    .dashboard-v2__panel-head {
+        overflow-wrap: anywhere;
+    }
+
+    .admin-btn,
+    .button,
+    .admin-page-head > a,
+    .admin-page-head > button {
+        max-width: 100%;
+    }
+}
