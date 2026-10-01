@@ -26,7 +26,7 @@ class StoreNavigationTest extends TestCase
 
         $response->assertSee('href="' . route('club') . '"', false);
         $response->assertSee('DrClubz');
-        $response->assertMatchesRegularExpression(
+        $this->assertMatchesRegularExpression(
             '/href="' . preg_quote(route('club'), '/') . '"\\s+class="store-nav__link(?:\\s+is-active)?"/',
             $response->getContent()
         );
