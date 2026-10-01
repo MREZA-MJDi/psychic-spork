@@ -507,7 +507,7 @@ document.addEventListener('click', async (event) => {
                 )
             );
         } catch (error) {
-            window.alert(error.message);
+            showStoreMessage(error.message);
         }
     }
 });
