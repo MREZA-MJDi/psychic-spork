@@ -15,7 +15,6 @@
     data-immersive-gallery
     aria-label="گالری تعاملی کالکشن جانان"
 >
-    <div class="immersive-preloader" id="immersivePreloader" aria-hidden="true"></div>
 
 
     <div class="immersive-vignette" aria-hidden="true"></div>
