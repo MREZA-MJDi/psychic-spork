@@ -838,3 +838,40 @@
 
 
 .product-wholesale-price{display:inline-flex;align-items:center;margin-inline-start:10px;padding:5px 8px;border-radius:999px;background:var(--janan-sky-100);color:var(--janan-blue-ink);font-size:8px;font-weight:700;white-space:nowrap;}
+
+
+/* ---------- Cart flight feedback ---------- */
+
+.cart-fly-clone {
+    position: fixed !important;
+    z-index: 13000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    pointer-events: none !important;
+    border: 1px solid rgba(255,255,255,.75) !important;
+    border-radius: 14px !important;
+    background: #fff !important;
+    box-shadow: 0 22px 55px rgba(25,40,47,.20) !important;
+    transform-origin: center center;
+}
+
+.cart-fly-clone img,
+.cart-fly-clone > div {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.cart-fly-clone > div {
+    display: grid;
+    place-items: center;
+    color: var(--janan-blue-ink);
+    font: 16px var(--janan-display);
+    background: linear-gradient(
+        135deg,
+        var(--janan-sky-100),
+        var(--janan-pink-100)
+    );
+}
