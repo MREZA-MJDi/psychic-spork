@@ -15,8 +15,7 @@ body.home-immersive .site-main {
 }
 
 body.home-immersive .store-header,
-body.home-immersive .store-footer,
-body.home-immersive .mobile-bottom-nav {
+body.home-immersive .store-footer {
   display: none !important;
 }
 
@@ -645,7 +644,7 @@ body.home-immersive {
 
 @media (max-width: 720px) {
   .immersive-grid-hero {
-    min-height: 620px;
+    min-height: 100dvh;
   }
 
   .immersive-header__section:nth-child(2) {
@@ -740,9 +739,6 @@ body.home-immersive {
   }
 }
 
-body:has(.immersive-grid-hero) .mobile-bottom-nav {
-  display: none !important;
-}
 body.immersive-zoom-lock{overflow:hidden!important}
 
 
