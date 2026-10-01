@@ -17,6 +17,7 @@ export default defineConfig({
                 'resources/css/auth.css',
                 'resources/js/app.js',
                 'resources/js/store-cart.js',
+                'resources/js/store-customer-uiux.js',
                 'resources/js/store-search.js',
                 'resources/js/product-show.js',
                 'resources/js/editorial-hero.js',
