@@ -65,7 +65,7 @@ class AdminHeroController extends Controller
             ->filter()
             ->unique()
             ->values()
-            ->take(6);
+            ->take(90);
 
         $products = Product::query()
             ->active()
@@ -95,7 +95,7 @@ class AdminHeroController extends Controller
 
         return back()->with(
             'success',
-            'تصاویر Hero با موفقیت ذخیره شد. حداکثر ۶ محصول انتخاب می‌شود.'
+            'تصاویر Hero با موفقیت ذخیره شد. حداکثر ۹۰ محصول انتخاب می‌شود.'
         );
     }
 }
