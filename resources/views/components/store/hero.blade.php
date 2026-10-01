@@ -1,6 +1,5 @@
 @php
     $slides = array_values($heroSlides ?? []);
-    $slideCount = count($slides);
 @endphp
 
 @if(!app()->environment('testing'))
@@ -16,7 +15,6 @@
     data-immersive-gallery
     aria-label="گالری تعاملی کالکشن جانان"
 >
-    <div class="immersive-preloader" id="immersivePreloader" aria-hidden="true"></div>
 
 
     <div class="immersive-vignette" aria-hidden="true"></div>
@@ -85,10 +83,6 @@
                 FIT
             </button>
         </div>
-
-        <button type="button" class="immersive-sound-toggle" id="immersiveSoundToggle" aria-label="Toggle sound" aria-pressed="false">
-            <canvas id="immersiveSoundCanvas" width="32" height="16"></canvas>
-        </button>
     </div>
 
     <footer class="immersive-footer">
