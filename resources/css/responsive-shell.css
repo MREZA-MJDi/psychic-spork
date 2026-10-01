@@ -145,3 +145,22 @@
         font-size: 14px;
     }
 }
+
+@media (max-width: 420px) {
+    .mobile-bottom-nav {
+        right: max(6px, env(safe-area-inset-right));
+        left: max(6px, env(safe-area-inset-left));
+    }
+
+    .mobile-bottom-nav a {
+        min-height: 47px;
+        font-size: 7px;
+    }
+
+    .mobile-bottom-nav__icon,
+    .mobile-bottom-nav svg {
+        width: 16px;
+        height: 16px;
+        flex-basis: 16px;
+    }
+}

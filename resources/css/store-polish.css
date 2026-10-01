@@ -4446,16 +4446,25 @@
     }
 
     .product-gallery-v2__grid {
-        grid-template-columns: 1fr;
-        grid-template-rows: minmax(360px, 110vw) repeat(2, minmax(150px, 46vw));
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-rows: auto auto;
+        gap: 8px;
     }
 
     .product-gallery-v2__main {
+        grid-column: 1 / -1;
         grid-row: auto;
+        aspect-ratio: 4 / 5;
+    }
+
+    .product-gallery-v2__secondary {
+        aspect-ratio: 1;
+        min-height: 0;
     }
 
     .product-gallery-v2__secondary:only-of-type {
-        grid-row: auto;
+        grid-column: 1 / -1;
+        aspect-ratio: 16 / 9;
     }
 
     .product-gallery-v2__overlay {
@@ -4463,8 +4472,17 @@
     }
 
     .product-gallery__thumbs--v2 {
-        grid-template-columns: repeat(6, minmax(54px, 1fr));
-        padding-bottom: 2px;
+        display: flex;
+        grid-template-columns: none;
+        gap: 7px;
+        overflow-x: auto;
+        padding: 2px 1px 5px;
+    }
+
+    .product-gallery__thumbs--v2 .product-gallery__thumb {
+        flex: 0 0 54px;
+        width: 54px;
+        height: 66px;
     }
 
     .product-detail-v2__purchase {
@@ -4474,7 +4492,7 @@
     }
 
     .product-detail-v2__price-row {
-        align-items: flex-end;
+        align-items: flex-start;
         flex-direction: column;
         gap: 10px;
     }
@@ -4505,7 +4523,17 @@
         width: 100%;
     }
 
+    .product-information--v2 .product-information__grid {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+
+    .product-information--v2 .product-information__intro {
+        position: static;
+    }
+
     .product-information--v2 .product-information__intro h2 {
+        max-width: 14ch;
         font-size: clamp(30px, 9vw, 39px);
     }
 
@@ -4530,12 +4558,9 @@
 }
 
 @media (max-width: 430px) {
-    .product-gallery-v2__grid {
-        grid-template-rows: minmax(330px, 105vw) repeat(2, minmax(132px, 42vw));
-    }
-
     .product-detail-v2__topline {
         gap: 8px;
+        flex-wrap: wrap;
     }
 
     .product-detail-v2__sku {
