@@ -6,7 +6,7 @@
 @section('content')
 <div class="admin-page-head">
     <div>
-        <h1 class="admin-page-head__title">کنترل Nila / Holoo</h1>
+        <h1 class="admin-page-head__title">مرکز کنترل نیلا / Holoo</h1>
         <p class="admin-page-head__text">
             مرکز کنترل Mapping و ورود داده؛ اتصال واقعی API فقط بعد از دریافت قرارداد رسمی Nila فعال می‌شود.
         </p>
