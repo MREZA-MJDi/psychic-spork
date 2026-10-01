@@ -1624,10 +1624,6 @@ width:
    SOURCE: resources/css/store-responsive.css
 ========================================================= */
 @media (max-width: 900px) {
-    .store-body {
-        padding-bottom: calc(82px + env(safe-area-inset-bottom));
-    }
-
     .store-footer {
         padding-bottom: calc(92px + env(safe-area-inset-bottom));
     }
