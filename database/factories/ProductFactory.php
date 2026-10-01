@@ -18,8 +18,8 @@ class ProductFactory extends Factory
         $name = fake()->unique()->words(3, true);
 
         return [
-            'category_id' => null,
-            'brand_id' => null,
+            'category_id' => Category::factory(),
+            'brand_id' => Brand::factory(),
             'name' => $name,
             'slug' => Str::slug($name) . '-' . fake()->unique()->numberBetween(1, 999999),
             'short_description' => fake()->optional()->sentence(),
