@@ -155,10 +155,6 @@
                                         </div>
                                         <button class="admin-btn admin-btn--ghost" type="submit">غیرفعال کردن چک</button>
                                     </form>
-                                @elseif(!$profile->isApproved())
-                                    <div class="admin-muted">
-                                        ابتدا دسترسی خرید عمده را تأیید کنید؛ سپس اجازه خرید چکی را فعال کنید.
-                                    </div>
                                 @else
                                     <form method="POST" action="{{ route('admin.customers.cheque.enable', $profile->user) }}" style="display:flex;gap:8px;align-items:end;flex-wrap:wrap;">
                                         @csrf
