@@ -59,28 +59,13 @@ class WholesaleController extends Controller
 
         $profile = $user->wholesaleProfile()->first();
 
-        abort_if(
-            $profile?->isApproved(),
-            422,
-            'حساب شما در حال حاضر دسترسی خرید عمده دارد.'
-        );
-
-        abort_if(
-            $profile?->status === 'pending',
-            422,
-            'درخواست عمده شما در حال بررسی مدیریت است.'
-        );
-
-        abort_if(
-            $profile?->status === 'suspended',
-            403,
-            'دسترسی عمده این حساب توسط مدیریت تعلیق شده است.'
-        );
+        // Wholesale online purchasing is open to every customer.
+        // This profile form is optional business information; it does not grant or revoke wholesale access.
 
         WholesaleProfile::updateOrCreate(
             ['user_id' => $user->id],
             [
-                'status' => 'pending',
+                'status' => 'approved',
                 'business_name' => $request->validated('business_name'),
                 'business_type' => $request->validated('business_type'),
                 'business_phone' => $request->validated('business_phone'),
@@ -96,7 +81,7 @@ class WholesaleController extends Controller
             ->route('wholesale.show')
             ->with(
                 'success',
-                'درخواست خرید عمده ثبت شد و پس از بررسی مدیریت فعال می‌شود.'
+                'اطلاعات پروفایل کسب‌وکار ذخیره شد. خرید عمده آنلاین برای همه مشتریان فعال است.'
             );
     }
 }
