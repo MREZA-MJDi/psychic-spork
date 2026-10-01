@@ -92,6 +92,23 @@ class Product extends Model
             : $this->variants()->first();
     }
 
+    public function scopeOrderByEffectivePrice($query, string $direction = 'asc')
+    {
+        $direction = strtolower($direction) === 'desc' ? 'desc' : 'asc';
+
+        $priceSubquery = ProductVariant::query()
+            ->selectRaw('COALESCE(sale_price, price)')
+            ->whereColumn('product_id', 'products.id')
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->limit(1);
+
+        return $query
+            ->orderBy($priceSubquery, $direction)
+            ->orderBy('id');
+    }
+
     public function scopeActive($query) { return $query->where('is_active', true); }
     public function scopeFeatured($query) { return $query->where('is_featured', true); }
 

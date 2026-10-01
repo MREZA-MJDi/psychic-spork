@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Product;
-use App\Models\ProductVariant;
 use Illuminate\Http\Request;
 use App\Services\SeoService;
 use Illuminate\View\View;
@@ -53,14 +52,6 @@ class StoreCategoryController extends Controller
             ? (int) $request->query('per_page', 12)
             : 12;
 
-        $priceSubquery = ProductVariant::query()
-            ->selectRaw('COALESCE(sale_price, price)')
-            ->whereColumn('product_id', 'products.id')
-            ->where('is_active', true)
-            ->orderBy('sort_order')
-            ->orderBy('id')
-            ->limit(1);
-
         $products = Product::query()
             ->active()
             ->with([
@@ -71,8 +62,8 @@ class StoreCategoryController extends Controller
             ])
             ->where('category_id', $category->id)
             ->when($sort === 'oldest', fn ($query) => $query->orderBy('updated_at')->orderBy('id'))
-            ->when($sort === 'price_asc', fn ($query) => $query->orderBy($priceSubquery, 'asc')->orderBy('id'))
-            ->when($sort === 'price_desc', fn ($query) => $query->orderBy($priceSubquery, 'desc')->orderBy('id'))
+            ->when($sort === 'price_asc', fn ($query) => $query->orderByEffectivePrice('asc'))
+            ->when($sort === 'price_desc', fn ($query) => $query->orderByEffectivePrice('desc'))
             ->when($sort === 'name_asc', fn ($query) => $query->orderBy('name')->orderBy('id'))
             ->when($sort === 'name_desc', fn ($query) => $query->orderByDesc('name')->orderBy('id'))
             ->when($sort === 'newest', fn ($query) => $query->latest('updated_at')->latest('id'))
