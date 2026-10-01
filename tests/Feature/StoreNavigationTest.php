@@ -25,8 +25,10 @@ class StoreNavigationTest extends TestCase
         );
 
         $response->assertSee(
-            'href="' . route('club') . '" class="store-nav__link'
+            'href="' . route('club') . '"'
         );
+        $response->assertSee('class="store-nav__link');
+        $response->assertSee('DrClubz');
 
         // The mobile storefront bar keeps the same customer-focused five-item
         // contract and must not silently fall back to the wholesale link.
