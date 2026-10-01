@@ -33,6 +33,14 @@ class ProductVariant extends Model
 
     public function product(): BelongsTo { return $this->belongsTo(Product::class); }
     public function media(): MorphMany { return $this->morphMany(Media::class, 'mediable'); }
+
+    public function galleryMedia(): MorphMany
+    {
+        return $this->morphMany(Media::class, 'mediable')
+            ->where('collection', 'gallery')
+            ->orderBy('sort_order')
+            ->orderBy('id');
+    }
     public function cartItems(): HasMany { return $this->hasMany(CartItem::class); }
     public function orderItems(): HasMany { return $this->hasMany(OrderItem::class); }
     public function inventoryMovements(): HasMany { return $this->hasMany(InventoryMovement::class); }
