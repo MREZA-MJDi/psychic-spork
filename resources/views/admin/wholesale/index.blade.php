@@ -8,6 +8,9 @@
     <div>
         <h1 class="admin-page-head__title">مدیریت عمده‌فروشی</h1>
         <p class="admin-page-head__text">درخواست‌ها، وضعیت دسترسی و شرایط خرید عمده مشتریان.</p>
+        <div class="admin-actions">
+            <a href="{{ route('admin.wholesale-packs.index') }}" class="admin-btn admin-btn--secondary">مدیریت پک‌های عمده</a>
+        </div>
     </div>
 </div>
 
