@@ -31,8 +31,8 @@ body.home-immersive {
 
   position: relative;
   width: 100%;
-  height: 100svh;
-  min-height: 680px;
+  height: 100dvh;
+  min-height: 100dvh;
   overflow: hidden;
   isolation: isolate;
   background: #000;
@@ -476,6 +476,41 @@ body.home-immersive {
 
 .immersive-controls.is-split {
   left: 75%;
+}
+
+/* The Hero is a one-screen experience: controls never require page scroll. */
+.immersive-grid-hero .immersive-controls {
+  bottom: max(18px, env(safe-area-inset-bottom));
+  z-index: 10001;
+  pointer-events: auto;
+}
+
+.immersive-grid-hero .immersive-controls > * {
+  pointer-events: auto;
+}
+
+.immersive-grid-hero .immersive-title-overlay {
+  max-height: calc(100dvh - 150px);
+  overflow: hidden;
+}
+
+@media (max-width: 820px) {
+  .immersive-grid-hero {
+    height: 100dvh;
+    min-height: 100dvh;
+  }
+
+  .immersive-grid-hero .immersive-controls {
+    position: absolute;
+    bottom: max(10px, env(safe-area-inset-bottom));
+    z-index: 10001;
+  }
+
+  .immersive-grid-hero .immersive-title-overlay {
+    bottom: 74px;
+    max-height: calc(100dvh - 145px);
+    overflow: hidden;
+  }
 }
 
 .immersive-percentage,
