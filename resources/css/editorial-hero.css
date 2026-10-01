@@ -157,7 +157,10 @@ body.home-immersive {
   height: 100%;
 }
 
-.immersive-grid-item {
+ .immersive-grid-item {
+  display: block;
+  color: inherit;
+  text-decoration: none;
   position: absolute;
   width: 320px;
   height: 320px;
