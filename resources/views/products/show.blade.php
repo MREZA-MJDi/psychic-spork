@@ -213,6 +213,8 @@
                                                 <strong>{{ $variantOption->display_name }}</strong>
                                                 <small>
                                                     {{ $variantOption->stock > 0 ? 'موجود' : 'ناموجود' }}
+                                                    ·
+                                                    {{ number_format($variantOption->effective_price) }} تومان
                                                 </small>
                                             </span>
 
@@ -264,8 +266,9 @@
                     <div class="product-detail-v2__purchase-block product-detail-v2__price-block">
                         <div class="product-detail-v2__section-label">
                             <span>قیمت و موجودی</span>
-                            <small data-product-variant-label>
-                                {{ $variant?->display_name ?: 'انتخاب نشده' }}
+                            <small>
+                                مدل منتخب:
+                                <b data-product-variant-label>{{ $variant?->display_name ?: 'انتخاب نشده' }}</b>
                             </small>
                         </div>
 
@@ -306,64 +309,6 @@
                             </div>
                         </div>
                     </div>
-
-                    @if($variants->isNotEmpty())
-                        <div class="product-detail-v2__purchase-block product-detail-v2__variant-block">
-                            <div class="product-variant-picker__head">
-                                <div>
-                                    <span>انتخاب مدل</span>
-                                    <small>قیمت، موجودی و تصویر با انتخاب مدل تغییر می‌کند.</small>
-                                </div>
-                            </div>
-
-                            <div class="product-variant-picker__grid">
-                                @foreach($variants as $variantOption)
-                                    @php
-                                        $colorCode = (string) ($variantOption->color_code ?? '');
-                                        $safeColor = preg_match('/^#[0-9A-Fa-f]{3,8}$/', $colorCode)
-                                            ? $colorCode
-                                            : null;
-                                        $variantImage = $variantOption->galleryMedia->first()?->url;
-                                    @endphp
-
-                                    <button
-                                        type="button"
-                                        class="product-variant-option {{ $variantOption->id === $variant?->id ? 'is-selected' : '' }} {{ $variantOption->stock < 1 ? 'is-out' : '' }}"
-                                        data-product-variant
-                                        data-variant-action="{{ route('cart.store', $variantOption) }}"
-                                        data-variant-price="{{ $variantOption->effective_price }}"
-                                        data-variant-wholesale="{{ $variantOption->wholesale_price !== null ? $variantOption->wholesale_price : '' }}"
-                                        data-variant-regular="{{ $variantOption->price }}"
-                                        data-variant-sale="{{ $variantOption->is_on_sale ? '1' : '0' }}"
-                                        data-variant-stock="{{ $variantOption->stock }}"
-                                        data-variant-low-stock="{{ $variantOption->is_low_stock ? '1' : '0' }}"
-                                        data-variant-label="{{ $variantOption->display_name }}"
-                                        data-variant-sku="{{ $variantOption->sku }}"
-                                        data-variant-index="{{ $loop->iteration }}"
-                                        data-variant-image="{{ $variantImage ?? '' }}"
-                                        data-variant-image-alt="{{ $product->name }} — {{ $variantOption->display_name }}"
-                                        aria-pressed="{{ $variantOption->id === $variant?->id ? 'true' : 'false' }}"
-                                        @disabled($variantOption->stock < 1)
-                                    >
-                                        @if($variantImage)
-                                            <span class="product-variant-option__media">
-                                                <img src="{{ $variantImage }}" alt="" loading="lazy" decoding="async">
-                                            </span>
-                                        @elseif($safeColor)
-                                            <i
-                                                class="product-variant-option__swatch"
-                                                style="--variant-color: {{ $safeColor }}"
-                                                aria-hidden="true"
-                                            ></i>
-                                        @endif
-
-                                        <span>{{ $variantOption->display_name }}</span>
-                                        <small>{{ $variantOption->stock > 0 ? 'موجود' : 'ناموجود' }}</small>
-                                    </button>
-                                @endforeach
-                            </div>
-                        </div>
-                    @endif
 
                     @if($variant)
                         <div class="product-detail-v2__purchase-block product-detail-v2__action-block">
