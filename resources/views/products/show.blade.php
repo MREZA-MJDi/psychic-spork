@@ -83,19 +83,15 @@
                             </div>
 
                             <figure class="product-gallery-v2__main">
-                                @if($image)
-                                    <img
-                                        src="{{ $image }}"
-                                        alt="{{ $product->name }}"
-                                        fetchpriority="high"
-                                        decoding="async"
-                                        data-gallery-main
-                                    >
-                                @else
-                                    <div class="product-gallery__placeholder" aria-hidden="true">
-                                        <span>JANAN</span>
-                                    </div>
-                                @endif
+                                <x-store.image
+                                    :src="$image"
+                                    :alt="$product->name"
+                                    loading="eager"
+                                    fetchpriority="high"
+                                    fallback-class="product-gallery__placeholder"
+                                    fallback="JANAN"
+                                    class="product-gallery-v2__main-image"
+                                />
 
                                 @if($discount)
                                     <span class="product-gallery-v2__sale">
@@ -190,12 +186,13 @@
                                         >
                                             <span class="product-variant-visual__media">
                                                 @if($variantImage)
-                                                    <img
-                                                        src="{{ $variantImage }}"
+                                                    <x-store.image
+                                                        :src="$variantImage"
                                                         alt=""
-                                                        loading="lazy"
-                                                        decoding="async"
-                                                    >
+                                                        fallback-tag="span"
+                                                        fallback-class="product-variant-visual__fallback"
+                                                        :fallback="mb_substr($variantOption->display_name ?: 'V', 0, 1)"
+                                                    />
                                                 @elseif($variantSafeColor)
                                                     <i
                                                         class="product-variant-visual__swatch"
