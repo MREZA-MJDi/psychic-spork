@@ -237,6 +237,8 @@ Route::prefix('admin')
 
         Route::resource('products', AdminProductController::class)
             ->except(['show']);
+        Route::patch('products/{product}/hero', [AdminProductController::class, 'toggleHero'])
+            ->name('products.hero.toggle');
         Route::get('products/{product}/media', [AdminProductMediaController::class, 'index'])
             ->name('products.media.index');
 
