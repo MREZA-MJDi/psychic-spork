@@ -16,8 +16,8 @@
         <input type="search" name="q" value="{{ request('q') }}" placeholder="شماره چک، صیاد، بانک، نام یا موبایل مشتری">
         <select name="status">
             <option value="">همه وضعیت‌ها</option>
-            @foreach($statuses as $status)
-                <option value="{{ $status }}" @selected(request('status') === $status)>{{ $status }}</option>
+            @foreach($statusNames as $status => $label)
+                <option value="{{ $status }}" @selected(request('status') === $status){{ $label }}</option>
             @endforeach
         </select>
         <button type="submit" class="button button--primary">فیلتر</button>
