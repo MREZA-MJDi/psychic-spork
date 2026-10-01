@@ -337,14 +337,12 @@
                 @foreach($items as $item)
                     <div class="checkout-item">
                         <div class="checkout-item__media">
-                            @if($item['image'])
-                                <img
-                                    src="{{ $item['image'] }}"
-                                    alt="{{ $item['product']->name }}"
-                                >
-                            @else
-                                <div class="product-image-placeholder"></div>
-                            @endif
+                            <x-store.image
+                                :src="$item['image']"
+                                :alt="$item['product']->name"
+                                fallback-class="product-image-placeholder"
+                                fallback="JANAN"
+                            />
                         </div>
 
                         <div>
