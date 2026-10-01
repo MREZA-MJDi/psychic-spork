@@ -89,19 +89,15 @@
                 @endif
             </div>
 
-            <div
-                class="product-card__stock {{ match (true) {
-                    $stock < 1 => 'is-out',
-                    $productVariant->is_low_stock => 'is-low',
-                    default => ''
-                } }}"
-            >
-                {{ match (true) {
-                    $stock < 1 => 'ناموجود',
-                    $productVariant->is_low_stock => 'موجودی محدود',
-                    default => 'موجود'
-                } }}
-            </div>
+            @if($stock < 1)
+                <div class="product-card__stock is-out" role="status" aria-label="ناموجود">
+                    ناموجود
+                </div>
+            @elseif($productVariant->is_low_stock)
+                <div class="product-card__stock is-low" role="status" aria-label="موجودی محدود">
+                    موجودی محدود
+                </div>
+            @endif
 
             <form
                 method="POST"
