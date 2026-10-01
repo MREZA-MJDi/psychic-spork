@@ -120,7 +120,7 @@ class AdminProductController extends Controller
         ]);
 
         Cache::put(
-            'store:home:hero:version',
+            'store:home:hero:products:version',
             (string) Str::uuid(),
             now()->addYear()
         );
