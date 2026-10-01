@@ -128,6 +128,17 @@ class AdminWholesalePackController extends Controller
 
         abort_unless($validCount === $variantIds->count(), 422, 'یکی از Variantهای انتخاب‌شده فعال نیست.');
 
+        $missingWholesalePrice = ProductVariant::query()
+            ->whereIn('id', $variantIds)
+            ->whereNull('wholesale_price')
+            ->exists();
+
+        abort_unless(
+            ! $missingWholesalePrice,
+            422,
+            'تمام Variantهای داخل پک باید قیمت عمده داشته باشند.'
+        );
+
         $data['slug'] = filled($data['slug'] ?? null)
             ? Str::slug($data['slug'])
             : Str::slug($data['name']) . '-' . Str::lower(Str::random(5));
