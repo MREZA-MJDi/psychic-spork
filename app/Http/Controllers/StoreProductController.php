@@ -203,7 +203,7 @@ class StoreProductController extends Controller
         $product->load([
             'category',
             'brand',
-            'activeVariants',
+            'activeVariants.galleryMedia',
             'galleryMedia',
         ]);
 
