@@ -128,13 +128,13 @@ class HomeController extends Controller
             ->get();
 
         $heroVersion = Cache::remember(
-            'store:home:hero:version',
+            'store:home:hero:products:version',
             now()->addYear(),
             fn () => '1'
         );
 
         $heroSlides = Cache::remember(
-            'store:home:hero:' . $heroVersion,
+            'store:home:hero:products:' . $heroVersion,
             now()->addMinutes(30),
             fn () => Product::query()
                 ->active()
