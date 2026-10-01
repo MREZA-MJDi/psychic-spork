@@ -9,6 +9,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class AdminHeroController extends Controller
@@ -91,7 +92,11 @@ class AdminHeroController extends Controller
             }
         });
 
-        Cache::forget('store:home:hero');
+        Cache::put(
+            'store:home:hero:version',
+            (string) Str::uuid(),
+            now()->addYear()
+        );
 
         return back()->with(
             'success',
