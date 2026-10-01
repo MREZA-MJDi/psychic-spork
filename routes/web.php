@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\AdminCustomerController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminFinancialController;
 use App\Http\Controllers\Admin\AdminInventoryController;
+use App\Http\Controllers\Admin\AdminMediaController;
 use App\Http\Controllers\Admin\AdminNilaController;
 use App\Http\Controllers\Admin\AdminOrderController;
 use App\Http\Controllers\Admin\AdminProductController;
@@ -255,6 +256,13 @@ Route::prefix('admin')
 
         Route::resource('brands', AdminBrandController::class)
             ->except(['show']);
+
+        // Reusable media actions for brand/category/variant admin surfaces.
+        Route::post('media/{type}/{id}', [AdminMediaController::class, 'store'])
+            ->name('media.store');
+
+        Route::delete('media/{type}/{id}/{media}', [AdminMediaController::class, 'destroy'])
+            ->name('media.destroy');
 
         /*
         |--------------------------------------------------------------------------

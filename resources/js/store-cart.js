@@ -79,6 +79,81 @@ const showQuickPreview = (payload, fallbackForm = null) => {
     }, 5200);
 };
 
+const animateProductToCart = (form = null) => {
+    const target = document.querySelector('[data-cart-open]:not([hidden])')
+        || document.querySelector('[data-cart-open]');
+
+    if (!target) return;
+
+    const source = form?.closest('.product-card')?.querySelector('.product-card__media img')
+        || form?.closest('.product-detail-v2, .product-detail-page')?.querySelector('img')
+        || null;
+
+    const sourceRect = source?.getBoundingClientRect();
+    const targetRect = target.getBoundingClientRect();
+
+    if (!targetRect.width || !targetRect.height) return;
+
+    const start = sourceRect || {
+        left: Math.max(16, targetRect.left - 260),
+        top: Math.max(16, targetRect.top + 30),
+        width: 72,
+        height: 88,
+    };
+
+    const clone = document.createElement('div');
+    clone.className = 'cart-fly-clone';
+    clone.style.left = start.left + 'px';
+    clone.style.top = start.top + 'px';
+    clone.style.width = Math.max(52, Math.min(96, start.width)) + 'px';
+    clone.style.height = Math.max(64, Math.min(116, start.height)) + 'px';
+
+    if (source?.currentSrc || source?.src) {
+        const img = document.createElement('img');
+        img.src = source.currentSrc || source.src;
+        img.alt = '';
+        clone.appendChild(img);
+    } else {
+        const placeholder = document.createElement('div');
+        placeholder.textContent = 'JANAN';
+        clone.appendChild(placeholder);
+    }
+
+    document.body.appendChild(clone);
+
+    const endX = targetRect.left + (targetRect.width / 2) - (start.width / 2);
+    const endY = targetRect.top + (targetRect.height / 2) - (start.height / 2);
+    const gsap = window.gsap;
+
+    if (!gsap) {
+        clone.animate(
+            [
+                { transform: 'translate3d(0,0,0) scale(1)', opacity: 1 },
+                { transform: 'translate3d(' + (endX - start.left) + 'px,' + (endY - start.top) + 'px,0) scale(.2)', opacity: .1 },
+            ],
+            { duration: 720, easing: 'cubic-bezier(.22,.75,.26,1)', fill: 'forwards' }
+        ).onfinish = () => clone.remove();
+        return;
+    }
+
+    const pulse = target.querySelector('svg') || target;
+    const tl = gsap.timeline({
+        defaults: { ease: 'power3.inOut' },
+        onComplete: () => clone.remove(),
+    });
+
+    tl.fromTo(
+        clone,
+        { x: 0, y: 0, scale: 1, opacity: 1, rotate: 0 },
+        { x: endX - start.left, y: endY - start.top, scale: .18, opacity: .18, rotate: 7, duration: .78 }
+    );
+
+    if (pulse) {
+        tl.to(pulse, { scale: 1.18, duration: .12, ease: 'power2.out' }, '-=.16')
+          .to(pulse, { scale: 1, duration: .22, ease: 'back.out(2)' });
+    }
+};
+
 const hideQuickPreview = () => {
     if (!quickPreview) return;
 
@@ -410,6 +485,9 @@ document.addEventListener('submit', async (event) => {
         }
 
         setCartCount(payload.count);
+
+        // Only animate after the server confirms the real cart mutation.
+        animateProductToCart(form);
 
         // نمایش فوری کنار آیکن سبد؛ رندر کامل Drawer بعد از آن انجام می‌شود.
         showQuickPreview(payload, form);
