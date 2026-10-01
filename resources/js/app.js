@@ -177,11 +177,31 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     window.addEventListener('resize', () => {
-        if (window.innerWidth > 820) {
+        if (window.innerWidth > 900) {
             mobileMenu?.classList.remove('is-open');
             mobileMenu?.setAttribute('aria-hidden', 'true');
             storeNav?.classList.remove('is-open');
             menuToggle?.setAttribute('aria-expanded', 'false');
         }
     });
+});
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    const hero = document.querySelector('[data-immersive-gallery]');
+    const nav = document.querySelector('.mobile-bottom-nav--store');
+
+    if (!hero || !nav || !('IntersectionObserver' in window)) return;
+
+    const observer = new IntersectionObserver(
+        ([entry]) => {
+            nav.classList.toggle(
+                'is-immersive-dimmed',
+                entry.isIntersecting && entry.intersectionRatio > 0.28
+            );
+        },
+        { threshold: [0, 0.28, 0.7, 1] }
+    );
+
+    observer.observe(hero);
 });
