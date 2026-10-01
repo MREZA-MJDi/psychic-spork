@@ -495,8 +495,7 @@ body.home-immersive {
 }
 
 .immersive-percentage,
-.immersive-switch,
-.immersive-sound-toggle {
+.immersive-switch {
   background-color: #f0f0f0;
   background-image: radial-gradient(rgba(0,0,0,.015) 1px, transparent 0);
   background-size: .44em .44em;
@@ -558,21 +557,6 @@ body.home-immersive {
   color: #f0f0f0;
 }
 
-.immersive-sound-toggle {
-  min-width: 3.75em;
-  padding: .5em .75em;
-  border: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-}
-
-.immersive-sound-toggle canvas {
-  width: 2em;
-  height: 1em;
-  display: block;
-}
 
 .immersive-footer__info {
   grid-column: 1 / span 4;
