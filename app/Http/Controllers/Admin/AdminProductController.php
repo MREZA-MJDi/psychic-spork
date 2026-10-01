@@ -104,34 +104,34 @@ class AdminProductController extends Controller
     {
         try {
             $isHero = DB::transaction(function () use ($product): bool {
-            $current = Product::query()
-                ->whereKey($product->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
-
-            if (!$current->is_hero) {
-                $heroCount = Product::query()
-                    ->where('is_hero', true)
+                $current = Product::query()
+                    ->whereKey($product->getKey())
                     ->lockForUpdate()
-                    ->count();
+                    ->firstOrFail();
 
-                if ($heroCount >= 6) {
-                    throw new \RuntimeException('hero_limit');
+                if (!$current->is_hero) {
+                    $heroIds = Product::query()
+                        ->where('is_hero', true)
+                        ->lockForUpdate()
+                        ->pluck('id');
+
+                    if ($heroIds->count() >= 6) {
+                        throw new \RuntimeException('hero_limit');
+                    }
                 }
-            }
 
-            $current->update([
-                'is_hero' => !$current->is_hero,
-            ]);
+                $current->update([
+                    'is_hero' => !$current->is_hero,
+                ]);
 
-            return (bool) $current->is_hero;
-        });
+                return (bool) $current->is_hero;
+            });
 
-        Cache::put(
-            'store:home:hero:products:version',
-            (string) Str::uuid(),
-            now()->addYear()
-        );
+            Cache::put(
+                'store:home:hero:products:version',
+                (string) Str::uuid(),
+                now()->addYear()
+            );
 
             return back()->with(
                 'success',
