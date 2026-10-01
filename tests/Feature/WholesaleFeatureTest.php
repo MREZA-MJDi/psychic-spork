@@ -22,7 +22,7 @@ class WholesaleFeatureTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_customer_can_apply_for_wholesale_access(): void
+    public function test_customer_can_save_wholesale_business_profile(): void
     {
         $customer = User::factory()->create([
             'is_admin' => false,
@@ -39,12 +39,12 @@ class WholesaleFeatureTest extends TestCase
 
         $this->assertDatabaseHas('wholesale_profiles', [
             'user_id' => $customer->id,
-            'status' => 'pending',
+            'status' => 'approved',
             'business_name' => 'فروشگاه تست',
         ]);
     }
 
-    public function test_guest_can_place_wholesale_order_online(): void
+    public function test_guest_cannot_place_wholesale_order_online(): void
     {
         Config::set('payment.driver', 'zarinpal');
         Config::set('payment.zarinpal.merchant_id', 'test-merchant');
@@ -88,14 +88,15 @@ class WholesaleFeatureTest extends TestCase
                 'order_type' => 'wholesale',
                 'payment_method' => 'online',
             ]))
-            ->assertRedirect();
+            ->assertRedirect()
+            ->assertSessionHas('error');
 
-        $this->assertDatabaseHas('orders', [
+        $this->assertDatabaseMissing('orders', [
             'user_id' => null,
             'order_type' => 'wholesale',
         ]);
 
-        $this->assertSame(8, $variant->fresh()->stock);
+        $this->assertSame(10, $variant->fresh()->stock);
     }
 
     public function test_unapproved_customer_can_place_wholesale_order_online(): void
