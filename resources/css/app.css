@@ -187,6 +187,8 @@ select,
 textarea {
 accent-color: var(--janan-pink-500);
 }
+
+.container {
 width:
         min(
             var(--janan-container),
