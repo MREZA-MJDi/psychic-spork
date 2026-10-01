@@ -1,6 +1,5 @@
 @php
     $slides = array_values($heroSlides ?? []);
-    $slideCount = count($slides);
 @endphp
 
 @if(!app()->environment('testing'))
@@ -85,10 +84,6 @@
                 FIT
             </button>
         </div>
-
-        <button type="button" class="immersive-sound-toggle" id="immersiveSoundToggle" aria-label="Toggle sound" aria-pressed="false">
-            <canvas id="immersiveSoundCanvas" width="32" height="16"></canvas>
-        </button>
     </div>
 
     <footer class="immersive-footer">
