@@ -502,6 +502,15 @@
     color: var(--janan-pink-ink);
 }
 
+.cart-drawer__item {
+    transition: transform .25s ease, border-color .25s ease;
+}
+
+.cart-drawer__item:hover {
+    transform: translateX(-3px);
+    border-color: rgba(91,170,198,.22);
+}
+
 .store-mobile-bottom a[data-cart-open] {
     cursor: pointer;
 }
