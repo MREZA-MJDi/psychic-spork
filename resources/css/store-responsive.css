@@ -3,10 +3,6 @@
    Shared mobile/tablet behavior for public + customer pages.
 ========================================================= */
 
-.store-body {
-    overflow-x: hidden;
-}
-
 .site-main {
     min-width: 0;
 }
@@ -345,22 +341,6 @@
         grid-template-columns: 1fr;
     }
 
-    .mobile-bottom-nav {
-        right: 6px !important;
-        left: 6px !important;
-    }
-
-    .mobile-bottom-nav a {
-        min-height: 47px;
-        font-size: 7px;
-    }
-
-    .mobile-bottom-nav__icon,
-    .mobile-bottom-nav svg {
-        width: 16px !important;
-        height: 16px !important;
-        flex-basis: 16px !important;
-    }
 }
 
 @media (prefers-reduced-motion: reduce) {
