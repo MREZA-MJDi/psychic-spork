@@ -1,5 +1,8 @@
 /* JANAN STORE / CUSTOMER UIUX — checkout interaction layer */
 (() => {
+    if (window.__JANAN_CHECKOUT_UI_INITIALIZED__) return;
+    window.__JANAN_CHECKOUT_UI_INITIALIZED__ = true;
+
     const syncCheckoutChoices = () => {
         const form = document.querySelector('.checkout-form');
         if (!form) return;
