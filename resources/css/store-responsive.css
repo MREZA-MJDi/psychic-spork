@@ -6065,3 +6065,31 @@ body.home-immersive .immersive-grid-hero{
  .store-body .site-main{padding-bottom:calc(78px + env(safe-area-inset-bottom))}
  .mobile-bottom-nav.mobile-bottom-nav--store{right:max(6px,env(safe-area-inset-right));bottom:max(6px,env(safe-area-inset-bottom));left:max(6px,env(safe-area-inset-left));min-height:62px;padding:5px;border-radius:18px}
 }
+
+
+/* =========================================================
+   IMMERSIVE GRID SCALE TOKENS
+   JS reads --immersive-item-size; media stays CSS-owned.
+========================================================= */
+
+.immersive-grid-hero {
+    --immersive-item-size: 320px;
+}
+
+@media (max-width: 1000px) {
+    .immersive-grid-hero {
+        --immersive-item-size: 240px;
+    }
+}
+
+@media (max-width: 720px) {
+    .immersive-grid-hero {
+        --immersive-item-size: 160px;
+    }
+}
+
+@media (max-width: 480px) {
+    .immersive-grid-hero {
+        --immersive-item-size: 128px;
+    }
+}
