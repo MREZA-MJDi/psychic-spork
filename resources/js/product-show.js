@@ -57,6 +57,9 @@
         const action = button.dataset.variantAction || '';
         const label = button.dataset.variantLabel || '';
         const variantSku = button.dataset.variantSku || '';
+        const variantImage = button.dataset.variantImage || '';
+        const variantImageAlt = button.dataset.variantImageAlt || '';
+
 
         if (form && action) {
             form.action = action;
@@ -85,6 +88,18 @@
         skuNodes.forEach((node) => {
             node.textContent = variantSku || '—';
         });
+
+        if (galleryMain && variantImage) {
+            galleryMain.src = variantImage;
+            galleryMain.alt = variantImageAlt || galleryMain.alt || '';
+            galleryThumbs.forEach((item) => {
+                item.classList.remove('is-active');
+                item.setAttribute('aria-pressed', 'false');
+            });
+            if (galleryCurrent) {
+                galleryCurrent.textContent = String(button.dataset.variantIndex || '01').padStart(2, '0');
+            }
+        }
 
         if (stock) {
             stock.classList.toggle('is-out', variantStock < 1);
