@@ -12,76 +12,62 @@ class AdminHeroTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_admin_can_select_products_for_homepage_hero(): void
+    public function test_admin_can_toggle_a_product_in_the_homepage_hero(): void
     {
         $admin = User::factory()->create(['is_admin' => true]);
 
-        $products = collect(range(1, 3))->map(function (int $index): Product {
-            $product = Product::factory()->create([
-                'name' => 'Hero Product ' . $index,
-                'is_active' => true,
-            ]);
+        $product = Product::factory()->create([
+            'is_active' => true,
+            'is_hero' => false,
+        ]);
 
-            ProductVariant::factory()->create([
-                'product_id' => $product->id,
-                'is_active' => true,
-            ]);
-
-            return $product;
-        });
+        ProductVariant::factory()->create([
+            'product_id' => $product->id,
+            'is_active' => true,
+        ]);
 
         $this->actingAs($admin)
-            ->put(route('admin.hero.update'), [
-                'product_ids' => $products->pluck('id')->all(),
-            ])
+            ->patch(route('admin.products.hero.toggle', $product))
             ->assertRedirect();
 
-        $this->assertDatabaseCount('hero_slides', 3);
-
-        $this->assertDatabaseHas('hero_slides', [
-            'product_id' => $products[0]->id,
-            'sort_order' => 1,
-            'is_active' => true,
+        $this->assertDatabaseHas('products', [
+            'id' => $product->id,
+            'is_hero' => true,
         ]);
 
         $this->get(route('home'))
             ->assertOk()
-            ->assertSee('Hero Product 1')
-            ->assertSee('Hero Product 3');
+            ->assertSee($product->name);
     }
 
-    public function test_hero_selection_rejects_more_than_six_products_at_backend_boundary(): void
+    public function test_product_hero_selection_is_capped_at_six_products(): void
     {
         $admin = User::factory()->create(['is_admin' => true]);
 
-        $products = Product::factory()->count(7)->create([
+        $products = Product::factory()->count(6)->create([
             'is_active' => true,
+            'is_hero' => true,
+        ]);
+
+        $candidate = Product::factory()->create([
+            'is_active' => true,
+            'is_hero' => false,
         ]);
 
         $this->actingAs($admin)
-            ->from(route('admin.hero.index'))
-            ->put(route('admin.hero.update'), [
-                'product_ids' => $products->pluck('id')->all(),
-            ])
-            ->assertSessionHasErrors('product_ids');
+            ->patch(route('admin.products.hero.toggle', $candidate))
+            ->assertRedirect()
+            ->assertSessionHas('error');
 
-        $this->assertDatabaseCount('hero_slides', 0);
-    }
-
-    public function test_hero_selection_is_capped_at_six_products(): void
-    {
-        $admin = User::factory()->create(['is_admin' => true]);
-
-        $products = Product::factory()->count(91)->create([
-            'is_active' => true,
+        $this->assertDatabaseCount('products', 7);
+        $this->assertDatabaseHas('products', [
+            'id' => $candidate->id,
+            'is_hero' => false,
         ]);
 
-        $this->actingAs($admin)
-            ->put(route('admin.hero.update'), [
-                'product_ids' => $products->pluck('id')->all(),
-            ])
-            ->assertRedirect();
-
-        $this->assertDatabaseCount('hero_slides', 6);
+        $this->assertSame(
+            6,
+            Product::query()->where('is_hero', true)->count()
+        );
     }
 }

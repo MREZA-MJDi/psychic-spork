@@ -12,6 +12,7 @@ use App\Models\ProductVariant;
 use App\Services\MediaService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
@@ -31,8 +32,13 @@ class AdminProductController extends Controller
             ->with([
                 'category',
                 'brand',
+                'primaryActiveVariant',
+                'primaryGalleryMedia',
+            ])
+            ->withCount([
                 'variants',
-                'galleryMedia',
+                'variants as wholesale_variants_count' => fn ($query) =>
+                    $query->whereNotNull('wholesale_price'),
             ])
             ->when($request->filled('q'), function ($query) use ($request) {
                 $search = trim((string) $request->input('q'));
@@ -92,6 +98,39 @@ class AdminProductController extends Controller
             'categories' => $this->categories(),
             'brands' => $this->brands(),
         ]);
+    }
+
+    public function toggleHero(Product $product): RedirectResponse
+    {
+        if (!$product->is_hero) {
+            $heroCount = Product::query()
+                ->where('is_hero', true)
+                ->count();
+
+            if ($heroCount >= 6) {
+                return back()->with(
+                    'error',
+                    'حداکثر ۶ محصول می‌تواند همزمان در Hero صفحه اصلی باشد.'
+                );
+            }
+        }
+
+        $product->update([
+            'is_hero' => !$product->is_hero,
+        ]);
+
+        Cache::put(
+            'store:home:hero:products:version',
+            (string) Str::uuid(),
+            now()->addYear()
+        );
+
+        return back()->with(
+            'success',
+            $product->is_hero
+                ? 'محصول به Hero صفحه اصلی اضافه شد.'
+                : 'محصول از Hero صفحه اصلی حذف شد.'
+        );
     }
 
     /*

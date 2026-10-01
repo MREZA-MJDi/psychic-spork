@@ -305,6 +305,10 @@
                             </th>
 
                             <th>
+                                Hero
+                            </th>
+
+                            <th>
                                 وضعیت
                             </th>
 
@@ -328,10 +332,10 @@
                             @php
 
                                 $variant =
-                                    $product->variants->first();
+                                    $product->primaryActiveVariant;
 
                                 $galleryImage =
-                                    $product->galleryMedia->first();
+                                    $product->primaryGalleryMedia;
 
                                 $stock =
                                     (int) ($variant?->stock ?? 0);
@@ -476,14 +480,11 @@
 
                                 <td>
                                     <div class="admin-price">
-                                        {{ number_format($product->variants->count()) }}
+                                        {{ number_format($product->variants_count) }}
                                         <span class="admin-muted">واریانت</span>
                                     </div>
-                                    @php
-                                        $wholesaleCount = $product->variants->whereNotNull('wholesale_price')->count();
-                                    @endphp
                                     <div class="admin-muted">
-                                        {{ number_format($wholesaleCount) }} قیمت عمده
+                                        {{ number_format($product->wholesale_variants_count) }} قیمت عمده
                                     </div>
                                 </td>
 
@@ -550,6 +551,35 @@
 
                                 </td>
 
+
+                                {{-- HERO --}}
+
+                                <td>
+                                    <form
+                                        method="POST"
+                                        action="{{ route('admin.products.hero.toggle', $product) }}"
+                                    >
+                                        @csrf
+                                        @method('PATCH')
+
+                                        <label
+                                            class="admin-hero-toggle"
+                                            title="{{ $product->is_hero ? 'حذف از Hero صفحه اصلی' : 'نمایش در Hero صفحه اصلی' }}"
+                                        >
+                                            <input
+                                                type="checkbox"
+                                                name="is_hero"
+                                                value="1"
+                                                @checked($product->is_hero)
+                                                onchange="this.form.submit()"
+                                            >
+                                            <span aria-hidden="true"></span>
+                                            <span class="admin-hero-toggle__text">
+                                                {{ $product->is_hero ? 'در Hero' : 'نمایش در Hero' }}
+                                            </span>
+                                        </label>
+                                    </form>
+                                </td>
 
                                 {{-- STATUS --}}
 
