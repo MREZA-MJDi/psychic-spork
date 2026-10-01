@@ -4,7 +4,7 @@
 
 @section('content')
 @php
-    $gallery = $product->galleryMedia->take(8)->values();
+    $gallery = $product->galleryMedia->values();
     $variants = $product->activeVariants->values();
 
     $variant = $variants->first(
