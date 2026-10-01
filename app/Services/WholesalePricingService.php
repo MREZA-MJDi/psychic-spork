@@ -8,11 +8,19 @@ use App\Models\User;
 
 final class WholesalePricingService
 {
+    public function __construct(
+        private readonly WholesaleEligibilityService $eligibility,
+    ) {
+    }
+
     public function quote(
         Cart $cart,
         ?User $user = null
     ): array {
-        $profile = $user?->wholesaleProfile;
+        // Wholesale is available to customers online, but never to guests.
+        $profile = $user
+            ? $this->eligibility->assertWholesaleAllowed($user)
+            : abort(403, 'برای خرید عمده باید وارد حساب مشتری شوید.');
 
         $items = $cart->items()
             ->with([
