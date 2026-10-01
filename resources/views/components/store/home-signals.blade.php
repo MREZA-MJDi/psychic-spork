@@ -110,16 +110,13 @@
                                 class="home-signal-item home-signal-item--popular"
                             >
                                 <span class="home-signal-item__media">
-                                    @if($image)
-                                        <img
-                                            src="{{ $image }}"
-                                            alt="{{ $product->name }}"
-                                            loading="lazy"
-                                            decoding="async"
-                                        >
-                                    @else
-                                        <span>JANAN</span>
-                                    @endif
+                                    <x-store.image
+                                        :src="$image"
+                                        :alt="$product->name"
+                                        fallback-tag="span"
+                                        fallback-class="home-signal-item__fallback"
+                                        fallback="JANAN"
+                                    />
                                 </span>
 
                                 <span class="home-signal-item__copy">
