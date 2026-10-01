@@ -4981,7 +4981,7 @@ display:
         10px;
 }
 
-/* Mobile bottom navigation is centralized in responsive-shell.css. */
+/* Mobile bottom navigation behavior is centralized in store-responsive.css. */
 
 .sr-only {
 position:
