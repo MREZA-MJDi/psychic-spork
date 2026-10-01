@@ -45,9 +45,9 @@
                     <input id="slug" name="slug" dir="ltr" value="{{ old('slug', $pack->slug) }}" placeholder="isabela-12-pack">
                 </div>
                 <div class="admin-field">
-                    <label for="pack_price">قیمت نهایی پک عمده</label>
-                    <input id="pack_price" type="number" min="0" step="1" name="pack_price" value="{{ old('pack_price', $pack->pack_price) }}" placeholder="خالی = جمع قیمت عمده اقلام">
-                    <small class="admin-help">اگر خالی باشد، قیمت پک از قیمت عمده Variantهای داخل آن محاسبه می‌شود.</small>
+                    <label for="pack_price">قیمت نهایی پک عمده *</label>
+                    <input id="pack_price" type="number" min="0" step="1" name="pack_price" required value="{{ old('pack_price', $pack->pack_price) }}" placeholder="مثلاً 20000000">
+                    <small class="admin-help">این مبلغ قیمت نهایی خودِ پک است و مستقل از قیمت عمده تک‌تک Variantها ثبت می‌شود.</small>
                 </div>
                 <div class="admin-field">
                     <label for="sort_order">ترتیب</label>
