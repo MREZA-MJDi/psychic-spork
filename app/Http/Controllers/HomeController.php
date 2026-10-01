@@ -114,8 +114,8 @@ class HomeController extends Controller
             ->with([
                 'category:id,name',
                 'brand:id,name',
-                'galleryMedia',
-                'variants',
+                'primaryGalleryMedia',
+                'primaryActiveVariant',
             ])
             ->withSum(
                 [
