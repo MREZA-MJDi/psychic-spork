@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\WholesaleApplicationRequest;
 use App\Models\WholesaleProfile;
+use App\Models\Product;
+use App\Models\WholesalePack;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -14,8 +16,33 @@ class WholesaleController extends Controller
     {
         $profile = $request->user()?->wholesaleProfile()->first();
 
+        $products = Product::query()
+            ->active()
+            ->whereHas('activeVariants', fn ($query) => $query->whereNotNull('wholesale_price'))
+            ->with([
+                'brand',
+                'category',
+                'primaryGalleryMedia',
+                'activeVariants' => fn ($query) => $query->whereNotNull('wholesale_price'),
+            ])
+            ->orderByDesc('is_featured')
+            ->orderBy('sort_order')
+            ->paginate(12, ['*'], 'products_page');
+
+        $packs = WholesalePack::query()
+            ->where('is_active', true)
+            ->with([
+                'items.variant.product.brand',
+                'items.variant.product.primaryGalleryMedia',
+            ])
+            ->orderBy('sort_order')
+            ->orderByDesc('id')
+            ->get();
+
         return view('pages.wholesale', [
             'profile' => $profile,
+            'products' => $products,
+            'packs' => $packs,
         ]);
     }
 
