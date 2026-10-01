@@ -59,8 +59,8 @@
     @unless(app()->environment('testing'))
         @vite([
             'resources/css/store-polish.css',
-            'resources/css/store-responsive.css',
             'resources/css/store-customer-uiux.css',
+            'resources/css/store-responsive.css',
         ])
     @endunless
 
