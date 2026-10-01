@@ -52,27 +52,12 @@
 
                         <div class="home-category-card__media">
 
-                            @if($category->coverMedia?->url)
-
-                                <img
-                                    src="{{ $category->coverMedia->url }}"
-                                    alt="{{ $category->name }}"
-                                    loading="lazy"
-                                    decoding="async"
-                                >
-
-                            @else
-
-                                <div
-                                    class="card-image-placeholder"
-                                    aria-hidden="true"
-                                >
-                                    <span>
-                                        {{ $category->name }}
-                                    </span>
-                                </div>
-
-                            @endif
+                            <x-store.image
+                                :src="$category->coverMedia?->url"
+                                :alt="$category->name"
+                                fallback-class="card-image-placeholder"
+                                :fallback="$category->name"
+                            />
 
                             <span
                                 class="home-category-card__index"
