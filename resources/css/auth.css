@@ -2,7 +2,7 @@
 
 /* =========================================================
    JANAN AUTH / PRIVATE CLIENT AREA
-   Editorial luxury: ink, pearl, wine, muted rose.
+   Editorial luxury: ink, pearl, soft blue, muted rose.
 ========================================================= */
 
 .auth-page {
@@ -66,8 +66,8 @@
         linear-gradient(135deg, rgba(255,255,255,.96), rgba(250,246,244,.92)),
         var(--auth-white);
     box-shadow:
-        0 42px 110px rgba(42,29,36,.12),
-        0 10px 30px rgba(42,29,36,.05),
+        0 42px 110px rgba(57,65,74,.10),
+        0 10px 30px rgba(57,65,74,.05),
         inset 0 1px 0 rgba(255,255,255,.92);
     animation: auth-card-in .8s cubic-bezier(.2,.8,.2,1) both;
 }
@@ -191,7 +191,7 @@
 }
 
 .auth-field__hint {
-    color: #aa9da3;
+    color: var(--auth-muted);
     font-size: 7px;
     font-weight: 600;
     letter-spacing: .17em;
@@ -225,7 +225,7 @@
 }
 
 .auth-form input:not([type="checkbox"])::placeholder {
-    color: #aaa0a5;
+    color: var(--auth-faint, #aeb6bd);
 }
 
 .auth-form input:not([type="checkbox"]):hover {
@@ -238,7 +238,7 @@
     background: #fff;
     box-shadow:
         0 0 0 4px rgba(189,103,131,.07),
-        0 15px 32px rgba(52,35,43,.06);
+        0 15px 32px rgba(57,65,74,.06);
     transform: translateY(-1px);
 }
 
@@ -259,7 +259,7 @@
     transform: translateY(-50%);
     border: 0;
     border-radius: 50%;
-    color: #91858b;
+    color: #7f8992;
     background: transparent;
     transition: color .2s ease, background .2s ease, transform .2s ease;
 }
@@ -391,7 +391,7 @@
 .auth-switch {
     position: relative;
     margin: 24px 0 0;
-    color: #8d8186;
+    color: #7f8992;
     text-align: center;
     font-size: 9px;
 }
@@ -432,7 +432,7 @@
     overflow: hidden;
     margin-top: 1px;
     border-radius: 99px;
-    background: #ece3e5;
+    background: var(--auth-rose-soft);
 }
 
 .auth-meter__bar {
@@ -440,7 +440,7 @@
     width: 0;
     height: 100%;
     border-radius: inherit;
-    background: linear-gradient(90deg, #d6adb9, #704059);
+    background: linear-gradient(90deg, var(--auth-rose), var(--auth-pink-deep, #cb7694));
     transition: width .28s ease;
 }
 
@@ -507,7 +507,7 @@
     bottom: -34%;
     background:
         radial-gradient(circle at 38% 37%, rgba(255,255,255,.24), transparent 35%),
-        radial-gradient(circle at 45% 45%, rgba(41,19,31,.24), transparent 63%);
+        radial-gradient(circle at 45% 45%, rgba(37,45,53,.18), transparent 63%);
     animation: auth-float-two 12s ease-in-out infinite;
 }
 
@@ -602,7 +602,7 @@
     font-family: 'IranNastaliq', serif;
     font-size: clamp(34px, 4.7vw, 62px);
     white-space: nowrap;
-    text-shadow: 0 15px 35px rgba(37,19,28,.25);
+    text-shadow: 0 15px 35px rgba(37,45,53,.18);
 }
 
 .auth-visual__copy {
@@ -805,7 +805,7 @@
 
 @media (max-width: 600px) {
     .auth-page {
-        background: #f7f3f1;
+        background: var(--auth-pearl);
     }
 
     .auth-visual {
@@ -844,7 +844,7 @@
         padding: 30px 18px 34px;
         border: 0;
         border-radius: 0;
-        box-shadow: 0 -1px 0 rgba(39,33,38,.08), 0 18px 40px rgba(39,33,38,.08);
+        box-shadow: 0 -1px 0 rgba(57,65,74,.08), 0 18px 40px rgba(57,65,74,.08);
     }
 
     .auth-card::before,
@@ -904,7 +904,7 @@
 }
 
 .auth-card__edition {
-    color: #aa9da3;
+    color: var(--auth-muted);
     font-size: 7px;
     font-weight: 700;
     letter-spacing: .16em;
@@ -913,11 +913,11 @@
 .auth-demo {
     margin: 0 0 22px;
     padding: 13px 14px;
-    border: 1px solid rgba(111,57,79,.13);
+    border: 1px solid rgba(189,103,131,.13);
     border-radius: 14px;
     background:
-        linear-gradient(135deg, rgba(111,57,79,.055), rgba(183,152,114,.055)),
-        #fffdfc;
+        linear-gradient(135deg, rgba(189,103,131,.055), rgba(123,196,223,.055)),
+        var(--auth-white);
 }
 
 .auth-demo__head {
@@ -962,7 +962,7 @@
 }
 
 .auth-demo__grid small {
-    color: #aa9da3;
+    color: var(--auth-muted);
     font-size: 6px;
     font-weight: 800;
     letter-spacing: .11em;
@@ -993,7 +993,7 @@
 }
 
 .auth-divider small {
-    color: #aa9da3;
+    color: var(--auth-muted);
     font-size: 7px;
     letter-spacing: .16em;
 }
