@@ -17,7 +17,7 @@
 
             <div class="home-section-head__copy">
                 <span class="eyebrow">
-                    COLLECTIONS / 03
+                    COLLECTIONS / 02
                 </span>
 
                 <h2 id="{{ $titleId }}">
