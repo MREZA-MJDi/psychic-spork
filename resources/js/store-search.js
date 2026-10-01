@@ -14,6 +14,9 @@
     );
 
     forms.forEach((form) => {
+        if (form.dataset.searchInitialized === 'true') return;
+        form.dataset.searchInitialized = 'true';
+
         const input = form.querySelector('[data-search-input]');
         const clear = form.querySelector('[data-search-clear]');
         let results = form.parentElement?.querySelector('[data-search-results]');
