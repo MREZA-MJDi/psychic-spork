@@ -15,8 +15,7 @@ body.home-immersive .site-main {
 }
 
 body.home-immersive .store-header,
-body.home-immersive .store-footer,
-body.home-immersive .mobile-bottom-nav {
+body.home-immersive .store-footer {
   display: none !important;
 }
 
@@ -645,7 +644,7 @@ body.home-immersive {
 
 @media (max-width: 720px) {
   .immersive-grid-hero {
-    min-height: 620px;
+    min-height: 100dvh;
   }
 
   .immersive-header__section:nth-child(2) {
@@ -740,9 +739,6 @@ body.home-immersive {
   }
 }
 
-body:has(.immersive-grid-hero) .mobile-bottom-nav {
-  display: none !important;
-}
 body.immersive-zoom-lock{overflow:hidden!important}
 
 
@@ -1144,7 +1140,7 @@ body:has(.immersive-grid-hero).cart-drawer-open {
 
     .immersive-grid-hero .immersive-title-overlay {
         inset-inline: 14px auto;
-        bottom: 86px;
+        bottom: 138px;
         width: min(350px, calc(100vw - 28px));
         z-index: 7;
     }
@@ -1195,7 +1191,7 @@ body:has(.immersive-grid-hero).cart-drawer-open {
     .immersive-grid-hero .immersive-controls {
         left: 8px !important;
         right: 8px;
-        bottom: max(8px, env(safe-area-inset-bottom));
+        bottom: calc(76px + env(safe-area-inset-bottom));
         width: calc(100% - 16px);
         max-width: none;
         height: 46px;
@@ -1271,7 +1267,7 @@ body:has(.immersive-grid-hero).cart-drawer-open {
 
 @media (max-width: 480px) {
     .immersive-grid-hero .immersive-title-overlay {
-        bottom: 82px;
+        bottom: 134px;
     }
 
     .immersive-grid-hero .immersive-title-overlay__description {
@@ -1404,4 +1400,15 @@ body:has(.immersive-grid-hero).cart-drawer-open {
         height: 100svh !important;
         border-radius: 0 !important;
     }
+}
+
+
+/* =========================================================
+   MOBILE STOREFRONT NAV + IMMERSIVE HERO COEXISTENCE
+========================================================= */
+@media (max-width: 900px) {
+  body:has(.immersive-grid-hero) .mobile-bottom-nav {
+    display: grid !important;
+    z-index: 12000 !important;
+  }
 }

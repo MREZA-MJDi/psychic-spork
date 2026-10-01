@@ -116,6 +116,17 @@ class StorePageController extends Controller
         }
     }
 
+    public function club(SeoService $seo): View
+    {
+        return view('pages.club', [
+            'seo' => $seo->page(
+                'DrClubz — باشگاه مشتریان ' . config('app.store_name', 'Janan'),
+                'باشگاه مشتریان DrClubz؛ مسیر اختصاصی اعضای جانان برای خرید، پیگیری سفارش و دسترسی به مزایای مشتریان.',
+                route('club')
+            ),
+        ]);
+    }
+
     public function shipping(SeoService $seo): View
     {
         return view('pages.shipping', [

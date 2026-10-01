@@ -7,7 +7,7 @@
 
     $isHome = request()->routeIs('home');
     $isProducts = request()->routeIs('products.*');
-    $isCategories = request()->routeIs('categories.*');
+    $isClub = request()->routeIs('club');
     $isBrands = request()->routeIs('brands.*');
     $isAbout = request()->routeIs('about');
     $isWholesale = request()->routeIs('wholesale.show');
@@ -57,11 +57,11 @@
             </a>
 
             <a
-                href="{{ route('categories.index') }}"
-                class="store-nav__link {{ $isCategories ? 'is-active' : '' }}"
-                @if($isCategories) aria-current="page" @endif
+                href="{{ route('club') }}"
+                class="store-nav__link {{ $isClub ? 'is-active' : '' }}"
+                @if($isClub) aria-current="page" @endif
             >
-                دسته‌بندی‌ها
+                DrClubz
             </a>
 
             <a
