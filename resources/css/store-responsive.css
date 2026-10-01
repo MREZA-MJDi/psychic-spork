@@ -1797,7 +1797,7 @@ width:
         transition-duration: .01ms !important;
         animation-duration: .01ms !important;
     }
-}}
+}
 
 @media (max-width: 900px) {
     .club-page__grid { grid-template-columns: 1fr; }
