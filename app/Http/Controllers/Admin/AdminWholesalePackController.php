@@ -8,6 +8,7 @@ use App\Models\WholesalePack;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -107,7 +108,7 @@ class AdminWholesalePackController extends Controller
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:180'],
-            'slug' => ['nullable', 'string', 'max:180'],
+            'slug' => ['nullable', 'string', 'max:180', Rule::unique('wholesale_packs', 'slug')->ignore($request->route('wholesalePack'))],
             'description' => ['nullable', 'string', 'max:5000'],
             'pack_price' => ['nullable', 'numeric', 'min:0'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
