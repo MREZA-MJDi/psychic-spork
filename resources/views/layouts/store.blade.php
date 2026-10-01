@@ -53,6 +53,7 @@
         'resources/js/app.js',
         'resources/js/store-cart.js',
         'resources/js/store-search.js',
+        'resources/js/store-customer-uiux.js',
     ])
 
     @unless(app()->environment('testing'))
@@ -84,6 +85,8 @@
             @vite(['resources/js/home-product-carousel.js'])
         @endunless
     @endif
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js" defer></script>
+
 </head>
 
 <body class="store-body customer-store">

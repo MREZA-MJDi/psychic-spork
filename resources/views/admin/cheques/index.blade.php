@@ -1,186 +1,80 @@
 @extends('layouts.admin')
 
-@section('title', 'پرداخت‌های چکی')
-@section('page-title', 'پرداخت‌های چکی')
+@section('title', 'مدیریت چک‌ها')
 
 @section('content')
-<div class="admin-page-head">
-    <div>
-        <h1 class="admin-page-head__title">پرداخت‌های چکی</h1>
-        <p class="admin-page-head__text">
-            بررسی، تأیید، واریز و تسویه چک‌های ثبت‌شده توسط مشتریان عمده.
-        </p>
-    </div>
-</div>
-
-<div class="admin-card admin-filter-card">
-    <form method="GET" action="{{ route('admin.cheques.index') }}">
-        <div class="admin-filter-grid">
-            <div class="admin-field">
-                <label for="q">جستجو</label>
-                <input
-                    id="q"
-                    type="search"
-                    name="q"
-                    value="{{ request('q') }}"
-                    placeholder="نام مشتری، موبایل، شناسه صیادی یا بانک..."
-                >
-            </div>
-
-            <div class="admin-field">
-                <label for="status">وضعیت</label>
-                <select id="status" name="status">
-                    <option value="">همه وضعیت‌ها</option>
-                    @foreach($statusNames as $status => $label)
-                        <option value="{{ $status }}" @selected(request('status') === $status)>
-                            {{ $label }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div class="admin-filter-actions">
-                <button class="admin-btn admin-btn--secondary" type="submit">اعمال فیلتر</button>
-                <a class="admin-btn admin-btn--ghost" href="{{ route('admin.cheques.index') }}">پاک کردن</a>
-            </div>
-        </div>
-    </form>
-</div>
-
-<div class="admin-card">
-    <div class="admin-card-header">
+<div class="admin-page">
+    <div class="admin-page__header">
         <div>
-            <h2 class="admin-card-title">فهرست چک‌ها</h2>
-            <p class="admin-card-description">{{ number_format($cheques->total()) }} مورد</p>
+            <span class="eyebrow">PAYMENTS / CHEQUES</span>
+            <h1>مدیریت چک‌ها</h1>
+            <p>وضعیت چک‌های ثبت‌شده را بررسی و فقط transitionهای مجاز را انجام بده.</p>
         </div>
     </div>
 
-    @if($cheques->count())
-        <div class="admin-table-wrap">
-            <table class="admin-table">
-                <thead>
+    <form method="GET" class="admin-filter-bar">
+        <input type="search" name="q" value="{{ request('q') }}" placeholder="شماره چک، صیاد، بانک، نام یا موبایل مشتری">
+        <select name="status">
+            <option value="">همه وضعیت‌ها</option>
+            @foreach($statuses as $status)
+                <option value="{{ $status }}" @selected(request('status') === $status)>{{ $status }}</option>
+            @endforeach
+        </select>
+        <button type="submit" class="button button--primary">فیلتر</button>
+        <a href="{{ route('admin.cheques.index') }}" class="button button--ghost">پاک کردن</a>
+    </form>
+
+    <div class="admin-table-wrap">
+        <table class="admin-table">
+            <thead>
+            <tr>
+                <th>چک</th>
+                <th>مشتری</th>
+                <th>مبلغ</th>
+                <th>سررسید</th>
+                <th>وضعیت</th>
+                <th>عملیات</th>
+            </tr>
+            </thead>
+            <tbody>
+            @forelse($cheques as $cheque)
                 <tr>
-                    <th>مشتری / سفارش</th>
-                    <th>چک</th>
-                    <th>مبلغ</th>
-                    <th>سررسید</th>
-                    <th>وضعیت</th>
-                    <th>عملیات</th>
+                    <td>
+                        <strong>{{ $cheque->cheque_number ?: '—' }}</strong>
+                        <small>{{ $cheque->bank_name ?: 'بانک نامشخص' }}</small>
+                    </td>
+                    <td>
+                        {{ $cheque->order?->user?->name ?: '—' }}
+                        <small>{{ $cheque->order?->user?->phone ?: '—' }}</small>
+                    </td>
+                    <td>{{ number_format((float) $cheque->amount) }} تومان</td>
+                    <td>{{ $cheque->due_date?->format('Y/m/d') ?: '—' }}</td>
+                    <td><span class="status-badge">{{ $cheque->status }}</span></td>
+                    <td>
+                        <div class="admin-actions">
+                            @if($cheque->status === 'submitted')
+                                <form method="POST" action="{{ route('admin.cheques.review', $cheque) }}">@csrf @method('PATCH')<button>بررسی</button></form>
+                            @elseif($cheque->status === 'under_review')
+                                <form method="POST" action="{{ route('admin.cheques.accept', $cheque) }}">@csrf @method('PATCH')<button>پذیرش</button></form>
+                                <form method="POST" action="{{ route('admin.cheques.reject', $cheque) }}">@csrf @method('PATCH')<button>رد</button></form>
+                            @elseif($cheque->status === 'accepted')
+                                <form method="POST" action="{{ route('admin.cheques.deposit', $cheque) }}">@csrf @method('PATCH')<button>واریز</button></form>
+                            @elseif($cheque->status === 'deposited')
+                                <form method="POST" action="{{ route('admin.cheques.clear', $cheque) }}">@csrf @method('PATCH')<button>تسویه</button></form>
+                                <form method="POST" action="{{ route('admin.cheques.bounce', $cheque) }}">@csrf @method('PATCH')<button>برگشت</button></form>
+                            @else
+                                <span>بدون اقدام</span>
+                            @endif
+                        </div>
+                    </td>
                 </tr>
-                </thead>
-                <tbody>
-                @foreach($cheques as $cheque)
-                    @php
-                        $status = $cheque->status;
-                        $statusClass = match($status) {
-                            'submitted', 'under_review' => 'warning',
-                            'accepted', 'deposited' => 'info',
-                            'cleared' => 'success',
-                            'rejected', 'bounced', 'cancelled' => 'danger',
-                            default => 'neutral',
-                        };
-                    @endphp
-                    <tr>
-                        <td>
-                            <div class="admin-product-name">
-                                {{ $cheque->order?->user?->name ?: $cheque->order?->customer_name ?: 'بدون نام' }}
-                            </div>
-                            <div class="admin-muted" dir="ltr">
-                                {{ $cheque->order?->order_number ?: '—' }}
-                            </div>
-                            @if($cheque->order?->user?->phone)
-                                <div class="admin-muted" dir="ltr">{{ $cheque->order->user->phone }}</div>
-                            @endif
-                        </td>
+            @empty
+                <tr><td colspan="6">چکی با این فیلتر پیدا نشد.</td></tr>
+            @endforelse
+            </tbody>
+        </table>
+    </div>
 
-                        <td>
-                            <div class="admin-product-name">{{ $cheque->bank_name }}</div>
-                            <div class="admin-muted" dir="ltr">صیادی: {{ $cheque->sayad_id }}</div>
-                            @if($cheque->cheque_number)
-                                <div class="admin-muted" dir="ltr">شماره: {{ $cheque->cheque_number }}</div>
-                            @endif
-                        </td>
-
-                        <td>
-                            <div class="admin-price">{{ number_format((float) $cheque->amount) }}</div>
-                            <div class="admin-muted">تومان</div>
-                        </td>
-
-                        <td>
-                            <span class="admin-muted">
-                                {{ $cheque->due_date?->format('Y/m/d') ?: '—' }}
-                            </span>
-                        </td>
-
-                        <td>
-                            <span class="admin-badge admin-badge--{{ $statusClass }}">
-                                {{ $statusNames[$status] ?? $status }}
-                            </span>
-                            @if($cheque->reviewedBy)
-                                <div class="admin-muted" style="margin-top:5px;">
-                                    بررسی توسط {{ $cheque->reviewedBy->name ?: 'مدیر' }}
-                                </div>
-                            @endif
-                        </td>
-
-                        <td>
-                            <div class="admin-actions">
-                                @if($status === 'submitted')
-                                    <form method="POST" action="{{ route('admin.cheques.review', $cheque) }}">
-                                        @csrf
-                                        @method('PATCH')
-                                        <button class="admin-btn admin-btn--secondary admin-btn--sm" type="submit">شروع بررسی</button>
-                                    </form>
-                                @elseif($status === 'under_review')
-                                    <form method="POST" action="{{ route('admin.cheques.accept', $cheque) }}">
-                                        @csrf
-                                        @method('PATCH')
-                                        <button class="admin-btn admin-btn--secondary admin-btn--sm" type="submit">تأیید چک</button>
-                                    </form>
-                                    <form method="POST" action="{{ route('admin.cheques.reject', $cheque) }}">
-                                        @csrf
-                                        @method('PATCH')
-                                        <button class="admin-btn admin-btn--ghost admin-btn--sm" type="submit">رد</button>
-                                    </form>
-                                @elseif($status === 'accepted')
-                                    <form method="POST" action="{{ route('admin.cheques.deposit', $cheque) }}">
-                                        @csrf
-                                        @method('PATCH')
-                                        <button class="admin-btn admin-btn--secondary admin-btn--sm" type="submit">ثبت واریز</button>
-                                    </form>
-                                @elseif($status === 'deposited')
-                                    <form method="POST" action="{{ route('admin.cheques.clear', $cheque) }}">
-                                        @csrf
-                                        @method('PATCH')
-                                        <button class="admin-btn admin-btn--secondary admin-btn--sm" type="submit">ثبت تسویه</button>
-                                    </form>
-                                    <form method="POST" action="{{ route('admin.cheques.bounce', $cheque) }}">
-                                        @csrf
-                                        @method('PATCH')
-                                        <button class="admin-btn admin-btn--ghost admin-btn--sm" type="submit">برگشتی</button>
-                                    </form>
-                                @else
-                                    <span class="admin-muted">عملیات دیگری لازم نیست.</span>
-                                @endif
-                            </div>
-                        </td>
-                    </tr>
-                @endforeach
-                </tbody>
-            </table>
-        </div>
-
-        @if($cheques->hasPages())
-            <div class="admin-pagination">
-                {{ $cheques->links() }}
-            </div>
-        @endif
-    @else
-        <div class="admin-empty">
-            <div class="admin-empty__icon">—</div>
-            <h3 class="admin-empty__title">چکی پیدا نشد</h3>
-            <p class="admin-empty__text">برای فیلتر فعلی موردی برای نمایش وجود ندارد.</p>
-        </div>
-    @endif
+    <div class="store-pagination">{{ $cheques->links() }}</div>
 </div>
 @endsection
