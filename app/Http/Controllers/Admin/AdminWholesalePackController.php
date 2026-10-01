@@ -110,7 +110,7 @@ class AdminWholesalePackController extends Controller
             'name' => ['required', 'string', 'max:180'],
             'slug' => ['nullable', 'string', 'max:180', Rule::unique('wholesale_packs', 'slug')->ignore($request->route('wholesalePack'))],
             'description' => ['nullable', 'string', 'max:5000'],
-            'pack_price' => ['nullable', 'numeric', 'min:0'],
+            'pack_price' => ['required', 'numeric', 'min:0'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
             'is_active' => ['nullable', 'boolean'],
             'items' => ['required', 'array', 'min:1'],
