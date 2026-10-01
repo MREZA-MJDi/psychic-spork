@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Brand;
+use App\Models\HeroSlide;
 use App\Models\Category;
 use App\Models\Order;
 use App\Models\Product;
 use App\Services\SeoService;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 
 class HomeController extends Controller
@@ -126,45 +128,50 @@ class HomeController extends Controller
             ->limit(4)
             ->get();
 
-        $heroProducts = Product::query()
-            ->active()
-            ->with(['brand.logoMedia', 'category', 'primaryGalleryMedia', 'primaryActiveVariant'])
-            ->orderByDesc('is_featured')
-            ->latest('updated_at')
-            ->latest('id')
-            ->take(24)
-            ->get();
+        $heroSlides = Cache::remember(
+            'store:home:hero',
+            now()->addMinutes(30),
+            fn () => HeroSlide::query()
+                ->active()
+                ->with([
+                    'product:id,name,slug,brand_id,category_id,short_description,description',
+                    'product.brand:id,name',
+                    'product.brand.logoMedia',
+                    'product.category:id,name',
+                    'product.primaryGalleryMedia',
+                ])
+                ->orderBy('sort_order')
+                ->orderBy('id')
+                ->limit(6)
+                ->get()
+                ->values()
+                ->map(function (HeroSlide $slide, int $index): array {
+                    $product = $slide->product;
 
-        $heroSlides = $heroProducts
-            ->values()
-            ->map(function (Product $product, int $index): array {
-                $productImage = $product->primaryGalleryMedia?->url;
-                $brandImage = $product->brand?->logoMedia?->url;
+                    $description = trim((string) (
+                        $slide->description
+                        ?: $product?->short_description
+                        ?: $product?->description
+                    ));
 
-                $description = trim((string) ($product->short_description ?: $product->description));
-
-                if ($description === '') {
-                    $description = sprintf(
-                        '%s%s',
-                        $product->brand?->name
-                            ? $product->brand->name . ' · '
-                            : '',
-                        $product->category?->name
+                    if ($description === '') {
+                        $description = $product?->category?->name
                             ? 'منتخبی از دسته ' . $product->category->name . ' در جانان.'
-                            : 'منتخبی از کالکشن جانان.'
-                    );
-                }
+                            : 'منتخبی از کالکشن جانان.';
+                    }
 
-                return [
-                    'number' => str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT),
-                    'image' => $productImage ?: $brandImage,
-                    'title' => $product->name,
-                    'description' => $description,
-                    'brand' => $product->brand?->name ?? 'JANAN',
-                    'url' => route('products.show', $product),
-                ];
-            })
-            ->all();
+                    return [
+                        'number' => str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT),
+                        'image' => $slide->resolved_image_url,
+                        'title' => $slide->title ?: ($product?->name ?? 'کالکشن منتخب جانان'),
+                        'description' => $description,
+                        'brand' => $product?->brand?->name ?? 'JANAN',
+                        'url' => $slide->link_url
+                            ?: ($product ? route('products.show', $product) : route('products.index')),
+                    ];
+                })
+                ->all()
+        );
 
         return view('home.index', [
             'seo' => $seo->storeHome(),

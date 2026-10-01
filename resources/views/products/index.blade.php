@@ -111,10 +111,10 @@
                 <div class="catalog-filter-bar__field">
                     <span>مرتب‌سازی</span>
                     <select name="sort" aria-label="مرتب‌سازی محصولات">
-                        <option value="latest" @selected(request('sort', 'latest') === 'latest')>جدیدترین</option>
+                        <option value="newest" @selected(request('sort', 'newest') === 'newest')>جدیدترین</option>
                         <option value="price_asc" @selected(request('sort') === 'price_asc')>ارزان‌ترین</option>
                         <option value="price_desc" @selected(request('sort') === 'price_desc')>گران‌ترین</option>
-                        <option value="name" @selected(request('sort') === 'name')>الفبایی</option>
+                        <option value="name_asc" @selected(request('sort') === 'name_asc')>الفبایی</option>
                     </select>
                 </div>
 
@@ -133,12 +133,21 @@
                     </select>
                 </div>
 
+                <div class="catalog-filter-bar__field">
+                    <span>تعداد نمایش</span>
+                    <select name="per_page" aria-label="تعداد نمایش در هر صفحه">
+                        <option value="12" @selected((int) request('per_page', $perPage) === 12)>۱۲</option>
+                        <option value="24" @selected((int) request('per_page', $perPage) === 24)>۲۴</option>
+                        <option value="36" @selected((int) request('per_page', $perPage) === 36)>۳۶</option>
+                    </select>
+                </div>
+
                 <div class="catalog-filter-bar__actions">
                     <button class="button button--primary" type="submit">
                         اعمال فیلتر
                     </button>
 
-                    @if(request()->hasAny(['q', 'category', 'brand']))
+                    @if(request()->hasAny(['q', 'category', 'brand', 'sort', 'per_page']))
                         <a
                             class="button button--ghost"
                             href="{{ route('products.index') }}"

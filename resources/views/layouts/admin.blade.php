@@ -58,6 +58,14 @@
             </a>
 
             <a
+                href="{{ route('admin.hero.index') }}"
+                class="admin-link {{ request()->routeIs('admin.hero.*') ? 'active' : '' }}"
+            >
+                <span class="admin-link-icon">✦</span>
+                <span>Hero صفحه اصلی</span>
+            </a>
+
+            <a
                 href="{{ route('admin.categories.index') }}"
                 class="admin-link {{ request()->routeIs('admin.categories.*') ? 'active' : '' }}"
             >

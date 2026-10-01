@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\AdminCustomerController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminFinancialController;
 use App\Http\Controllers\Admin\AdminInventoryController;
+use App\Http\Controllers\Admin\AdminHeroController;
 use App\Http\Controllers\Admin\AdminMediaController;
 use App\Http\Controllers\Admin\AdminNilaController;
 use App\Http\Controllers\Admin\AdminOrderController;
@@ -368,6 +369,12 @@ Route::prefix('admin')
 
         Route::get('nila', [AdminNilaController::class, 'index'])
             ->name('nila.index');
+
+        Route::get('hero', [AdminHeroController::class, 'index'])
+            ->name('hero.index');
+
+        Route::put('hero', [AdminHeroController::class, 'update'])
+            ->name('hero.update');
 
         Route::post('inventory', [AdminInventoryController::class, 'store'])
             ->name('inventory.store');
