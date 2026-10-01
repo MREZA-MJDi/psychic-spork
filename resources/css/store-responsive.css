@@ -2942,3 +2942,112 @@ animation-duration:
         gap: 8px;
     }
 }
+
+
+/* =========================================================
+   IMMERSIVE HERO RESPONSIVE CONTRACT
+   Hero breakpoint layout stays centralized here.
+========================================================= */
+
+/* Responsive Hero controls: one compact touch-safe control rail. */
+@media (max-width: 820px) {
+  .immersive-grid-hero .immersive-controls {
+    left: 50%;
+    right: auto;
+    bottom: max(14px, env(safe-area-inset-bottom));
+    width: min(94vw, 520px);
+    max-width: calc(100vw - 20px);
+    transform: translateX(-50%);
+    display: grid;
+    grid-template-columns: 64px minmax(0, 1fr);
+    gap: 6px;
+  }
+
+  .immersive-grid-hero .immersive-percentage {
+    min-width: 0;
+    min-height: 48px;
+    padding: 0 8px;
+  }
+
+  .immersive-grid-hero .immersive-switch {
+    min-width: 0;
+    min-height: 48px;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 2px;
+    padding: 4px;
+    border-radius: 12px;
+  }
+
+  .immersive-grid-hero .immersive-switch__button {
+    min-width: 0;
+    min-height: 40px;
+    padding: 7px 4px;
+    font-size: 9px;
+  }
+
+  .immersive-grid-hero .immersive-switch__button > span {
+    left: 50%;
+    top: auto;
+    bottom: 3px;
+    transform: translateX(-50%);
+  }
+
+  .immersive-grid-hero .immersive-title-overlay {
+    inset-inline-start: 16px;
+    inset-inline-end: 16px;
+    bottom: 84px;
+    width: auto;
+    max-width: 520px;
+  }
+
+  .immersive-grid-hero .immersive-title-overlay__title h1 {
+    font-size: clamp(30px, 9vw, 46px);
+  }
+
+  .immersive-grid-hero .immersive-title-overlay__description {
+    min-height: 0;
+    max-width: 42ch;
+  }
+
+  .immersive-grid-hero .immersive-description-line {
+    font-size: 13px;
+    line-height: 1.55;
+  }
+
+  .immersive-grid-hero .immersive-close-button {
+    top: max(74px, env(safe-area-inset-top) + 58px);
+    right: 12px;
+    width: 46px;
+    height: 46px;
+  }
+
+  .immersive-grid-hero .immersive-close-button svg {
+    width: 46px;
+    height: 46px;
+  }
+
+  .immersive-grid-hero .immersive-footer {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .immersive-grid-hero .immersive-controls {
+    width: calc(100vw - 16px);
+    grid-template-columns: 54px minmax(0, 1fr);
+  }
+
+  .immersive-grid-hero .immersive-switch__button {
+    font-size: 8px;
+    letter-spacing: -.01em;
+  }
+
+  .immersive-grid-hero .immersive-title-overlay {
+    bottom: 78px;
+  }
+
+  .immersive-grid-hero .immersive-title-overlay__number span {
+    font-size: 10px;
+  }
+}
