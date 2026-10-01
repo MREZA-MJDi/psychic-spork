@@ -148,7 +148,7 @@ class HomeController extends Controller
                 ])
                 ->orderBy('sort_order')
                 ->orderBy('id')
-                ->limit(90)
+                ->limit(6)
                 ->get()
                 ->values()
                 ->map(function (HeroSlide $slide, int $index): array {
