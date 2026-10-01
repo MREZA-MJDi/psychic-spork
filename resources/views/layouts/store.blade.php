@@ -48,10 +48,7 @@
 
     @php
         $storeAssets = [
-            'resources/css/app.css',
-            'resources/css/store-structure.css',
-            'resources/css/store-polish.css',
-            'resources/css/store-customer-uiux.css',
+            'resources/css/store.css',
             'resources/js/app.js',
             'resources/js/store-cart.js',
             'resources/js/store-search.js',
