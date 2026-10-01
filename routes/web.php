@@ -154,13 +154,12 @@ Route::get('/checkout/success', [CheckoutController::class, 'success'])
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth', 'customer'])->group(function () {
-    Route::get('/wholesale', [WholesaleController::class, 'show'])
-        ->name('wholesale.show');
+Route::get('/wholesale', [WholesaleController::class, 'show'])
+    ->name('wholesale.show');
 
-    Route::post('/wholesale/apply', [WholesaleController::class, 'apply'])
-        ->name('wholesale.apply');
-});
+Route::post('/wholesale/apply', [WholesaleController::class, 'apply'])
+    ->middleware(['auth', 'customer'])
+    ->name('wholesale.apply');
 
 /*
 |--------------------------------------------------------------------------

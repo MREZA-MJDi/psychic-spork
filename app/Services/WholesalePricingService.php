@@ -8,16 +8,11 @@ use App\Models\User;
 
 final class WholesalePricingService
 {
-    public function __construct(
-        private readonly WholesaleEligibilityService $eligibility,
-    ) {
-    }
-
     public function quote(
         Cart $cart,
-        User $user
+        ?User $user = null
     ): array {
-        $profile = $this->eligibility->assertWholesaleAllowed($user);
+        $profile = $user?->wholesaleProfile;
 
         $items = $cart->items()
             ->with([

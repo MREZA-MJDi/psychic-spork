@@ -33,6 +33,21 @@
         </div>
     </section>
 
+    <section class="section-block section-block--compact customer-discovery-preamble">
+        <div class="container">
+            <div class="customer-action-strip">
+                <div class="customer-action-strip__copy">
+                    <small>JANAN / DISCOVERY</small>
+                    <strong>از یک مسیر شروع کن؛ بعد با فیلترها دقیق‌ترش کن.</strong>
+                </div>
+                <div class="customer-action-strip__actions">
+                    <a class="button button--ghost" href="{{ route('categories.index') }}">دسته‌ها</a>
+                    <a class="button button--ghost" href="{{ route('brands.index') }}">برندها</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <section class="catalog-discovery">
         <div class="container">
 

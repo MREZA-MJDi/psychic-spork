@@ -351,6 +351,23 @@
         </div>
     </section>
 
+    <div class="container customer-action-wrap customer-product-action">
+        <div class="customer-action-strip">
+            <div class="customer-action-strip__copy">
+                <small>JANAN / PRODUCT PATH</small>
+                <strong>مدل را انتخاب کن، قیمت و موجودی را ببین و همان‌جا به سبد اضافه کن.</strong>
+            </div>
+            <div class="customer-action-strip__actions">
+                @if($product->category)
+                    <a class="button button--ghost" href="{{ route('categories.show', $product->category) }}">این دسته</a>
+                @endif
+                @if($product->brand)
+                    <a class="button button--primary" href="{{ route('brands.show', $product->brand) }}">این برند</a>
+                @endif
+            </div>
+        </div>
+    </div>
+
     <section class="product-information product-information--v2">
         <div class="container">
             <div class="product-information__grid">

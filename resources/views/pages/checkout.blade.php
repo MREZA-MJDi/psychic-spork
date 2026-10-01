@@ -15,6 +15,21 @@
     <div class="container checkout-layout">
 
         <section class="checkout-card">
+            <div class="customer-stepper" aria-label="مراحل خرید">
+                <div class="customer-stepper__item">
+                    <span class="customer-stepper__index">01</span>
+                    <div><strong>سبد خرید</strong><span>انتخاب‌ها</span></div>
+                </div>
+                <div class="customer-stepper__item" aria-current="step">
+                    <span class="customer-stepper__index">02</span>
+                    <div><strong>اطلاعات سفارش</strong><span>ارسال و پرداخت</span></div>
+                </div>
+                <div class="customer-stepper__item">
+                    <span class="customer-stepper__index">03</span>
+                    <div><strong>تکمیل</strong><span>تأیید سفارش</span></div>
+                </div>
+            </div>
+
             <div class="section-head">
                 <div>
                     <span class="eyebrow">DELIVERY DETAILS</span>
@@ -26,6 +41,7 @@
                 method="POST"
                 action="{{ route('checkout.store') }}"
                 class="checkout-form"
+                enctype="multipart/form-data"
             >
                 @csrf
 
@@ -102,10 +118,10 @@
                 </div>
 
                 <div class="checkout-payment" data-checkout-options>
-                    <div style="margin-bottom:18px;">
+                    <div class="checkout-option-group">
                         <span class="eyebrow">ORDER TYPE</span>
                         <strong>نوع خرید</strong>
-                        <div class="form-grid" style="margin-top:12px;">
+                        <div class="form-grid checkout-option-grid">
                             <label>
                                 <input
                                     type="radio"
@@ -117,29 +133,26 @@
                                 خرید عادی
                             </label>
 
-                            @if($wholesaleApproved)
-                                <label>
-                                    <input
-                                        type="radio"
-                                        name="order_type"
-                                        value="wholesale"
-                                        @checked(old('order_type') === 'wholesale')
-                                        data-order-type="wholesale"
-                                    >
-                                    خرید عمده
-                                </label>
-                            @else
-                                <small class="admin-help" style="grid-column:1/-1;">
-                                    خرید عمده فقط بعد از تأیید حساب توسط مدیریت فعال می‌شود.
-                                </small>
-                            @endif
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="order_type"
+                                    value="wholesale"
+                                    @checked(old('order_type') === 'wholesale')
+                                    data-order-type="wholesale"
+                                >
+                                خرید عمده
+                            </label>
+                            <small class="admin-help checkout-option-help">
+                                سفارش عمده آنلاین برای همه باز است؛ فقط پرداخت چکی نیاز به مجوز مدیر دارد.
+                            </small>
                         </div>
                     </div>
 
                     <div>
                         <span class="eyebrow">PAYMENT</span>
                         <strong>روش پرداخت</strong>
-                        <div class="form-grid" style="margin-top:12px;">
+                        <div class="form-grid checkout-option-grid">
                             <label>
                                 <input
                                     type="radio"
@@ -165,13 +178,13 @@
                             @endif
                         </div>
 
-                        <p data-online-help style="margin-top:10px;">
+                        <p data-online-help class="checkout-payment-help">
                             مبلغ نهایی پس از ثبت سفارش به درگاه امن پرداخت منتقل می‌شود.
                         </p>
 
                         @if($chequeEnabled)
-                            <p data-cheque-help hidden style="margin-top:10px;">
-                                مجوز پرداخت چکی این حساب فعال است.
+                            <p data-cheque-help hidden class="checkout-payment-help">
+                                مجوز پرداخت چکی این حساب فعال است و فقط برای همین حساب قابل استفاده است.
                                 @if($chequeMaxOrderAmount !== null)
                                     سقف هر سفارش:
                                     {{ number_format((float) $chequeMaxOrderAmount) }}
@@ -187,7 +200,7 @@
                         <div
                             data-cheque-fields
                             hidden
-                            style="margin-top:18px;padding-top:18px;border-top:1px solid rgba(0,0,0,.08);"
+                            class="checkout-cheque-fields"
                         >
                             <div class="form-grid">
                                 <label>

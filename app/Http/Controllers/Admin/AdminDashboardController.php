@@ -63,10 +63,9 @@ class AdminDashboardController extends Controller
         $ledgerLines = JournalLine::query()
             ->with('account')
             ->whereHas('entry', function ($query) use ($from, $to): void {
-                $query->whereBetween('entry_date', [
-                    $from->toDateString(),
-                    $to->toDateString(),
-                ]);
+                $query
+                    ->whereDate('entry_date', '>=', $from->toDateString())
+                    ->whereDate('entry_date', '<=', $to->toDateString());
             });
 
         $revenue = (float) (clone $ledgerLines)

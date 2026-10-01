@@ -36,6 +36,17 @@
     <section class="directory-stage directory-stage--collections">
         <div class="container">
 
+            <div class="customer-action-strip customer-action-strip--spaced">
+                <div class="customer-action-strip__copy">
+                    <small>JANAN / COLLECTION MAP</small>
+                    <strong>دسته را انتخاب کن و مستقیم وارد محصولات همان مسیر شو.</strong>
+                </div>
+                <div class="customer-action-strip__actions">
+                    <a class="button button--primary" href="{{ route('products.index') }}">همه محصولات</a>
+                    <a class="button button--ghost" href="{{ route('brands.index') }}">برندها</a>
+                </div>
+            </div>
+
             <header class="directory-intro">
                 <div>
                     <span class="eyebrow">BROWSE BY FEEL</span>

@@ -54,7 +54,7 @@
                 </article>
             </div>
 
-            <div class="page-cta-panel" style="margin-top: 18px;">
+            <div class="page-cta-panel customer-page-cta">
                 <div>
                     <span class="eyebrow">NEED HELP?</span>
                     <h2>سوالی درباره ارسال داری؟</h2>

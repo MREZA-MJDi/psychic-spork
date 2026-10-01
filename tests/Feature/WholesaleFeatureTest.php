@@ -14,6 +14,7 @@ use App\Models\ChequePermission;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 use Illuminate\Http\UploadedFile;
 use Tests\TestCase;
 
@@ -43,10 +44,83 @@ class WholesaleFeatureTest extends TestCase
         ]);
     }
 
-    public function test_unapproved_customer_cannot_place_wholesale_order(): void
+    public function test_guest_can_place_wholesale_order_online(): void
     {
+        Config::set('payment.driver', 'zarinpal');
+        Config::set('payment.zarinpal.merchant_id', 'test-merchant');
+
+        Http::fake([
+            'https://api.zarinpal.com/pg/v4/payment/request.json' =>
+                Http::response([
+                    'data' => [
+                        'code' => 100,
+                        'authority' => 'A000000000000000000000000099',
+                    ],
+                    'errors' => [],
+                ], 200),
+        ]);
+
+        [, $variant] = $this->makeProduct(
+            stock: 10,
+            wholesalePrice: 70000
+        );
+
+        /*
+         * The test suite uses SESSION_DRIVER=array, so keep the guest
+         * identity explicit across requests. The production browser already
+         * persists this cookie normally.
+         */
+        $sessionId = Str::random(40);
+
+        $this->withCookie(config('session.cookie'), $sessionId)
+            ->post(route('cart.store', $variant), [
+                'quantity' => 2,
+            ])
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('cart_items', [
+            'product_variant_id' => $variant->id,
+            'quantity' => 2,
+        ]);
+
+        $this->withCookie(config('session.cookie'), $sessionId)
+            ->post('/checkout', $this->checkoutData([
+                'order_type' => 'wholesale',
+                'payment_method' => 'online',
+            ]))
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('orders', [
+            'user_id' => null,
+            'order_type' => 'wholesale',
+        ]);
+
+        $this->assertSame(8, $variant->fresh()->stock);
+    }
+
+    public function test_unapproved_customer_can_place_wholesale_order_online(): void
+    {
+        Config::set('payment.driver', 'zarinpal');
+        Config::set('payment.zarinpal.merchant_id', 'test-merchant');
+
+        Http::fake([
+            'https://api.zarinpal.com/pg/v4/payment/request.json' =>
+                Http::response([
+                    'data' => [
+                        'code' => 100,
+                        'authority' => 'A000000000000000000000000099',
+                    ],
+                    'errors' => [],
+                ], 200),
+        ]);
+
         $customer = User::factory()->create([
             'is_admin' => false,
+        ]);
+
+        WholesaleProfile::create([
+            'user_id' => $customer->id,
+            'status' => 'pending',
         ]);
 
         [, $variant] = $this->makeProduct(
@@ -69,11 +143,13 @@ class WholesaleFeatureTest extends TestCase
             ->post('/checkout', $this->checkoutData([
                 'order_type' => 'wholesale',
             ]))
-            ->assertRedirect()
-            ->assertSessionHas('error');
+            ->assertRedirect();
 
-        $this->assertDatabaseCount('orders', 0);
-        $this->assertSame(10, $variant->fresh()->stock);
+        $this->assertDatabaseHas('orders', [
+            'user_id' => $customer->id,
+            'order_type' => 'wholesale',
+        ]);
+        $this->assertSame(8, $variant->fresh()->stock);
     }
 
     public function test_approved_customer_uses_wholesale_price_and_minimums(): void

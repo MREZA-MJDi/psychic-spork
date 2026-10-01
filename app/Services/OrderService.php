@@ -15,7 +15,6 @@ final class OrderService
     public function __construct(
         private readonly PaymentService $payment,
         private readonly CartService $cart,
-        private readonly WholesaleEligibilityService $wholesaleEligibility,
         private readonly WholesalePricingService $wholesalePricing,
     ) {
     }
@@ -37,14 +36,6 @@ final class OrderService
                 422,
                 'نوع سفارش نامعتبر است.'
             );
-
-            if ($orderType === 'wholesale') {
-                abort_unless(
-                    $user?->isCustomer(),
-                    403,
-                    'خرید عمده فقط برای حساب مشتری مجاز است.'
-                );
-            }
 
             $cartItems = $cart->items()
                 ->with([
@@ -114,8 +105,7 @@ final class OrderService
             ]);
 
             $subtotal = 0;
-            $wholesaleQuantity = 0;
-
+            $orderQuantity = 0;
             foreach ($cartItems as $cartItem) {
                 $variant = ProductVariant::query()
                     ->with([
@@ -150,11 +140,9 @@ final class OrderService
                     ? $this->wholesalePricing->unitPrice($variant)
                     : (float) $variant->effective_price;
 
-                if ($orderType === 'wholesale') {
-                    $wholesaleQuantity += $quantity;
-                }
-
                 $lineTotal = $unitPrice * $quantity;
+
+                $orderQuantity += $quantity;
 
                 abort_if(
                     $unitPrice < 0 || $lineTotal < 0,
@@ -192,20 +180,17 @@ final class OrderService
                 ]);
             }
 
-            if ($orderType === 'wholesale') {
-                abort_unless(
-                    $user,
-                    403,
-                    'خرید عمده فقط برای مشتری واردشده مجاز است.'
-                );
-
-                $this->wholesaleEligibility->assertWholesaleOrder(
-                    $user,
+            // Wholesale orders are open for online checkout.
+            // Configured customer-specific minimums remain enforced transactionally.
+            if ($orderType === 'wholesale' && $user?->wholesaleProfile) {
+                $this->wholesalePricing->assertMinimums(
+                    $user->wholesaleProfile,
                     $subtotal,
-                    $wholesaleQuantity
+                    $orderQuantity
                 );
             }
 
+            // Cheque authorization is enforced only by ChequePaymentMethod.
             abort_if(
                 $subtotal <= 0,
                 422,

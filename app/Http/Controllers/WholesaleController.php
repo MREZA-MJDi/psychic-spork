@@ -12,9 +12,7 @@ class WholesaleController extends Controller
 {
     public function show(Request $request): View
     {
-        $profile = $request->user()
-            ->wholesaleProfile()
-            ->first();
+        $profile = $request->user()?->wholesaleProfile()->first();
 
         return view('pages.wholesale', [
             'profile' => $profile,

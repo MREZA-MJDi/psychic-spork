@@ -4,85 +4,219 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>ثبت‌نام — JANAN</title>
-    @vite(['resources/css/auth.css', 'resources/js/app.js'])
+    <meta name="robots" content="noindex,nofollow">
+    <title>ثبت‌نام — {{ config('app.store_name', 'JANAN') }}</title>
+
+    @vite([
+        'resources/css/auth.css',
+        'resources/js/app.js',
+    ])
 </head>
-<body class="auth-page" data-auth-page>
-<main class="auth-shell">
-    <section class="auth-card">
-        <a href="{{ route('home') }}" class="auth-brand" aria-label="Janan">
-            <span class="auth-brand__latin">janan</span>
-            <span class="auth-brand__fa">جانان</span>
-        </a>
 
-        <div class="auth-intro">
-            <span class="eyebrow">JOIN JANAN / NEW ACCOUNT</span>
-            <h1>حساب جدید بساز.</h1>
-            <p>یک فضای شخصی برای انتخاب‌های بعدی‌ات بساز؛ اطلاعات حساب به‌صورت واقعی در سیستم ذخیره می‌شوند.</p>
+<body class="auth-page" data-auth-page="register">
+    <main class="auth-app">
+        <header class="auth-topbar">
+            <a href="{{ route('home') }}" class="auth-brand" aria-label="بازگشت به جانان">
+                <span class="auth-brand__mark" aria-hidden="true">J</span>
+                <span>
+                    <strong>janan</strong>
+                    <small>STORE / PRIVATE ACCESS</small>
+                </span>
+            </a>
+
+            <div class="auth-topbar__meta" aria-label="وضعیت سامانه">
+                <span class="auth-status"><i aria-hidden="true"></i> ثبت‌نام مشتری</span>
+                <span class="auth-index">02 / 02</span>
+            </div>
+        </header>
+
+        <div class="auth-canvas">
+            <div class="auth-grid" aria-hidden="true"></div>
+            <div class="auth-orbit auth-orbit--one" aria-hidden="true"></div>
+            <div class="auth-orbit auth-orbit--two" aria-hidden="true"></div>
+
+            <section class="auth-workspace" aria-labelledby="register-title">
+                <div class="auth-workspace__rail" aria-hidden="true">
+                    <span>AUTH</span>
+                    <span>02</span>
+                    <span class="auth-workspace__line"></span>
+                    <span>JANAN</span>
+                </div>
+
+                <div class="auth-panel">
+                    <div class="auth-panel__head">
+                        <div>
+                            <span class="auth-kicker">CREATE / ACCOUNT</span>
+                            <h1 id="register-title">فضای خودت را بساز.</h1>
+                        </div>
+
+                        <span class="auth-panel__code">A-02</span>
+                    </div>
+
+                    <p class="auth-lead">
+                        با یک حساب جانان، سفارش‌ها، پروفایل و مسیر خریدت را یک‌جا مدیریت کن.
+                    </p>
+
+                    @if($errors->any())
+                        <div class="auth-alert auth-alert--error" role="alert">
+                            {{ $errors->first() }}
+                        </div>
+                    @endif
+
+                    @if(session('error'))
+                        <div class="auth-alert auth-alert--error" role="alert">
+                            {{ session('error') }}
+                        </div>
+                    @endif
+
+                    <form method="POST" action="{{ route('register.store') }}" class="auth-form">
+                        @csrf
+
+                        <label class="auth-field">
+                            <span class="auth-field__label">
+                                نام و نام خانوادگی
+                                <small>YOUR NAME</small>
+                            </span>
+                            <div class="auth-input-wrap">
+                                <span class="auth-input-index" aria-hidden="true">01</span>
+                                <input
+                                    type="text"
+                                    name="name"
+                                    value="{{ old('name') }}"
+                                    placeholder="مثلاً سارا احمدی"
+                                    autocomplete="name"
+                                    maxlength="120"
+                                    required
+                                    autofocus
+                                >
+                            </div>
+                        </label>
+
+                        <label class="auth-field">
+                            <span class="auth-field__label">
+                                ایمیل
+                                <small>EMAIL</small>
+                            </span>
+                            <div class="auth-input-wrap">
+                                <span class="auth-input-index" aria-hidden="true">02</span>
+                                <input
+                                    type="email"
+                                    name="email"
+                                    value="{{ old('email') }}"
+                                    placeholder="you@example.com"
+                                    autocomplete="email"
+                                    required
+                                >
+                            </div>
+                        </label>
+
+                        <div class="auth-form__two-col">
+                            <label class="auth-field">
+                                <span class="auth-field__label">
+                                    رمز عبور
+                                    <small>SECURE PASSWORD</small>
+                                </span>
+                                <div class="auth-input-wrap auth-password-wrap">
+                                    <input
+                                        type="password"
+                                        name="password"
+                                        placeholder="حداقل ۸ کاراکتر"
+                                        autocomplete="new-password"
+                                        minlength="8"
+                                        required
+                                        data-password-input
+                                        data-password-meter-source
+                                    >
+                                    <button
+                                        class="auth-password-toggle"
+                                        type="button"
+                                        data-password-toggle
+                                        aria-label="نمایش رمز عبور"
+                                        aria-pressed="false"
+                                    >
+                                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                                            <path d="M2.5 12s3.5-5 9.5-5 9.5 5 9.5 5-3.5 5-9.5 5-9.5-5-9.5-5Z"/>
+                                            <circle cx="12" cy="12" r="2.5"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="auth-meter" aria-hidden="true"><span data-password-meter></span></div>
+                            </label>
+
+                            <label class="auth-field">
+                                <span class="auth-field__label">
+                                    تکرار رمز
+                                    <small>CONFIRM</small>
+                                </span>
+                                <div class="auth-input-wrap auth-password-wrap">
+                                    <input
+                                        type="password"
+                                        name="password_confirmation"
+                                        placeholder="تکرار رمز"
+                                        autocomplete="new-password"
+                                        minlength="8"
+                                        required
+                                        data-password-input
+                                    >
+                                    <button
+                                        class="auth-password-toggle"
+                                        type="button"
+                                        data-password-toggle
+                                        aria-label="نمایش رمز عبور"
+                                        aria-pressed="false"
+                                    >
+                                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                                            <path d="M2.5 12s3.5-5 9.5-5 9.5 5 9.5 5-3.5 5-9.5 5-9.5-5-9.5-5Z"/>
+                                            <circle cx="12" cy="12" r="2.5"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </label>
+                        </div>
+
+                        <button class="auth-button" type="submit">
+                            <span>ساخت حساب</span>
+                            <b aria-hidden="true">↗</b>
+                        </button>
+                    </form>
+
+                    <footer class="auth-panel__foot">
+                        <span>NEW ACCOUNT / CUSTOMER ACCESS</span>
+                        <span>قبلاً حساب ساختی؟ <a href="{{ route('login') }}">وارد شو</a></span>
+                    </footer>
+                </div>
+
+                <aside class="auth-context" aria-label="مسیرهای دسترسی">
+                    <span class="auth-context__kicker">START HERE</span>
+                    <strong>یک حساب،<br>یک تجربه شخصی.</strong>
+
+                    <div class="auth-context__items">
+                        <a href="{{ route('login') }}" class="auth-context__item">
+                            <span>01</span>
+                            <div>
+                                <strong>ورود</strong>
+                                <small>حساب مشتری / مدیریت</small>
+                            </div>
+                            <b aria-hidden="true">↗</b>
+                        </a>
+
+                        <div class="auth-context__item is-active">
+                            <span>02</span>
+                            <div>
+                                <strong>ثبت‌نام</strong>
+                                <small>شروع با حساب مشتری</small>
+                            </div>
+                            <b aria-hidden="true">↗</b>
+                        </div>
+                    </div>
+
+                    <div class="auth-context__note">
+                        <i aria-hidden="true"></i>
+                        <span>حساب‌های جدید به‌صورت پیش‌فرض مشتری هستند و به بخش مدیریت دسترسی ندارند.</span>
+                    </div>
+                </aside>
+            </section>
         </div>
-
-        @if($errors->any())
-            <div class="auth-alert auth-alert--error" role="alert">{{ $errors->first() }}</div>
-        @endif
-
-        <form method="POST" action="{{ route('register.store') }}" class="auth-form">
-            @csrf
-
-            <label class="auth-field">
-                <span>نام و نام خانوادگی <small class="auth-field__hint">YOUR NAME</small></span>
-                <div class="auth-input-wrap">
-                    <input type="text" name="name" value="{{ old('name') }}" placeholder="مثلاً سارا احمدی" autocomplete="name" maxlength="120" required autofocus>
-                </div>
-            </label>
-
-            <label class="auth-field">
-                <span>ایمیل <small class="auth-field__hint">EMAIL</small></span>
-                <div class="auth-input-wrap">
-                    <input type="email" name="email" value="{{ old('email') }}" placeholder="you@example.com" autocomplete="email" required>
-                </div>
-            </label>
-
-            <label class="auth-field">
-                <span>رمز عبور <small class="auth-field__hint">SECURE PASSWORD</small></span>
-                <div class="auth-input-wrap auth-password-wrap">
-                    <input type="password" name="password" placeholder="رمز امن" autocomplete="new-password" minlength="8" required data-password-input data-password-meter-source>
-                    <button class="auth-password-toggle" type="button" data-password-toggle aria-label="نمایش رمز عبور" aria-pressed="false">
-                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-5 9.5-5 9.5 5 9.5 5-3.5 5-9.5 5-9.5-5-9.5-5Z"/><circle cx="12" cy="12" r="2.5"/></svg>
-                    </button>
-                </div>
-                <div class="auth-meter" aria-hidden="true"><span class="auth-meter__bar" data-password-meter></span></div>
-            </label>
-
-            <label class="auth-field">
-                <span>تکرار رمز عبور <small class="auth-field__hint">CONFIRM</small></span>
-                <div class="auth-input-wrap auth-password-wrap">
-                    <input type="password" name="password_confirmation" placeholder="تکرار رمز عبور" autocomplete="new-password" minlength="8" required data-password-input>
-                    <button class="auth-password-toggle" type="button" data-password-toggle aria-label="نمایش رمز عبور" aria-pressed="false">
-                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-5 9.5-5 9.5 5 9.5 5-3.5 5-9.5 5-9.5-5-9.5-5Z"/><circle cx="12" cy="12" r="2.5"/></svg>
-                    </button>
-                </div>
-            </label>
-
-            <button class="auth-button" type="submit">ساخت حساب جانان <span aria-hidden="true">↗</span></button>
-        </form>
-
-        <p class="auth-switch">
-            قبلاً حساب ساختی؟
-            <a href="{{ route('login') }}">وارد شو</a>
-        </p>
-    </section>
-
-    <aside class="auth-visual" aria-hidden="true">
-        <span class="auth-visual__orb auth-visual__orb--one"></span>
-        <span class="auth-visual__orb auth-visual__orb--two"></span>
-        <div class="auth-visual__veil"></div>
-        <div class="auth-visual__copy">
-            <span>JANAN / YOUR NEXT CHAPTER</span>
-            <strong>شروع یک<br>انتخاب تازه.</strong>
-            <small>CREATE / DISCOVER / WEAR</small>
-            <div class="auth-visual__line">A SOFT INTERFACE WITH SHARP DETAILS</div>
-        </div>
-    </aside>
-</main>
+    </main>
 </body>
 </html>

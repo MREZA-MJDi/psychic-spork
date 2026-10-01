@@ -14,7 +14,19 @@
         <div class="page-hero__watermark" aria-hidden="true">{{ mb_substr($category->name,0,1) }}</div>
     </div>
 </section>
-<section class="section-block catalog-stage"><div class="container">
+<section class="section-block catalog-stage">
+<div class="container">
+    <div class="customer-action-strip customer-action-strip--spaced">
+        <div class="customer-action-strip__copy">
+            <small>COLLECTION / {{ strtoupper($category->slug) }}</small>
+            <strong>{{ number_format($products->total()) }} انتخاب در این کالکشن</strong>
+        </div>
+        <div class="customer-action-strip__actions">
+            <a class="button button--ghost" href="{{ route('categories.index') }}">همه دسته‌ها</a>
+            <a class="button button--primary" href="{{ route('products.index', ['category' => $category->slug]) }}">باز کردن کاتالوگ</a>
+        </div>
+    </div>
+
 <div class="catalog-toolbar">
     <div>
         <span class="eyebrow">CURATED PRODUCTS</span>

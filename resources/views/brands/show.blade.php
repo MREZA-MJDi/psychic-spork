@@ -69,6 +69,19 @@
         </div>
     </section>
 
+    <div class="container customer-action-wrap">
+        <div class="customer-action-strip">
+            <div class="customer-action-strip__copy">
+                <small>BRAND / SHOPPING PATH</small>
+                <strong>محصولات {{ $brand->name }} را مستقیم مرور کن.</strong>
+            </div>
+            <div class="customer-action-strip__actions">
+                <a class="button button--primary" href="#brand-products">شروع خرید</a>
+                <a class="button button--ghost" href="{{ route('products.index', ['brand' => $brand->slug]) }}">کاتالوگ برند</a>
+            </div>
+        </div>
+    </div>
+
     <nav
         class="brand-profile-nav"
         aria-label="ناوبری صفحه برند"
