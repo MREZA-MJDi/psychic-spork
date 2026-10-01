@@ -35,18 +35,8 @@ class WholesalePack extends Model
         return $this->hasMany(WholesalePackItem::class)->orderBy('id');
     }
 
-    public function getCalculatedWholesalePriceAttribute(): float
-    {
-        return (float) $this->items->sum(
-            fn (WholesalePackItem $item) =>
-                ((float) ($item->variant?->wholesale_price ?? 0)) * $item->quantity
-        );
-    }
-
     public function getDisplayPriceAttribute(): float
     {
-        return $this->pack_price !== null
-            ? (float) $this->pack_price
-            : $this->calculated_wholesale_price;
+        return (float) $this->pack_price;
     }
 }
