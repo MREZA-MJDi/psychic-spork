@@ -2,7 +2,6 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -105,12 +104,14 @@ return new class extends Migration
             }
         }
 
-        $columnSql = implode(', ', $columns);
-        $keyword = $type === 'UNIQUE' ? 'UNIQUE' : '';
+        Schema::table($table, function (Blueprint $blueprint) use ($type, $columns, $index): void {
+            if ($type === 'UNIQUE') {
+                $blueprint->unique($columns, $index);
+                return;
+            }
 
-        DB::statement(
-            'ALTER TABLE ' . $table . ' ADD ' . $keyword . ' INDEX ' . $index . ' (' . $columnSql . ')'
-        );
+            $blueprint->index($columns, $index);
+        });
     }
 
     public function down(): void
