@@ -12,8 +12,6 @@
     ) ?? $variants->first();
 
     $image = $gallery->first()?->url;
-    $secondaryGallery = $gallery->slice(1, 2)->values();
-
     $attributes = collect($product->attributes ?? [])
         ->filter(fn ($value) => filled($value))
         ->values();
@@ -59,13 +57,30 @@
 
             <div class="product-detail-v2__layout">
 
-                <div class="product-detail-v2__visual">
-
+                {{-- =====================================================
+                     VISUAL STAGE
+                ====================================================== --}}
+                <section
+                    class="product-detail-v2__visual product-detail-v2__visual-stage"
+                    aria-label="گالری و تصاویر محصول"
+                >
                     <div
                         class="product-gallery product-gallery--v2"
                         data-product-gallery
                     >
-                        <div class="product-gallery-v2__grid">
+                        <div class="product-gallery-v2__stage">
+
+                            <div class="product-gallery-v2__stage-meta">
+                                <span class="product-gallery-v2__kicker">
+                                    JANAN / VISUAL
+                                </span>
+
+                                <span class="product-gallery-v2__index">
+                                    <span data-gallery-current>01</span>
+                                    <i aria-hidden="true">/</i>
+                                    <span>{{ str_pad((string) $galleryCount, 2, '0', STR_PAD_LEFT) }}</span>
+                                </span>
+                            </div>
 
                             <figure class="product-gallery-v2__main">
                                 @if($image)
@@ -82,45 +97,25 @@
                                     </div>
                                 @endif
 
-                                <div class="product-gallery-v2__overlay" aria-hidden="true">
-                                    <span class="product-gallery-v2__counter">
-                                        <span data-gallery-current>01</span>
-                                        <i>/</i>
-                                        <span>{{ str_pad((string) $galleryCount, 2, '0', STR_PAD_LEFT) }}</span>
+                                @if($discount)
+                                    <span class="product-gallery-v2__sale">
+                                        {{ $discount }}٪-
                                     </span>
-
-                                    @if($discount)
-                                        <span class="product-gallery-v2__sale">
-                                            {{ $discount }}٪-
-                                        </span>
-                                    @endif
-                                </div>
+                                @endif
                             </figure>
-
-                            @foreach($secondaryGallery as $galleryItem)
-                                <button
-                                    type="button"
-                                    class="product-gallery-v2__secondary"
-                                    data-gallery-thumb
-                                    data-gallery-src="{{ $galleryItem->url }}"
-                                    data-gallery-alt="{{ $product->name }} — تصویر {{ $loop->iteration + 1 }}"
-                                    data-gallery-index="{{ str_pad((string) ($loop->iteration + 1), 2, '0', STR_PAD_LEFT) }}"
-                                    aria-label="مشاهده تصویر {{ $loop->iteration + 1 }} محصول"
-                                    aria-pressed="false"
-                                >
-                                    <img
-                                        src="{{ $galleryItem->url }}"
-                                        alt=""
-                                        loading="lazy"
-                                        decoding="async"
-                                    >
-                                    <span aria-hidden="true">↗</span>
-                                </button>
-                            @endforeach
 
                         </div>
 
                         @if($gallery->count() > 1)
+                            <div class="product-gallery-v2__thumbs-head">
+                                <div>
+                                    <strong>گالری محصول</strong>
+                                    <span>برای مشاهده تصویر، روی thumbnail بزن.</span>
+                                </div>
+
+                                <span>{{ number_format($gallery->count()) }} تصویر</span>
+                            </div>
+
                             <div
                                 class="product-gallery__thumbs product-gallery__thumbs--v2"
                                 role="list"
@@ -137,6 +132,10 @@
                                         aria-label="تصویر {{ $loop->iteration }} محصول"
                                         aria-pressed="{{ $loop->first ? 'true' : 'false' }}"
                                     >
+                                        <span class="product-gallery__thumb-index">
+                                            {{ str_pad((string) $loop->iteration, 2, '0', STR_PAD_LEFT) }}
+                                        </span>
+
                                         <img
                                             src="{{ $galleryItem->url }}"
                                             alt=""
@@ -147,16 +146,96 @@
                                 @endforeach
                             </div>
                         @endif
+
+                        {{-- Variant-specific image strip. Each variant can have
+                             one gallery asset through the existing media system. --}}
+                        @if($variants->isNotEmpty())
+                            <section class="product-variant-visuals" aria-label="تصاویر واریانت‌ها">
+                                <div class="product-variant-visuals__head">
+                                    <div>
+                                        <span class="eyebrow">VARIANTS / VISUAL</span>
+                                        <strong>تصویر مدل‌ها</strong>
+                                    </div>
+                                    <span>با انتخاب هر مدل، تصویر اصلی هم هماهنگ می‌شود.</span>
+                                </div>
+
+                                <div class="product-variant-visuals__grid">
+                                    @foreach($variants as $variantOption)
+                                        @php
+                                            $variantImage = $variantOption->galleryMedia->first()?->url;
+                                            $variantColorCode = (string) ($variantOption->color_code ?? '');
+                                            $variantSafeColor = preg_match('/^#[0-9A-Fa-f]{3,8}$/', $variantColorCode)
+                                                ? $variantColorCode
+                                                : null;
+                                        @endphp
+
+                                        <button
+                                            type="button"
+                                            class="product-variant-visual {{ $variantOption->id === $variant?->id ? 'is-selected' : '' }} {{ $variantOption->stock < 1 ? 'is-out' : '' }}"
+                                            data-product-variant
+                                            data-variant-action="{{ route('cart.store', $variantOption) }}"
+                                            data-variant-price="{{ $variantOption->effective_price }}"
+                                            data-variant-wholesale="{{ $variantOption->wholesale_price !== null ? $variantOption->wholesale_price : '' }}"
+                                            data-variant-regular="{{ $variantOption->price }}"
+                                            data-variant-sale="{{ $variantOption->is_on_sale ? '1' : '0' }}"
+                                            data-variant-stock="{{ $variantOption->stock }}"
+                                            data-variant-low-stock="{{ $variantOption->is_low_stock ? '1' : '0' }}"
+                                            data-variant-label="{{ $variantOption->display_name }}"
+                                            data-variant-sku="{{ $variantOption->sku }}"
+                                            data-variant-index="{{ $loop->iteration }}"
+                                            data-variant-image="{{ $variantImage ?? '' }}"
+                                            data-variant-image-alt="{{ $product->name }} — {{ $variantOption->display_name }}"
+                                            aria-pressed="{{ $variantOption->id === $variant?->id ? 'true' : 'false' }}"
+                                            @disabled($variantOption->stock < 1)
+                                        >
+                                            <span class="product-variant-visual__media">
+                                                @if($variantImage)
+                                                    <img
+                                                        src="{{ $variantImage }}"
+                                                        alt=""
+                                                        loading="lazy"
+                                                        decoding="async"
+                                                    >
+                                                @elseif($variantSafeColor)
+                                                    <i
+                                                        class="product-variant-visual__swatch"
+                                                        style="--variant-color: {{ $variantSafeColor }}"
+                                                        aria-hidden="true"
+                                                    ></i>
+                                                @else
+                                                    <span class="product-variant-visual__fallback" aria-hidden="true">
+                                                        {{ mb_substr($variantOption->display_name ?: 'V', 0, 1) }}
+                                                    </span>
+                                                @endif
+                                            </span>
+
+                                            <span class="product-variant-visual__copy">
+                                                <strong>{{ $variantOption->display_name }}</strong>
+                                                <small>
+                                                    {{ $variantOption->stock > 0 ? 'موجود' : 'ناموجود' }}
+                                                </small>
+                                            </span>
+
+                                            <span class="product-variant-visual__check" aria-hidden="true">
+                                                ✓
+                                            </span>
+                                        </button>
+                                    @endforeach
+                                </div>
+                            </section>
+                        @endif
                     </div>
+                </section>
 
-                </div>
-
+                {{-- =====================================================
+                     PURCHASE STAGE
+                ====================================================== --}}
                 <aside
                     class="product-detail-v2__purchase"
                     aria-labelledby="product-title"
                     data-product-purchase
                 >
-                    <div class="product-detail-v2__topline">
+                    <div class="product-detail-v2__purchase-head">
                         <div class="product-detail-v2__identity">
                             <span class="eyebrow">JANAN / PRODUCT</span>
 
@@ -182,54 +261,59 @@
                         </p>
                     </div>
 
-                    <div class="product-detail-v2__price-row">
-                        <div class="product-buy-card__price product-buy-card__price--v2" aria-live="polite">
-                            <strong data-product-price>
-                                {{ number_format($variant?->effective_price ?? 0) }}
-                            </strong>
-                            <span>تومان</span>
-
-                            <span
-                                class="product-wholesale-price"
-                                data-product-wholesale-price
-                                @if($variant?->wholesale_price === null) hidden @endif
-                            >
-                                @if($variant?->wholesale_price !== null)
-                                    عمده: {{ number_format($variant->wholesale_price) }} تومان
-                                @endif
-                            </span>
-
-                            <del
-                                data-product-regular-price
-                                @if(!$variant?->is_on_sale) hidden @endif
-                            >
-                                {{ number_format($variant?->price ?? 0) }}
-                            </del>
+                    <div class="product-detail-v2__purchase-block product-detail-v2__price-block">
+                        <div class="product-detail-v2__section-label">
+                            <span>قیمت و موجودی</span>
+                            <small data-product-variant-label>
+                                {{ $variant?->display_name ?: 'انتخاب نشده' }}
+                            </small>
                         </div>
 
-                        <div
-                            class="product-buy-card__stock product-detail-v2__stock {{ ($variant?->stock ?? 0) < 1 ? 'is-out' : (($variant?->is_low_stock ?? false) ? 'is-low' : '') }}"
-                            data-product-stock
-                        >
-                            <i aria-hidden="true"></i>
-                            {{ ($variant?->stock ?? 0) < 1
-                                ? 'فعلاً ناموجود'
-                                : (($variant?->is_low_stock ?? false) ? 'موجودی محدود' : 'موجود و آماده سفارش')
-                            }}
+                        <div class="product-detail-v2__price-row">
+                            <div class="product-buy-card__price product-buy-card__price--v2" aria-live="polite">
+                                <strong data-product-price>
+                                    {{ number_format($variant?->effective_price ?? 0) }}
+                                </strong>
+                                <span>تومان</span>
+
+                                <span
+                                    class="product-wholesale-price"
+                                    data-product-wholesale-price
+                                    @if($variant?->wholesale_price === null) hidden @endif
+                                >
+                                    @if($variant?->wholesale_price !== null)
+                                        عمده: {{ number_format($variant->wholesale_price) }} تومان
+                                    @endif
+                                </span>
+
+                                <del
+                                    data-product-regular-price
+                                    @if(!$variant?->is_on_sale) hidden @endif
+                                >
+                                    {{ number_format($variant?->price ?? 0) }}
+                                </del>
+                            </div>
+
+                            <div
+                                class="product-buy-card__stock product-detail-v2__stock {{ ($variant?->stock ?? 0) < 1 ? 'is-out' : (($variant?->is_low_stock ?? false) ? 'is-low' : '') }}"
+                                data-product-stock
+                            >
+                                <i aria-hidden="true"></i>
+                                {{ ($variant?->stock ?? 0) < 1
+                                    ? 'فعلاً ناموجود'
+                                    : (($variant?->is_low_stock ?? false) ? 'موجودی محدود' : 'موجود و آماده سفارش')
+                                }}
+                            </div>
                         </div>
                     </div>
 
                     @if($variants->isNotEmpty())
-                        <div class="product-variant-picker product-variant-picker--v2">
+                        <div class="product-detail-v2__purchase-block product-detail-v2__variant-block">
                             <div class="product-variant-picker__head">
                                 <div>
                                     <span>انتخاب مدل</span>
-                                    <small>مدل انتخابی روی قیمت و موجودی اثر می‌گذارد.</small>
+                                    <small>قیمت، موجودی و تصویر با انتخاب مدل تغییر می‌کند.</small>
                                 </div>
-
-                                <b data-product-variant-label>
-                                    {{ $variant?->display_name ?: 'انتخاب نشده' }}
-                                </b>
                             </div>
 
                             <div class="product-variant-picker__grid">
@@ -239,6 +323,7 @@
                                         $safeColor = preg_match('/^#[0-9A-Fa-f]{3,8}$/', $colorCode)
                                             ? $colorCode
                                             : null;
+                                        $variantImage = $variantOption->galleryMedia->first()?->url;
                                     @endphp
 
                                     <button
@@ -255,10 +340,16 @@
                                         data-variant-label="{{ $variantOption->display_name }}"
                                         data-variant-sku="{{ $variantOption->sku }}"
                                         data-variant-index="{{ $loop->iteration }}"
+                                        data-variant-image="{{ $variantImage ?? '' }}"
+                                        data-variant-image-alt="{{ $product->name }} — {{ $variantOption->display_name }}"
                                         aria-pressed="{{ $variantOption->id === $variant?->id ? 'true' : 'false' }}"
                                         @disabled($variantOption->stock < 1)
                                     >
-                                        @if($safeColor)
+                                        @if($variantImage)
+                                            <span class="product-variant-option__media">
+                                                <img src="{{ $variantImage }}" alt="" loading="lazy" decoding="async">
+                                            </span>
+                                        @elseif($safeColor)
                                             <i
                                                 class="product-variant-option__swatch"
                                                 style="--variant-color: {{ $safeColor }}"
@@ -275,55 +366,57 @@
                     @endif
 
                     @if($variant)
-                        <form
-                            method="POST"
-                            action="{{ route('cart.store', $variant) }}"
-                            class="product-purchase-form product-purchase-form--v2"
-                            data-cart-add
-                            data-product-name="{{ $product->name }}"
-                            data-product-image="{{ $image ?? '' }}"
-                        >
-                            @csrf
+                        <div class="product-detail-v2__purchase-block product-detail-v2__action-block">
+                            <form
+                                method="POST"
+                                action="{{ route('cart.store', $variant) }}"
+                                class="product-purchase-form product-purchase-form--v2"
+                                data-cart-add
+                                data-product-name="{{ $product->name }}"
+                                data-product-image="{{ $variant?->galleryMedia->first()?->url ?: $image ?: '' }}"
+                            >
+                                @csrf
 
-                            <div class="product-purchase-form__row">
-                                <div class="product-quantity-control">
-                                    <span class="product-quantity-control__label">تعداد</span>
+                                <div class="product-purchase-form__row">
+                                    <div class="product-quantity-control">
+                                        <span class="product-quantity-control__label">تعداد</span>
 
-                                    <div class="product-quantity-control__control">
-                                        <button type="button" data-product-quantity="decrease" aria-label="کاهش تعداد">−</button>
+                                        <div class="product-quantity-control__control">
+                                            <button type="button" data-product-quantity="decrease" aria-label="کاهش تعداد">−</button>
 
-                                        <input
-                                            id="product-quantity"
-                                            type="number"
-                                            name="quantity"
-                                            min="1"
-                                            max="{{ max(1, $variant->stock) }}"
-                                            value="1"
-                                            inputmode="numeric"
-                                            data-product-quantity-input
-                                        >
+                                            <input
+                                                id="product-quantity"
+                                                type="number"
+                                                name="quantity"
+                                                min="1"
+                                                max="{{ max(1, $variant->stock) }}"
+                                                value="1"
+                                                inputmode="numeric"
+                                                data-product-quantity-input
+                                            >
 
-                                        <button type="button" data-product-quantity="increase" aria-label="افزایش تعداد">+</button>
+                                            <button type="button" data-product-quantity="increase" aria-label="افزایش تعداد">+</button>
+                                        </div>
                                     </div>
+
+                                    <button
+                                        type="submit"
+                                        class="button button--primary product-purchase-form__submit"
+                                        data-product-add-button
+                                        @disabled($variant->stock < 1)
+                                    >
+                                        <span data-product-add-label>
+                                            {{ $variant->stock > 0 ? 'افزودن به سبد خرید' : 'ناموجود' }}
+                                        </span>
+                                        <span aria-hidden="true">←</span>
+                                    </button>
                                 </div>
 
-                                <button
-                                    type="submit"
-                                    class="button button--primary product-purchase-form__submit"
-                                    data-product-add-button
-                                    @disabled($variant->stock < 1)
-                                >
-                                    <span data-product-add-label>
-                                        {{ $variant->stock > 0 ? 'افزودن به سبد خرید' : 'ناموجود' }}
-                                    </span>
-                                    <span aria-hidden="true">←</span>
-                                </button>
-                            </div>
-
-                            <p class="product-purchase-form__hint">
-                                انتخابت را اضافه کن؛ سبد خرید بدون ترک کردن صفحه به‌روزرسانی می‌شود.
-                            </p>
-                        </form>
+                                <p class="product-purchase-form__hint">
+                                    انتخابت را اضافه کن؛ سبد خرید بدون ترک کردن صفحه به‌روزرسانی می‌شود.
+                                </p>
+                            </form>
+                        </div>
                     @else
                         <div class="product-unavailable">
                             <strong>این محصول فعلاً Variant فعالی ندارد.</strong>
