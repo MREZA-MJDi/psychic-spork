@@ -141,6 +141,7 @@ class HomeController extends Controller
                 ->where('is_hero', true)
                 ->with([
                     'brand:id,name',
+                    'brand.logoMedia',
                     'category:id,name',
                     'primaryGalleryMedia',
                 ])
