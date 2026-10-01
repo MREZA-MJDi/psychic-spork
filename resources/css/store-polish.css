@@ -2761,8 +2761,8 @@
 .product-gallery-v2__main {
     position: relative;
     min-width: 0;
-    height: min(630px, 62vw);
-    min-height: 440px;
+    height: min(540px, 48vw);
+    min-height: 390px;
     margin: 0;
     overflow: hidden;
 }
@@ -2944,6 +2944,7 @@
     border-radius: 12px;
     background: #fff;
     text-align: start;
+    font: inherit;
     cursor: pointer;
     transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
 }
