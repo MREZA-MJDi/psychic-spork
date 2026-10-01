@@ -30,8 +30,8 @@ class AdminProductController extends Controller
     {
         $products = Product::query()
             ->with([
-                'category',
-                'brand',
+                'category:id,name',
+                'brand:id,name',
                 'primaryActiveVariant',
                 'primaryGalleryMedia',
             ])
