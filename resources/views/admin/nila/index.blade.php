@@ -40,6 +40,7 @@
             <p class="admin-card-description">
                 Nila منبع داده‌های کاتالوگ است؛ Janan مالک Media و نحوه نمایش Store است.
             </p>
+            <p class="admin-card-description">همگام‌سازی API بدون قرارداد واقعی اجرا نمی‌شود.</p>
         </div>
     </div>
 
