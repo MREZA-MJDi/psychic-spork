@@ -453,10 +453,6 @@
     border-color: rgba(91,170,198,.22);
 }
 
-.store-mobile-bottom a[data-cart-open] {
-    cursor: pointer;
-}
-
 .footer-social--networks {
     display: flex;
     flex-wrap: wrap;
