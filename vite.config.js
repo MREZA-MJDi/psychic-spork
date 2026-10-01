@@ -10,7 +10,6 @@ export default defineConfig({
                 'resources/css/store-polish.css',
                 'resources/css/store-responsive.css',
                 'resources/css/store-customer-uiux.css',
-                'resources/css/responsive-shell.css',
                 'resources/css/home.css',
                 'resources/css/wholesale.css',
                 'resources/css/editorial-hero.css',
