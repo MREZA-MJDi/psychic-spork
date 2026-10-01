@@ -21,6 +21,20 @@
         <div class="alert success">{{ session('success') }}</div>
     @endif
 
+    <form method="GET" action="{{ route('admin.hero.index') }}" class="admin-filter-bar" style="margin-bottom:16px">
+        <input
+            type="search"
+            name="q"
+            value="{{ $search }}"
+            placeholder="جستجوی محصول یا برند…"
+            aria-label="جستجوی محصول یا برند"
+        >
+        <button class="button button--ghost" type="submit">جستجو</button>
+        @if($search !== '')
+            <a class="button button--ghost" href="{{ route('admin.hero.index') }}">پاک کردن</a>
+        @endif
+    </form>
+
     <form method="POST" action="{{ route('admin.hero.update') }}">
         @csrf
         @method('PUT')
@@ -57,6 +71,12 @@
                 </label>
             @endforeach
         </div>
+
+        @if($products->hasPages())
+            <nav class="store-pagination" aria-label="صفحه‌بندی انتخاب Hero" style="margin-top:18px">
+                {{ $products->onEachSide(1)->links() }}
+            </nav>
+        @endif
 
         <div class="hero-admin-actions">
             <span>حداکثر ۶ محصول انتخاب کن.</span>
