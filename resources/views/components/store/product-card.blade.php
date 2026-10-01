@@ -36,18 +36,12 @@
             class="product-card__image-link"
             aria-label="مشاهده {{ $product->name }}"
         >
-            @if($image)
-                <img
-                    src="{{ $image }}"
-                    alt="{{ $product->name }}"
-                    loading="lazy"
-                    decoding="async"
-                >
-            @else
-                <div class="product-image-placeholder" aria-hidden="true">
-                    <span>JANAN</span>
-                </div>
-            @endif
+            <x-store.image
+                :src="$image"
+                :alt="$product->name"
+                fallback-class="product-image-placeholder"
+                fallback="JANAN"
+            />
         </a>
 
     </div>
