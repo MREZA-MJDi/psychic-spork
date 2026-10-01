@@ -38,6 +38,7 @@
             id="store-mobile-menu"
             class="store-nav"
             aria-label="منوی اصلی فروشگاه"
+            aria-hidden="true"
             data-mobile-menu
         >
             <a
