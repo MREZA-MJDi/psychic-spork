@@ -94,23 +94,10 @@ return new class extends Migration
 
     private function ensureIndex(string $table, string $index, string $type, array $columns): void
     {
-        $rows = DB::select('SHOW INDEX FROM ' . $table);
-        $existing = [];
+        foreach (Schema::getIndexes($table) as $existing) {
+            $indexedColumns = array_values($existing['columns'] ?? []);
 
-        foreach ($rows as $row) {
-            $key = (string) ($row->Key_name ?? '');
-            $seq = (int) ($row->Seq_in_index ?? 0);
-            $column = (string) ($row->Column_name ?? '');
-
-            if ($key !== '' && $seq > 0 && $column !== '') {
-                $existing[$key][$seq] = $column;
-            }
-        }
-
-        foreach ($existing as $key => $indexedColumns) {
-            ksort($indexedColumns);
-
-            if (array_values($indexedColumns) === $columns) {
+            if ($indexedColumns === $columns) {
                 return;
             }
         }
