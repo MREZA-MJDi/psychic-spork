@@ -723,15 +723,19 @@ body.immersive-zoom-lock{overflow:hidden!important}
     z-index: 10000;
     width: 100%;
     color: #fff;
-    background: linear-gradient(
-        180deg,
-        rgba(0, 0, 0, .68) 0%,
-        rgba(0, 0, 0, .22) 58%,
-        transparent 100%
-    );
-    border-bottom-color: transparent;
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
+    background:
+        linear-gradient(
+            180deg,
+            rgba(0, 0, 0, .62) 0%,
+            rgba(0, 0, 0, .34) 38%,
+            rgba(0, 0, 0, .10) 72%,
+            transparent 100%
+        );
+    border-bottom: 1px solid rgba(255,255,255,.06);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 72%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 0%, #000 72%, transparent 100%);
 }
 
 .store-header--immersive .store-header__inner {
