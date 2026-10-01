@@ -94,13 +94,25 @@ return new class extends Migration
 
     private function ensureIndex(string $table, string $index, string $type, array $columns): void
     {
-        $exists = DB::selectOne(
-            'SHOW INDEX FROM ' . $table . ' WHERE Key_name = ?',
-            [$index]
-        );
+        $rows = DB::select('SHOW INDEX FROM ' . $table);
+        $existing = [];
 
-        if ($exists) {
-            return;
+        foreach ($rows as $row) {
+            $key = (string) ($row->Key_name ?? '');
+            $seq = (int) ($row->Seq_in_index ?? 0);
+            $column = (string) ($row->Column_name ?? '');
+
+            if ($key !== '' && $seq > 0 && $column !== '') {
+                $existing[$key][$seq] = $column;
+            }
+        }
+
+        foreach ($existing as $key => $indexedColumns) {
+            ksort($indexedColumns);
+
+            if (array_values($indexedColumns) === $columns) {
+                return;
+            }
         }
 
         $columnSql = implode(', ', $columns);
