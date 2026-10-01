@@ -12,7 +12,7 @@
             <p>فقط محصولاتی که تیک می‌زنی در Hero صفحه اصلی نمایش داده می‌شوند. ترتیب انتخاب، ترتیب نمایش است.</p>
         </div>
         <div class="admin-page-head__meta">
-            <strong>{{ $selectedIds->count() }}/6</strong>
+            <strong>{{ $selectedIds->count() }}/90</strong>
             <span>اسلاید فعال</span>
         </div>
     </div>
@@ -79,7 +79,7 @@
         @endif
 
         <div class="hero-admin-actions">
-            <span>حداکثر ۶ محصول انتخاب کن.</span>
+            <span>حداکثر ۹۰ محصول انتخاب کن.</span>
             <button class="button button--primary" type="submit">ذخیره Hero</button>
         </div>
     </form>
@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded',function(){
     const sync=()=>boxes.forEach(box=>box.closest('.hero-product-card')?.classList.toggle('is-selected',box.checked));
     boxes.forEach(box=>box.addEventListener('change',function(){
         const selected=boxes.filter(item=>item.checked);
-        if(selected.length>6)this.checked=false;
+        if(selected.length>90)this.checked=false;
         sync();
     }));
     sync();
