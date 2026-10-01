@@ -1,0 +1,44 @@
+.wholesale-catalog{padding-block:56px;}
+.wholesale-catalog__head,.wholesale-products-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:24px;}
+.wholesale-catalog__head h2,.wholesale-products-head h3{margin:8px 0 6px;color:var(--janan-ink-strong);font-size:clamp(24px,3vw,38px);}
+.wholesale-catalog__head p{margin:0;color:var(--janan-muted);font-size:10px;}
+.wholesale-pack-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-bottom:46px;}
+.wholesale-pack-card{padding:22px;border:1px solid var(--janan-line);border-radius:22px;background:#fff;box-shadow:var(--janan-shadow-xs);}
+.wholesale-pack-card__top{display:flex;justify-content:space-between;gap:15px;align-items:flex-start;}
+.wholesale-pack-card__eyebrow{font-size:8px;letter-spacing:.14em;color:var(--janan-faint);}
+.wholesale-pack-card h3{margin:7px 0 0;font-size:20px;color:var(--janan-ink-strong);}
+.wholesale-pack-card__top>strong{padding:7px 10px;border-radius:999px;background:var(--janan-sky-100);color:var(--janan-blue-ink);font-size:9px;white-space:nowrap;}
+.wholesale-pack-card__description{margin:14px 0;color:var(--janan-muted);font-size:10px;line-height:1.9;}
+.wholesale-pack-card__items{display:grid;gap:8px;margin-top:16px;}
+.wholesale-pack-item{display:flex;justify-content:space-between;gap:12px;padding:12px;border:1px solid var(--janan-line);border-radius:14px;background:#fafafa;}
+.wholesale-pack-item strong,.wholesale-pack-item span{display:block;}
+.wholesale-pack-item strong{font-size:10px;color:var(--janan-ink-strong);}
+.wholesale-pack-item span{margin-top:4px;color:var(--janan-muted);font-size:8px;}
+.wholesale-pack-item>b{font-size:12px;color:var(--janan-pink-ink);white-space:nowrap;}
+.wholesale-pack-card__foot{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-top:16px;padding-top:16px;border-top:1px solid var(--janan-line);}
+.wholesale-pack-card__foot span{font-size:9px;color:var(--janan-muted);}
+.wholesale-pack-card__foot strong{font-size:17px;color:var(--janan-ink-strong);}
+.wholesale-products-head{margin-top:12px;}
+.wholesale-products-head h3{font-size:20px;}
+.wholesale-products-head>span{color:var(--janan-faint);font-size:9px;}
+.wholesale-product-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;}
+.wholesale-product-card{overflow:hidden;border:1px solid var(--janan-line);border-radius:20px;background:#fff;box-shadow:var(--janan-shadow-xs);}
+.wholesale-product-card__media{height:250px;display:grid;place-items:center;background:linear-gradient(135deg,var(--janan-sky-100),var(--janan-pink-100));overflow:hidden;}
+.wholesale-product-card__media img{width:100%;height:100%;object-fit:cover;}
+.wholesale-product-card__media span{font:18px var(--janan-display);color:var(--janan-blue-ink);}
+.wholesale-product-card__body{padding:16px;}
+.wholesale-product-card__meta{display:flex;justify-content:space-between;gap:8px;color:var(--janan-faint);font-size:8px;}
+.wholesale-product-card__title{display:block;margin:8px 0 14px;font-size:14px;font-weight:700;color:var(--janan-ink-strong);}
+.wholesale-variant-list{display:grid;gap:7px;}
+.wholesale-variant-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 10px;border:1px solid var(--janan-line);border-radius:12px;}
+.wholesale-variant-row strong,.wholesale-variant-row span{display:block;}
+.wholesale-variant-row strong{font-size:9px;color:var(--janan-ink-strong);}
+.wholesale-variant-row span{margin-top:3px;color:var(--janan-muted);font-size:7px;}
+.wholesale-variant-price{font-size:11px;font-weight:800;color:var(--janan-pink-ink);white-space:nowrap;}
+.wholesale-variant-price small{font-size:7px;font-weight:500;}
+.wholesale-product-card__action{width:100%;margin-top:12px;justify-content:center;}
+.wholesale-empty{padding:30px;display:grid;gap:8px;text-align:center;}
+.wholesale-empty strong{font-size:14px;color:var(--janan-ink-strong);}
+.wholesale-empty span{font-size:9px;color:var(--janan-muted);}
+@media(max-width:900px){.wholesale-product-grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
+@media(max-width:700px){.wholesale-pack-grid,.wholesale-product-grid{grid-template-columns:1fr}.wholesale-catalog__head,.wholesale-products-head{align-items:flex-start;flex-direction:column}.wholesale-pack-card{padding:16px}.wholesale-product-card__media{height:220px;}}
