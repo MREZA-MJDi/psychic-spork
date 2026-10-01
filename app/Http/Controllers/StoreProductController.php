@@ -131,6 +131,12 @@ class StoreProductController extends Controller
             return response()->json(['items' => []]);
         }
 
+        if (mb_strlen($term) > 120) {
+            return response()->json([
+                'message' => 'عبارت جستجو بیش از حد طولانی است.',
+            ], 422);
+        }
+
         $like = '%' . $term . '%';
 
         $items = Product::query()
