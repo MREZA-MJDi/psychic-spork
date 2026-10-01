@@ -179,6 +179,63 @@ document.addEventListener('DOMContentLoaded', () => {
         revealItems.forEach((element) => element.classList.add('is-visible'));
     }
 
+    const replaceBrokenStoreImage = (image) => {
+        if (!(image instanceof HTMLImageElement)) return;
+        if (image.dataset.storeImageFallbackApplied) return;
+
+        const fallbackClass = image.dataset.storeImageFallbackClass;
+        const fallbackTag = ['div', 'span'].includes(image.dataset.storeImageFallbackTag)
+            ? image.dataset.storeImageFallbackTag
+            : 'div';
+
+        if (!fallbackClass || !image.parentElement) return;
+
+        const fallback = document.createElement(fallbackTag);
+        fallback.className = fallbackClass;
+        fallback.setAttribute('aria-hidden', 'true');
+        fallback.dataset.storeImageFallbackApplied = '1';
+
+        const label = document.createElement('span');
+        label.textContent = image.dataset.storeImageFallback || 'JANAN';
+        fallback.appendChild(label);
+
+        image.replaceWith(fallback);
+    };
+
+    document.addEventListener('error', (event) => {
+        if (
+            event.target instanceof HTMLImageElement
+            && event.target.matches('[data-store-image-fallback]')
+        ) {
+            replaceBrokenStoreImage(event.target);
+        }
+    }, true);
+
+    document
+        .querySelectorAll('img[data-store-image-fallback]')
+        .forEach((image) => {
+            if (image.complete && image.naturalWidth === 0) {
+                replaceBrokenStoreImage(image);
+            }
+        });
+
+    const hero = document.querySelector('[data-immersive-gallery]');
+    const nav = document.querySelector('.mobile-bottom-nav--store');
+
+    if (hero && nav && 'IntersectionObserver' in window) {
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                nav.classList.toggle(
+                    'is-immersive-dimmed',
+                    entry.isIntersecting && entry.intersectionRatio > 0.28
+                );
+            },
+            { threshold: [0, 0.28, 0.7, 1] }
+        );
+
+        observer.observe(hero);
+    }
+
     window.addEventListener('resize', () => {
         if (window.innerWidth > 900) {
             mobileMenu?.classList.remove('is-open');
