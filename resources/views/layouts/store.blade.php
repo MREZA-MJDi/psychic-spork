@@ -48,7 +48,6 @@
 
     @vite([
         'resources/css/app.css',
-        'resources/css/responsive-shell.css',
         'resources/css/store-structure.css',
         'resources/js/app.js',
         'resources/js/store-cart.js',
@@ -64,27 +63,6 @@
         ])
     @endunless
 
-    @if(request()->routeIs('wholesale.show'))
-        @vite(['resources/css/wholesale.css'])
-    @endif
-
-    @if(request()->routeIs('products.show'))
-        @unless(app()->environment('testing'))
-            @vite(['resources/js/product-show.js'])
-        @endunless
-    @endif
-
-    @if($isHome)
-        @vite([
-            'resources/css/home.css',
-            'resources/css/editorial-hero.css',
-            'resources/js/editorial-hero.js',
-        ])
-
-        @unless(app()->environment('testing'))
-            @vite(['resources/js/home-product-carousel.js'])
-        @endunless
-    @endif
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js" defer></script>
 
 </head>
