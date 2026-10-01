@@ -9,6 +9,9 @@
     const galleryMain = gallery?.querySelector('[data-gallery-main]');
     const galleryThumbs = [...(gallery?.querySelectorAll('[data-gallery-thumb]') || [])];
     const galleryCurrent = gallery?.querySelector('[data-gallery-current]');
+    const galleryMode = gallery?.querySelector('[data-gallery-mode]');
+    const galleryTotal = gallery?.querySelector('[data-gallery-total]');
+
 
     const variants = [...root.querySelectorAll('[data-product-variant]')];
     const form = root.querySelector('.product-purchase-form');
@@ -96,8 +99,21 @@
                 item.classList.remove('is-active');
                 item.setAttribute('aria-pressed', 'false');
             });
+
+            if (galleryMode) {
+                galleryMode.textContent = 'VARIANT';
+            }
+
             if (galleryCurrent) {
                 galleryCurrent.textContent = String(button.dataset.variantIndex || '01').padStart(2, '0');
+            }
+
+            if (galleryTotal) {
+                galleryTotal.textContent = String(variants.length).padStart(2, '0');
+            }
+
+            if (form) {
+                form.dataset.productImage = variantImage;
             }
         }
 
@@ -160,8 +176,20 @@
                 item.setAttribute('aria-pressed', String(active));
             });
 
+            if (galleryMode) {
+                galleryMode.textContent = 'PRODUCT';
+            }
+
             if (galleryCurrent) {
                 galleryCurrent.textContent = thumb.dataset.galleryIndex || '01';
+            }
+
+            if (galleryTotal) {
+                galleryTotal.textContent = String(galleryThumbs.length).padStart(2, '0');
+            }
+
+            if (form && !variants.some((item) => item.classList.contains('is-selected') && item.dataset.variantImage)) {
+                form.dataset.productImage = thumb.dataset.gallerySrc || '';
             }
         });
     });
