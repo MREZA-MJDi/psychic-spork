@@ -50,7 +50,25 @@ class AdminHeroTest extends TestCase
             ->assertSee('Hero Product 3');
     }
 
-    public function test_hero_selection_is_capped_at_ninety_products(): void
+    public function test_hero_selection_rejects_more_than_six_products_at_backend_boundary(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+
+        $products = Product::factory()->count(7)->create([
+            'is_active' => true,
+        ]);
+
+        $this->actingAs($admin)
+            ->from(route('admin.hero.index'))
+            ->put(route('admin.hero.update'), [
+                'product_ids' => $products->pluck('id')->all(),
+            ])
+            ->assertSessionHasErrors('product_ids');
+
+        $this->assertDatabaseCount('hero_slides', 0);
+    }
+
+    public function test_hero_selection_is_capped_at_six_products(): void
     {
         $admin = User::factory()->create(['is_admin' => true]);
 
@@ -64,6 +82,6 @@ class AdminHeroTest extends TestCase
             ])
             ->assertRedirect();
 
-        $this->assertDatabaseCount('hero_slides', 90);
+        $this->assertDatabaseCount('hero_slides', 6);
     }
 }

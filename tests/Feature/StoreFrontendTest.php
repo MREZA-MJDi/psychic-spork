@@ -153,6 +153,61 @@ class StoreFrontendTest extends TestCase
     }
 
 
+    public function test_product_catalog_price_sort_uses_sale_price_when_present(): void
+    {
+        $category = Category::create([
+            'name' => 'قیمت فروش تست',
+            'slug' => 'sale-price-sort-' . uniqid(),
+            'is_active' => true,
+            'sort_order' => 1,
+        ]);
+
+        $regularProduct = Product::create([
+            'category_id' => $category->id,
+            'name' => 'محصول قیمت عادی',
+            'slug' => 'regular-price-' . uniqid(),
+            'is_active' => true,
+            'is_featured' => false,
+            'sort_order' => 1,
+        ]);
+
+        ProductVariant::create([
+            'product_id' => $regularProduct->id,
+            'sku' => 'REGULAR-' . strtoupper(uniqid()),
+            'price' => 100000,
+            'sale_price' => null,
+            'stock' => 10,
+            'is_active' => true,
+            'sort_order' => 1,
+        ]);
+
+        $saleProduct = Product::create([
+            'category_id' => $category->id,
+            'name' => 'محصول با تخفیف',
+            'slug' => 'sale-price-' . uniqid(),
+            'is_active' => true,
+            'is_featured' => false,
+            'sort_order' => 2,
+        ]);
+
+        ProductVariant::create([
+            'product_id' => $saleProduct->id,
+            'sku' => 'SALE-' . strtoupper(uniqid()),
+            'price' => 250000,
+            'sale_price' => 50000,
+            'stock' => 10,
+            'is_active' => true,
+            'sort_order' => 1,
+        ]);
+
+        $this->get(route('products.index', ['sort' => 'price_asc']))
+            ->assertOk()
+            ->assertSeeInOrder([
+                'محصول با تخفیف',
+                'محصول قیمت عادی',
+            ]);
+    }
+
     public function test_product_catalog_stock_badge_only_renders_for_non_available_states(): void
     {
         $category = Category::create([

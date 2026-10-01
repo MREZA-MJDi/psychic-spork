@@ -61,12 +61,16 @@ class AdminHeroController extends Controller
 
     public function update(): RedirectResponse
     {
-        $productIds = collect(request()->input('product_ids', []))
+        $validated = request()->validate([
+            'product_ids' => ['nullable', 'array', 'max:6'],
+            'product_ids.*' => ['integer', 'distinct', 'exists:products,id'],
+        ], [
+            'product_ids.max' => 'حداکثر ۶ محصول برای Hero قابل انتخاب است.',
+        ]);
+
+        $productIds = collect($validated['product_ids'] ?? [])
             ->map(fn ($id) => (int) $id)
-            ->filter()
-            ->unique()
-            ->values()
-            ->take(90);
+            ->values();
 
         $products = Product::query()
             ->active()
@@ -100,7 +104,7 @@ class AdminHeroController extends Controller
 
         return back()->with(
             'success',
-            'تصاویر Hero با موفقیت ذخیره شد. حداکثر ۹۰ محصول انتخاب می‌شود.'
+            'تصاویر Hero با موفقیت ذخیره شد. حداکثر ۶ محصول انتخاب می‌شود.'
         );
     }
 }

@@ -12,7 +12,7 @@
             <p>فقط محصولاتی که تیک می‌زنی در Hero صفحه اصلی نمایش داده می‌شوند. ترتیب انتخاب، ترتیب نمایش است.</p>
         </div>
         <div class="admin-page-head__meta">
-            <strong>{{ $selectedIds->count() }}/90</strong>
+            <strong>{{ $selectedIds->count() }}/6</strong>
             <span>اسلاید فعال</span>
         </div>
     </div>
@@ -126,7 +126,7 @@ document.addEventListener('DOMContentLoaded',function(){
             box.closest('.hero-product-card')?.classList.toggle('is-selected',checked);
         });
         if(hidden){
-            hidden.replaceChildren(...[...selected].slice(0,90).map(id=>{
+            hidden.replaceChildren(...[...selected].slice(0,6).map(id=>{
                 const input=document.createElement('input');
                 input.type='hidden';
                 input.name='product_ids[]';
@@ -140,7 +140,7 @@ document.addEventListener('DOMContentLoaded',function(){
     boxes.forEach(box=>box.addEventListener('change',function(){
         const id=String(this.value);
         if(this.checked){
-            if(selected.size>=90){this.checked=false;return}
+            if(selected.size>=6){this.checked=false;return}
             selected.add(id);
         }else{
             selected.delete(id);

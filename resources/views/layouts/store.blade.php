@@ -51,11 +51,14 @@
             'resources/js/app.js',
             'resources/js/store-cart.js',
             'resources/js/store-search.js',
-            'resources/js/store-customer-uiux.js',
         ];
 
         if (request()->routeIs('wholesale.show')) {
             $storeAssets[] = 'resources/css/wholesale.css';
+        }
+
+        if (request()->routeIs('checkout')) {
+            $storeAssets[] = 'resources/js/store-customer-uiux.js';
         }
 
         if (request()->routeIs('products.show')) {
