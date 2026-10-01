@@ -62,150 +62,6 @@
 }
 
 /* =========================================================
-   SOURCE: resources/css/responsive-shell.css
-========================================================= */
-@media (max-width: 900px) {
-    .mobile-bottom-nav {
-        position: fixed !important;
-        right: max(8px, env(safe-area-inset-right));
-        bottom: max(8px, env(safe-area-inset-bottom));
-        left: max(8px, env(safe-area-inset-left));
-        z-index: 9999;
-        display: grid;
-        grid-template-columns: repeat(5, minmax(0, 1fr));
-        width: auto;
-        min-height: 66px;
-        margin-inline: auto;
-        padding: 6px;
-        border: 1px solid rgba(57,65,74,.10);
-        border-radius: 20px;
-        background: rgba(255,255,255,.94);
-        box-shadow: 0 18px 48px rgba(20,28,34,.16);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-    }
-
-    .mobile-bottom-nav a {
-        position: relative;
-        display: grid;
-        place-items: center;
-        align-content: center;
-        gap: 4px;
-        overflow: hidden;
-        border-radius: 14px;
-        color: #7f8992;
-        font-size: 9px;
-        font-weight: 650;
-        line-height: 1.25;
-        transition:
-            color .22s ease,
-            background .22s ease,
-            transform .22s ease;
-    }
-
-    .mobile-bottom-nav a:active {
-        transform: translateY(1px);
-    }
-
-    .mobile-bottom-nav a.is-active,
-    .mobile-bottom-nav a.active {
-        color: var(--janan-pink-ink);
-        background: var(--janan-pink-50);
-    }
-
-    .mobile-bottom-nav svg,
-    .mobile-bottom-nav__icon {
-        width: 20px;
-        height: 20px;
-        display: grid;
-        place-items: center;
-        flex: 0 0 20px;
-    }
-
-    .mobile-bottom-nav__icon {
-        line-height: 1;
-        font-size: 15px;
-    }
-
-    .mobile-bottom-nav .cart-count {
-        position: absolute;
-        top: 2px;
-        left: 50%;
-        min-width: 16px;
-        height: 16px;
-        display: grid;
-        place-items: center;
-        padding-inline: 3px;
-        border: 2px solid rgba(255,255,255,.94);
-        border-radius: 999px;
-        color: #fff;
-        background: var(--janan-pink-500);
-        font-size: 7px;
-        font-weight: 800;
-        line-height: 1;
-        transform: translateX(7px);
-    }
-
-    .store-body .site-main,
-    .admin-body .admin-main {
-        padding-bottom: calc(92px + env(safe-area-inset-bottom));
-    }
-
-    body:has(.immersive-grid-hero) .store-body,
-    body:has(.immersive-grid-hero) .site-main {
-        padding-bottom: 0;
-    }
-}
-
-@media (max-width: 480px) {
-    .mobile-bottom-nav {
-        right: max(6px, env(safe-area-inset-right));
-        bottom: max(6px, env(safe-area-inset-bottom));
-        left: max(6px, env(safe-area-inset-left));
-        min-height: 62px;
-        padding: 5px;
-        border-radius: 18px;
-    }
-
-    .mobile-bottom-nav a {
-        min-height: 48px;
-        font-size: 8px;
-        border-radius: 13px;
-    }
-
-    .mobile-bottom-nav svg,
-    .mobile-bottom-nav__icon {
-        width: 18px;
-        height: 18px;
-        flex-basis: 18px;
-    }
-
-    .mobile-bottom-nav__icon {
-        font-size: 14px;
-    }
-}
-
-@media (max-width: 420px) {
-    .mobile-bottom-nav {
-        right: max(6px, env(safe-area-inset-right));
-        left: max(6px, env(safe-area-inset-left));
-    }
-
-    .mobile-bottom-nav a {
-        min-height: 47px;
-        font-size: 7px;
-    }
-
-    .mobile-bottom-nav__icon,
-    .mobile-bottom-nav svg {
-        width: 16px;
-        height: 16px;
-        flex-basis: 16px;
-    }
-}
-
-
-/* =========================================================
    SOURCE: resources/css/store-customer-uiux.css
 ========================================================= */
 @media (max-width: 1020px) {
@@ -2118,14 +1974,16 @@ width:
 
     .mobile-bottom-nav.mobile-bottom-nav--store {
         position: fixed !important;
-        right: max(8px, env(safe-area-inset-right));
+        top: auto !important;
+        right: auto !important;
         bottom: max(8px, env(safe-area-inset-bottom));
-        left: max(8px, env(safe-area-inset-left));
+        left: 50%;
         z-index: 9000;
         display: grid;
         grid-template-columns: repeat(5, minmax(0, 1fr));
-        width: auto;
+        width: min(620px, calc(100vw - 16px)) !important;
         min-height: 66px;
+        margin: 0 !important;
         padding: 6px;
         border: 1px solid rgba(57,65,74,.10);
         border-radius: 20px;
@@ -2133,12 +1991,13 @@ width:
         box-shadow: 0 18px 48px rgba(20,28,34,.16);
         backdrop-filter: blur(20px);
         -webkit-backdrop-filter: blur(20px);
+        transform: translateX(-50%);
         transition: opacity .24s ease, transform .24s ease;
     }
 
     .mobile-bottom-nav.mobile-bottom-nav--store.is-immersive-dimmed {
         opacity: 0;
-        transform: translateY(16px);
+        transform: translate(-50%, 16px);
         pointer-events: none;
     }
 
@@ -2258,7 +2117,7 @@ width:
 
     .mobile-bottom-nav.mobile-bottom-nav--store.is-immersive-dimmed {
         opacity: 0;
-        transform: translateY(18px);
+        transform: translate(-50%, 18px);
     }
 }
 
@@ -2269,9 +2128,10 @@ width:
     }
 
     .mobile-bottom-nav.mobile-bottom-nav--store {
-        right: max(6px, env(safe-area-inset-right));
+        right: auto;
         bottom: max(6px, env(safe-area-inset-bottom));
-        left: max(6px, env(safe-area-inset-left));
+        left: 50%;
+        width: calc(100vw - 12px) !important;
         min-height: 62px;
         padding: 5px;
         border-radius: 18px;
@@ -5781,70 +5641,6 @@ animation-duration:
     .club-card__actions { display: grid; grid-template-columns: 1fr; }
     .club-card__actions .button { width: 100%; }
 }
-
-/* =========================================================
-   FINAL VIEWPORT GUARDRAILS
-========================================================= */
-.store-body{min-width:320px;overflow-x:hidden}
-.store-body .site-main,
-.store-body .site-main>*,
-.store-body .home-page,
-.store-body .container,
-.store-body .container--wide,
-.store-body .section-block,
-.store-body .product-grid,
-.store-body .collection-grid,
-.store-body .brand-grid,
-.store-body .brand-mosaic{min-width:0}
-.store-body img,
-.store-body svg,
-.store-body video,
-.store-body iframe,
-.store-body canvas{max-width:100%}
-.store-body .table-responsive,
-.store-body [data-scroll-container]{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
-
-body.home-immersive .site-main,
-body.home-immersive .home-page{margin:0!important;padding:0!important;min-height:0}
-body.home-immersive .immersive-grid-hero{
- box-sizing:border-box;
- width:100%;
- height:100dvh;
- min-height:0;
- max-height:100dvh;
- margin:0!important;
- overflow:hidden
-}
-@media (max-width:900px){
- .store-body .site-main{padding-bottom:calc(82px + env(safe-area-inset-bottom))}
- body.home-immersive .site-main{padding-bottom:0!important}
- body.home-immersive .immersive-grid-hero{height:100dvh;min-height:100dvh;max-height:100dvh}
- .mobile-bottom-nav.mobile-bottom-nav--store{
-  position:fixed!important;
-  right:max(8px,env(safe-area-inset-right));
-  bottom:max(8px,env(safe-area-inset-bottom));
-  left:max(8px,env(safe-area-inset-left));
-  z-index:9000;
-  display:grid;
-  grid-template-columns:repeat(5,minmax(0,1fr));
-  width:auto;
-  min-height:66px;
-  padding:6px;
-  border:1px solid rgba(57,65,74,.10);
-  border-radius:20px;
-  background:rgba(255,255,255,.94);
-  box-shadow:0 18px 48px rgba(20,28,34,.16);
-  backdrop-filter:blur(18px);
-  -webkit-backdrop-filter:blur(18px);
-  transition:opacity .24s ease,transform .24s ease
- }
- .mobile-bottom-nav.mobile-bottom-nav--store.is-immersive-dimmed{opacity:0;transform:translateY(16px);pointer-events:none}
-}
-@media (max-width:480px){
- .store-body .site-main{padding-bottom:calc(78px + env(safe-area-inset-bottom))}
- .mobile-bottom-nav.mobile-bottom-nav--store{right:max(6px,env(safe-area-inset-right));bottom:max(6px,env(safe-area-inset-bottom));left:max(6px,env(safe-area-inset-left));min-height:62px;padding:5px;border-radius:18px}
-}
-
 
 /* =========================================================
    IMMERSIVE GRID SCALE TOKENS
