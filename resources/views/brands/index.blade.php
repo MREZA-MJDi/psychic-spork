@@ -71,16 +71,12 @@
                             </div>
 
                             <div class="brand-mosaic__logo">
-                                @if($brand->logoMedia?->url)
-                                    <img
-                                        src="{{ $brand->logoMedia->url }}"
-                                        alt="{{ $brand->name }}"
-                                        loading="lazy"
-                                        decoding="async"
-                                    >
-                                @else
-                                    <span>{{ mb_substr($brand->name,0,1) }}</span>
-                                @endif
+                                <x-store.image
+                                    :src="$brand->logoMedia?->url"
+                                    :alt="$brand->name"
+                                    fallback-tag="span"
+                                    :fallback="mb_substr($brand->name, 0, 1)"
+                                />
                             </div>
 
                             <div class="brand-mosaic__bottom">
