@@ -102,22 +102,30 @@ class AdminProductController extends Controller
 
     public function toggleHero(Product $product): RedirectResponse
     {
-        if (!$product->is_hero) {
-            $heroCount = Product::query()
-                ->where('is_hero', true)
-                ->count();
+        try {
+            $isHero = DB::transaction(function () use ($product): bool {
+            $current = Product::query()
+                ->whereKey($product->getKey())
+                ->lockForUpdate()
+                ->firstOrFail();
 
-            if ($heroCount >= 6) {
-                return back()->with(
-                    'error',
-                    'حداکثر ۶ محصول می‌تواند همزمان در Hero صفحه اصلی باشد.'
-                );
+            if (!$current->is_hero) {
+                $heroCount = Product::query()
+                    ->where('is_hero', true)
+                    ->lockForUpdate()
+                    ->count();
+
+                if ($heroCount >= 6) {
+                    throw new \RuntimeException('hero_limit');
+                }
             }
-        }
 
-        $product->update([
-            'is_hero' => !$product->is_hero,
-        ]);
+            $current->update([
+                'is_hero' => !$current->is_hero,
+            ]);
+
+            return (bool) $current->is_hero;
+        });
 
         Cache::put(
             'store:home:hero:products:version',
@@ -125,12 +133,22 @@ class AdminProductController extends Controller
             now()->addYear()
         );
 
-        return back()->with(
-            'success',
-            $product->is_hero
-                ? 'محصول به Hero صفحه اصلی اضافه شد.'
-                : 'محصول از Hero صفحه اصلی حذف شد.'
-        );
+            return back()->with(
+                'success',
+                $isHero
+                    ? 'محصول به Hero صفحه اصلی اضافه شد.'
+                    : 'محصول از Hero صفحه اصلی حذف شد.'
+            );
+        } catch (\RuntimeException $e) {
+            if ($e->getMessage() === 'hero_limit') {
+                return back()->with(
+                    'error',
+                    'حداکثر ۶ محصول می‌تواند همزمان در Hero صفحه اصلی باشد.'
+                );
+            }
+
+            throw $e;
+        }
     }
 
     /*
