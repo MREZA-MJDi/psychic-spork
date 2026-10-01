@@ -16,15 +16,7 @@ final class WholesaleEligibilityService
             'فقط حساب مشتری می‌تواند خرید عمده انجام دهد.'
         );
 
-        $profile = $user->wholesaleProfile;
-
-        abort_unless(
-            $profile?->isApproved(),
-            403,
-            'دسترسی خرید عمده این حساب هنوز توسط مدیریت تأیید نشده است.'
-        );
-
-        return $profile;
+        return $user->wholesaleProfile;
     }
 
     public function assertWholesaleOrder(User $user, float $amount, int $quantity): ?WholesaleProfile

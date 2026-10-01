@@ -8,6 +8,9 @@
     <div>
         <h1 class="admin-page-head__title">مدیریت عمده‌فروشی</h1>
         <p class="admin-page-head__text">درخواست‌ها، وضعیت دسترسی و شرایط خرید عمده مشتریان.</p>
+        <div class="admin-actions">
+            <a href="{{ route('admin.wholesale-packs.index') }}" class="admin-btn admin-btn--secondary">مدیریت پک‌های عمده</a>
+        </div>
     </div>
 </div>
 
@@ -152,10 +155,6 @@
                                         </div>
                                         <button class="admin-btn admin-btn--ghost" type="submit">غیرفعال کردن چک</button>
                                     </form>
-                                @elseif(!$profile->isApproved())
-                                    <div class="admin-muted">
-                                        ابتدا دسترسی خرید عمده را تأیید کنید؛ سپس اجازه خرید چکی را فعال کنید.
-                                    </div>
                                 @else
                                     <form method="POST" action="{{ route('admin.customers.cheque.enable', $profile->user) }}" style="display:flex;gap:8px;align-items:end;flex-wrap:wrap;">
                                         @csrf

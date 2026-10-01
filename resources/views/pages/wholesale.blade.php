@@ -95,6 +95,122 @@
         </div>
     </section>
 
+    <section class="section-block wholesale-catalog" id="wholesale-catalog">
+        <div class="container">
+            <header class="wholesale-catalog__head">
+                <div>
+                    <span class="eyebrow">JANAN / WHOLESALE CATALOG</span>
+                    <h2>محصولات و پک‌های عمده</h2>
+                    <p>هر محصول با Variantهای واقعی خودش و قیمت عمده نمایش داده می‌شود.</p>
+                </div>
+                <a class="button button--ghost" href="{{ route('products.index') }}">کاتالوگ عادی</a>
+            </header>
+
+            @if($packs->isNotEmpty())
+                <div class="wholesale-pack-grid">
+                    @foreach($packs as $pack)
+                        <article class="wholesale-pack-card">
+                            <div class="wholesale-pack-card__top">
+                                <div>
+                                    <span class="wholesale-pack-card__eyebrow">WHOLESALE PACK</span>
+                                    <h3>{{ $pack->name }}</h3>
+                                </div>
+                                <strong>{{ number_format($pack->pack_quantity) }} عدد</strong>
+                            </div>
+
+                            @if($pack->description)
+                                <p class="wholesale-pack-card__description">{{ $pack->description }}</p>
+                            @endif
+
+                            <div class="wholesale-pack-card__items">
+                                @foreach($pack->items as $item)
+                                    @php $v = $item->variant; @endphp
+                                    <a href="{{ $v?->product ? route('products.show', $v->product) : '#' }}" class="wholesale-pack-item">
+                                        <div>
+                                            <strong>{{ $v?->product?->name ?? 'محصول' }}</strong>
+                                            <span>
+                                                {{ $v?->product?->brand?->name ?? 'بدون برند' }}
+                                                · {{ $v?->display_name ?? 'Variant' }}
+                                                · SKU {{ $v?->sku ?? '—' }}
+                                            </span>
+                                        </div>
+                                        <b>× {{ number_format($item->quantity) }}</b>
+                                    </a>
+                                @endforeach
+                            </div>
+
+                            <div class="wholesale-pack-card__foot">
+                                <span>قیمت پک عمده</span>
+                                <strong>{{ number_format($pack->display_price) }} تومان</strong>
+                            </div>
+                        </article>
+                    @endforeach
+                </div>
+            @endif
+
+            <div class="wholesale-products-head">
+                <div>
+                    <span class="eyebrow">WHOLESALE PRODUCTS</span>
+                    <h3>محصولات دارای قیمت عمده</h3>
+                </div>
+                <span>{{ number_format($products->total()) }} محصول</span>
+            </div>
+
+            @if($products->count())
+                <div class="wholesale-product-grid">
+                    @foreach($products as $product)
+                        <article class="wholesale-product-card">
+                            <a href="{{ route('products.show', $product) }}" class="wholesale-product-card__media">
+                                @if($product->primaryGalleryMedia?->url)
+                                    <img src="{{ $product->primaryGalleryMedia->url }}" alt="{{ $product->name }}" loading="lazy">
+                                @else
+                                    <span>JANAN</span>
+                                @endif
+                            </a>
+
+                            <div class="wholesale-product-card__body">
+                                <div class="wholesale-product-card__meta">
+                                    <span>{{ $product->brand?->name ?? 'Janan' }}</span>
+                                    <span>{{ $product->category?->name ?? 'محصول' }}</span>
+                                </div>
+                                <a href="{{ route('products.show', $product) }}" class="wholesale-product-card__title">{{ $product->name }}</a>
+
+                                <div class="wholesale-variant-list">
+                                    @foreach($product->activeVariants as $variant)
+                                        <div class="wholesale-variant-row">
+                                            <div>
+                                                <strong>{{ $variant->display_name }}</strong>
+                                                <span>SKU {{ $variant->sku ?: '—' }} · موجودی {{ number_format($variant->stock) }}</span>
+                                            </div>
+                                            <div class="wholesale-variant-price">
+                                                {{ number_format($variant->wholesale_price) }}
+                                                <small>تومان</small>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+
+                                <a class="button button--ghost wholesale-product-card__action" href="{{ route('products.show', $product) }}">
+                                    انتخاب Variant
+                                    <span aria-hidden="true">↗</span>
+                                </a>
+                            </div>
+                        </article>
+                    @endforeach
+                </div>
+
+                @if($products->hasPages())
+                    <div class="store-pagination">{{ $products->links() }}</div>
+                @endif
+            @else
+                <div class="customer-surface wholesale-empty">
+                    <strong>هنوز محصولی با قیمت عمده ثبت نشده است.</strong>
+                    <span>از مدیریت محصول، برای Variantهای قابل فروش قیمت عمده تعیین کن.</span>
+                </div>
+            @endif
+        </div>
+    </section>
+
     <section class="section-block section-block--soft" id="wholesale-form">
         <div class="container wholesale-content">
             <section class="customer-surface wholesale-form-card">

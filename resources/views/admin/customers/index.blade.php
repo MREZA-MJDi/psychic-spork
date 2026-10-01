@@ -157,6 +157,10 @@
                         </th>
 
                         <th>
+                            خرید چکی
+                        </th>
+
+                        <th>
                             عضویت
                         </th>
 
@@ -296,6 +300,32 @@
 
                             </td>
 
+
+                            {{-- CHEQUE PERMISSION --}}
+
+                            <td>
+                                @if($customer->chequePermission?->enabled)
+                                    <span class="admin-badge admin-badge--success">مجاز</span>
+                                    <div class="admin-muted">
+                                        {{ $customer->chequePermission->max_order_amount !== null ? 'سقف: ' . number_format((float) $customer->chequePermission->max_order_amount) . ' تومان' : 'بدون سقف' }}
+                                    </div>
+                                    <form method="POST" action="{{ route('admin.customers.cheque.disable', $customer) }}" style="margin-top:8px;">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button type="submit" class="admin-btn admin-btn--ghost admin-btn--sm">لغو مجوز</button>
+                                    </form>
+                                @else
+                                    <span class="admin-badge admin-badge--neutral">ندارد</span>
+                                    <form method="POST" action="{{ route('admin.customers.cheque.enable', $customer) }}" style="margin-top:8px;">
+                                        @csrf
+                                        @method('PATCH')
+                                        <div style="display:grid;gap:6px;">
+                                            <input type="number" name="max_order_amount" min="0" step="1" placeholder="سقف اختیاری">
+                                            <button type="submit" class="admin-btn admin-btn--secondary admin-btn--sm">صدور مجوز چک</button>
+                                        </div>
+                                    </form>
+                                @endif
+                            </td>
 
                             {{-- CREATED AT --}}
 

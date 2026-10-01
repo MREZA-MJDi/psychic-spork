@@ -189,6 +189,16 @@
                             </strong>
                             <span>تومان</span>
 
+                            <span
+                                class="product-wholesale-price"
+                                data-product-wholesale-price
+                                @if($variant?->wholesale_price === null) hidden @endif
+                            >
+                                @if($variant?->wholesale_price !== null)
+                                    عمده: {{ number_format($variant->wholesale_price) }} تومان
+                                @endif
+                            </span>
+
                             <del
                                 data-product-regular-price
                                 @if(!$variant?->is_on_sale) hidden @endif
@@ -237,6 +247,7 @@
                                         data-product-variant
                                         data-variant-action="{{ route('cart.store', $variantOption) }}"
                                         data-variant-price="{{ $variantOption->effective_price }}"
+                                        data-variant-wholesale="{{ $variantOption->wholesale_price !== null ? $variantOption->wholesale_price : '' }}"
                                         data-variant-regular="{{ $variantOption->price }}"
                                         data-variant-sale="{{ $variantOption->is_on_sale ? '1' : '0' }}"
                                         data-variant-stock="{{ $variantOption->stock }}"
