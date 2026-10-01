@@ -82,17 +82,16 @@
         </a>
 
         <a
-            class="{{ request()->routeIs('wholesale.show') ? 'is-active' : '' }}"
-            href="{{ route('wholesale.show') }}"
-            aria-label="خرید عمده"
+            class="{{ request()->routeIs('club') ? 'is-active' : '' }}"
+            href="{{ route('club') }}"
+            aria-label="باشگاه مشتریان DrClubz"
         >
             <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M4 7h16"/>
-                <path d="M6 7v12h12V7"/>
-                <path d="M9 11h6"/>
-                <path d="M9 15h4"/>
+                <path d="M12 21s-7-4.35-9-8.4C1.4 9.4 3.5 6 7 6c2 0 3.4 1.1 5 2.9C13.6 7.1 15 6 17 6c3.5 0 5.6 3.4 4 6.6-2 4.05-9 8.4-9 8.4Z"/>
+                <path d="M8.5 3.5 10 5"/>
+                <path d="m15.5 3.5-1.5 1.5"/>
             </svg>
-            <span>عمده</span>
+            <span>باشگاه</span>
         </a>
 
         <a
