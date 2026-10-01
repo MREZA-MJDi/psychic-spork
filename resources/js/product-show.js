@@ -1,4 +1,7 @@
 (() => {
+    if (window.__JANAN_PRODUCT_SHOW_INITIALIZED__) return;
+    window.__JANAN_PRODUCT_SHOW_INITIALIZED__ = true;
+
     const root = document.querySelector('[data-product-purchase]');
     if (!root) return;
 
@@ -17,7 +20,7 @@
     const regularPrice = root.querySelector('[data-product-regular-price]');
     const wholesalePrice = root.querySelector('[data-product-wholesale-price]');
     const stock = root.querySelector('[data-product-stock]');
-    const sku = document.querySelector('[data-product-sku]');
+    const skuNodes = [...document.querySelectorAll('[data-product-sku]')];
     const variantLabel = root.querySelector('[data-product-variant-label]');
     const addButton = root.querySelector('[data-product-add-button]');
     const addLabel = root.querySelector('[data-product-add-label]');
@@ -79,9 +82,9 @@
             variantLabel.textContent = label || 'انتخاب نشده';
         }
 
-        if (sku) {
-            sku.textContent = variantSku || '—';
-        }
+        skuNodes.forEach((node) => {
+            node.textContent = variantSku || '—';
+        });
 
         if (stock) {
             stock.classList.toggle('is-out', variantStock < 1);
