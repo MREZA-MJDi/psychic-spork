@@ -3,8 +3,15 @@
    Shared mobile/tablet behavior for public + customer pages.
 ========================================================= */
 
-.site-main {
+.site-main,
+.site-shell {
+    width: 100%;
+    max-width: 100%;
     min-width: 0;
+}
+
+.site-main {
+    overflow-x: clip;
 }
 
 .catalog-inline-sort {
@@ -62,13 +69,9 @@
 }
 
 /* =========================================================
-
-/* =========================================================
-   CENTRAL PAGE RESPONSIVE CONTRACTS
-   All responsive behavior lives here. Page CSS owns structure only.
-========================================================= */
-
-   CENTRAL RESPONSIVE OWNER: resources/css/store-customer-uiux.css
+   CENTRAL STOREFRONT RESPONSIVE CONTRACT
+   All public/customer responsive behavior lives here.
+   Page CSS owns structure; this file owns breakpoints.
 ========================================================= */
 @media (max-width: 1020px) {
     .product-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
@@ -137,8 +140,7 @@
 
 
 /* =========================================================
-
-   CENTRAL RESPONSIVE OWNER: resources/css/wholesale.css
+   WHOLESALE RESPONSIVE CONTRACT
 ========================================================= */
 @media(max-width:900px){.wholesale-product-grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
 
@@ -169,8 +171,7 @@
 
 
 /* =========================================================
-
-   CENTRAL RESPONSIVE OWNER: resources/css/home.css
+   HOME RESPONSIVE CONTRACT
 ========================================================= */
 @media (max-width: 1100px) {
 .home-brand-rail {
@@ -3053,9 +3054,9 @@ animation-duration:
 }
 
 /* =========================================================
-   PRODUCT DETAIL FINAL LAYOUT
+   PRODUCT DETAIL RESPONSIVE CONTRACT
    Desktop: visual right / purchase + text left.
-   Mobile: content first, visual second.
+   Mobile: purchase first / visual second.
 ========================================================= */
 .product-detail-v2__layout {
     direction: ltr;
@@ -3074,27 +3075,27 @@ animation-duration:
 
 @media (max-width: 900px) {
     .product-detail-v2__layout {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
         gap: 24px;
+        direction: ltr;
     }
 
     .product-detail-v2__purchase,
     .product-detail-v2__visual-stage {
         grid-column: 1;
         grid-row: auto;
+        min-width: 0;
+        width: 100%;
     }
 
     .product-detail-v2__purchase {
         position: relative;
         top: auto;
+        order: 1;
     }
 
     .product-detail-v2__visual-stage {
         order: 2;
-    }
-
-    .product-detail-v2__purchase {
-        order: 1;
     }
 }
 
@@ -3105,6 +3106,7 @@ animation-duration:
 
     .product-detail-v2 .container {
         width: calc(100% - 24px);
+        max-width: 100%;
     }
 
     .product-detail-v2__purchase {
