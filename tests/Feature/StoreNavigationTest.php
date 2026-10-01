@@ -19,12 +19,12 @@ class StoreNavigationTest extends TestCase
 
         // Categories remain a valid discovery route, but are no longer a
         // primary item in the shared storefront navbar.
-        $response->assertSee('href="' . route('categories.index') . '"');
+        $response->assertSee('href="' . route('categories.index') . '"', false);
         $response->assertDontSee(
             'href="' . route('categories.index') . '" class="store-nav__link'
         );
 
-        $response->assertSee('href="' . route('club') . '"');
+        $response->assertSee('href="' . route('club') . '"', false);
         $response->assertSee('DrClubz');
         $response->assertMatchesRegularExpression(
             '/href="' . preg_quote(route('club'), '/') . '"\\s+class="store-nav__link(?:\\s+is-active)?"/',
