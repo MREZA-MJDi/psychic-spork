@@ -147,7 +147,7 @@ class HomeController extends Controller
                 ])
                 ->orderBy('sort_order')
                 ->orderBy('id')
-                ->limit(6)
+                ->limit(48)
                 ->get()
                 ->values()
                 ->map(function (Product $product, int $index): array {

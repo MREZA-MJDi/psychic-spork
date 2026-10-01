@@ -57,6 +57,23 @@ body.home-immersive {
   text-decoration: none;
 }
 
+.immersive-preloader {
+  position: absolute;
+  inset: 0;
+  z-index: 100000;
+  display: grid;
+  place-items: center;
+  background: #000;
+  opacity: 1;
+  pointer-events: all;
+}
+
+.immersive-preloader canvas {
+  width: 300px;
+  height: 300px;
+  display: block;
+}
+
 .immersive-grid-hero p,
 .immersive-grid-hero h3,
 .immersive-grid-hero h1 {
@@ -157,7 +174,10 @@ body.home-immersive {
   height: 100%;
 }
 
-.immersive-grid-item {
+ .immersive-grid-item {
+  display: block;
+  color: inherit;
+  text-decoration: none;
   position: absolute;
   width: 320px;
   height: 320px;

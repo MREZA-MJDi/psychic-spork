@@ -115,7 +115,7 @@ class AdminProductController extends Controller
                         ->lockForUpdate()
                         ->pluck('id');
 
-                    if ($heroIds->count() >= 6) {
+                    if ($heroIds->count() >= 48) {
                         throw new \RuntimeException('hero_limit');
                     }
                 }
@@ -143,7 +143,7 @@ class AdminProductController extends Controller
             if ($e->getMessage() === 'hero_limit') {
                 return back()->with(
                     'error',
-                    'حداکثر ۶ محصول می‌تواند همزمان در Hero صفحه اصلی باشد.'
+                    'حداکثر ۴۸ محصول می‌تواند همزمان در Hero صفحه اصلی باشد.'
                 );
             }
 
