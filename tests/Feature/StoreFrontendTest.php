@@ -151,4 +151,107 @@ class StoreFrontendTest extends TestCase
             ->assertSee('name="per_page"', false);
     }
 
+
+    public function test_product_catalog_stock_badge_only_renders_for_non_available_states(): void
+    {
+        $category = Category::create([
+            'name' => 'وضعیت موجودی',
+            'slug' => 'stock-state-' . uniqid(),
+            'is_active' => true,
+            'sort_order' => 1,
+        ]);
+
+        $available = Product::create([
+            'category_id' => $category->id,
+            'name' => 'محصول موجود',
+            'slug' => 'available-product-' . uniqid(),
+            'is_active' => true,
+            'is_featured' => false,
+            'sort_order' => 1,
+        ]);
+
+        ProductVariant::create([
+            'product_id' => $available->id,
+            'sku' => 'AVAILABLE-' . strtoupper(uniqid()),
+            'price' => 100000,
+            'sale_price' => null,
+            'stock' => 8,
+            'low_stock_threshold' => 2,
+            'is_active' => true,
+            'sort_order' => 1,
+        ]);
+
+        $out = Product::create([
+            'category_id' => $category->id,
+            'name' => 'محصول ناموجود',
+            'slug' => 'out-product-' . uniqid(),
+            'is_active' => true,
+            'is_featured' => false,
+            'sort_order' => 2,
+        ]);
+
+        ProductVariant::create([
+            'product_id' => $out->id,
+            'sku' => 'OUT-' . strtoupper(uniqid()),
+            'price' => 120000,
+            'sale_price' => null,
+            'stock' => 0,
+            'low_stock_threshold' => 2,
+            'is_active' => true,
+            'sort_order' => 1,
+        ]);
+
+        $html = $this->get(route('products.index'))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertSame(
+            1,
+            substr_count($html, 'class="product-card__stock is-out"')
+        );
+        $this->assertStringContainsString('محصول موجود', $html);
+        $this->assertStringContainsString('محصول ناموجود', $html);
+    }
+
+    public function test_product_detail_contains_purchase_panel_and_variant_data(): void
+    {
+        $category = Category::create([
+            'name' => 'جزئیات محصول',
+            'slug' => 'detail-test-' . uniqid(),
+            'is_active' => true,
+            'sort_order' => 1,
+        ]);
+
+        $product = Product::create([
+            'category_id' => $category->id,
+            'name' => 'محصول جزئیات تست',
+            'slug' => 'detail-product-' . uniqid(),
+            'short_description' => 'توضیح کوتاه تست',
+            'description' => 'توضیح کامل تست',
+            'is_active' => true,
+            'is_featured' => false,
+            'sort_order' => 1,
+        ]);
+
+        ProductVariant::create([
+            'product_id' => $product->id,
+            'sku' => 'DETAIL-' . strtoupper(uniqid()),
+            'price' => 150000,
+            'sale_price' => 125000,
+            'stock' => 5,
+            'low_stock_threshold' => 2,
+            'is_active' => true,
+            'sort_order' => 1,
+        ]);
+
+        $this->get(route('products.show', $product))
+            ->assertOk()
+            ->assertSee('product-detail-v2__layout', false)
+            ->assertSee('product-detail-v2__purchase', false)
+            ->assertSee('محصول جزئیات تست')
+            ->assertSee('125,000', false)
+            ->assertSee('DETAIL-', false)
+            ->assertSee('افزودن به سبد خرید');
+    }
+
 }
