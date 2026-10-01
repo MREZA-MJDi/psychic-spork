@@ -189,11 +189,15 @@
                             </strong>
                             <span>تومان</span>
 
-                            @if($variant?->wholesale_price !== null)
-                                <span class="product-wholesale-price" data-product-wholesale-price>
+                            <span
+                                class="product-wholesale-price"
+                                data-product-wholesale-price
+                                @if($variant?->wholesale_price === null) hidden @endif
+                            >
+                                @if($variant?->wholesale_price !== null)
                                     عمده: {{ number_format($variant->wholesale_price) }} تومان
-                                </span>
-                            @endif
+                                @endif
+                            </span>
 
                             <del
                                 data-product-regular-price
