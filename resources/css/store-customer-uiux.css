@@ -489,46 +489,6 @@
     box-shadow:0 22px 60px rgba(25,40,47,.16);
 }
 
-@media (max-width: 1020px) {
-    .product-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
-    .brand-mosaic { grid-template-columns:repeat(2,minmax(0,1fr)); }
-}
-@media (max-width: 760px) {
-    .catalog-masthead__content,
-    .catalog-search-box,
-    .directory-intro { grid-template-columns:1fr; }
-    .catalog-local-nav { justify-content:flex-start; }
-    .catalog-filter-bar { grid-template-columns:1fr 1fr; }
-    .catalog-filter-bar__actions { grid-column:1/-1; display:flex; }
-    .catalog-filter-bar__count { grid-column:1/-1; padding:0; }
-    .product-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
-    .collection-grid { grid-template-columns:1fr; }
-    .collection-card,
-    .collection-card:nth-child(4n+1) { grid-column:auto; min-height:360px; }
-    .brand-mosaic { grid-template-columns:1fr; }
-    .catalog-results__head,
-    .catalog-toolbar,
-    .section-head { align-items:flex-start; flex-direction:column; }
-}
-@media (max-width: 520px) {
-    .product-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; }
-    .product-card { border-radius:15px; }
-    .product-card__body { padding:11px; }
-    .product-card__title { font-size:12px; }
-    .quick-add { min-height:38px; font-size:9px; }
-    .catalog-filter-bar { grid-template-columns:1fr; }
-    .catalog-search { grid-template-columns:1fr; }
-    .catalog-search .button { width:100%; }
-    .catalog-masthead h1 { font-size:38px; }
-}
-@media (prefers-reduced-motion: reduce) {
-    .product-card,
-    .product-card img,
-    .collection-card,
-    .brand-mosaic__item { transition:none !important; }
-}
-
-
 /* =========================================================
    HOME BALANCE PASS
    Keep the immersive hero intact; make the content after it
@@ -611,14 +571,6 @@
     pointer-events: none;
     background: linear-gradient(180deg, transparent, rgba(0,0,0,.30));
 }
-
-@media (max-width: 720px) {
-    .home-page .home-section,
-    .home-page .home-editorial-section {
-        padding-block: 58px;
-    }
-}
-
 
 /* =========================================================
    CHECKOUT / ORDER TYPE + PAYMENT STATES
@@ -780,20 +732,4 @@
     color: var(--store-gray);
     font-size: 9px;
     line-height: 1.9;
-}
-
-@media (max-width: 760px) {
-    .checkout-choice-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .checkout-payment-request,
-    .checkout-notice {
-        align-items: flex-start;
-        flex-direction: column;
-    }
-
-    .checkout-payment-request .button {
-        width: 100%;
-    }
 }
