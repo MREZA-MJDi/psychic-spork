@@ -246,22 +246,3 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-
-document.addEventListener('DOMContentLoaded', () => {
-    const hero = document.querySelector('[data-immersive-gallery]');
-    const nav = document.querySelector('.mobile-bottom-nav--store');
-
-    if (!hero || !nav || !('IntersectionObserver' in window)) return;
-
-    const observer = new IntersectionObserver(
-        ([entry]) => {
-            nav.classList.toggle(
-                'is-immersive-dimmed',
-                entry.isIntersecting && entry.intersectionRatio > 0.28
-            );
-        },
-        { threshold: [0, 0.28, 0.7, 1] }
-    );
-
-    observer.observe(hero);
-});
