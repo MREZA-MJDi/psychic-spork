@@ -111,6 +111,11 @@
     .admin-body .admin-main {
         padding-bottom: calc(92px + env(safe-area-inset-bottom));
     }
+
+    body:has(.immersive-grid-hero) .store-body,
+    body:has(.immersive-grid-hero) .site-main {
+        padding-bottom: 0;
+    }
 }
 
 @media (max-width: 480px) {
