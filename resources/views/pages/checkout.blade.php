@@ -3,11 +3,19 @@
 @section('title', 'تکمیل سفارش — ' . ($siteBrandNameLatin ?? 'Janan'))
 
 @section('content')
+@php
+    $user = auth()->user();
+    $isCustomer = $user?->isCustomer() ?? false;
+    $chequePermission = $user?->chequePermission;
+    $chequeApproved = $chequePermission?->isApproved() ?? false;
+    $chequePending = $chequePermission?->isPending() ?? false;
+@endphp
+
 <section class="page-hero page-hero--motion">
     <div class="container">
         <span class="eyebrow">JANAN / CHECKOUT</span>
         <h1>تکمیل سفارش</h1>
-        <p>اطلاعات ارسال را وارد کن؛ سپس برای پرداخت آنلاین به درگاه منتقل می‌شوی.</p>
+        <p>نوع خرید و روش پرداخت را انتخاب کن؛ بعد اطلاعات ارسال را کامل کن.</p>
     </div>
 </section>
 
@@ -17,24 +25,220 @@
         <section class="checkout-card">
             <div class="section-head">
                 <div>
-                    <span class="eyebrow">DELIVERY DETAILS</span>
-                    <h2>اطلاعات گیرنده</h2>
+                    <span class="eyebrow">ORDER & PAYMENT</span>
+                    <h2>نوع خرید و پرداخت</h2>
                 </div>
             </div>
+
+            @if(session('success'))
+                <div class="checkout-notice checkout-notice--success">
+                    {{ session('success') }}
+                </div>
+            @endif
+
+            @if(session('error'))
+                <div class="checkout-notice checkout-notice--error">
+                    {{ session('error') }}
+                </div>
+            @endif
 
             <form
                 method="POST"
                 action="{{ route('checkout.store') }}"
                 class="checkout-form"
+                enctype="multipart/form-data"
             >
                 @csrf
+
+                <fieldset class="checkout-choice-group">
+                    <legend>
+                        <span class="eyebrow">ORDER TYPE</span>
+                        <strong>نوع خرید</strong>
+                    </legend>
+
+                    <div class="checkout-choice-grid">
+                        <label class="checkout-choice">
+                            <input
+                                type="radio"
+                                name="order_type"
+                                value="retail"
+                                @checked(old('order_type', 'retail') === 'retail')
+                            >
+                            <span>
+                                <strong>خرید عادی</strong>
+                                <small>قیمت و شرایط فروش عادی جانان</small>
+                            </span>
+                        </label>
+
+                        <label class="checkout-choice {{ ! $isCustomer ? 'is-disabled' : '' }}">
+                            <input
+                                type="radio"
+                                name="order_type"
+                                value="wholesale"
+                                @checked(old('order_type') === 'wholesale')
+                                @disabled(! $isCustomer)
+                            >
+                            <span>
+                                <strong>خرید عمده</strong>
+                                <small>
+                                    بدون نیاز به تأیید حساب؛ فقط پرداخت چکی مجوز مدیریت می‌خواهد.
+                                </small>
+                            </span>
+                        </label>
+                    </div>
+
+                    @guest
+                        <p class="checkout-choice-note">
+                            برای ثبت سفارش عمده، ابتدا وارد حساب مشتری شو.
+                        </p>
+                    @endguest
+                </fieldset>
+
+                <fieldset class="checkout-choice-group">
+                    <legend>
+                        <span class="eyebrow">PAYMENT</span>
+                        <strong>روش پرداخت</strong>
+                    </legend>
+
+                    <div class="checkout-choice-grid">
+                        <label class="checkout-choice">
+                            <input
+                                type="radio"
+                                name="payment_method"
+                                value="online"
+                                @checked(old('payment_method', 'online') === 'online')
+                            >
+                            <span>
+                                <strong>پرداخت آنلاین</strong>
+                                <small>پس از ثبت سفارش به درگاه امن پرداخت منتقل می‌شوی.</small>
+                            </span>
+                        </label>
+
+                        @if($chequeApproved)
+                            <label class="checkout-choice checkout-choice--cheque">
+                                <input
+                                    type="radio"
+                                    name="payment_method"
+                                    value="cheque"
+                                    @checked(old('payment_method') === 'cheque')
+                                >
+                                <span>
+                                    <strong>پرداخت با چک</strong>
+                                    <small>
+                                        فقط برای سفارش عمده و تا سقف
+                                        {{ $chequePermission->max_order_amount !== null ? number_format((float) $chequePermission->max_order_amount) . ' تومان' : 'بدون سقف تعیین‌شده' }}
+                                    </small>
+                                </span>
+                            </label>
+                        @else
+                            <div class="checkout-payment-request">
+                                <div>
+                                    <span class="checkout-payment-request__badge">CHEQUE ACCESS</span>
+                                    <strong>پرداخت با چک هنوز برای این حساب فعال نیست.</strong>
+
+                                    @if($chequePending)
+                                        <p>درخواست شما ثبت شده و در انتظار بررسی مدیریت است.</p>
+                                    @else
+                                        <p>خرید عمده آزاد است؛ برای استفاده از چک فقط یک‌بار درخواست مجوز بده.</p>
+                                    @endif
+                                </div>
+
+                                @if($isCustomer && ! $chequePending)
+                                    <button
+                                        type="submit"
+                                        form="cheque-permission-request"
+                                        class="button button--ghost"
+                                    >
+                                        درخواست مجوز چک
+                                    </button>
+                                @endif
+                            </div>
+                        @endif
+                    </div>
+                </fieldset>
+
+                @if($chequeApproved)
+                    <div
+                        class="checkout-cheque-fields"
+                        data-cheque-fields
+                        hidden
+                    >
+                        <div class="section-head">
+                            <div>
+                                <span class="eyebrow">CHEQUE DETAILS</span>
+                                <h3>اطلاعات چک</h3>
+                            </div>
+                        </div>
+
+                        <div class="form-grid">
+                            <label>
+                                شناسه صیادی *
+                                <input
+                                    name="sayad_id"
+                                    value="{{ old('sayad_id') }}"
+                                    inputmode="numeric"
+                                    maxlength="16"
+                                >
+                            </label>
+
+                            <label>
+                                شماره چک *
+                                <input
+                                    name="cheque_number"
+                                    value="{{ old('cheque_number') }}"
+                                >
+                            </label>
+
+                            <label>
+                                بانک *
+                                <input
+                                    name="bank_name"
+                                    value="{{ old('bank_name') }}"
+                                >
+                            </label>
+
+                            <label>
+                                صاحب حساب
+                                <input
+                                    name="account_holder"
+                                    value="{{ old('account_holder') }}"
+                                >
+                            </label>
+
+                            <label>
+                                تاریخ سررسید *
+                                <input
+                                    type="date"
+                                    name="due_date"
+                                    value="{{ old('due_date') }}"
+                                >
+                            </label>
+
+                            <label>
+                                تصویر چک *
+                                <input
+                                    type="file"
+                                    name="cheque_image"
+                                    accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                                >
+                            </label>
+                        </div>
+                    </div>
+                @endif
+
+                <div class="checkout-delivery-divider">
+                    <div>
+                        <span class="eyebrow">DELIVERY DETAILS</span>
+                        <h2>اطلاعات گیرنده</h2>
+                    </div>
+                </div>
 
                 <div class="form-grid">
                     <label>
                         نام و نام خانوادگی
                         <input
                             name="customer_name"
-                            value="{{ old('customer_name', auth()->user()?->name) }}"
+                            value="{{ old('customer_name', $user?->name) }}"
                             required
                         >
                     </label>
@@ -43,7 +247,7 @@
                         شماره موبایل
                         <input
                             name="customer_phone"
-                            value="{{ old('customer_phone', auth()->user()?->phone) }}"
+                            value="{{ old('customer_phone', $user?->phone) }}"
                             inputmode="tel"
                             required
                         >
@@ -54,7 +258,7 @@
                         <input
                             type="email"
                             name="customer_email"
-                            value="{{ old('customer_email', auth()->user()?->email) }}"
+                            value="{{ old('customer_email', $user?->email) }}"
                         >
                     </label>
 
@@ -101,27 +305,24 @@
                     </label>
                 </div>
 
-                <div class="checkout-payment">
-                    <div>
-                        <span class="eyebrow">PAYMENT</span>
-                        <strong>پرداخت آنلاین</strong>
-                        <p>
-                            مبلغ نهایی پس از ثبت سفارش به درگاه امن پرداخت منتقل می‌شود.
-                        </p>
-                    </div>
-
-                    <span class="checkout-payment__badge">
-                        ONLINE
-                    </span>
-                </div>
-
                 <button
                     class="button button--primary checkout-submit"
                     type="submit"
                 >
-                    ادامه و پرداخت
+                    ادامه و ثبت سفارش
                 </button>
             </form>
+
+            @if($isCustomer && ! $chequeApproved && ! $chequePending)
+                <form
+                    id="cheque-permission-request"
+                    method="POST"
+                    action="{{ route('wholesale.cheque.request') }}"
+                    hidden
+                >
+                    @csrf
+                </form>
+            @endif
         </section>
 
         <aside class="checkout-card checkout-card--summary">
@@ -167,11 +368,15 @@
             </div>
 
             <div class="checkout-total">
-                <span>مبلغ سفارش</span>
+                <span>مبلغ فعلی سبد</span>
                 <strong>
                     {{ number_format($total) }} تومان
                 </strong>
             </div>
+
+            <p class="checkout-summary-note">
+                در سفارش عمده، قیمت عمده هنگام ثبت نهایی سفارش محاسبه می‌شود.
+            </p>
 
             <a
                 class="button button--ghost checkout-back"

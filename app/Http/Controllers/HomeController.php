@@ -41,8 +41,8 @@ class HomeController extends Controller
             ->with([
                 'category',
                 'brand',
-                'variants',
-                'galleryMedia',
+                'primaryActiveVariant',
+                'primaryGalleryMedia',
             ]);
 
         $featuredProducts = (clone $productsQuery)
@@ -75,24 +75,13 @@ class HomeController extends Controller
                 ->values();
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | Home signals
-        |--------------------------------------------------------------------------
-        |
-        | These values mirror the catalog signals used in Admin Dashboard:
-        | recent catalog additions + paid, non-cancelled top sellers.
-        | They are filtered to active products before reaching the storefront.
-        |--------------------------------------------------------------------------
-        */
-
         $recentProducts = Product::query()
             ->active()
             ->with([
                 'category:id,name',
                 'brand:id,name',
-                'galleryMedia',
-                'variants',
+                'primaryGalleryMedia',
+                'primaryActiveVariant',
             ])
             ->latest('created_at')
             ->latest('id')
@@ -105,8 +94,21 @@ class HomeController extends Controller
 
         $signalTo = now()->endOfDay();
 
+        $popularSalesFilter = function ($query) use ($signalFrom, $signalTo) {
+            $query->whereHas('order', function ($orderQuery) use ($signalFrom, $signalTo) {
+                $orderQuery
+                    ->whereBetween('placed_at', [$signalFrom, $signalTo])
+                    ->whereNotIn(
+                        'status',
+                        Order::CANCEL_LIKE_STATUSES
+                    )
+                    ->where('payment_status', 'paid');
+            });
+        };
+
         $popularProducts = Product::query()
             ->active()
+            ->whereHas('orderItems', $popularSalesFilter)
             ->with([
                 'category:id,name',
                 'brand:id,name',
@@ -115,21 +117,10 @@ class HomeController extends Controller
             ])
             ->withSum(
                 [
-                    'orderItems as sales_quantity' => function ($query) use ($signalFrom, $signalTo) {
-                        $query->whereHas('order', function ($orderQuery) use ($signalFrom, $signalTo) {
-                            $orderQuery
-                                ->whereBetween('placed_at', [$signalFrom, $signalTo])
-                                ->whereNotIn(
-                                    'status',
-                                    Order::CANCEL_LIKE_STATUSES
-                                )
-                                ->where('payment_status', 'paid');
-                        });
-                    },
+                    'orderItems as sales_quantity' => $popularSalesFilter,
                 ],
                 'quantity'
             )
-            ->having('sales_quantity', '>', 0)
             ->orderByDesc('sales_quantity')
             ->orderByDesc('id')
             ->limit(4)
@@ -137,24 +128,40 @@ class HomeController extends Controller
 
         $heroProducts = Product::query()
             ->active()
-            ->with(['brand.logoMedia', 'galleryMedia', 'variants'])
+            ->with(['brand.logoMedia', 'category', 'primaryGalleryMedia', 'primaryActiveVariant'])
+            ->orderByDesc('is_featured')
             ->latest('updated_at')
             ->latest('id')
-            ->take(4)
+            ->take(24)
             ->get();
 
         $heroSlides = $heroProducts
             ->values()
             ->map(function (Product $product, int $index): array {
-                $productImage = $product->galleryMedia->first()?->url;
+                $productImage = $product->primaryGalleryMedia?->url;
                 $brandImage = $product->brand?->logoMedia?->url;
 
+                $description = trim((string) ($product->short_description ?: $product->description));
+
+                if ($description === '') {
+                    $description = sprintf(
+                        '%s%s',
+                        $product->brand?->name
+                            ? $product->brand->name . ' · '
+                            : '',
+                        $product->category?->name
+                            ? 'منتخبی از دسته ' . $product->category->name . ' در جانان.'
+                            : 'منتخبی از کالکشن جانان.'
+                    );
+                }
+
                 return [
+                    'number' => str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT),
                     'image' => $productImage ?: $brandImage,
                     'title' => $product->name,
+                    'description' => $description,
                     'brand' => $product->brand?->name ?? 'JANAN',
                     'url' => route('products.show', $product),
-                    'index' => $index,
                 ];
             })
             ->all();

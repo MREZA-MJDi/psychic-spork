@@ -34,6 +34,26 @@
         );
 
         $chartMax = max((float) $maxIncome, 1);
+
+        $formatFaNumber = static function (mixed $value, int $decimals = 0): string {
+            return strtr(
+                number_format((float) $value, $decimals, '.', ','),
+                [
+                    '0' => '۰',
+                    '1' => '۱',
+                    '2' => '۲',
+                    '3' => '۳',
+                    '4' => '۴',
+                    '5' => '۵',
+                    '6' => '۶',
+                    '7' => '۷',
+                    '8' => '۸',
+                    '9' => '۹',
+                    ',' => '٬',
+                    '.' => '٫',
+                ]
+            );
+        };
     @endphp
 
     <div class="dashboard-v2">
@@ -85,52 +105,150 @@
         <section class="dashboard-v2__stats" aria-label="شاخص‌های اصلی">
             <article class="dashboard-v2__stat dashboard-v2__stat--dark">
                 <span>REVENUE</span>
-                <strong>{{ number_format((float) $revenue) }}</strong>
+                <strong>{{ $formatFaNumber((float) $revenue) }}</strong>
                 <small>تومان درآمد پرداخت‌شده</small>
                 <i>01</i>
             </article>
 
             <article class="dashboard-v2__stat">
                 <span>NET CASH</span>
-                <strong>{{ number_format((float) $netCash) }}</strong>
+                <strong>{{ $formatFaNumber((float) $netCash) }}</strong>
                 <small>خالص جریان نقدی</small>
                 <i>02</i>
             </article>
 
             <article class="dashboard-v2__stat">
                 <span>ORDERS</span>
-                <strong>{{ number_format((int) $ordersCount) }}</strong>
-                <small>{{ number_format((int) $paidOrdersCount) }} پرداخت‌شده</small>
+                <strong>{{ $formatFaNumber((int) $ordersCount) }}</strong>
+                <small>{{ $formatFaNumber((int) $paidOrdersCount) }} پرداخت‌شده</small>
                 <i>03</i>
             </article>
 
             <article class="dashboard-v2__stat dashboard-v2__stat--accent">
                 <span>PROCESSING</span>
-                <strong>{{ number_format($processingCount) }}</strong>
-                <small>{{ number_format((int) $pendingOrders) }} سفارش جاری</small>
+                <strong>{{ $formatFaNumber($processingCount) }}</strong>
+                <small>{{ $formatFaNumber((int) $pendingOrders) }} سفارش جاری</small>
                 <i>04</i>
             </article>
 
             <article class="dashboard-v2__stat">
                 <span>CUSTOMERS</span>
-                <strong>{{ number_format((int) $customers) }}</strong>
+                <strong>{{ $formatFaNumber((int) $customers) }}</strong>
                 <small>حساب مشتری</small>
                 <i>05</i>
             </article>
 
             <article class="dashboard-v2__stat">
                 <span>LOW STOCK</span>
-                <strong>{{ number_format((int) $lowStock) }}</strong>
+                <strong>{{ $formatFaNumber((int) $lowStock) }}</strong>
                 <small>تنوع در محدوده هشدار</small>
                 <i>06</i>
             </article>
 
             <article class="dashboard-v2__stat dashboard-v2__stat--accent">
                 <span>CONTACT INBOX</span>
-                <strong>{{ number_format((int) ($unreadContactMessages ?? 0)) }}</strong>
+                <strong>{{ $formatFaNumber((int) ($unreadContactMessages ?? 0)) }}</strong>
                 <small>پیام خوانده‌نشده</small>
                 <i>07</i>
             </article>
+        </section>
+
+        <section class="dashboard-v2__panel" aria-label="وضعیت کاتالوگ">
+            <header class="dashboard-v2__panel-head">
+                <div>
+                    <span class="dashboard-v2__kicker">CATALOG CONTROL</span>
+                    <h2>وضعیت کاتالوگ و قیمت‌گذاری</h2>
+                    <p>تعداد واقعی محصولات، برندها، دسته‌بندی‌ها، واریانت‌ها و قیمت‌های عمده از دیتابیس.</p>
+                </div>
+                <a href="{{ route('admin.products.index') }}" class="dashboard-v2__small-link">
+                    مدیریت محصولات <span aria-hidden="true">↗</span>
+                </a>
+            </header>
+
+            <div class="dashboard-v2__stats" style="margin-top:0;">
+                <article class="dashboard-v2__stat">
+                    <span>PRODUCTS</span>
+                    <strong>{{ $formatFaNumber((int) $catalogProducts) }}</strong>
+                    <small>محصول ثبت‌شده</small>
+                    <i>01</i>
+                </article>
+
+                <article class="dashboard-v2__stat">
+                    <span>BRANDS</span>
+                    <strong>{{ $formatFaNumber((int) $catalogBrands) }}</strong>
+                    <small>برند فعال در کاتالوگ</small>
+                    <i>02</i>
+                </article>
+
+                <article class="dashboard-v2__stat">
+                    <span>CATEGORIES</span>
+                    <strong>{{ $formatFaNumber((int) $catalogCategories) }}</strong>
+                    <small>دسته‌بندی</small>
+                    <i>03</i>
+                </article>
+
+                <article class="dashboard-v2__stat">
+                    <span>VARIANTS</span>
+                    <strong>{{ $formatFaNumber((int) $catalogVariants) }}</strong>
+                    <small>واریانت فعال</small>
+                    <i>04</i>
+                </article>
+
+                <article class="dashboard-v2__stat dashboard-v2__stat--accent">
+                    <span>WHOLESALE PRICE</span>
+                    <strong>{{ $formatFaNumber((int) $catalogWholesalePricedVariants) }}</strong>
+                    <small>واریانت دارای قیمت عمده</small>
+                    <i>05</i>
+                </article>
+            </div>
+        </section>
+
+        <section class="dashboard-v2__control-center" aria-label="مرکز اقدام مدیریت">
+            <div class="dashboard-v2__control-head">
+                <div>
+                    <span class="dashboard-v2__kicker">ACTION CENTER</span>
+                    <h2>کارهایی که الان باید کنترل شوند</h2>
+                    <p>این بخش فقط وضعیت‌هایی را نشان می‌دهد که واقعاً نیاز به تصمیم یا اقدام مدیریتی دارند.</p>
+                </div>
+            </div>
+
+            <div class="dashboard-v2__control-grid">
+                <a href="{{ route('admin.cheques.index') }}" class="dashboard-v2__control-item {{ $chequesAwaitingReview > 0 ? 'is-attention' : '' }}">
+                    <span class="dashboard-v2__control-icon">چک</span>
+                    <div>
+                        <strong>پرداخت‌های چکی</strong>
+                        <small>{{ $formatFaNumber((int) $chequesAwaitingReview) }} مورد نیازمند بررسی · {{ $formatFaNumber((float) $chequesAwaitingReviewAmount) }} تومان</small>
+                    </div>
+                    <b aria-hidden="true">←</b>
+                </a>
+
+                <a href="{{ route('admin.wholesale.index', ['status' => 'pending']) }}" class="dashboard-v2__control-item {{ $pendingWholesaleApplications > 0 ? 'is-attention' : '' }}">
+                    <span class="dashboard-v2__control-icon">عمده</span>
+                    <div>
+                        <strong>درخواست‌های عمده</strong>
+                        <small>{{ $formatFaNumber((int) $pendingWholesaleApplications) }} درخواست در انتظار تصمیم مدیریتی</small>
+                    </div>
+                    <b aria-hidden="true">←</b>
+                </a>
+
+                <a href="{{ route('admin.inventory.index') }}" class="dashboard-v2__control-item {{ $lowStock > 0 ? 'is-attention' : '' }}">
+                    <span class="dashboard-v2__control-icon">انبار</span>
+                    <div>
+                        <strong>کنترل موجودی</strong>
+                        <small>{{ $formatFaNumber((int) $lowStock) }} واریانت در محدوده هشدار · ارزش موجودی {{ $formatFaNumber((float) $inventoryValue) }} تومان</small>
+                    </div>
+                    <b aria-hidden="true">←</b>
+                </a>
+
+                <a href="{{ route('admin.nila.index') }}" class="dashboard-v2__control-item">
+                    <span class="dashboard-v2__control-icon">نیلا</span>
+                    <div>
+                        <strong>مرز داده نیلا</strong>
+                        <small>{{ $formatFaNumber((int) $nilaProductMappings) }} محصول و {{ $formatFaNumber((int) $nilaVariantMappings) }} واریانت mapping شده‌اند؛ آخرین تغییر mapping: <span data-admin-date="{{ optional($nilaLastMappedAt)->toIso8601String() }}" data-admin-date-format="day">{{ optional($nilaLastMappedAt)->format('Y/m/d') ?: '—' }}</span>.</small>
+                    </div>
+                    <span class="dashboard-v2__control-state">کنترل نیلا ←</span>
+                </a>
+            </div>
         </section>
 
         <section class="dashboard-v2__grid dashboard-v2__grid--main">
@@ -140,11 +258,11 @@
                     <div>
                         <span class="dashboard-v2__kicker">SALES SIGNAL</span>
                         <h2>روند فروش روزانه</h2>
-                        <p>درآمد پرداخت‌شده و تعداد سفارش‌ها در {{ number_format($period) }} روز اخیر.</p>
+                        <p>درآمد پرداخت‌شده و تعداد سفارش‌ها در {{ $formatFaNumber($period) }} روز اخیر.</p>
                     </div>
 
                     <div class="dashboard-v2__mini-stat">
-                        <strong>{{ number_format($paymentRate) }}%</strong>
+                        <strong>{{ $formatFaNumber($paymentRate) }}%</strong>
                         <span>نرخ پرداخت</span>
                     </div>
                 </header>
@@ -161,13 +279,13 @@
 
                             <div class="dashboard-v2__bar-column">
                                 <div class="dashboard-v2__bar-value">
-                                    {{ $income > 0 ? number_format($income / 1000000, 1) . 'M' : '—' }}
+                                    {{ $income > 0 ? $formatFaNumber($income / 1000000, 1) . 'M' : '—' }}
                                 </div>
 
                                 <div class="dashboard-v2__bar-track">
                                     <span
                                         style="height: {{ $height }}%"
-                                        title="{{ number_format($income) }} تومان"
+                                        title="{{ $formatFaNumber($income) }} تومان"
                                     ></span>
                                 </div>
 
@@ -178,7 +296,7 @@
                                     {{ $day['label'] ?? '—' }}
                                 </small>
                                 <b class="dashboard-v2__bar-orders">
-                                    {{ number_format((int) ($day['orders'] ?? 0)) }}
+                                    {{ $formatFaNumber((int) ($day['orders'] ?? 0)) }}
                                 </b>
                             </div>
                         @endforeach
@@ -212,7 +330,7 @@
                         <div class="dashboard-v2__status">
                             <div>
                                 <span>{{ $name }}</span>
-                                <strong>{{ number_format($count) }}</strong>
+                                <strong>{{ $formatFaNumber($count) }}</strong>
                             </div>
 
                             <div class="dashboard-v2__status-track">
@@ -241,15 +359,15 @@
                 <div class="dashboard-v2__cash-list">
                     <div>
                         <span>درآمد پرداخت‌شده</span>
-                        <strong>{{ number_format((float) $revenue) }} <small>تومان</small></strong>
+                        <strong>{{ $formatFaNumber((float) $revenue) }} <small>تومان</small></strong>
                     </div>
                     <div>
                         <span>هزینه‌ها</span>
-                        <strong>{{ number_format((float) $expenses) }} <small>تومان</small></strong>
+                        <strong>{{ $formatFaNumber((float) $expenses) }} <small>تومان</small></strong>
                     </div>
                     <div class="dashboard-v2__cash-total">
                         <span>خالص</span>
-                        <strong>{{ number_format((float) $netCash) }} <small>تومان</small></strong>
+                        <strong>{{ $formatFaNumber((float) $netCash) }} <small>تومان</small></strong>
                     </div>
                 </div>
 
@@ -290,7 +408,7 @@
                                 <i style="width: {{ $stockPercent }}%"></i>
                             </div>
 
-                            <b>{{ number_format((int) $variant->stock) }}</b>
+                            <b>{{ $formatFaNumber((int) $variant->stock) }}</b>
                         </div>
                     @empty
                         <div class="dashboard-v2__empty">
@@ -343,7 +461,7 @@
                                 <small>{{ $product->category?->name ?? 'بدون دسته‌بندی' }}</small>
                             </div>
 
-                            <b>{{ number_format($salesQuantity) }} <small>عدد</small></b>
+                            <b>{{ $formatFaNumber($salesQuantity) }} <small>عدد</small></b>
                         </a>
                     @empty
                         <div class="dashboard-v2__empty">
@@ -372,6 +490,26 @@
             </header>
 
             @if($recentOrders->isNotEmpty())
+                <div class="dashboard-v2__orders-mobile" aria-label="آخرین سفارش‌ها در موبایل">
+                    @foreach($recentOrders as $order)
+                        @php
+                            $customerName = $order->user?->name ?? $order->customer_name ?? 'مشتری';
+                        @endphp
+                        <article class="dashboard-v2__order-card">
+                            <div class="dashboard-v2__order-card-head">
+                                <strong>{{ $order->order_number }}</strong>
+                                <span class="admin-badge admin-badge--{{ $statusClasses[$order->status] ?? 'neutral' }}">{{ $statusNames[$order->status] ?? $order->status }}</span>
+                            </div>
+                            <div class="dashboard-v2__order-card-body">
+                                <div><small>مشتری</small><strong>{{ $customerName }}</strong></div>
+                                <div><small>مبلغ</small><strong>{{ $formatFaNumber((float) $order->total) }} <em>تومان</em></strong></div>
+                                <div><small>پرداخت</small><strong>{{ $order->payment_status === 'paid' ? 'پرداخت‌شده' : ($order->payment_status === 'pending' ? 'در انتظار' : $order->payment_status) }}</strong></div>
+                                <a href="{{ route('admin.orders.show', $order) }}" class="dashboard-v2__order-card-link">جزئیات <span aria-hidden="true">←</span></a>
+                            </div>
+                        </article>
+                    @endforeach
+                </div>
+
                 <div class="dashboard-v2__orders-table">
                     <table>
                         <thead>
@@ -408,7 +546,7 @@
                                 </td>
 
                                 <td>
-                                    <strong>{{ number_format((float) $order->total) }}</strong>
+                                    <strong>{{ $formatFaNumber((float) $order->total) }}</strong>
                                     <small class="dashboard-v2__muted">تومان</small>
                                 </td>
 

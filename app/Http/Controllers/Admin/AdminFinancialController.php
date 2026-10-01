@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreFinancialTransactionRequest;
 use App\Models\FinancialTransaction;
+use App\Models\JournalEntry;
+use App\Models\JournalLine;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -93,11 +95,44 @@ class AdminFinancialController extends Controller
             ->expense()
             ->sum('amount');
 
+        $ledgerSummary = JournalLine::query()
+            ->selectRaw('ledger_accounts.code, ledger_accounts.name, SUM(journal_lines.debit) as debit, SUM(journal_lines.credit) as credit')
+            ->join('ledger_accounts', 'ledger_accounts.id', '=', 'journal_lines.ledger_account_id')
+            ->join('journal_entries', 'journal_entries.id', '=', 'journal_lines.journal_entry_id')
+            ->when(
+                $request->filled('from'),
+                fn ($query) => $query->whereDate('journal_entries.entry_date', '>=', $request->input('from'))
+            )
+            ->when(
+                $request->filled('to'),
+                fn ($query) => $query->whereDate('journal_entries.entry_date', '<=', $request->input('to'))
+            )
+            ->groupBy('ledger_accounts.id', 'ledger_accounts.code', 'ledger_accounts.name')
+            ->orderBy('ledger_accounts.code')
+            ->get();
+
+        $journalEntries = JournalEntry::query()
+            ->with('lines.account')
+            ->when(
+                $request->filled('from'),
+                fn ($query) => $query->whereDate('entry_date', '>=', $request->input('from'))
+            )
+            ->when(
+                $request->filled('to'),
+                fn ($query) => $query->whereDate('entry_date', '<=', $request->input('to'))
+            )
+            ->latest('entry_date')
+            ->latest('id')
+            ->limit(10)
+            ->get();
+
         return view('admin.accounting.index', [
             'transactions' => $transactions,
             'income' => $income,
             'expense' => $expense,
             'net' => $income - $expense,
+            'ledgerSummary' => $ledgerSummary,
+            'journalEntries' => $journalEntries,
         ]);
     }
 

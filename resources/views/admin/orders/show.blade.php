@@ -117,6 +117,21 @@
         <div class="admin-stat-card">
 
             <div class="admin-stat-card__label">
+                نوع سفارش
+            </div>
+
+            <div style="margin-top:10px;">
+                <span class="admin-badge admin-badge--{{ $order->isWholesale() ? 'info' : 'neutral' }}">
+                    {{ $order->isWholesale() ? 'عمده' : 'خرده' }}
+                </span>
+            </div>
+
+        </div>
+
+
+        <div class="admin-stat-card">
+
+            <div class="admin-stat-card__label">
                 وضعیت سفارش
             </div>
 

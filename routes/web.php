@@ -3,12 +3,17 @@
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\Admin\AdminBrandController;
 use App\Http\Controllers\Admin\AdminCategoryController;
+use App\Http\Controllers\Admin\AdminChequeController;
+use App\Http\Controllers\Admin\AdminWholesaleController;
+use App\Http\Controllers\Admin\AdminWholesalePackController;
 use App\Http\Controllers\Admin\AdminCustomerController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminFinancialController;
 use App\Http\Controllers\Admin\AdminInventoryController;
+use App\Http\Controllers\Admin\AdminNilaController;
 use App\Http\Controllers\Admin\AdminOrderController;
 use App\Http\Controllers\Admin\AdminProductController;
+use App\Http\Controllers\Admin\AdminProductMediaController;
 use App\Http\Controllers\Admin\AdminProductVariantController;
 use App\Http\Controllers\Admin\AdminProfileController;
 use App\Http\Controllers\Admin\AdminSiteContentController;
@@ -23,6 +28,7 @@ use App\Http\Controllers\StoreCategoryController;
 use App\Http\Controllers\StoreMediaController;
 use App\Http\Controllers\StorePageController;
 use App\Http\Controllers\StoreProductController;
+use App\Http\Controllers\WholesaleController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -143,6 +149,19 @@ Route::post('/checkout', [CheckoutController::class, 'store'])
 Route::get('/checkout/success', [CheckoutController::class, 'success'])
     ->name('checkout.success');
 
+/* 
+|--------------------------------------------------------------------------
+| Wholesale
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/wholesale', [WholesaleController::class, 'show'])
+    ->name('wholesale.show');
+
+Route::post('/wholesale/apply', [WholesaleController::class, 'apply'])
+    ->middleware(['auth', 'customer'])
+    ->name('wholesale.apply');
+
 /*
 |--------------------------------------------------------------------------
 | Online payment callbacks
@@ -166,6 +185,7 @@ Route::middleware('guest')->group(function () {
         ->name('login');
 
     Route::post('/login', [AuthController::class, 'login'])
+        ->middleware('throttle:login')
         ->name('login.store');
 
     Route::get('/register', [AuthController::class, 'showRegister'])
@@ -211,6 +231,21 @@ Route::prefix('admin')
 
         Route::resource('products', AdminProductController::class)
             ->except(['show']);
+        Route::get('products/{product}/media', [AdminProductMediaController::class, 'index'])
+            ->name('products.media.index');
+
+        Route::post('products/{product}/media', [AdminProductMediaController::class, 'store'])
+            ->name('products.media.store');
+
+        Route::patch('products/{product}/media/{media}', [AdminProductMediaController::class, 'update'])
+            ->name('products.media.update');
+
+        Route::post('products/{product}/media/reorder', [AdminProductMediaController::class, 'reorder'])
+            ->name('products.media.reorder');
+
+        Route::delete('products/{product}/media/{media}', [AdminProductMediaController::class, 'destroy'])
+            ->name('products.media.destroy');
+
 
         Route::resource('products.variants', AdminProductVariantController::class)
             ->except(['show']);
@@ -230,6 +265,42 @@ Route::prefix('admin')
         Route::get('customers', [AdminCustomerController::class, 'index'])
             ->name('customers.index');
 
+        Route::get('wholesale', [AdminWholesaleController::class, 'index'])
+            ->name('wholesale.index');
+
+        Route::resource('wholesale-packs', AdminWholesalePackController::class)
+            ->except(['show']);
+
+        Route::patch(
+            'customers/{customer}/wholesale/approve',
+            [AdminWholesaleController::class, 'approve']
+        )->name('customers.wholesale.approve');
+
+        Route::patch(
+            'customers/{customer}/wholesale/reject',
+            [AdminWholesaleController::class, 'reject']
+        )->name('customers.wholesale.reject');
+
+        Route::patch(
+            'customers/{customer}/wholesale/terms',
+            [AdminWholesaleController::class, 'updateTerms']
+        )->name('customers.wholesale.terms');
+
+        Route::patch(
+            'customers/{customer}/wholesale/suspend',
+            [AdminWholesaleController::class, 'suspend']
+        )->name('customers.wholesale.suspend');
+
+        Route::patch(
+            'customers/{customer}/cheque/enable',
+            [AdminWholesaleController::class, 'enableCheque']
+        )->name('customers.cheque.enable');
+
+        Route::patch(
+            'customers/{customer}/cheque/disable',
+            [AdminWholesaleController::class, 'disableCheque']
+        )->name('customers.cheque.disable');
+
         /*
         |--------------------------------------------------------------------------
         | Orders
@@ -245,6 +316,39 @@ Route::prefix('admin')
         Route::put('orders/{order}', [AdminOrderController::class, 'update'])
             ->name('orders.update');
 
+        Route::get('cheques', [AdminChequeController::class, 'index'])
+            ->name('cheques.index');
+
+        Route::patch(
+            'cheques/{chequePayment}/review',
+            [AdminChequeController::class, 'review']
+        )->name('cheques.review');
+
+        Route::patch(
+            'cheques/{chequePayment}/accept',
+            [AdminChequeController::class, 'accept']
+        )->name('cheques.accept');
+
+        Route::patch(
+            'cheques/{chequePayment}/reject',
+            [AdminChequeController::class, 'reject']
+        )->name('cheques.reject');
+
+        Route::patch(
+            'cheques/{chequePayment}/deposit',
+            [AdminChequeController::class, 'deposit']
+        )->name('cheques.deposit');
+
+        Route::patch(
+            'cheques/{chequePayment}/clear',
+            [AdminChequeController::class, 'clear']
+        )->name('cheques.clear');
+
+        Route::patch(
+            'cheques/{chequePayment}/bounce',
+            [AdminChequeController::class, 'bounce']
+        )->name('cheques.bounce');
+
         /*
         |--------------------------------------------------------------------------
         | Inventory
@@ -253,6 +357,9 @@ Route::prefix('admin')
 
         Route::get('inventory', [AdminInventoryController::class, 'index'])
             ->name('inventory.index');
+
+        Route::get('nila', [AdminNilaController::class, 'index'])
+            ->name('nila.index');
 
         Route::post('inventory', [AdminInventoryController::class, 'store'])
             ->name('inventory.store');

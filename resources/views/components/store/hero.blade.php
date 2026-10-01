@@ -3,248 +3,105 @@
     $slideCount = count($slides);
 @endphp
 
+@if(!app()->environment('testing'))
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/Draggable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/Flip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+@endif
+
 <section
-    class="editorial-hero"
-    id="editorialHero"
-    data-editorial-hero
-    data-autoplay="6500"
-    aria-label="کالکشن منتخب جانان"
+    class="immersive-grid-hero"
+    id="immersiveGridHero"
+    data-immersive-gallery
+    aria-label="گالری تعاملی کالکشن جانان"
 >
-    <div class="editorial-hero__ambient" aria-hidden="true">
-        <span class="editorial-hero__orb editorial-hero__orb--sky"></span>
-        <span class="editorial-hero__orb editorial-hero__orb--pink"></span>
-        <span class="editorial-hero__grid"></span>
+    <div class="immersive-preloader" id="immersivePreloader" aria-hidden="true"></div>
+
+
+    <div class="immersive-vignette" aria-hidden="true"></div>
+
+    <div class="immersive-viewport" id="immersiveViewport">
+        <div class="immersive-canvas-wrapper" id="immersiveCanvasWrapper">
+            <div class="immersive-grid-container" id="immersiveGridContainer"></div>
+        </div>
     </div>
 
-    <div class="editorial-hero__container">
-
-        {{-- Editorial copy --}}
-        <div class="editorial-hero__copy">
-
-            <div class="editorial-hero__copy-top">
-                <span
-                    class="editorial-hero__eyebrow"
-                    data-hero-eyebrow
-                >
-                    NEW COLLECTION
-                </span>
-
-                <span class="editorial-hero__season">
-                    JANAN / 2026
-                </span>
-            </div>
-
-            <div class="editorial-hero__heading-wrap">
-                <span class="editorial-hero__micro-label">
-                    THE NEW JANAN EDIT
-                </span>
-
-                <h1 data-hero-heading>
-                    کالکشن منتخب جانان
-                </h1>
-            </div>
-
-            <p
-                class="editorial-hero__description"
-                data-hero-description
-            >
-                کالکشنی برای استایل روزمره؛ ظریف، راحت و با جزئیاتی که حس بهتری می‌سازند.
-            </p>
-
-            <div class="editorial-hero__actions">
-
-                <a
-                    href="{{ route('products.index') }}"
-                    class="editorial-hero__button"
-                    data-hero-button
-                >
-                    <span data-hero-button-text>
-                        مشاهده کالکشن
-                    </span>
-
-                    <span
-                        class="editorial-hero__button-icon"
-                        aria-hidden="true"
-                    >
-                        ↗
-                    </span>
-                </a>
-
-                <div class="editorial-hero__counter">
-                    <strong data-hero-current>01</strong>
-
-                    <span></span>
-
-                    <small data-hero-total>
-                        {{ str_pad((string) max(1, $slideCount), 2, '0', STR_PAD_LEFT) }}
-                    </small>
-                </div>
-
-            </div>
-
-            <div class="editorial-hero__caption">
-                <span>SELECTED FOR YOU</span>
-                <i></i>
-                <span>JANAN STORE</span>
-            </div>
-
+    <div class="immersive-split-screen" id="immersiveSplitScreen">
+        <div class="immersive-split-screen__left" id="immersiveSplitLeft">
+            <div class="immersive-zoom-target" id="immersiveZoomTarget"></div>
         </div>
 
-
-        {{-- Product stage --}}
-        <div class="editorial-hero__stage">
-
-            <div
-                class="editorial-hero__stage-glow"
-                aria-hidden="true"
-            ></div>
-
-            <div
-                class="editorial-hero__stage-line editorial-hero__stage-line--one"
-                aria-hidden="true"
-            ></div>
-
-            <div
-                class="editorial-hero__stage-line editorial-hero__stage-line--two"
-                aria-hidden="true"
-            ></div>
-
-
-            @php
-                $initialSlots = [0, 1, 2, 3, 4];
-            @endphp
-
-            @foreach($initialSlots as $slot)
-                @php
-                    $slideIndex = match ($slot) {
-                        0 => $slideCount > 0
-                            ? (($slideCount - 1) % $slideCount)
-                            : 0,
-
-                        1 => $slideCount > 0
-                            ? (2 % $slideCount)
-                            : 0,
-
-                        2 => 0,
-
-                        3 => $slideCount > 0
-                            ? (1 % $slideCount)
-                            : 0,
-
-                        default => 0,
-                    };
-
-                    $slide = $slides[$slideIndex] ?? null;
-                @endphp
-
-                <article
-                    class="
-                        editorial-hero__card
-                        editorial-hero__card--slot-{{ $slot }}
-                    {{ $slot === 4 ? 'is-hero' : '' }}
-                        "
-                    data-hero-card
-                    data-hero-slot="{{ $slot }}"
-                    data-slide-index="{{ $slideIndex }}"
-                    aria-hidden="{{ $slot === 4 ? 'false' : 'true' }}"
-                >
-
-                    <div class="editorial-hero__card-media">
-
-                        @if(!empty($slide['image'] ?? null))
-
-                            <picture>
-                                <source
-                                    data-card-mobile-source
-                                >
-
-                                <img
-                                    data-card-image
-                                    src="{{ $slide['image'] }}"
-                                    alt="{{ $slide['title'] ?? 'محصول جانان' }}"
-                                    loading="{{ $slot === 4 ? 'eager' : 'lazy' }}"
-                                    fetchpriority="{{ $slot === 4 ? 'high' : 'low' }}"
-                                    decoding="async"
-                                    draggable="false"
-                                >
-                            </picture>
-
-                        @else
-
-                            <div class="editorial-hero__placeholder">
-                                <span>JANAN</span>
-                            </div>
-
-                        @endif
-
-                    </div>
-
-
-                    <div
-                        class="editorial-hero__card-shade"
-                        aria-hidden="true"
-                    ></div>
-
-
-                    <div class="editorial-hero__card-content">
-
-                        <span class="editorial-hero__card-label">
-                            JANAN COLLECTION
-                        </span>
-
-                        <h2 data-card-title>
-                            {{ $slide['title'] ?? 'کالکشن منتخب' }}
-                        </h2>
-
-                        <span class="editorial-hero__card-brand">
-                            {{ $slide['brand'] ?? 'JANAN' }}
-                        </span>
-
-                    </div>
-
-                </article>
-            @endforeach
-
-
-            {{-- Stage details --}}
-            <div
-                class="editorial-hero__stage-meta"
-                aria-hidden="true"
-            >
-                <span>01</span>
-                <i></i>
-                {{ str_pad((string) max(1, $slideCount), 2, '0', STR_PAD_LEFT) }}
-            </div>
-
-
-            <div class="editorial-hero__controls">
-
-                <button
-                    type="button"
-                    class="editorial-hero__control"
-                    data-hero-prev
-                    aria-label="محصول قبلی"
-                >
-                    <span>←</span>
-                </button>
-
-                <button
-                    type="button"
-                    class="editorial-hero__control"
-                    data-hero-next
-                    aria-label="محصول بعدی"
-                >
-                    <span>→</span>
-                </button>
-
-            </div>
-
-        </div>
-
+        <div class="immersive-split-screen__right" id="immersiveSplitRight"></div>
     </div>
 
+    <div class="immersive-title-overlay" id="immersiveTitleOverlay">
+        <div class="immersive-title-overlay__number">
+            <span id="immersiveSlideNumber">01</span>
+        </div>
+        <div class="immersive-title-overlay__title">
+            <h1 id="immersiveSlideTitle">کالکشن منتخب جانان</h1>
+        </div>
+        <div class="immersive-title-overlay__description" id="immersiveSlideDescription"></div>
+        <a
+            class="immersive-title-overlay__link"
+            id="immersiveSlideLink"
+            href="{{ route('products.index') }}"
+        >
+            <span>View product</span>
+            <span aria-hidden="true">↗</span>
+        </a>
+    </div>
 
-    <script type="application/json" data-hero-data>
+    <button
+        type="button"
+        class="immersive-close-button"
+        id="immersiveCloseButton"
+        aria-label="بستن نمای محصول"
+    >
+        <svg width="64" height="64" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M7.89873 16L6.35949 14.48L11.8278 9.08H0V6.92H11.8278L6.35949 1.52L7.89873 0L16 8L7.89873 16Z" fill="white"/>
+        </svg>
+    </button>
+
+    <div class="immersive-controls" id="immersiveControls">
+        <div class="immersive-percentage" id="immersivePercentage">60%</div>
+
+        <div class="immersive-switch" id="immersiveSwitch">
+            <button type="button" class="immersive-switch__button immersive-switch__button--current" data-zoom="0.3">
+                <span></span>
+                ZOOM OUT
+            </button>
+            <button type="button" class="immersive-switch__button immersive-switch__button--current-false" data-zoom="0.6">
+                <span></span>
+                NORMAL
+            </button>
+            <button type="button" class="immersive-switch__button" data-zoom="1">
+                <span></span>
+                ZOOM IN
+            </button>
+            <button type="button" class="immersive-switch__button" data-fit="1">
+                <span></span>
+                FIT
+            </button>
+        </div>
+
+        <button type="button" class="immersive-sound-toggle" id="immersiveSoundToggle" aria-label="Toggle sound" aria-pressed="false">
+            <canvas id="immersiveSoundCanvas" width="32" height="16"></canvas>
+        </button>
+    </div>
+
+    <footer class="immersive-footer">
+        <div class="immersive-footer__info">
+            <p>Est. 2026 · Janan Collection</p>
+            <p>{{ config('app.url') ? parse_url(config('app.url'), PHP_URL_HOST) : 'JANAN' }}</p>
+        </div>
+        <div class="immersive-footer__counter">
+            <span>Interactive Product Grid</span>
+        </div>
+    </footer>
+
+    <script type="application/json" id="immersiveHeroData">
         @json($slides)
     </script>
 </section>

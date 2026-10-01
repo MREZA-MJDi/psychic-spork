@@ -86,6 +86,110 @@
 
 
     {{-- =====================================================
+        DOUBLE ENTRY FOUNDATION
+    ====================================================== --}}
+
+    <div class="admin-dashboard-grid admin-dashboard-grid--equal">
+
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <div>
+                    <h2 class="admin-card-title">دفتر کل</h2>
+                    <p class="admin-card-description">
+                        مانده‌های ثبت‌شده در سیستم دوطرفه حسابداری
+                    </p>
+                </div>
+            </div>
+
+            @if(($ledgerSummary ?? collect())->isNotEmpty())
+                <div class="admin-table-wrap">
+                    <table class="admin-table">
+                        <thead>
+                        <tr>
+                            <th>حساب</th>
+                            <th>بدهکار</th>
+                            <th>بستانکار</th>
+                            <th>خالص</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        @foreach($ledgerSummary as $account)
+                            @php
+                                $debit = (float) $account->debit;
+                                $credit = (float) $account->credit;
+                            @endphp
+                            <tr>
+                                <td>
+                                    <strong>{{ $account->name }}</strong>
+                                    <div class="admin-muted">{{ $account->code }}</div>
+                                </td>
+                                <td>{{ number_format($debit) }} تومان</td>
+                                <td>{{ number_format($credit) }} تومان</td>
+                                <td>{{ number_format($debit - $credit) }} تومان</td>
+                            </tr>
+                        @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @else
+                <div class="admin-empty">
+                    <h3 class="admin-empty__title">هنوز سند دوطرفه‌ای ثبت نشده است</h3>
+                    <p class="admin-empty__text">
+                        با ثبت پرداخت یا بازپرداخت، سند حسابداری در دفتر کل ظاهر می‌شود.
+                    </p>
+                </div>
+            @endif
+        </div>
+
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <div>
+                    <h2 class="admin-card-title">آخرین اسناد حسابداری</h2>
+                    <p class="admin-card-description">سندهای ثبت‌شده از پرداخت‌ها و بازپرداخت‌ها</p>
+                </div>
+            </div>
+
+            @forelse(($journalEntries ?? collect()) as $entry)
+                <article style="padding:16px 0;border-bottom:1px solid var(--admin-border,#e5e7eb);">
+                    <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+                        <strong>{{ $entry->entry_number }}</strong>
+                        <span class="admin-muted">{{ optional($entry->entry_date)->format('Y/m/d') }}</span>
+                    </div>
+                    <p class="admin-muted" style="margin:7px 0;">
+                        {{ $entry->description ?: 'بدون شرح' }}
+                    </p>
+                    @foreach($entry->lines as $line)
+                        <div style="display:flex;justify-content:space-between;gap:12px;font-size:.9rem;">
+                            <span>{{ $line->account?->name ?? 'حساب' }}</span>
+                            <span>
+                                @if((float) $line->debit > 0)
+                                    بدهکار {{ number_format((float) $line->debit) }}
+                                @else
+                                    بستانکار {{ number_format((float) $line->credit) }}
+                                @endif
+                                تومان
+                            </span>
+                        </div>
+                    @endforeach
+                </article>
+            @empty
+                <div class="admin-empty">
+                    <h3 class="admin-empty__title">سندی وجود ندارد</h3>
+                </div>
+            @endforelse
+
+            <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--admin-border,#e5e7eb);">
+                <small class="admin-muted">
+                    تراکنش‌های دستی قدیمی همچنان در دفتر تراکنش مالی نگهداری می‌شوند؛
+                    سندهای فروش و بازپرداخت از اینجا از Ledger خوانده می‌شوند.
+                </small>
+            </div>
+        </div>
+
+    </div>
+
+
+        {{-- =====================================================
         FILTERS
     ====================================================== --}}
 

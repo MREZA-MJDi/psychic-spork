@@ -245,6 +245,41 @@
             </div>
 
 
+            {{-- WHOLESALE PRICE --}}
+
+            <div class="admin-field">
+
+                <label for="wholesale_price">
+                    قیمت عمده
+                </label>
+
+                <input
+                    id="wholesale_price"
+                    type="number"
+                    name="wholesale_price"
+                    min="0"
+                    step="1"
+                    value="{{ old('wholesale_price', $variant->wholesale_price) }}"
+                    inputmode="numeric"
+                    placeholder="اختیاری"
+                >
+
+                <small class="admin-help">
+                    فقط برای مشتریان عمده تأییدشده استفاده می‌شود.
+                </small>
+
+                @error('wholesale_price')
+                <small
+                    class="admin-help"
+                    style="color:var(--admin-danger);"
+                >
+                    {{ $message }}
+                </small>
+                @enderror
+
+            </div>
+
+
             {{-- SALE PRICE --}}
 
             <div class="admin-field">

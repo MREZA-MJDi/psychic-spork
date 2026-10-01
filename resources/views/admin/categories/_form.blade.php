@@ -257,180 +257,27 @@
 ========================================================= --}}
 
 <div class="admin-card admin-form-section">
-
     <div class="admin-card-header">
-
         <div>
-
-            <h2 class="admin-card-title">
-                تصویر دسته‌بندی
-            </h2>
-
-            <p class="admin-card-description">
-                تصویر مناسب برای نمایش دسته‌بندی انتخاب کنید.
-            </p>
-
+            <h2 class="admin-card-title">تصویر دسته‌بندی</h2>
+            <p class="admin-card-description">تصویر را انتخاب کن و کادر دقیق نمایش آن را قبل از ذخیره تنظیم کن.</p>
         </div>
-
     </div>
-
-
     <div class="admin-card-body">
-
-        {{-- CURRENT IMAGE --}}
-
-        @if($cover?->url)
-
-            <div
-                class="admin-current-image"
-                id="category-current-image"
-            >
-
-                <img
-                    src="{{ $cover->url }}"
-                    alt="{{ $category->name }}"
-                >
-
-                <div>
-
-                    <strong>
-                        تصویر فعلی
-                    </strong>
-
-                    <p class="admin-muted">
-                        با انتخاب تصویر جدید، تصویر فعلی جایگزین می‌شود.
-                    </p>
-
-                </div>
-
-            </div>
-
-        @endif
-
-
-        {{-- NEW IMAGE PREVIEW --}}
-
-        <div
-            class="admin-current-image"
-            id="category-image-preview"
-            hidden
-            style="margin-bottom:16px;"
-        >
-
-            <img
-                id="category-image-preview-image"
-                src=""
-                alt="پیش‌نمایش تصویر دسته‌بندی"
-            >
-
-            <div>
-
-                <strong>
-                    پیش‌نمایش تصویر جدید
-                </strong>
-
-                <p class="admin-muted">
-                    این تصویر قبل از ذخیره فقط برای پیش‌نمایش است.
-                </p>
-
-            </div>
-
-        </div>
-
-
-        {{-- FILE INPUT --}}
-
-        <div class="admin-field">
-
-            <label for="image_file">
-                انتخاب تصویر
-            </label>
-
-            <input
-                id="image_file"
-                type="file"
-                name="image_file"
-                accept="image/jpeg,image/png,image/webp"
-            >
-
-            <small class="admin-help">
-                JPG، PNG یا WebP — حداکثر ۲ مگابایت
-            </small>
-
-            @error('image_file')
-            <small class="admin-help" style="color:var(--admin-danger);">
-                {{ $message }}
-            </small>
-            @enderror
-
-        </div>
-
+        @include('admin.components.media-picker', [
+            'name' => 'image_file',
+            'id' => 'image_file',
+            'label' => 'انتخاب تصویر',
+            'help' => 'عکس را بکش و زوم کن تا دقیقاً همان قسمت موردنظر در فروشگاه نمایش داده شود.',
+            'currentUrl' => $cover?->url,
+            'currentAlt' => $category->name,
+            'ratio' => '4:5',
+        ])
+        @error('image_file')
+            <small class="admin-help" style="color:var(--admin-danger);">{{ $message }}</small>
+        @enderror
     </div>
-
 </div>
-
-
-    @php
-        $categoryMetaTitle = old(
-            'meta_title',
-            $category?->meta_title ?: (
-                filled($category?->name)
-                    ? $category->name . ' | Janan'
-                    : ''
-            )
-        );
-
-        $categoryMetaDescription = old(
-            'meta_description',
-            $category?->meta_description ?: (
-                $category?->description
-                    ?: 'مشاهده محصولات مرتبط با ' . ($category?->name ?: 'این دسته‌بندی') . ' در فروشگاه جانان.'
-            )
-        );
-    @endphp
-
-    <section class="admin-card admin-form-section admin-form-section-full">
-        <div class="admin-card-header">
-            <div>
-                <h2 class="admin-card-title">نمایش دسته‌بندی در گوگل</h2>
-                <p class="admin-card-description">
-                    اگر این دو فیلد را خالی بگذاری، مقدار پیشنهادی بر اساس نام و توضیحات دسته‌بندی استفاده می‌شود.
-                </p>
-            </div>
-        </div>
-
-        <div class="admin-form-grid">
-            <div class="admin-field admin-field-full">
-                <label for="meta_title">عنوان SEO</label>
-                <input
-                    id="meta_title"
-                    type="text"
-                    name="meta_title"
-                    maxlength="180"
-                    value="{{ $categoryMetaTitle }}"
-                    placeholder="مثلاً مراقبت از پوست | Janan"
-                >
-                <small class="admin-help">
-                    عنوانی که برای صفحه این دسته در عنوان مرورگر و نتیجه جستجو استفاده می‌شود.
-                </small>
-            </div>
-
-            <div class="admin-field admin-field-full">
-                <label for="meta_description">توضیحات SEO</label>
-                <textarea
-                    id="meta_description"
-                    name="meta_description"
-                    rows="4"
-                    maxlength="320"
-                    placeholder="توضیح کوتاه و روشن درباره محتوای این دسته..."
-                >{{ $categoryMetaDescription }}</textarea>
-                <small class="admin-help">
-                    توضیح کوتاهی که کاربر قبل از ورود به صفحه دسته‌بندی می‌تواند در نتایج جستجو ببیند.
-                </small>
-            </div>
-        </div>
-    </section>
-
 
 
 {{-- =========================================================

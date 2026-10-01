@@ -3,12 +3,18 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Brand;
+use App\Models\Category;
+use App\Models\ChequePayment;
 use App\Models\ContactMessage;
 use App\Models\FinancialTransaction;
+use App\Models\IntegrationMapping;
+use App\Models\JournalLine;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\User;
+use App\Models\WholesaleProfile;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -46,13 +52,41 @@ class AdminDashboardController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | Financial summary
+        | Accounting summary
+        |
+        | The dashboard reads recognized revenue and settled cash/bank
+        | from the double-entry ledger. Legacy manual expenses remain
+        | visible until the manual-expense posting path is migrated.
         |--------------------------------------------------------------------------
         */
 
-        $revenue = (float) (clone $baseOrders)
-            ->where('payment_status', 'paid')
-            ->sum('total');
+        $ledgerLines = JournalLine::query()
+            ->with('account')
+            ->whereHas('entry', function ($query) use ($from, $to): void {
+                $query
+                    ->whereDate('entry_date', '>=', $from->toDateString())
+                    ->whereDate('entry_date', '<=', $to->toDateString());
+            });
+
+        $revenue = (float) (clone $ledgerLines)
+            ->whereHas('account', fn ($query) => $query->where('code', 'sales'))
+            ->sum('credit');
+
+        $salesReturns = (float) (clone $ledgerLines)
+            ->whereHas('account', fn ($query) => $query->where('code', 'sales_returns'))
+            ->sum('debit');
+
+        $revenue = max(0, $revenue - $salesReturns);
+
+        $settledFundsIn = (float) (clone $ledgerLines)
+            ->whereHas('account', fn ($query) => $query->whereIn('code', ['cash', 'bank']))
+            ->sum('debit');
+
+        $settledFundsOut = (float) (clone $ledgerLines)
+            ->whereHas('account', fn ($query) => $query->whereIn('code', ['cash', 'bank']))
+            ->sum('credit');
+
+        $settledFunds = $settledFundsIn - $settledFundsOut;
 
         $expenses = (float) FinancialTransaction::query()
             ->where('type', 'expense')
@@ -61,6 +95,8 @@ class AdminDashboardController extends Controller
                 $to->toDateString(),
             ])
             ->sum('amount');
+
+        $netCash = $settledFunds - $expenses;
 
 
         /*
@@ -208,6 +244,60 @@ class AdminDashboardController extends Controller
             ->unread()
             ->count();
 
+        /*
+        |--------------------------------------------------------------------------
+        | Catalog control metrics
+        |--------------------------------------------------------------------------
+        */
+
+        $catalogProducts = Product::query()->count();
+        $catalogBrands = Brand::query()->count();
+        $catalogCategories = Category::query()->count();
+        $catalogVariants = ProductVariant::query()->where('is_active', true)->count();
+        $catalogWholesalePricedVariants = ProductVariant::query()
+            ->where('is_active', true)
+            ->whereNotNull('wholesale_price')
+            ->count();
+
+        /*
+        |--------------------------------------------------------------------------
+        | Management queues
+        |--------------------------------------------------------------------------
+        */
+
+        $chequesAwaitingReview = ChequePayment::query()
+            ->whereIn('status', ['submitted', 'under_review'])
+            ->count();
+
+        $chequesAwaitingReviewAmount = (float) ChequePayment::query()
+            ->whereIn('status', ['submitted', 'under_review'])
+            ->sum('amount');
+
+        $pendingWholesaleApplications = WholesaleProfile::query()
+            ->where('status', 'pending')
+            ->count();
+
+        /*
+        |--------------------------------------------------------------------------
+        | Nila mapping metrics
+        |--------------------------------------------------------------------------
+        */
+
+        $nilaMappings = IntegrationMapping::query()
+            ->where('integration', 'nila');
+
+        $nilaProductMappings = (clone $nilaMappings)
+            ->where('entity_type', Product::class)
+            ->count();
+
+        $nilaVariantMappings = (clone $nilaMappings)
+            ->where('entity_type', ProductVariant::class)
+            ->count();
+
+        $nilaLastMappedAt = (clone $nilaMappings)
+            ->latest('updated_at')
+            ->value('updated_at');
+
 
         /*
         |--------------------------------------------------------------------------
@@ -257,27 +347,29 @@ class AdminDashboardController extends Controller
         | so cancelled/returned orders are handled correctly.
         |--------------------------------------------------------------------------
         */
+        $topProductSalesFilter = function ($query) use ($from, $to) {
+            $query->whereHas('order', function ($orderQuery) use ($from, $to) {
+                $orderQuery
+                    ->whereBetween('placed_at', [$from, $to])
+                    ->whereNotIn(
+                        'status',
+                        Order::CANCEL_LIKE_STATUSES
+                    )
+                    ->where('payment_status', 'paid');
+            });
+        };
+
         $topProducts = Product::query()
             ->with([
                 'category:id,name',
             ])
+            ->whereHas('orderItems', $topProductSalesFilter)
             ->withSum(
                 [
-                    'orderItems as sales_quantity' => function ($query) use ($from, $to) {
-                        $query->whereHas('order', function ($orderQuery) use ($from, $to) {
-                            $orderQuery
-                                ->whereBetween('placed_at', [$from, $to])
-                                ->whereNotIn(
-                                    'status',
-                                    Order::CANCEL_LIKE_STATUSES
-                                )
-                                ->where('payment_status', 'paid');
-                        });
-                    },
+                    'orderItems as sales_quantity' => $topProductSalesFilter,
                 ],
                 'quantity'
             )
-            ->having('sales_quantity', '>', 0)
             ->orderByDesc('sales_quantity')
             ->orderBy('id')
             ->limit(6)
@@ -316,7 +408,11 @@ class AdminDashboardController extends Controller
 
                 'expenses' => $expenses,
 
-                'netCash' => $revenue - $expenses,
+                'netCash' => $netCash,
+
+                'settledFunds' => $settledFunds,
+
+                'salesReturns' => $salesReturns,
 
                 'paidOrdersCount' => $paidOrdersCount,
 
@@ -327,6 +423,20 @@ class AdminDashboardController extends Controller
                 'customers' => $customers,
 
                 'unreadContactMessages' => $unreadContactMessages,
+
+                'catalogProducts' => $catalogProducts,
+                'catalogBrands' => $catalogBrands,
+                'catalogCategories' => $catalogCategories,
+                'catalogVariants' => $catalogVariants,
+                'catalogWholesalePricedVariants' => $catalogWholesalePricedVariants,
+
+                'chequesAwaitingReview' => $chequesAwaitingReview,
+                'chequesAwaitingReviewAmount' => $chequesAwaitingReviewAmount,
+                'pendingWholesaleApplications' => $pendingWholesaleApplications,
+
+                'nilaProductMappings' => $nilaProductMappings,
+                'nilaVariantMappings' => $nilaVariantMappings,
+                'nilaLastMappedAt' => $nilaLastMappedAt,
 
                 'lowStock' => $lowStock,
 

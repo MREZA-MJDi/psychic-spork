@@ -46,7 +46,7 @@ class AccessAndCheckoutTest extends TestCase
 
         $this->actingAs($admin)
             ->get('/account')
-            ->assertRedirect('/admin');
+            ->assertForbidden();
     }
 
     public function test_checkout_creates_pending_order_payment_and_redirects_to_gateway(): void
@@ -249,6 +249,64 @@ class AccessAndCheckoutTest extends TestCase
         $this->assertSame(3, $variant->fresh()->stock);
         $this->assertDatabaseCount('cart_items', 0);
         $this->assertDatabaseCount('financial_transactions', 1);
+    }
+
+
+    public function test_checkout_cannot_oversell_the_same_variant_across_two_carts(): void
+    {
+        Config::set('payment.driver', 'zarinpal');
+        Config::set('payment.zarinpal.merchant_id', 'test-merchant');
+
+        Http::fake([
+            'https://api.zarinpal.com/pg/v4/payment/request.json' =>
+                Http::response([
+                    'data' => [
+                        'code' => 100,
+                        'authority' => 'A000000000000000000000000003',
+                    ],
+                    'errors' => [],
+                ], 200),
+        ]);
+
+        $firstUser = User::factory()->create();
+        $secondUser = User::factory()->create();
+
+        [, $variant] = $this->makeProduct(stock: 1);
+
+        foreach ([$firstUser, $secondUser] as $user) {
+            $cart = Cart::create([
+                'user_id' => $user->id,
+                'last_activity_at' => now(),
+            ]);
+
+            CartItem::create([
+                'cart_id' => $cart->id,
+                'product_variant_id' => $variant->id,
+                'quantity' => 1,
+            ]);
+        }
+
+        $this->actingAs($firstUser)
+            ->post('/checkout', [
+                'customer_name' => 'کاربر اول',
+                'customer_phone' => '09120000001',
+                'customer_email' => 'first@example.com',
+                'shipping_address' => 'تهران',
+            ])
+            ->assertRedirect();
+
+        $this->actingAs($secondUser)
+            ->post('/checkout', [
+                'customer_name' => 'کاربر دوم',
+                'customer_phone' => '09120000002',
+                'customer_email' => 'second@example.com',
+                'shipping_address' => 'تهران',
+            ])
+            ->assertRedirect()
+            ->assertSessionHas('error');
+
+        $this->assertDatabaseCount('orders', 1);
+        $this->assertSame(0, $variant->fresh()->stock);
     }
 
     private function makeProduct(int $stock): array

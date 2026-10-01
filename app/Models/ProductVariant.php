@@ -13,7 +13,7 @@ class ProductVariant extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'product_id','sku','size','color','color_code','price','sale_price','stock',
+        'product_id','sku','size','color','color_code','price','sale_price','wholesale_price','stock',
         'low_stock_threshold','is_active','sort_order',
     ];
 
@@ -22,6 +22,7 @@ class ProductVariant extends Model
         return [
             'price' => 'decimal:2',
             'sale_price' => 'decimal:2',
+            'wholesale_price' => 'decimal:2',
             'stock' => 'integer',
             'low_stock_threshold' => 'integer',
             'is_active' => 'boolean',
@@ -33,6 +34,7 @@ class ProductVariant extends Model
     public function cartItems(): HasMany { return $this->hasMany(CartItem::class); }
     public function orderItems(): HasMany { return $this->hasMany(OrderItem::class); }
     public function inventoryMovements(): HasMany { return $this->hasMany(InventoryMovement::class); }
+    public function wholesalePackItems(): HasMany { return $this->hasMany(WholesalePackItem::class); }
 
     public function getEffectivePriceAttribute(): float
     {

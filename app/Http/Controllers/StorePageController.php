@@ -40,8 +40,24 @@ class StorePageController extends Controller
             'cta_text' => 'محصولی که دنبالش هستی را پیدا کن یا مستقیم با تیم جانان در ارتباط باش.',
         ];
 
+        $settingKeys = collect(array_keys($defaults))
+            ->map(fn ($key) => "about.{$key}")
+            ->push(
+                'contact.phone',
+                'contact.email',
+                'contact.address',
+                'contact.working_hours',
+            )
+            ->all();
+
+        $settings = SiteSetting::query()
+            ->whereIn('key', $settingKeys)
+            ->pluck('value', 'key');
+
         $about = collect($defaults)
-            ->mapWithKeys(fn ($default, $key) => [$key => SiteSetting::getValue("about.{$key}", $default)])
+            ->mapWithKeys(fn ($default, $key) => [
+                $key => $settings->get("about.{$key}", $default),
+            ])
             ->all();
 
         return view('pages.about', [
@@ -57,24 +73,18 @@ class StorePageController extends Controller
                 'categories' => Category::query()->active()->count(),
                 'brands' => Brand::query()->active()->count(),
             ],
+            'contactStore' => [
+                'phone' => $settings->get('contact.phone', env('JANAN_STORE_PHONE')),
+                'email' => $settings->get('contact.email', env('JANAN_STORE_EMAIL')),
+                'address' => $settings->get('contact.address', env('JANAN_STORE_ADDRESS')),
+                'working_hours' => $settings->get('contact.working_hours', env('JANAN_STORE_WORKING_HOURS')),
+            ],
         ]);
     }
 
-    public function contact(SeoService $seo): View
+    public function contact(): RedirectResponse
     {
-        return view('pages.contact', [
-            'seo' => $seo->page(
-                'تماس با جانان — ' . config('app.store_name', 'Janan'),
-                'راه‌های ارتباط با فروشگاه و ارسال پیام به پشتیبانی جانان.',
-                route('contact')
-            ),
-            'contactStore' => [
-                'phone' => SiteSetting::getValue('contact.phone', env('JANAN_STORE_PHONE')),
-                'email' => SiteSetting::getValue('contact.email', env('JANAN_STORE_EMAIL')),
-                'address' => SiteSetting::getValue('contact.address', env('JANAN_STORE_ADDRESS')),
-                'working_hours' => SiteSetting::getValue('contact.working_hours', env('JANAN_STORE_WORKING_HOURS')),
-            ],
-        ]);
+        return redirect()->to(route('about') . '#contact');
     }
 
     public function submitContact(Request $request): RedirectResponse
@@ -93,11 +103,14 @@ class StorePageController extends Controller
                 'status' => ContactMessage::STATUS_NEW,
             ]);
 
-            return back()->with('success', 'پیامت با موفقیت ثبت شد. تیم جانان بعد از بررسی با تو در ارتباط می‌شود.');
+            return redirect()
+                ->to(route('about') . '#contact')
+                ->with('success', 'پیامت با موفقیت ثبت شد. تیم جانان بعد از بررسی با تو در ارتباط می‌شود.');
         } catch (Throwable $e) {
             report($e);
 
-            return back()
+            return redirect()
+                ->to(route('about') . '#contact')
                 ->withInput()
                 ->with('error', 'ثبت پیام انجام نشد. لطفاً دوباره تلاش کن.');
         }

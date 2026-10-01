@@ -285,7 +285,15 @@
                             </th>
 
                             <th>
+                                برند
+                            </th>
+
+                            <th>
                                 دسته‌بندی
+                            </th>
+
+                            <th>
+                                واریانت / قیمت عمده
                             </th>
 
                             <th>
@@ -434,6 +442,17 @@
                                 </td>
 
 
+                                {{-- BRAND --}}
+
+                                <td>
+                                    @if($product->brand)
+                                        <span class="admin-product-name">{{ $product->brand->name }}</span>
+                                    @else
+                                        <span class="admin-muted">بدون برند</span>
+                                    @endif
+                                </td>
+
+
                                 {{-- CATEGORY --}}
 
                                 <td>
@@ -450,6 +469,22 @@
 
                                     @endif
 
+                                </td>
+
+
+                                {{-- VARIANTS / WHOLESALE PRICE --}}
+
+                                <td>
+                                    <div class="admin-price">
+                                        {{ number_format($product->variants->count()) }}
+                                        <span class="admin-muted">واریانت</span>
+                                    </div>
+                                    @php
+                                        $wholesaleCount = $product->variants->whereNotNull('wholesale_price')->count();
+                                    @endphp
+                                    <div class="admin-muted">
+                                        {{ number_format($wholesaleCount) }} قیمت عمده
+                                    </div>
                                 </td>
 
 

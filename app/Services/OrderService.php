@@ -15,6 +15,7 @@ final class OrderService
     public function __construct(
         private readonly PaymentService $payment,
         private readonly CartService $cart,
+        private readonly WholesalePricingService $wholesalePricing,
     ) {
     }
 
@@ -28,6 +29,14 @@ final class OrderService
             $customer,
             $user
         ): Order {
+            $orderType = $customer['order_type'] ?? 'retail';
+
+            abort_unless(
+                in_array($orderType, ['retail', 'wholesale'], true),
+                422,
+                'نوع سفارش نامعتبر است.'
+            );
+
             $cartItems = $cart->items()
                 ->with([
                     'productVariant.product.galleryMedia',
@@ -80,7 +89,8 @@ final class OrderService
 
                 'status' => 'pending',
                 'payment_status' => 'pending',
-                'payment_method' => 'cash_on_delivery',
+                'payment_method' => $customer['payment_method'] ?? 'online',
+                'order_type' => $orderType,
 
                 'subtotal' => 0,
                 'discount' => 0,
@@ -95,7 +105,7 @@ final class OrderService
             ]);
 
             $subtotal = 0;
-
+            $orderQuantity = 0;
             foreach ($cartItems as $cartItem) {
                 $variant = ProductVariant::query()
                     ->with([
@@ -126,8 +136,13 @@ final class OrderService
                     "موجودی «{$variant->product->name}» برای سفارش کافی نیست."
                 );
 
-                $unitPrice = (float) $variant->effective_price;
+                $unitPrice = $orderType === 'wholesale'
+                    ? $this->wholesalePricing->unitPrice($variant)
+                    : (float) $variant->effective_price;
+
                 $lineTotal = $unitPrice * $quantity;
+
+                $orderQuantity += $quantity;
 
                 abort_if(
                     $unitPrice < 0 || $lineTotal < 0,
@@ -165,6 +180,17 @@ final class OrderService
                 ]);
             }
 
+            // Wholesale orders are open for online checkout.
+            // Configured customer-specific minimums remain enforced transactionally.
+            if ($orderType === 'wholesale' && $user?->wholesaleProfile) {
+                $this->wholesalePricing->assertMinimums(
+                    $user->wholesaleProfile,
+                    $subtotal,
+                    $orderQuantity
+                );
+            }
+
+            // Cheque authorization is enforced only by ChequePaymentMethod.
             abort_if(
                 $subtotal <= 0,
                 422,
@@ -269,6 +295,18 @@ final class OrderService
             ]);
 
             if ($paymentStatus !== $oldPaymentStatus) {
+                abort_if(
+                    $paymentStatus === 'paid',
+                    422,
+                    'ثبت پرداخت موفق فقط از مسیر تأیید درگاه یا تسویه ابزار پرداخت انجام می‌شود.'
+                );
+
+                abort_if(
+                    $paymentStatus === 'refunded',
+                    422,
+                    'بازپرداخت باید از مسیر امن پرداخت انجام شود.'
+                );
+
                 $this->payment->matchStatus(
                     $order,
                     $paymentStatus

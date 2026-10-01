@@ -1,25 +1,40 @@
 document.addEventListener('DOMContentLoaded', () => {
     const sidebar = document.querySelector('[data-admin-sidebar]');
     const menu = document.querySelector('[data-admin-menu]');
+    const backdrop = document.querySelector('[data-admin-sidebar-backdrop]');
 
-    menu?.addEventListener('click', () => {
-        const isOpen = sidebar?.classList.toggle('is-open') ?? false;
-        menu.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    if (!sidebar || !menu) return;
+
+    const setOpen = (open) => {
+        sidebar.classList.toggle('is-open', open);
+        backdrop?.classList.toggle('is-open', open);
+        menu.setAttribute('aria-expanded', open ? 'true' : 'false');
+        document.body.classList.toggle('admin-nav-open', open && window.innerWidth <= 900);
+
+        if (open) {
+            sidebar.querySelector('a, button')?.focus({ preventScroll: true });
+        }
+    };
+
+    menu.addEventListener('click', () => {
+        setOpen(!sidebar.classList.contains('is-open'));
     });
 
-    sidebar?.querySelectorAll('a').forEach((link) => {
-        link.addEventListener('click', () => {
-            sidebar.classList.remove('is-open');
-            menu?.setAttribute('aria-expanded', 'false');
-        });
+    backdrop?.addEventListener('click', () => setOpen(false));
+
+    sidebar.querySelectorAll('a').forEach((link) => {
+        link.addEventListener('click', () => setOpen(false));
     });
 
-    document.addEventListener('click', (event) => {
-        if (window.innerWidth > 820) return;
-        if (!sidebar?.classList.contains('is-open')) return;
-        if (sidebar.contains(event.target) || menu?.contains(event.target)) return;
-        sidebar.classList.remove('is-open');
-        menu?.setAttribute('aria-expanded', 'false');
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && sidebar.classList.contains('is-open')) {
+            setOpen(false);
+            menu.focus({ preventScroll: true });
+        }
+    });
+
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 900) setOpen(false);
     });
 });
 
@@ -35,6 +50,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const preview = field.querySelector('[data-media-preview]');
         const fileName = field.querySelector('[data-media-file-name]');
         const ctx = canvas?.getContext('2d');
+        const ratioValue = field.dataset.mediaRatio || '1:1';
+        const [ratioW, ratioH] = ratioValue.split(':').map(Number);
+        const ratio = ratioW > 0 && ratioH > 0 ? ratioW / ratioH : 1;
+        const fitButton = field.querySelector('[data-media-fit]');
 
         if (!input || !editor || !canvas || !zoom || !apply || !ctx) return;
 
@@ -47,6 +66,13 @@ document.addEventListener('DOMContentLoaded', () => {
         let dragStartY = 0;
 
         const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+
+        const resizeCanvas = () => {
+            const max = 720;
+            if (ratio >= 1) { canvas.width = max; canvas.height = Math.round(max / ratio); }
+            else { canvas.height = max; canvas.width = Math.round(max * ratio); }
+        };
+        resizeCanvas();
 
         const draw = () => {
             if (!image) return;
@@ -85,6 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 zoom.value = '1';
                 draw();
                 editor.hidden = false;
+                field.classList.add('is-cropping');
                 fileName.textContent = name;
             };
 
@@ -176,23 +203,21 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 'image/webp', 0.88);
         });
 
+        fitButton?.addEventListener('click', () => { offsetX = 0; offsetY = 0; scale = 1; zoom.value = '1'; draw(); });
+
         const saveCropToPreview = async () => {
             if (!image) return;
 
             const saved = await replaceInputWithCrop();
             if (!saved) return;
 
-            let previewImage = preview.querySelector('[data-media-preview-image]');
-
-            if (!previewImage) {
-                previewImage = document.createElement('img');
-                previewImage.setAttribute('data-media-preview-image', '');
-                preview.appendChild(previewImage);
-            }
-
+            const previewImage = document.createElement('img');
+            previewImage.setAttribute('data-media-preview-image', '');
+            previewImage.alt = input.files[0].name || 'پیش‌نمایش تصویر';
             previewImage.src = URL.createObjectURL(input.files[0]);
-            preview.querySelector('.admin-media-field__empty')?.remove();
+            preview.replaceChildren(previewImage);
             fileName.textContent = input.files[0].name;
+            field.classList.remove('is-cropping');
             editor.hidden = true;
         };
 
@@ -200,6 +225,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         cancel?.addEventListener('click', () => {
             editor.hidden = true;
+            field.classList.remove('is-cropping');
             input.value = '';
         });
 
@@ -209,6 +235,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const saved = await replaceInputWithCrop();
                 if (saved) {
                     editor.hidden = true;
+                    field.classList.remove('is-cropping');
                     field.closest('form').requestSubmit();
                 }
             }
@@ -361,6 +388,10 @@ document.addEventListener('DOMContentLoaded', () => {
         'shipping_cost',
         'discount_amount',
         'total_amount',
+        'wholesale_price',
+        'max_order_amount',
+        'minimum_order_amount',
+        'amount_toman',
     ]);
 
     const faNumber = new Intl.NumberFormat('fa-IR');
@@ -403,7 +434,7 @@ document.addEventListener('DOMContentLoaded', () => {
         visible.autocomplete = 'off';
         visible.name = originalName + '_display';
         visible.value = formatMoney(input.value);
-        visible.placeholder = 'مثلاً ۱٬۵۰۰٬۰۰۰';
+        visible.placeholder = 'مثلاً ۱٬۵۰۰٬۰۰۰ تومان';
         visible.dir = 'ltr';
         visible.required = wasRequired;
 
@@ -634,3 +665,155 @@ document.addEventListener('DOMContentLoaded', () => {
         formatLocalDates();
     });
 })();
+
+
+/* =========================================================
+   PRODUCT MEDIA MANAGER
+========================================================= */
+
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('[data-product-media-manager]').forEach((manager) => {
+        const input = manager.querySelector('[data-media-upload-input]');
+        const dropzone = manager.querySelector('[data-media-dropzone]');
+        const preview = manager.querySelector('[data-media-upload-preview]');
+        const count = manager.querySelector('[data-media-upload-count]');
+        const submit = manager.querySelector('[data-media-upload-submit]');
+        const sortable = manager.querySelector('[data-media-sortable]');
+
+        const renderFiles = async (files) => {
+            if (!input || !preview || !submit) return;
+
+            preview.innerHTML = '';
+            const selected = [...files].slice(0, 12);
+            const accepted = [];
+
+            for (const file of selected) {
+                if (file.type.startsWith('video/')) {
+                    const url = URL.createObjectURL(file);
+                    const video = document.createElement('video');
+                    video.muted = true;
+                    video.playsInline = true;
+                    video.preload = 'metadata';
+                    video.src = url;
+
+                    await new Promise((resolve) => {
+                        video.onloadedmetadata = () => {
+                            if (video.duration <= 5.01) {
+                                accepted.push(file);
+                                video.controls = true;
+                                video.className = 'admin-media-upload-preview__asset';
+                                const item = document.createElement('div');
+                                item.className = 'admin-media-upload-preview__item';
+                                const name = document.createElement('span');
+                                name.textContent = file.name + ' · ویدئو';
+                                item.append(video, name);
+                                preview.appendChild(item);
+                            }
+                            resolve();
+                        };
+                        video.onerror = () => resolve();
+                    });
+                    continue;
+                }
+
+                if (file.type.startsWith('image/')) {
+                    accepted.push(file);
+                    const item = document.createElement('div');
+                    item.className = 'admin-media-upload-preview__item';
+
+                    const image = document.createElement('img');
+                    image.alt = file.name;
+                    image.src = URL.createObjectURL(file);
+                    image.className = 'admin-media-upload-preview__asset';
+
+                    const name = document.createElement('span');
+                    name.textContent = file.name + ' · تصویر';
+
+                    item.append(image, name);
+                    preview.appendChild(item);
+                }
+            }
+
+            const transfer = new DataTransfer();
+            accepted.forEach((file) => transfer.items.add(file));
+            input.files = transfer.files;
+
+            if (count) {
+                count.textContent = accepted.length
+                    ? '\${accepted.length} رسانه انتخاب شده'
+                    : 'رسانه معتبر انتخاب نشده است';
+            }
+
+            submit.disabled = accepted.length === 0;
+        };
+
+        input?.addEventListener('change', () => renderFiles(input.files));
+
+        ['dragenter', 'dragover'].forEach((eventName) => {
+            dropzone?.addEventListener(eventName, (event) => {
+                event.preventDefault();
+                dropzone.classList.add('is-dragover');
+            });
+        });
+
+        ['dragleave', 'drop'].forEach((eventName) => {
+            dropzone?.addEventListener(eventName, (event) => {
+                event.preventDefault();
+                dropzone.classList.remove('is-dragover');
+            });
+        });
+
+        dropzone?.addEventListener('drop', (event) => {
+            const files = event.dataTransfer?.files;
+            if (!files?.length) return;
+            renderFiles(files);
+        });
+
+        let dragged = null;
+
+        sortable?.querySelectorAll('[data-media-id]').forEach((item) => {
+            item.addEventListener('dragstart', () => {
+                dragged = item;
+                item.classList.add('is-dragging');
+            });
+
+            item.addEventListener('dragend', async () => {
+                item.classList.remove('is-dragging');
+                if (!dragged || !sortable) return;
+
+                const ids = [...sortable.querySelectorAll('[data-media-id]')]
+                    .map((node) => Number(node.dataset.mediaId))
+                    .filter(Boolean);
+
+                try {
+                    const response = await fetch(manager.dataset.reorderUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                        },
+                        body: JSON.stringify({ media: ids }),
+                    });
+
+                    if (!response.ok) throw new Error('reorder failed');
+                } catch {
+                    window.location.reload();
+                }
+
+                dragged = null;
+            });
+
+            item.addEventListener('dragover', (event) => {
+                event.preventDefault();
+                if (!dragged || dragged === item) return;
+
+                const rect = item.getBoundingClientRect();
+                const after = event.clientY > rect.top + rect.height / 2;
+
+                if (after) item.after(dragged);
+                else item.before(dragged);
+            });
+        });
+    });
+});

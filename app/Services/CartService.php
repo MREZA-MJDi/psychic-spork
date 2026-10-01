@@ -16,7 +16,7 @@ final class CartService
     public function current(Request $request): Cart
     {
         if ($request->user()) {
-            return Cart::query()->firstOrCreate(
+            return Cart::query()->createOrFirst(
                 ['user_id' => $request->user()->id],
                 ['last_activity_at' => now()]
             );
@@ -24,7 +24,7 @@ final class CartService
 
         $sessionId = $request->session()->getId();
 
-        return Cart::query()->firstOrCreate(
+        return Cart::query()->createOrFirst(
             ['session_id' => $sessionId],
             ['last_activity_at' => now()]
         );
@@ -50,10 +50,14 @@ final class CartService
                 ->first();
 
             if (! $cart) {
-                $cart = Cart::query()->create([
-                    'user_id' => $user->id,
-                    'last_activity_at' => now(),
-                ]);
+                $cart = Cart::query()->createOrFirst(
+                    ['user_id' => $user->id],
+                    ['last_activity_at' => now()],
+                );
+
+                $cart = Cart::query()
+                    ->lockForUpdate()
+                    ->findOrFail($cart->id);
             }
 
             if (! $guest || $guest->id === $cart->id) {
@@ -127,7 +131,7 @@ final class CartService
             ->with([
                 'productVariant.product.category',
                 'productVariant.product.brand',
-                'productVariant.product.galleryMedia',
+                'productVariant.product.primaryGalleryMedia',
             ])
             ->get();
 
@@ -166,7 +170,7 @@ final class CartService
                     'quantity' => $quantity,
                     'unit_price' => $unitPrice,
                     'line_total' => $quantity * $unitPrice,
-                    'image' => $product->galleryMedia->first()?->url,
+                    'image' => $product->primaryGalleryMedia?->url,
                 ];
             })
             ->filter()

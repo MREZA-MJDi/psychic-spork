@@ -38,17 +38,81 @@
                 </p>
 
                 <div class="brand-hero__meta">
-                    <span>{{ number_format($products->total()) }} محصول فعال</span>
-                    <i></i>
+                    <span>
+                        <strong>{{ number_format($products->total()) }}</strong>
+                        محصول فعال
+                    </span>
+
+                    <i aria-hidden="true"></i>
+
                     <span>JANAN SELECT</span>
+                </div>
+
+                <div class="brand-hero__actions">
+                    <a
+                        class="button button--dark"
+                        href="#brand-products"
+                    >
+                        دیدن محصولات
+                        <span aria-hidden="true">↓</span>
+                    </a>
+
+                    <a
+                        class="button button--ghost"
+                        href="#brand-overview"
+                    >
+                        شناخت برند
+                    </a>
                 </div>
             </div>
 
         </div>
     </section>
 
+    <div class="container customer-action-wrap">
+        <div class="customer-action-strip">
+            <div class="customer-action-strip__copy">
+                <small>BRAND / SHOPPING PATH</small>
+                <strong>محصولات {{ $brand->name }} را مستقیم مرور کن.</strong>
+            </div>
+            <div class="customer-action-strip__actions">
+                <a class="button button--primary" href="#brand-products">شروع خرید</a>
+                <a class="button button--ghost" href="{{ route('products.index', ['brand' => $brand->slug]) }}">کاتالوگ برند</a>
+            </div>
+        </div>
+    </div>
+
+    <nav
+        class="brand-profile-nav"
+        aria-label="ناوبری صفحه برند"
+    >
+        <div class="container">
+            <span class="brand-profile-nav__identity">
+                {{ strtoupper($brand->slug) }}
+            </span>
+
+            <div class="brand-profile-nav__links">
+                <a href="#brand-overview">معرفی</a>
+                <a href="#brand-strengths">نقاط برجسته</a>
+                <a href="#brand-considerations">قبل از خرید</a>
+                <a href="#brand-products">محصولات</a>
+            </div>
+
+            <a
+                class="brand-profile-nav__shop"
+                href="#brand-products"
+            >
+                {{ number_format($products->total()) }} محصول
+                <span aria-hidden="true">↘</span>
+            </a>
+        </div>
+    </nav>
+
     {{-- 02. Brand overview --}}
-    <section class="brand-profile__section">
+    <section
+        id="brand-overview"
+        class="brand-profile__section brand-profile__section--overview"
+    >
         <div class="container">
 
             <div class="brand-profile__intro">
@@ -67,7 +131,10 @@
     </section>
 
     {{-- 03. Strengths --}}
-    <section class="brand-profile__section brand-profile__section--soft">
+    <section
+        id="brand-strengths"
+        class="brand-profile__section brand-profile__section--soft"
+    >
         <div class="container">
 
             <header class="section-head">
@@ -104,7 +171,10 @@
     </section>
 
     {{-- 04. Considerations --}}
-    <section class="brand-profile__section">
+    <section
+        id="brand-considerations"
+        class="brand-profile__section brand-profile__section--considerations"
+    >
         <div class="container">
 
             <div class="brand-profile__comparison">
@@ -191,7 +261,10 @@
     </section>
 
     {{-- 06. Products --}}
-    <section class="section-block catalog-stage brand-profile__products">
+    <section
+        id="brand-products"
+        class="section-block catalog-stage brand-profile__products"
+    >
         <div class="container">
 
             <header class="section-head">
@@ -203,9 +276,32 @@
                     </h2>
 
                     <p>
-                        اطلاعات قیمت، موجودی و مشخصات از محصولات فعال فروشگاه خوانده می‌شود.
+                        انتخاب‌های فعلی {{ $brand->name }} را ببین؛
+                        از همین‌جا وارد صفحه محصول شو و سایز، مشخصات و موجودی را بررسی کن.
                     </p>
                 </div>
+
+                <form class="catalog-inline-sort" method="GET">
+                    <label>
+                        <span>مرتب‌سازی</span>
+                        <select name="sort" onchange="this.form.submit()">
+                            <option value="newest" @selected($sort === 'newest')>جدیدترین</option>
+                            <option value="oldest" @selected($sort === 'oldest')>قدیمی‌ترین</option>
+                            <option value="price_asc" @selected($sort === 'price_asc')>ارزان‌ترین</option>
+                            <option value="price_desc" @selected($sort === 'price_desc')>گران‌ترین</option>
+                            <option value="name_asc" @selected($sort === 'name_asc')>نام: الف تا ی</option>
+                            <option value="name_desc" @selected($sort === 'name_desc')>نام: ی تا الف</option>
+                        </select>
+                    </label>
+                    <label>
+                        <span>نمایش</span>
+                        <select name="per_page" onchange="this.form.submit()">
+                            <option value="12" @selected($perPage === 12)>۱۲</option>
+                            <option value="24" @selected($perPage === 24)>۲۴</option>
+                            <option value="36" @selected($perPage === 36)>۳۶</option>
+                        </select>
+                    </label>
+                </form>
 
                 <a
                     class="text-link"

@@ -174,116 +174,26 @@
 ========================================================= --}}
 
 <div class="admin-card admin-form-section">
-
     <div class="admin-card-header">
-
         <div>
-
-            <h2 class="admin-card-title">
-                لوگوی برند
-            </h2>
-
-            <p class="admin-card-description">
-                لوگوی برند را انتخاب کنید.
-            </p>
-
+            <h2 class="admin-card-title">لوگوی برند</h2>
+            <p class="admin-card-description">لوگو را انتخاب کن و کادر دقیق نمایش آن را قبل از ذخیره تنظیم کن.</p>
         </div>
-
     </div>
-
-
     <div class="admin-card-body">
-
-        {{-- CURRENT LOGO --}}
-
-        @if($logo?->url)
-
-            <div
-                class="admin-current-image"
-                id="brand-current-logo"
-            >
-
-                <img
-                    src="{{ $logo->url }}"
-                    alt="{{ $brand->name }}"
-                >
-
-                <div>
-
-                    <strong>
-                        لوگوی فعلی
-                    </strong>
-
-                    <p class="admin-muted">
-                        با انتخاب تصویر جدید، لوگوی فعلی جایگزین می‌شود.
-                    </p>
-
-                </div>
-
-            </div>
-
-        @endif
-
-
-        {{-- NEW LOGO PREVIEW --}}
-
-        <div
-            class="admin-current-image"
-            id="brand-logo-preview"
-            hidden
-            style="margin-bottom:16px;"
-        >
-
-            <img
-                id="brand-logo-preview-image"
-                src=""
-                alt="پیش‌نمایش لوگوی جدید"
-            >
-
-            <div>
-
-                <strong>
-                    پیش‌نمایش لوگوی جدید
-                </strong>
-
-                <p class="admin-muted">
-                    این تصویر قبل از ذخیره فقط برای پیش‌نمایش است.
-                </p>
-
-            </div>
-
-        </div>
-
-
-        {{-- FILE INPUT --}}
-
-        <div class="admin-field">
-
-            <label for="logo_file">
-                انتخاب لوگو
-            </label>
-
-            <input
-                id="logo_file"
-                type="file"
-                name="logo_file"
-                accept="image/jpeg,image/png,image/webp"
-            >
-
-            <small class="admin-help">
-                JPG، PNG یا WebP — حداکثر ۲ مگابایت
-            </small>
-
-            @error('logo_file')
-            <small class="admin-help" style="color:var(--admin-danger);">
-                {{ $message }}
-            </small>
-            @enderror
-
-        </div>
-
+        @include('admin.components.media-picker', [
+            'name' => 'logo_file',
+            'id' => 'logo_file',
+            'label' => 'انتخاب لوگو',
+            'help' => 'عکس را بکش و زوم کن تا دقیقاً همان قسمت موردنظر نمایش داده شود.',
+            'currentUrl' => $logo?->url,
+            'currentAlt' => $brand->name,
+            'ratio' => '1:1',
+        ])
+        @error('logo_file')
+            <small class="admin-help" style="color:var(--admin-danger);">{{ $message }}</small>
+        @enderror
     </div>
-
 </div>
 
 

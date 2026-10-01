@@ -6,6 +6,7 @@ use App\Http\Requests\StoreProductFilterRequest;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\ProductVariant;
 use App\Services\SeoService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -19,13 +20,24 @@ class StoreProductController extends Controller
     ): View {
         $filters = $request->validated();
 
+        $sort = $filters['sort'] ?? 'newest';
+        $perPage = (int) ($filters['per_page'] ?? 12);
+
+        $priceSubquery = ProductVariant::query()
+            ->selectRaw('COALESCE(sale_price, price)')
+            ->whereColumn('product_id', 'products.id')
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->limit(1);
+
         $products = Product::query()
             ->active()
             ->with([
-                'category',
-                'brand',
-                'variants',
-                'galleryMedia',
+                'category:id,name,slug',
+                'brand:id,name,slug',
+                'primaryActiveVariant',
+                'primaryGalleryMedia',
             ])
             ->when(
                 ! empty($filters['q']),
@@ -76,9 +88,25 @@ class StoreProductController extends Controller
                         ->where('is_active', true)
                 )
             )
-            ->latest('updated_at')
-            ->latest('id')
-            ->paginate(12)
+            ->when($sort === 'oldest', fn ($query) =>
+                $query->orderBy('updated_at')->orderBy('id')
+            )
+            ->when($sort === 'price_asc', fn ($query) =>
+                $query->orderBy($priceSubquery, 'asc')->orderBy('id')
+            )
+            ->when($sort === 'price_desc', fn ($query) =>
+                $query->orderBy($priceSubquery, 'desc')->orderBy('id')
+            )
+            ->when($sort === 'name_asc', fn ($query) =>
+                $query->orderBy('name')->orderBy('id')
+            )
+            ->when($sort === 'name_desc', fn ($query) =>
+                $query->orderByDesc('name')->orderBy('id')
+            )
+            ->when($sort === 'newest', fn ($query) =>
+                $query->latest('updated_at')->latest('id')
+            )
+            ->paginate($perPage)
             ->withQueryString();
 
         return view('products.index', [
@@ -88,13 +116,17 @@ class StoreProductController extends Controller
                 route('products.index')
             ),
             'products' => $products,
+            'sort' => $sort,
+            'perPage' => $perPage,
             'categories' => Category::query()
                 ->active()
+                ->select(['id', 'name', 'slug'])
                 ->orderBy('sort_order')
                 ->orderBy('name')
                 ->get(),
             'brands' => Brand::query()
                 ->active()
+                ->select(['id', 'name', 'slug'])
                 ->orderBy('name')
                 ->get(),
         ]);
@@ -115,8 +147,8 @@ class StoreProductController extends Controller
             ->with([
                 'category:id,name',
                 'brand:id,name',
-                'galleryMedia',
-                'variants',
+                'primaryGalleryMedia',
+                'primaryActiveVariant',
             ])
             ->where(function ($query) use ($like) {
                 $query
@@ -144,15 +176,13 @@ class StoreProductController extends Controller
             ->limit(6)
             ->get()
             ->map(function (Product $product): array {
-                $variant = $product->variants->first(
-                    fn ($item) => (bool) $item->is_active
-                );
+                $variant = $product->primaryActiveVariant;
 
                 return [
                     'name' => $product->name,
                     'brand' => $product->brand?->name,
                     'category' => $product->category?->name,
-                    'image' => $product->galleryMedia->first()?->url,
+                    'image' => $product->primaryGalleryMedia?->url,
                     'price' => $variant?->effective_price,
                     'url' => route('products.show', $product),
                 ];
@@ -173,7 +203,6 @@ class StoreProductController extends Controller
         $product->load([
             'category',
             'brand',
-            'variants',
             'activeVariants',
             'galleryMedia',
         ]);
@@ -181,10 +210,10 @@ class StoreProductController extends Controller
         $relatedProducts = Product::query()
             ->active()
             ->with([
-                'category',
-                'brand',
-                'variants',
-                'galleryMedia',
+                'category:id,name,slug',
+                'brand:id,name,slug',
+                'primaryActiveVariant',
+                'primaryGalleryMedia',
             ])
             ->where('id', '!=', $product->id)
             ->when(
@@ -205,10 +234,10 @@ class StoreProductController extends Controller
             $fallbackProducts = Product::query()
                 ->active()
                 ->with([
-                    'category',
-                    'brand',
-                    'variants',
-                    'galleryMedia',
+                    'category:id,name,slug',
+                    'brand:id,name,slug',
+                    'primaryActiveVariant',
+                    'primaryGalleryMedia',
                 ])
                 ->where('id', '!=', $product->id)
                 ->whereNotIn(

@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\ProductVariant;
+use Illuminate\Http\Request;
 use App\Services\SeoService;
 use Illuminate\View\View;
 
@@ -32,30 +34,57 @@ class StoreCategoryController extends Controller
         ]);
     }
 
-    public function show(Category $category, SeoService $seo): View
+    public function show(Category $category, SeoService $seo, Request $request): View
     {
         abort_unless($category->is_active, 404);
 
         $category->load('coverMedia');
 
+        $sort = in_array($request->query('sort'), [
+            'newest',
+            'oldest',
+            'price_asc',
+            'price_desc',
+            'name_asc',
+            'name_desc',
+        ], true) ? $request->query('sort') : 'newest';
+
+        $perPage = in_array((int) $request->query('per_page', 12), [12, 24, 36], true)
+            ? (int) $request->query('per_page', 12)
+            : 12;
+
+        $priceSubquery = ProductVariant::query()
+            ->selectRaw('COALESCE(sale_price, price)')
+            ->whereColumn('product_id', 'products.id')
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->limit(1);
+
         $products = Product::query()
             ->active()
             ->with([
-                'category',
-                'brand',
-                'variants',
-                'galleryMedia',
+                'category:id,name,slug',
+                'brand:id,name,slug',
+                'primaryActiveVariant',
+                'primaryGalleryMedia',
             ])
             ->where('category_id', $category->id)
-            ->latest('updated_at')
-            ->latest('id')
-            ->paginate(12)
+            ->when($sort === 'oldest', fn ($query) => $query->orderBy('updated_at')->orderBy('id'))
+            ->when($sort === 'price_asc', fn ($query) => $query->orderBy($priceSubquery, 'asc')->orderBy('id'))
+            ->when($sort === 'price_desc', fn ($query) => $query->orderBy($priceSubquery, 'desc')->orderBy('id'))
+            ->when($sort === 'name_asc', fn ($query) => $query->orderBy('name')->orderBy('id'))
+            ->when($sort === 'name_desc', fn ($query) => $query->orderByDesc('name')->orderBy('id'))
+            ->when($sort === 'newest', fn ($query) => $query->latest('updated_at')->latest('id'))
+            ->paginate($perPage)
             ->withQueryString();
 
         return view('categories.show', [
             'seo' => $seo->category($category),
             'category' => $category,
             'products' => $products,
+            'sort' => $sort,
+            'perPage' => $perPage,
         ]);
     }
 }
