@@ -2508,6 +2508,7 @@ animation-duration:
     }
 
     .mobile-bottom-nav--store a {
+        position: relative;
         color: var(--janan-muted, #7f8992);
         transition: color .2s ease, background .2s ease;
     }
