@@ -4923,7 +4923,7 @@ display:
         10px;
 }
 
-/* Mobile bottom navigation is centralized in responsive-shell.css. */
+/* Mobile bottom navigation primitives are centralized in core.css. */
 
 .sr-only {
 position:
