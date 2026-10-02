@@ -67,7 +67,6 @@
 
         if ($isHome) {
             $storeAssets[] = 'resources/css/home.css';
-            $storeAssets[] = 'resources/css/editorial-hero.css';
             $storeAssets[] = 'resources/js/editorial-hero.js';
 
             if (!app()->environment('testing')) {
