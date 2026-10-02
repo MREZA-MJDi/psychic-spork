@@ -11,7 +11,6 @@
 ========================================================= */
 
 :root {
-    --store-section-y: var(--store-section-gap);
     --store-radius: 24px;
     --store-soft: #f7fafb;
     --store-sky: #dff3fa;
