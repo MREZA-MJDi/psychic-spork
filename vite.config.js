@@ -8,7 +8,6 @@ export default defineConfig({
                 'resources/css/store.css',
                 'resources/css/home.css',
                 'resources/css/wholesale.css',
-                'resources/css/editorial-hero.css',
                 'resources/css/auth.css',
                 'resources/js/app.js',
                 'resources/js/store-cart.js',

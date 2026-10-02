@@ -1,9 +1,3 @@
-import Alpine from 'alpinejs';
-
-window.Alpine = Alpine;
-
-Alpine.start();
-
 document.addEventListener('DOMContentLoaded', () => {
     if (window.__JANAN_APP_INITIALIZED__) return;
     window.__JANAN_APP_INITIALIZED__ = true;
