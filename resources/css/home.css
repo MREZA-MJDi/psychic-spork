@@ -2289,7 +2289,7 @@ outline:
 
 .janan-trust__eyebrow {
     color: rgba(255,255,255,.46);
-    font-family: "TheGoodMonolith", monospace;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     font-size: 8px;
     font-weight: 400;
     letter-spacing: .16em;
@@ -2308,7 +2308,7 @@ outline:
 .janan-trust__intro strong em {
     margin-top: 5px;
     color: rgba(255,255,255,.64);
-    font-family: "PPNeueMontreal", sans-serif;
+    font-family: var(--janan-font);
     font-size: inherit;
     font-style: normal;
     font-weight: 300;
@@ -2345,7 +2345,7 @@ outline:
 .janan-trust__index {
     padding-top: 1px;
     color: rgba(255,255,255,.28);
-    font-family: "TheGoodMonolith", monospace;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     font-size: 8px;
     letter-spacing: .08em;
 }
@@ -2401,7 +2401,7 @@ outline:
 
 .janan-trust__arrow {
     color: rgba(255,255,255,.28);
-    font-family: "TheGoodMonolith", monospace;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     font-size: 14px;
 }
 
@@ -2469,7 +2469,7 @@ outline:
 
 .janan-trust__eyebrow {
     color: rgba(23,23,23,.48);
-    font-family: "TheGoodMonolith", monospace;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     font-size: 8px;
     font-weight: 400;
     letter-spacing: .15em;
@@ -2488,7 +2488,7 @@ outline:
 .janan-trust__intro strong em {
     margin-top: 4px;
     color: rgba(23,23,23,.58);
-    font-family: "PPNeueMontreal", sans-serif;
+    font-family: var(--janan-font);
     font-size: inherit;
     font-style: normal;
     font-weight: 300;
@@ -2534,7 +2534,7 @@ outline:
 
 .janan-trust__index {
     color: rgba(23,23,23,.32);
-    font-family: "TheGoodMonolith", monospace;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     font-size: 8px;
     letter-spacing: .08em;
 }
@@ -2591,7 +2591,7 @@ outline:
 
 .janan-trust__arrow {
     color: rgba(23,23,23,.34);
-    font-family: "TheGoodMonolith", monospace;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     font-size: 13px;
     transition: color .25s ease, transform .3s ease;
 }

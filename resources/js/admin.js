@@ -817,3 +817,302 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 });
+
+/* =========================================================
+   ADMIN FORM INTERACTIONS
+   Page forms keep behavior here; Blade remains markup-only.
+========================================================= */
+
+document.addEventListener('DOMContentLoaded', () => {
+    const initProductForm = () => {
+        const slugInput = document.getElementById('slug');
+        const nameInput = document.getElementById('name');
+        const skuInput = document.getElementById('sku');
+        const slugButton = document.getElementById('generate-slug');
+        const skuButton = document.getElementById('generate-sku');
+        const colorPicker = document.getElementById('color_picker');
+        const colorCode = document.getElementById('color_code');
+        const priceInput = document.getElementById('price');
+        const salePriceInput = document.getElementById('sale_price');
+        const imageInput = document.getElementById('image_file');
+        const imagePreview = document.getElementById('image-preview');
+        const imagePreviewWrap = document.getElementById('image-preview-wrap');
+        const attributesList = document.getElementById('attributes-list');
+        const attributesJson = document.getElementById('attributes_json');
+        const addAttributeButton = document.getElementById('add-attribute');
+
+        if (!slugInput && !skuInput && !attributesList && !imageInput) return;
+
+        const transliterate = (value) => value
+            .toLowerCase()
+            .replace(/[إأآا]/g, 'a').replace(/ب/g, 'b').replace(/پ/g, 'p')
+            .replace(/ت/g, 't').replace(/ث/g, 's').replace(/ج/g, 'j')
+            .replace(/چ/g, 'ch').replace(/ح/g, 'h').replace(/خ/g, 'kh')
+            .replace(/د/g, 'd').replace(/ذ/g, 'z').replace(/ر/g, 'r')
+            .replace(/ز/g, 'z').replace(/ژ/g, 'zh').replace(/س/g, 's')
+            .replace(/ش/g, 'sh').replace(/ص/g, 's').replace(/ض/g, 'z')
+            .replace(/ط/g, 't').replace(/ظ/g, 'z').replace(/ع/g, 'a')
+            .replace(/غ/g, 'gh').replace(/ف/g, 'f').replace(/ق/g, 'gh')
+            .replace(/ک/g, 'k').replace(/گ/g, 'g').replace(/ل/g, 'l')
+            .replace(/م/g, 'm').replace(/ن/g, 'n').replace(/و/g, 'v')
+            .replace(/ه/g, 'h').replace(/ی/g, 'y').replace(/ء/g, '')
+            .replace(/ۀ/g, 'e').replace(/ة/g, 'e')
+            .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+
+        const generateSlug = () => {
+            if (!slugInput || !nameInput) return;
+            const value = nameInput.value.trim();
+            if (!value) return;
+            slugInput.value = transliterate(value) || 'product';
+        };
+
+        const generateSku = () => {
+            if (!skuInput) return;
+            skuInput.value = 'JAN-' + Math.random().toString(36).slice(2, 8).toUpperCase();
+        };
+
+        slugButton?.addEventListener('click', generateSlug);
+        skuButton?.addEventListener('click', generateSku);
+
+        if (skuInput && !skuInput.value.trim()) generateSku();
+        if (slugInput && nameInput && !slugInput.value.trim() && nameInput.value.trim()) {
+            generateSlug();
+        }
+
+        if (colorPicker && colorCode) {
+            colorPicker.addEventListener('input', () => {
+                colorCode.value = colorPicker.value;
+            });
+            if (colorCode.value) colorPicker.value = colorCode.value;
+        }
+
+        const normalizeSalePrice = () => {
+            if (!priceInput || !salePriceInput) return;
+            const price = Number(priceInput.value);
+            const sale = Number(salePriceInput.value);
+            if (Number.isFinite(price) && Number.isFinite(sale) && sale >= price) {
+                salePriceInput.value = '';
+            }
+        };
+
+        priceInput?.addEventListener('input', normalizeSalePrice);
+        salePriceInput?.addEventListener('input', normalizeSalePrice);
+
+        imageInput?.addEventListener('change', () => {
+            const file = imageInput.files?.[0];
+            if (!file || !file.type.startsWith('image/') || !imagePreview || !imagePreviewWrap) return;
+
+            const url = URL.createObjectURL(file);
+            imagePreview.src = url;
+            imagePreviewWrap.hidden = false;
+            imagePreview.onload = () => URL.revokeObjectURL(url);
+        });
+
+        const escapeHtml = (value) => {
+            const div = document.createElement('div');
+            div.textContent = value ?? '';
+            return div.innerHTML;
+        };
+
+        const createAttributeRow = (key = '', value = '') => {
+            if (!attributesList) return;
+            const row = document.createElement('div');
+            row.className = 'attribute-row';
+            row.innerHTML = `
+                <input type="text" class="attribute-key" value="${escapeHtml(key)}" placeholder="ویژگی، مثلاً جنس">
+                <input type="text" class="attribute-value" value="${escapeHtml(value)}" placeholder="مقدار، مثلاً ساتن">
+                <button type="button" class="admin-btn admin-btn--danger admin-btn--sm remove-attribute">حذف</button>
+            `;
+            attributesList.appendChild(row);
+        };
+
+        const syncAttributes = () => {
+            if (!attributesList || !attributesJson) return;
+            const result = {};
+            attributesList.querySelectorAll('.attribute-row').forEach((row) => {
+                const key = row.querySelector('.attribute-key')?.value.trim();
+                const value = row.querySelector('.attribute-value')?.value.trim();
+                if (key) result[key] = value;
+            });
+            attributesJson.value = JSON.stringify(result);
+        };
+
+        addAttributeButton?.addEventListener('click', () => {
+            createAttributeRow();
+            syncAttributes();
+        });
+
+        attributesList?.addEventListener('click', (event) => {
+            const button = event.target.closest('.remove-attribute');
+            if (!button) return;
+            button.closest('.attribute-row')?.remove();
+            syncAttributes();
+        });
+
+        attributesList?.addEventListener('input', syncAttributes);
+
+        const metaTitle = document.getElementById('meta_title');
+        const metaDescription = document.getElementById('meta_description');
+        const seoTitlePreview = document.querySelector('[data-seo-preview-title]');
+        const seoDescriptionPreview = document.querySelector('[data-seo-preview-description]');
+
+        const syncSeoPreview = () => {
+            if (seoTitlePreview && metaTitle) {
+                seoTitlePreview.textContent = metaTitle.value.trim() || 'عنوان محصول';
+            }
+            if (seoDescriptionPreview && metaDescription) {
+                seoDescriptionPreview.textContent =
+                    metaDescription.value.trim() ||
+                    'توضیحات کوتاه محصول در این قسمت دیده می‌شود.';
+            }
+        };
+
+        metaTitle?.addEventListener('input', syncSeoPreview);
+        metaDescription?.addEventListener('input', syncSeoPreview);
+        syncSeoPreview();
+        attributesJson?.closest('form')?.addEventListener('submit', () => {
+            syncAttributes();
+            normalizeSalePrice();
+        });
+        syncAttributes();
+    };
+
+    const initVariantForm = () => {
+        const skuInput = document.getElementById('sku');
+        const skuButton = document.getElementById('generate-variant-sku');
+        const colorInput = document.getElementById('color_code');
+        const colorLabel = document.getElementById('color-preview-name');
+        const priceInput = document.getElementById('price');
+        const salePriceInput = document.getElementById('sale_price');
+
+        if (!skuButton && !colorInput && !priceInput) return;
+
+        skuButton?.addEventListener('click', () => {
+            if (!skuInput) return;
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            let value = '';
+            for (let i = 0; i < 8; i++) {
+                value += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            skuInput.value = 'JAN-' + value;
+            skuInput.dispatchEvent(new Event('input', { bubbles: true }));
+        });
+
+        const updateColorLabel = () => {
+            if (colorLabel && colorInput) colorLabel.textContent = 'رنگ انتخاب‌شده';
+        };
+        colorInput?.addEventListener('input', updateColorLabel);
+        updateColorLabel();
+
+        const normalize = (value) => Number(
+            String(value ?? '')
+                .replace(/[۰-۹]/g, (digit) => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(digit)))
+                .replace(/[,\u066C،\s]/g, '')
+        );
+
+        const syncSale = () => {
+            if (!priceInput || !salePriceInput) return;
+            const price = normalize(priceInput.value);
+            const sale = normalize(salePriceInput.value);
+            if (Number.isFinite(price) && price > 0 && Number.isFinite(sale) && sale >= price) {
+                salePriceInput.value = '';
+            }
+        };
+
+        priceInput?.addEventListener('input', syncSale);
+        salePriceInput?.addEventListener('blur', syncSale);
+    };
+
+    const initInventoryForm = () => {
+        const form = document.getElementById('inventory-movement-form');
+        if (!form) return;
+
+        const typeInput = document.getElementById('movement-type');
+        const quantityAmountInput = document.getElementById('quantity_amount');
+        const quantityInput = document.getElementById('quantity');
+        const directionField = document.getElementById('adjustment-direction-field');
+        const directionInput = document.getElementById('adjustment_direction');
+        const variantSelect = document.querySelector('[data-inventory-variant]');
+        const currentStock = document.querySelector('[data-current-stock]');
+        const quantityHelp = document.getElementById('quantity-help');
+
+        const updateCurrentStock = () => {
+            if (!variantSelect || !currentStock) return;
+            const option = variantSelect.options[variantSelect.selectedIndex];
+            const stock = option?.dataset?.stock;
+            currentStock.textContent = stock === undefined
+                ? '—'
+                : new Intl.NumberFormat('fa-IR').format(Number(stock)) + ' عدد';
+        };
+
+        const updateQuantity = () => {
+            if (!typeInput || !quantityAmountInput || !quantityInput) return;
+            const amount = Math.abs(Number(quantityAmountInput.value) || 0);
+            const type = typeInput.value;
+            let signed = amount;
+
+            if (type === 'sale' || type === 'damage') signed = -amount;
+            if (type === 'adjustment' && directionInput) {
+                signed = directionInput.value === 'decrease' ? -amount : amount;
+            }
+
+            quantityInput.value = amount > 0 ? String(signed) : '';
+
+            if (quantityHelp) {
+                quantityHelp.textContent = {
+                    purchase: 'این مقدار به موجودی اضافه می‌شود.',
+                    return: 'این مقدار به موجودی اضافه می‌شود.',
+                    sale: 'این مقدار از موجودی کم می‌شود.',
+                    damage: 'این مقدار از موجودی کم می‌شود.',
+                    adjustment: directionInput?.value === 'decrease'
+                        ? 'این مقدار از موجودی کم می‌شود.'
+                        : 'این مقدار به موجودی اضافه می‌شود.',
+                }[type] || 'تعداد موردنظر را وارد کنید.';
+            }
+        };
+
+        const updateDirectionVisibility = () => {
+            if (!typeInput || !directionField) return;
+            directionField.hidden = typeInput.value !== 'adjustment';
+            updateQuantity();
+        };
+
+        typeInput?.addEventListener('change', updateDirectionVisibility);
+        variantSelect?.addEventListener('change', updateCurrentStock);
+        directionInput?.addEventListener('change', updateQuantity);
+        quantityAmountInput?.addEventListener('input', updateQuantity);
+        updateDirectionVisibility();
+        updateCurrentStock();
+        form.addEventListener('submit', updateQuantity);
+    };
+
+    const initWholesalePackForm = () => {
+        const search = document.getElementById('variant-search');
+        const rows = [...document.querySelectorAll('[data-variant-row]')];
+        if (!search || !rows.length) return;
+
+        search.addEventListener('input', () => {
+            const term = search.value.trim().toLowerCase();
+            rows.forEach((row) => {
+                row.hidden = Boolean(term) && !row.dataset.search.includes(term);
+            });
+        });
+
+        rows.forEach((row) => {
+            const checkbox = row.querySelector('input[type="checkbox"]');
+            const quantity = row.querySelector('.wholesale-pack-qty');
+            checkbox?.addEventListener('change', () => {
+                if (!quantity) return;
+                quantity.disabled = !checkbox.checked;
+                if (checkbox.checked && Number(quantity.value || 0) < 1) {
+                    quantity.value = '1';
+                }
+            });
+        });
+    };
+
+    initProductForm();
+    initVariantForm();
+    initInventoryForm();
+    initWholesalePackForm();
+});

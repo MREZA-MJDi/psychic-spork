@@ -1,4 +1,7 @@
 @import './app.css';
+@import './store-responsive.css';
+
+@import './app.css';
 @import './store-structure.css';
 @import './store-polish.css';
 @import './store-responsive.css';

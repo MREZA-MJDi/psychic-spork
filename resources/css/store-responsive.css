@@ -1798,18 +1798,7 @@ width:
     .club-card { border-radius: 18px; padding: 20px; }
     .club-card__actions { display: grid; grid-template-columns: 1fr; }
     .club-card__actions .button { width: 100%; }
-}
-
-/* =========================================================
-   IMMERSIVE GRID SCALE TOKENS
-   JS reads --immersive-item-size; media stays CSS-owned.
-========================================================= */
-
-.immersive-grid-hero {
-    --immersive-item-size: 320px;
-}
-
-@media (max-width: 1000px) {
+}@media (max-width: 1000px) {
     .immersive-grid-hero {
         --immersive-item-size: 240px;
     }

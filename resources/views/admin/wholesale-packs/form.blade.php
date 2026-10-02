@@ -75,8 +75,8 @@
             </div>
         </div>
         <div class="admin-card-body">
-            <input id="variant-search" class="admin-field-input" type="search" placeholder="جستجو در محصول، برند، SKU، سایز یا رنگ..." style="width:100%;margin-bottom:14px;">
-            <div style="display:grid;gap:8px;">
+            <input id="variant-search" class="admin-field-input admin-wholesale-pack-search" type="search" placeholder="جستجو در محصول، برند، SKU، سایز یا رنگ...">
+            <div class="admin-wholesale-pack-list">
                 @foreach($variants as $variant)
                     @php $item = $selected->get($variant->id); @endphp
                     <label class="wholesale-pack-variant-row" data-variant-row data-search="{{ strtolower(($variant->product?->name ?? '') . ' ' . ($variant->product?->brand?->name ?? '') . ' ' . ($variant->sku ?? '') . ' ' . ($variant->size ?? '') . ' ' . ($variant->color ?? '')) }}">
@@ -103,27 +103,5 @@
     </div>
 </form>
 
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    const search = document.getElementById('variant-search');
-    const rows = [...document.querySelectorAll('[data-variant-row]')];
 
-    search?.addEventListener('input', () => {
-        const term = search.value.trim().toLowerCase();
-        rows.forEach(row => {
-            row.hidden = term && !row.dataset.search.includes(term);
-        });
-    });
-
-    rows.forEach(row => {
-        const checkbox = row.querySelector('input[type="checkbox"]');
-        const qty = row.querySelector('.wholesale-pack-qty');
-
-        checkbox?.addEventListener('change', () => {
-            qty.disabled = !checkbox.checked;
-            if (checkbox.checked && Number(qty.value || 0) < 1) qty.value = 1;
-        });
-    });
-});
-</script>
 @endsection

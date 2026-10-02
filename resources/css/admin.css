@@ -3644,3 +3644,20 @@ body.admin-nav-open {
     width: max-content;
     min-width: 100%;
 }
+/* Form primitives extracted from Blade inline styles. */
+.attribute-row {
+    display: grid;
+    grid-template-columns: minmax(0,1fr) minmax(0,1fr) auto;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.admin-wholesale-pack-search {
+    width: 100%;
+    margin-bottom: 14px;
+}
+
+.admin-wholesale-pack-list {
+    display: grid;
+    gap: 8px;
+}

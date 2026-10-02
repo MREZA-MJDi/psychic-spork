@@ -1,3 +1,7 @@
+.immersive-grid-hero {
+    --immersive-item-size: 320px;
+}
+
 /* =========================================================
    JANAN IMMERSIVE HERO
    Homepage-only visual layer. It is loaded only on home.
