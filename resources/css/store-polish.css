@@ -11,9 +11,7 @@
 ========================================================= */
 
 :root {
-    --store-max: 1320px;
-    --store-gutter: clamp(16px, 3vw, 34px);
-    --store-section-y: clamp(64px, 8vw, 116px);
+    --store-section-y: var(--store-section-gap);
     --store-radius: 24px;
     --store-soft: #f7fafb;
     --store-sky: #dff3fa;
@@ -203,7 +201,7 @@
 .catalog-results,
 .directory-stage,
 .catalog-stage {
-    padding-block: var(--store-section-y);
+    padding-block: var(--store-section-gap);
 }
 
 .catalog-results {
@@ -504,11 +502,11 @@
 
 .home-page .home-section,
 .home-page .home-editorial-section {
-    padding-block: var(--store-section-y);
+    padding-block: var(--store-section-gap);
 }
 
 .home-page .container {
-    width: min(var(--store-max), calc(100% - (var(--store-gutter) * 2)));
+    width: min(var(--store-content-max), calc(100% - (var(--store-content-gutter) * 2)));
 }
 
 .home-page .home-section + .home-section,
