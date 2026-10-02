@@ -36,18 +36,12 @@
             class="product-card__image-link"
             aria-label="مشاهده {{ $product->name }}"
         >
-            @if($image)
-                <img
-                    src="{{ $image }}"
-                    alt="{{ $product->name }}"
-                    loading="lazy"
-                    decoding="async"
-                >
-            @else
-                <div class="product-image-placeholder" aria-hidden="true">
-                    <span>JANAN</span>
-                </div>
-            @endif
+            <x-store.image
+                :src="$image"
+                :alt="$product->name"
+                fallback-class="product-image-placeholder"
+                fallback="JANAN"
+            />
         </a>
 
     </div>
@@ -89,19 +83,15 @@
                 @endif
             </div>
 
-            <div
-                class="product-card__stock {{ match (true) {
-                    $stock < 1 => 'is-out',
-                    $productVariant->is_low_stock => 'is-low',
-                    default => ''
-                } }}"
-            >
-                {{ match (true) {
-                    $stock < 1 => 'ناموجود',
-                    $productVariant->is_low_stock => 'موجودی محدود',
-                    default => 'موجود'
-                } }}
-            </div>
+            @if($stock < 1)
+                <div class="product-card__stock is-out" role="status" aria-label="ناموجود">
+                    ناموجود
+                </div>
+            @elseif($productVariant->is_low_stock)
+                <div class="product-card__stock is-low" role="status" aria-label="موجودی محدود">
+                    موجودی محدود
+                </div>
+            @endif
 
             <form
                 method="POST"

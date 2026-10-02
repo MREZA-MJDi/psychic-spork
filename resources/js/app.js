@@ -1,10 +1,7 @@
-import Alpine from 'alpinejs';
-
-window.Alpine = Alpine;
-
-Alpine.start();
-
 document.addEventListener('DOMContentLoaded', () => {
+    if (window.__JANAN_APP_INITIALIZED__) return;
+    window.__JANAN_APP_INITIALIZED__ = true;
+
     const menuToggle = document.querySelector('[data-menu-toggle]');
     const mobileMenu = document.querySelector('[data-mobile-menu]');
     const storeNav = document.querySelector('.store-nav');
@@ -49,6 +46,20 @@ document.addEventListener('DOMContentLoaded', () => {
         ) {
             setSearchOpen(false);
         }
+    });
+
+    document.addEventListener('click', (event) => {
+        if (
+            !mobileMenu?.classList.contains('is-open') ||
+            mobileMenu.contains(event.target) ||
+            menuToggle?.contains(event.target)
+        ) {
+            return;
+        }
+
+        mobileMenu.classList.remove('is-open');
+        mobileMenu.setAttribute('aria-hidden', 'true');
+        menuToggle?.setAttribute('aria-expanded', 'false');
     });
 
     document.addEventListener('keydown', (event) => {
@@ -176,12 +187,75 @@ document.addEventListener('DOMContentLoaded', () => {
         revealItems.forEach((element) => element.classList.add('is-visible'));
     }
 
-    window.addEventListener('resize', () => {
-        if (window.innerWidth > 820) {
-            mobileMenu?.classList.remove('is-open');
-            mobileMenu?.setAttribute('aria-hidden', 'true');
-            storeNav?.classList.remove('is-open');
-            menuToggle?.setAttribute('aria-expanded', 'false');
+    const replaceBrokenStoreImage = (image) => {
+        if (!(image instanceof HTMLImageElement)) return;
+        if (image.dataset.storeImageFallbackApplied) return;
+
+        const fallbackClass = image.dataset.storeImageFallbackClass;
+        const fallbackTag = ['div', 'span'].includes(image.dataset.storeImageFallbackTag)
+            ? image.dataset.storeImageFallbackTag
+            : 'div';
+
+        if (!fallbackClass || !image.parentElement) return;
+
+        const fallback = document.createElement(fallbackTag);
+        fallback.className = fallbackClass;
+        fallback.setAttribute('aria-hidden', 'true');
+        fallback.dataset.storeImageFallbackApplied = '1';
+
+        const label = document.createElement('span');
+        label.textContent = image.dataset.storeImageFallback || 'JANAN';
+        fallback.appendChild(label);
+
+        image.replaceWith(fallback);
+    };
+
+    document.addEventListener('error', (event) => {
+        if (
+            event.target instanceof HTMLImageElement
+            && event.target.matches('[data-store-image-fallback]')
+        ) {
+            replaceBrokenStoreImage(event.target);
         }
-    });
+    }, true);
+
+    document
+        .querySelectorAll('img[data-store-image-fallback]')
+        .forEach((image) => {
+            if (image.complete && image.naturalWidth === 0) {
+                replaceBrokenStoreImage(image);
+            }
+        });
+
+    const hero = document.querySelector('[data-immersive-gallery]');
+    const nav = document.querySelector('.mobile-bottom-nav--store');
+
+    if (hero && nav && 'IntersectionObserver' in window) {
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                nav.classList.toggle(
+                    'is-immersive-dimmed',
+                    entry.isIntersecting && entry.intersectionRatio > 0.28
+                );
+            },
+            { threshold: [0, 0.28, 0.7, 1] }
+        );
+
+        observer.observe(hero);
+    }
+
+    const desktopQuery = window.matchMedia('(min-width: 901px)');
+
+    const syncDesktopNavigation = (event) => {
+        if (!event.matches) return;
+
+        mobileMenu?.classList.remove('is-open');
+        mobileMenu?.setAttribute('aria-hidden', 'true');
+        storeNav?.classList.remove('is-open');
+        menuToggle?.setAttribute('aria-expanded', 'false');
+    };
+
+    syncDesktopNavigation(desktopQuery);
+    desktopQuery.addEventListener?.('change', syncDesktopNavigation);
 });
+

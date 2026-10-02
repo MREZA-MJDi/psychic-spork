@@ -17,7 +17,7 @@ class Product extends Model
 
     protected $fillable = [
         'category_id','brand_id','name','slug','short_description','description','attributes',
-        'meta_title','meta_description','is_active','is_featured','sort_order',
+        'meta_title','meta_description','is_active','is_featured','is_hero','sort_order',
     ];
 
     protected function casts(): array
@@ -26,6 +26,7 @@ class Product extends Model
             'attributes' => 'array',
             'is_active' => 'boolean',
             'is_featured' => 'boolean',
+            'is_hero' => 'boolean',
             'sort_order' => 'integer',
         ];
     }
@@ -90,6 +91,23 @@ class Product extends Model
         return $this->relationLoaded('variants')
             ? $this->variants->first()
             : $this->variants()->first();
+    }
+
+    public function scopeOrderByEffectivePrice($query, string $direction = 'asc')
+    {
+        $direction = strtolower($direction) === 'desc' ? 'desc' : 'asc';
+
+        $priceSubquery = ProductVariant::query()
+            ->selectRaw('COALESCE(sale_price, price)')
+            ->whereColumn('product_id', 'products.id')
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->limit(1);
+
+        return $query
+            ->orderBy($priceSubquery, $direction)
+            ->orderBy('id');
     }
 
     public function scopeActive($query) { return $query->where('is_active', true); }

@@ -10,7 +10,6 @@ use App\Http\Controllers\Admin\AdminCustomerController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminFinancialController;
 use App\Http\Controllers\Admin\AdminInventoryController;
-use App\Http\Controllers\Admin\AdminHeroController;
 use App\Http\Controllers\Admin\AdminMediaController;
 use App\Http\Controllers\Admin\AdminNilaController;
 use App\Http\Controllers\Admin\AdminOrderController;
@@ -62,6 +61,7 @@ Route::get('/products', [StoreProductController::class, 'index'])
     ->name('products.index');
 
 Route::get('/search/suggestions', [StoreProductController::class, 'suggestions'])
+    ->middleware('throttle:60,1')
     ->name('search.suggestions');
 
 Route::get('/products/{product:slug}', [StoreProductController::class, 'show'])
@@ -236,6 +236,8 @@ Route::prefix('admin')
 
         Route::resource('products', AdminProductController::class)
             ->except(['show']);
+        Route::patch('products/{product}/hero', [AdminProductController::class, 'toggleHero'])
+            ->name('products.hero.toggle');
         Route::get('products/{product}/media', [AdminProductMediaController::class, 'index'])
             ->name('products.media.index');
 

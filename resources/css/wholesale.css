@@ -40,9 +40,6 @@
 .wholesale-empty{padding:30px;display:grid;gap:8px;text-align:center;}
 .wholesale-empty strong{font-size:14px;color:var(--janan-ink-strong);}
 .wholesale-empty span{font-size:9px;color:var(--janan-muted);}
-@media(max-width:900px){.wholesale-product-grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
-@media(max-width:700px){.wholesale-pack-grid,.wholesale-product-grid{grid-template-columns:1fr}.wholesale-catalog__head,.wholesale-products-head{align-items:flex-start;flex-direction:column}.wholesale-pack-card{padding:16px}.wholesale-product-card__media{height:220px;}}
-
 
 /* =========================================================
    WHOLESALE / FINAL STORE SURFACE
@@ -261,25 +258,3 @@
 }
 .customer-inline-status strong { font-size:11px; }
 .customer-inline-status p { margin:5px 0 14px; color:var(--wholesale-muted); font-size:9px; }
-
-@media (max-width: 920px) {
-    .wholesale-hero { grid-template-columns:1fr; }
-    .wholesale-status { min-height:220px; }
-    .wholesale-benefit-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
-    .wholesale-content { grid-template-columns:1fr; }
-}
-@media (max-width: 620px) {
-    .wholesale-page .section-block--compact { padding-block:18px 34px; }
-    .wholesale-hero__main,.wholesale-status,.wholesale-form-card,.wholesale-process { border-radius:20px; }
-    .wholesale-hero__main { min-height:0; padding:25px 18px; }
-    .wholesale-hero__main h1 { font-size:clamp(36px,11vw,54px); }
-    .customer-action-strip { align-items:stretch; flex-direction:column; }
-    .customer-action-strip__actions { display:grid; grid-template-columns:1fr 1fr; }
-    .customer-action-strip__actions .button { width:100%; }
-    .wholesale-benefit-grid { grid-template-columns:1fr; }
-    .wholesale-benefit { min-height:0; }
-    .wholesale-catalog { padding-block:42px 52px; }
-    .wholesale-catalog__head { padding:20px; }
-    .wholesale-pack-grid { gap:10px; }
-    .wholesale-product-card__media { aspect-ratio:1/1.12; }
-}

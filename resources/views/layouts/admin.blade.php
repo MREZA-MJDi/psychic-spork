@@ -10,7 +10,6 @@
 
     @vite([
         'resources/css/admin.css',
-        'resources/css/responsive-shell.css',
         'resources/js/admin.js',
     ])
 
@@ -55,14 +54,6 @@
             >
                 <span class="admin-link-icon">◈</span>
                 <span>محصولات</span>
-            </a>
-
-            <a
-                href="{{ route('admin.hero.index') }}"
-                class="admin-link {{ request()->routeIs('admin.hero.*') ? 'active' : '' }}"
-            >
-                <span class="admin-link-icon">✦</span>
-                <span>Hero صفحه اصلی</span>
             </a>
 
             <a

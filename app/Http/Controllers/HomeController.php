@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Brand;
-use App\Models\HeroSlide;
 use App\Models\Category;
 use App\Models\Order;
 use App\Models\Product;
@@ -114,8 +113,8 @@ class HomeController extends Controller
             ->with([
                 'category:id,name',
                 'brand:id,name',
-                'galleryMedia',
-                'variants',
+                'primaryGalleryMedia',
+                'primaryActiveVariant',
             ])
             ->withSum(
                 [
@@ -129,51 +128,48 @@ class HomeController extends Controller
             ->get();
 
         $heroVersion = Cache::remember(
-            'store:home:hero:version',
+            'store:home:hero:products:version',
             now()->addYear(),
             fn () => '1'
         );
 
         $heroSlides = Cache::remember(
-            'store:home:hero:' . $heroVersion,
+            'store:home:hero:products:' . $heroVersion,
             now()->addMinutes(30),
-            fn () => HeroSlide::query()
+            fn () => Product::query()
                 ->active()
+                ->where('is_hero', true)
                 ->with([
-                    'product:id,name,slug,brand_id,category_id,short_description,description',
-                    'product.brand:id,name',
-                    'product.brand.logoMedia',
-                    'product.category:id,name',
-                    'product.primaryGalleryMedia',
+                    'brand:id,name',
+                    'brand.logoMedia',
+                    'category:id,name',
+                    'primaryGalleryMedia',
                 ])
                 ->orderBy('sort_order')
                 ->orderBy('id')
-                ->limit(90)
+                ->limit(48)
                 ->get()
                 ->values()
-                ->map(function (HeroSlide $slide, int $index): array {
-                    $product = $slide->product;
-
+                ->map(function (Product $product, int $index): array {
                     $description = trim((string) (
-                        $slide->description
-                        ?: $product?->short_description
-                        ?: $product?->description
+                        $product->short_description
+                        ?: $product->description
                     ));
 
                     if ($description === '') {
-                        $description = $product?->category?->name
+                        $description = $product->category?->name
                             ? 'منتخبی از دسته ' . $product->category->name . ' در جانان.'
                             : 'منتخبی از کالکشن جانان.';
                     }
 
                     return [
                         'number' => str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT),
-                        'image' => $slide->resolved_image_url,
-                        'title' => $slide->title ?: ($product?->name ?? 'کالکشن منتخب جانان'),
+                        'image' => $product->primaryGalleryMedia?->url
+                            ?: $product->brand?->logoMedia?->url,
+                        'title' => $product->name,
                         'description' => $description,
-                        'brand' => $product?->brand?->name ?? 'JANAN',
-                        'url' => $slide->link_url
-                            ?: ($product ? route('products.show', $product) : route('products.index')),
+                        'brand' => $product->brand?->name ?? 'JANAN',
+                        'url' => route('products.show', $product),
                     ];
                 })
                 ->all()

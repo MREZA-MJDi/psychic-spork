@@ -161,11 +161,13 @@
                     @foreach($products as $product)
                         <article class="wholesale-product-card">
                             <a href="{{ route('products.show', $product) }}" class="wholesale-product-card__media">
-                                @if($product->primaryGalleryMedia?->url)
-                                    <img src="{{ $product->primaryGalleryMedia->url }}" alt="{{ $product->name }}" loading="lazy">
-                                @else
-                                    <span>JANAN</span>
-                                @endif
+                                <x-store.image
+                                    :src="$product->primaryGalleryMedia?->url"
+                                    :alt="$product->name"
+                                    fallback-tag="span"
+                                    fallback-class=""
+                                    fallback="JANAN"
+                                />
                             </a>
 
                             <div class="wholesale-product-card__body">

@@ -5,15 +5,9 @@ export default defineConfig({
     plugins: [
         laravel({
             input: [
-                'resources/css/app.css',
-                'resources/css/store-structure.css',
-                'resources/css/store-polish.css',
-                'resources/css/store-responsive.css',
-                'resources/css/store-customer-uiux.css',
-                'resources/css/responsive-shell.css',
+                'resources/css/store.css',
                 'resources/css/home.css',
                 'resources/css/wholesale.css',
-                'resources/css/editorial-hero.css',
                 'resources/css/auth.css',
                 'resources/js/app.js',
                 'resources/js/store-cart.js',

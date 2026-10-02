@@ -27,7 +27,7 @@
         radial-gradient(circle at 8% 8%, rgba(218,142,169,.10), transparent 25rem),
         radial-gradient(circle at 94% 86%, rgba(123,196,223,.08), transparent 24rem),
         var(--auth-pearl);
-    font-family: 'Vazirmatn', Tahoma, Arial, sans-serif;
+    font-family: 'IRANYekanX', Tahoma, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
 }
@@ -1183,8 +1183,7 @@
     width: min(1420px, 100%);
     min-height: min(720px, calc(100svh - 150px));
     display: grid;
-    grid-template-columns: 42px minmax(0, 1fr) minmax(310px, .43fr);
-    grid-template-areas: "rail context panel";
+    grid-template-columns: minmax(0, 1fr) minmax(310px, .43fr);
     direction: ltr;
     border: 1px solid rgba(57,65,74,.09);
     background: rgba(255,255,255,.76);
@@ -1195,8 +1194,7 @@
     animation: auth-card-in .65s cubic-bezier(.2,.8,.2,1) both;
 }
 
- .auth-workspace__rail {
-    grid-area: rail;
+.auth-workspace__rail {
     width: 42px;
     display: flex;
     flex-direction: column;
@@ -1219,8 +1217,7 @@
     background: linear-gradient(to bottom, transparent, rgba(189,103,131,.38), transparent);
 }
 
- .auth-panel {
-    grid-area: panel;
+.auth-panel {
     min-width: 0;
     padding: clamp(34px, 5vw, 72px);
     direction: rtl;
@@ -1485,8 +1482,7 @@
     font-weight: 900;
 }
 
- .auth-context {
-    grid-area: context;
+.auth-context {
     position: relative;
     min-width: 0;
     overflow: hidden;
@@ -1624,8 +1620,7 @@
     }
 
     .auth-workspace {
-        grid-template-columns: 42px minmax(0, 1fr) minmax(260px, .42fr);
-        grid-template-areas: "rail context panel";
+        grid-template-columns: minmax(0, 1fr) minmax(260px, .42fr);
     }
 
     .auth-panel {

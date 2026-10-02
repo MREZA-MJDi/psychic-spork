@@ -16,7 +16,7 @@
 
         <header class="home-signals__head">
             <div>
-                <span class="eyebrow">JANAN / STORE PULSE / 06</span>
+                <span class="eyebrow">JANAN / STORE PULSE / 05</span>
                 <h2 id="home-signals-title">آنچه همین حالا در فروشگاه جریان دارد.</h2>
                 <p>تازه‌های کاتالوگ و خریدهای ثبت‌شده در ۳۰ روز اخیر.</p>
             </div>
@@ -57,16 +57,13 @@
                                 class="home-signal-item"
                             >
                                 <span class="home-signal-item__media">
-                                    @if($image)
-                                        <img
-                                            src="{{ $image }}"
-                                            alt="{{ $product->name }}"
-                                            loading="lazy"
-                                            decoding="async"
-                                        >
-                                    @else
-                                        <span>JANAN</span>
-                                    @endif
+                                    <x-store.image
+                                        :src="$image"
+                                        :alt="$product->name"
+                                        fallback-tag="span"
+                                        fallback-class="home-signal-item__fallback"
+                                        fallback="JANAN"
+                                    />
                                 </span>
 
                                 <span class="home-signal-item__copy">
@@ -103,10 +100,8 @@
                     <div class="home-signal-list">
                         @foreach($popularProducts as $product)
                             @php
-                                $variant = $product->variants?->first(
-                                    fn ($item) => (bool) $item->is_active
-                                );
-                                $image = $product->galleryMedia?->first()?->url;
+                                $variant = $product->primaryActiveVariant;
+                                $image = $product->primaryGalleryMedia?->url;
                                 $sales = (int) ($product->sales_quantity ?? 0);
                             @endphp
 
@@ -115,16 +110,13 @@
                                 class="home-signal-item home-signal-item--popular"
                             >
                                 <span class="home-signal-item__media">
-                                    @if($image)
-                                        <img
-                                            src="{{ $image }}"
-                                            alt="{{ $product->name }}"
-                                            loading="lazy"
-                                            decoding="async"
-                                        >
-                                    @else
-                                        <span>JANAN</span>
-                                    @endif
+                                    <x-store.image
+                                        :src="$image"
+                                        :alt="$product->name"
+                                        fallback-tag="span"
+                                        fallback-class="home-signal-item__fallback"
+                                        fallback="JANAN"
+                                    />
                                 </span>
 
                                 <span class="home-signal-item__copy">

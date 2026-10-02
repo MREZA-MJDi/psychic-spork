@@ -1,13 +1,12 @@
 @php
     $slides = array_values($heroSlides ?? []);
-    $slideCount = count($slides);
 @endphp
 
 @if(!app()->environment('testing'))
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/Draggable.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/Flip.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/CustomEase.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/Draggable.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/Flip.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/CustomEase.min.js" defer></script>
 @endif
 
 <section
@@ -29,7 +28,7 @@
 
     <div class="immersive-split-screen" id="immersiveSplitScreen">
         <div class="immersive-split-screen__left" id="immersiveSplitLeft">
-            <div class="immersive-zoom-target" id="immersiveZoomTarget"></div>
+            <a class="immersive-zoom-target" id="immersiveZoomTarget" href="{{ route('products.index') }}" aria-label="مشاهده محصول انتخاب‌شده"></a>
         </div>
 
         <div class="immersive-split-screen__right" id="immersiveSplitRight"></div>
@@ -85,10 +84,6 @@
                 FIT
             </button>
         </div>
-
-        <button type="button" class="immersive-sound-toggle" id="immersiveSoundToggle" aria-label="Toggle sound" aria-pressed="false">
-            <canvas id="immersiveSoundCanvas" width="32" height="16"></canvas>
-        </button>
     </div>
 
     <footer class="immersive-footer">

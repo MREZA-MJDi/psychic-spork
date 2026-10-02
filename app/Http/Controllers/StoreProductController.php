@@ -6,7 +6,6 @@ use App\Http\Requests\StoreProductFilterRequest;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
-use App\Models\ProductVariant;
 use App\Services\SeoService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -22,14 +21,6 @@ class StoreProductController extends Controller
 
         $sort = $filters['sort'] ?? 'newest';
         $perPage = (int) ($filters['per_page'] ?? 12);
-
-        $priceSubquery = ProductVariant::query()
-            ->selectRaw('COALESCE(sale_price, price)')
-            ->whereColumn('product_id', 'products.id')
-            ->where('is_active', true)
-            ->orderBy('sort_order')
-            ->orderBy('id')
-            ->limit(1);
 
         $products = Product::query()
             ->active()
@@ -92,10 +83,10 @@ class StoreProductController extends Controller
                 $query->orderBy('updated_at')->orderBy('id')
             )
             ->when($sort === 'price_asc', fn ($query) =>
-                $query->orderBy($priceSubquery, 'asc')->orderBy('id')
+                $query->orderByEffectivePrice('asc')
             )
             ->when($sort === 'price_desc', fn ($query) =>
-                $query->orderBy($priceSubquery, 'desc')->orderBy('id')
+                $query->orderByEffectivePrice('desc')
             )
             ->when($sort === 'name_asc', fn ($query) =>
                 $query->orderBy('name')->orderBy('id')
@@ -138,6 +129,12 @@ class StoreProductController extends Controller
 
         if (mb_strlen($term) < 2) {
             return response()->json(['items' => []]);
+        }
+
+        if (mb_strlen($term) > 120) {
+            return response()->json([
+                'message' => 'عبارت جستجو بیش از حد طولانی است.',
+            ], 422);
         }
 
         $like = '%' . $term . '%';
@@ -203,8 +200,8 @@ class StoreProductController extends Controller
         $product->load([
             'category',
             'brand',
-            'activeVariants',
-            'galleryMedia',
+            'activeVariants.primaryGalleryMedia',
+            'galleryMedia' => fn ($query) => $query->orderBy('sort_order')->orderBy('id')->limit(8),
         ]);
 
         $relatedProducts = Product::query()

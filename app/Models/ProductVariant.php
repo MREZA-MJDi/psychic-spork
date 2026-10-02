@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ProductVariant extends Model
@@ -37,6 +38,14 @@ class ProductVariant extends Model
     public function galleryMedia(): MorphMany
     {
         return $this->morphMany(Media::class, 'mediable')
+            ->where('collection', 'gallery')
+            ->orderBy('sort_order')
+            ->orderBy('id');
+    }
+
+    public function primaryGalleryMedia(): MorphOne
+    {
+        return $this->morphOne(Media::class, 'mediable')
             ->where('collection', 'gallery')
             ->orderBy('sort_order')
             ->orderBy('id');

@@ -10,6 +10,7 @@ use App\Models\ContactMessage;
 use App\Models\FinancialTransaction;
 use App\Models\IntegrationMapping;
 use App\Models\JournalLine;
+use App\Models\LedgerAccount;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\ProductVariant;
@@ -60,31 +61,39 @@ class AdminDashboardController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $ledgerLines = JournalLine::query()
-            ->with('account')
+        $ledgerTotals = JournalLine::query()
             ->whereHas('entry', function ($query) use ($from, $to): void {
                 $query
                     ->whereDate('entry_date', '>=', $from->toDateString())
                     ->whereDate('entry_date', '<=', $to->toDateString());
-            });
+            })
+            ->whereHas('account', fn ($query) => $query->whereIn(
+                'code',
+                ['sales', 'sales_returns', 'cash', 'bank']
+            ))
+            ->selectRaw('ledger_account_id, SUM(debit) as debit_total, SUM(credit) as credit_total')
+            ->groupBy('ledger_account_id')
+            ->get();
 
-        $revenue = (float) (clone $ledgerLines)
-            ->whereHas('account', fn ($query) => $query->where('code', 'sales'))
-            ->sum('credit');
+        $ledgerAccounts = LedgerAccount::query()
+            ->whereIn('id', $ledgerTotals->pluck('ledger_account_id'))
+            ->pluck('code', 'id');
 
-        $salesReturns = (float) (clone $ledgerLines)
-            ->whereHas('account', fn ($query) => $query->where('code', 'sales_returns'))
-            ->sum('debit');
+        $ledgerByCode = $ledgerTotals->keyBy(
+            fn ($row) => $ledgerAccounts->get($row->ledger_account_id)
+        );
 
+        $revenue = (float) ($ledgerByCode->get('sales')?->credit_total ?? 0);
+        $salesReturns = (float) ($ledgerByCode->get('sales_returns')?->debit_total ?? 0);
         $revenue = max(0, $revenue - $salesReturns);
 
-        $settledFundsIn = (float) (clone $ledgerLines)
-            ->whereHas('account', fn ($query) => $query->whereIn('code', ['cash', 'bank']))
-            ->sum('debit');
+        $settledFundsIn = (float) $ledgerByCode
+            ->filter(fn ($row, $code) => in_array($code, ['cash', 'bank'], true))
+            ->sum('debit_total');
 
-        $settledFundsOut = (float) (clone $ledgerLines)
-            ->whereHas('account', fn ($query) => $query->whereIn('code', ['cash', 'bank']))
-            ->sum('credit');
+        $settledFundsOut = (float) $ledgerByCode
+            ->filter(fn ($row, $code) => in_array($code, ['cash', 'bank'], true))
+            ->sum('credit_total');
 
         $settledFunds = $settledFundsIn - $settledFundsOut;
 
@@ -328,8 +337,8 @@ class AdminDashboardController extends Controller
         $recentProducts = Product::query()
             ->with([
                 'category:id,name',
-                'galleryMedia',
-                'variants',
+                'primaryGalleryMedia',
+                'primaryActiveVariant',
             ])
             ->latest('created_at')
             ->latest('id')

@@ -1810,7 +1810,7 @@
    34. MOBILE NAV
 ========================================================= */
 
-.admin-mobile-nav {
+.mobile-bottom-nav--admin {
     display: none;
 }
 
@@ -1867,7 +1867,7 @@
         padding:
             18px
             18px
-            92px;
+            calc(92px + env(safe-area-inset-bottom));
     }
 
     .admin-header {
@@ -1907,11 +1907,11 @@
         grid-template-columns: 1fr;
     }
 
-    .admin-mobile-nav {
+    .mobile-bottom-nav--admin {
         position: fixed;
-        right: 12px;
-        left: 12px;
-        bottom: 12px;
+        right: max(10px, env(safe-area-inset-right));
+        left: max(10px, env(safe-area-inset-left));
+        bottom: max(10px, env(safe-area-inset-bottom));
 
         z-index: 200;
 
@@ -1934,7 +1934,7 @@
         backdrop-filter: blur(12px);
     }
 
-    .admin-mobile-nav a {
+    .mobile-bottom-nav--admin a {
         min-width: 0;
 
         display: flex;
@@ -1956,13 +1956,13 @@
             color var(--admin-transition);
     }
 
-    .admin-mobile-nav a:hover,
-    .admin-mobile-nav a.active {
+    .mobile-bottom-nav--admin a:hover,
+    .mobile-bottom-nav--admin a.active {
         color: #ffffff;
         background: rgba(255, 255, 255, 0.08);
     }
 
-    .admin-mobile-nav__icon {
+    .mobile-bottom-nav--admin .mobile-bottom-nav__icon {
         font-size: 13px;
         line-height: 1;
     }
@@ -2161,7 +2161,7 @@
         font-size: 18px;
     }
 
-    .admin-mobile-nav {
+    .mobile-bottom-nav--admin {
         right: 8px;
         left: 8px;
         bottom: 8px;
@@ -3987,6 +3987,79 @@ body.admin-nav-open {
 }
 
 
+
+.admin-hero-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 118px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.admin-hero-toggle input {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.admin-hero-toggle > span[aria-hidden="true"] {
+    position: relative;
+    inline-size: 36px;
+    block-size: 22px;
+    flex: 0 0 36px;
+    border-radius: 999px;
+    background: var(--admin-surface-muted);
+    border: 1px solid var(--admin-border);
+    transition: background var(--admin-transition), border-color var(--admin-transition);
+}
+
+.admin-hero-toggle > span[aria-hidden="true"]::after {
+    content: "";
+    position: absolute;
+    inset-block-start: 3px;
+    inset-inline-start: 3px;
+    inline-size: 14px;
+    block-size: 14px;
+    border-radius: 50%;
+    background: var(--admin-muted);
+    transition: transform var(--admin-transition), background var(--admin-transition);
+}
+
+.admin-hero-toggle input:checked + span[aria-hidden="true"] {
+    background: var(--admin-info);
+    border-color: var(--admin-info);
+}
+
+.admin-hero-toggle input:checked + span[aria-hidden="true"]::after {
+    transform: translateX(-14px);
+    background: #fff;
+}
+
+.admin-hero-toggle input:focus-visible + span[aria-hidden="true"] {
+    outline: 2px solid var(--admin-info);
+    outline-offset: 3px;
+}
+
+.admin-hero-toggle__text {
+    color: var(--admin-text-soft);
+    font-size: 9px;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+    .admin-hero-toggle {
+        min-width: 0;
+    }
+
+    .admin-hero-toggle__text {
+        display: none;
+    }
+}
+
 /* =========================================================
    OPERATIONAL CONTROL CENTER
 ========================================================= */
@@ -4289,3 +4362,101 @@ body.admin-nav-open {
 .admin-media-picker__controls{display:flex;gap:10px;align-items:end;flex-wrap:wrap}
 .admin-media-picker__controls .admin-field{flex:1 1 240px}
 @media(max-width:700px){.admin-media-picker__stage{grid-template-columns:1fr}.admin-media-picker__preview{width:min(360px,100%);justify-self:center}.admin-media-picker__editor-head{flex-direction:column}.admin-media-picker__editor canvas{max-height:52vh}.admin-media-picker__controls>*{width:100%}}
+
+
+/* =========================================================
+   ADMIN FINAL VIEWPORT GUARDRAILS
+========================================================= */
+
+.admin-body {
+    min-width: 320px;
+    overflow-x: hidden;
+}
+
+.admin-shell,
+.admin-main,
+.admin-content,
+.admin-header,
+.admin-page-head,
+.admin-card,
+.admin-form-grid,
+.admin-dashboard-grid,
+.admin-dashboard-grid--equal,
+.admin-dashboard-grid--three,
+.dashboard-v2,
+.dashboard-v2__grid,
+.dashboard-v2__stats,
+.dashboard-v2__panel,
+.dashboard-v2__hero,
+.dashboard-v2__control-grid,
+.dashboard-v2__control-item {
+    min-width: 0;
+    max-width: 100%;
+}
+
+.admin-header__right > *,
+.admin-header__left > *,
+.admin-page-head > *,
+.dashboard-v2__hero > *,
+.dashboard-v2__hero-actions > *,
+.dashboard-v2__panel-head > *,
+.dashboard-v2__control-item > * {
+    min-width: 0;
+    max-width: 100%;
+}
+
+.admin-table-wrap,
+.admin-table-responsive,
+.dashboard-v2__orders-table,
+.dashboard-v2__chart-wrap {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+}
+
+.admin-table {
+    width: max-content;
+    min-width: 100%;
+}
+
+@media (max-width: 900px) {
+    .admin-main {
+        margin-right: 0;
+        padding-bottom: calc(92px + env(safe-area-inset-bottom));
+    }
+
+    .dashboard-v2__hero-actions,
+    .dashboard-v2__control-grid {
+        min-width: 0;
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 640px) {
+    .admin-main {
+        padding-inline: 10px;
+    }
+
+    .admin-header,
+    .admin-card,
+    .dashboard-v2__panel,
+    .dashboard-v2__hero,
+    .dashboard-v2__control-center {
+        max-width: 100%;
+    }
+
+    .admin-page-head,
+    .admin-card-header,
+    .dashboard-v2__panel-head {
+        overflow-wrap: anywhere;
+    }
+
+    .admin-btn,
+    .button,
+    .admin-page-head > a,
+    .admin-page-head > button {
+        max-width: 100%;
+    }
+}

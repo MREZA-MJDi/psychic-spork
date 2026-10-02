@@ -29,7 +29,12 @@
 @foreach($items as $item)
     <article class="cart-item reveal-up">
         <a href="{{ route('products.show',$item['product']) }}" class="cart-item__media">
-            @if($item['image'])<img src="{{ $item['image'] }}" alt="{{ $item['product']->name }}" loading="lazy">@else<div class="product-image-placeholder"><span>{{ $item['product']->name }}</span></div>@endif
+            <x-store.image
+                :src="$item['image']"
+                :alt="$item['product']->name"
+                fallback-class="product-image-placeholder"
+                :fallback="$item['product']->name"
+            />
         </a>
         <div class="cart-item__body">
             <span class="eyebrow">{{ $item['product']->category?->name ?: 'JANAN' }}</span>

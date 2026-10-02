@@ -12,6 +12,7 @@ use App\Models\ProductVariant;
 use App\Services\MediaService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
@@ -29,10 +30,15 @@ class AdminProductController extends Controller
     {
         $products = Product::query()
             ->with([
-                'category',
-                'brand',
+                'category:id,name',
+                'brand:id,name',
+                'primaryActiveVariant',
+                'primaryGalleryMedia',
+            ])
+            ->withCount([
                 'variants',
-                'galleryMedia',
+                'variants as wholesale_variants_count' => fn ($query) =>
+                    $query->whereNotNull('wholesale_price'),
             ])
             ->when($request->filled('q'), function ($query) use ($request) {
                 $search = trim((string) $request->input('q'));
@@ -92,6 +98,57 @@ class AdminProductController extends Controller
             'categories' => $this->categories(),
             'brands' => $this->brands(),
         ]);
+    }
+
+    public function toggleHero(Product $product): RedirectResponse
+    {
+        try {
+            $isHero = DB::transaction(function () use ($product): bool {
+                $current = Product::query()
+                    ->whereKey($product->getKey())
+                    ->lockForUpdate()
+                    ->firstOrFail();
+
+                if (!$current->is_hero) {
+                    $heroIds = Product::query()
+                        ->where('is_hero', true)
+                        ->lockForUpdate()
+                        ->pluck('id');
+
+                    if ($heroIds->count() >= 48) {
+                        throw new \RuntimeException('hero_limit');
+                    }
+                }
+
+                $current->update([
+                    'is_hero' => !$current->is_hero,
+                ]);
+
+                return (bool) $current->is_hero;
+            });
+
+            Cache::put(
+                'store:home:hero:products:version',
+                (string) Str::uuid(),
+                now()->addYear()
+            );
+
+            return back()->with(
+                'success',
+                $isHero
+                    ? 'محصول به Hero صفحه اصلی اضافه شد.'
+                    : 'محصول از Hero صفحه اصلی حذف شد.'
+            );
+        } catch (\RuntimeException $e) {
+            if ($e->getMessage() === 'hero_limit') {
+                return back()->with(
+                    'error',
+                    'حداکثر ۴۸ محصول می‌تواند همزمان در Hero صفحه اصلی باشد.'
+                );
+            }
+
+            throw $e;
+        }
     }
 
     /*

@@ -46,46 +46,40 @@
         </script>
     @endif
 
-    @vite([
-        'resources/css/app.css',
-        'resources/css/responsive-shell.css',
-        'resources/css/store-structure.css',
-        'resources/js/app.js',
-        'resources/js/store-cart.js',
-        'resources/js/store-search.js',
-        'resources/js/store-customer-uiux.js',
-    ])
+    @php
+        $storeAssets = [
+            'resources/js/app.js',
+            'resources/js/store-cart.js',
+            'resources/js/store-search.js',
+        ];
 
-    @unless(app()->environment('testing'))
-        @vite([
-            'resources/css/store-polish.css',
-            'resources/css/store-responsive.css',
-            'resources/css/store-customer-uiux.css',
-        ])
-    @endunless
+        if (request()->routeIs('wholesale.show')) {
+            $storeAssets[] = 'resources/css/wholesale.css';
+        }
 
-    @if(request()->routeIs('wholesale.show'))
-        @vite(['resources/css/wholesale.css'])
-    @endif
+        if (request()->routeIs('checkout')) {
+            $storeAssets[] = 'resources/js/store-customer-uiux.js';
+        }
 
-    @if(request()->routeIs('products.show'))
-        @unless(app()->environment('testing'))
-            @vite(['resources/js/product-show.js'])
-        @endunless
-    @endif
+        if (request()->routeIs('products.show')) {
+            $storeAssets[] = 'resources/js/product-show.js';
+        }
 
-    @if($isHome)
-        @vite([
-            'resources/css/home.css',
-            'resources/css/editorial-hero.css',
-            'resources/js/editorial-hero.js',
-        ])
+        if ($isHome) {
+            $storeAssets[] = 'resources/css/home.css';
+            $storeAssets[] = 'resources/js/editorial-hero.js';
 
-        @unless(app()->environment('testing'))
-            @vite(['resources/js/home-product-carousel.js'])
-        @endunless
-    @endif
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js" defer></script>
+            if (!app()->environment('testing')) {
+                $storeAssets[] = 'resources/js/home-product-carousel.js';
+            }
+        }
+
+        if (!app()->environment('testing')) {
+            $storeAssets[] = 'resources/css/store.css';
+        }
+    @endphp
+
+    @vite($storeAssets)
 
 </head>
 

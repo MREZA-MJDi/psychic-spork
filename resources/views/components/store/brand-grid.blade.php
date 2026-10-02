@@ -17,7 +17,7 @@
 
             <div class="home-brands__intro">
                 <span class="eyebrow">
-                    HOUSES / 07
+                    HOUSES / 06
                 </span>
 
                 <h2 id="{{ $titleId }}">
@@ -59,22 +59,13 @@
 
                         <div class="home-brand-tile__logo">
 
-                            @if($brand->logoMedia?->url)
-
-                                <img
-                                    src="{{ $brand->logoMedia->url }}"
-                                    alt="{{ $brand->name }}"
-                                    loading="lazy"
-                                    decoding="async"
-                                >
-
-                            @else
-
-                                <span class="home-brand-tile__initial">
-                                    {{ mb_substr($brand->name, 0, 1) }}
-                                </span>
-
-                            @endif
+                            <x-store.image
+                                :src="$brand->logoMedia?->url"
+                                :alt="$brand->name"
+                                fallback-tag="span"
+                                fallback-class="home-brand-tile__initial"
+                                :fallback="mb_substr($brand->name, 0, 1)"
+                            />
 
                         </div>
 
