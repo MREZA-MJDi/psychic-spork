@@ -23,11 +23,6 @@
     --store-line: rgba(44, 65, 75, .10);
 }
 
-.container {
-    width: min(var(--store-max), calc(100% - (var(--store-gutter) * 2)));
-    margin-inline: auto;
-}
-
 .catalog-page,
 .brand-profile-page,
 .product-detail-v2 {
