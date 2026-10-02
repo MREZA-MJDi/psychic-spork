@@ -3,17 +3,6 @@
    Shared mobile/tablet behavior for public + customer pages.
 ========================================================= */
 
-.site-main,
-.site-shell {
-    width: 100%;
-    max-width: 100%;
-    min-width: 0;
-}
-
-.site-main {
-    overflow-x: clip;
-}
-
 .catalog-inline-sort {
     display: flex;
     align-items: end;
