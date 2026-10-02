@@ -1867,7 +1867,7 @@
         padding:
             18px
             18px
-            92px;
+            calc(92px + env(safe-area-inset-bottom));
     }
 
     .admin-header {
@@ -1909,9 +1909,9 @@
 
     .mobile-bottom-nav--admin {
         position: fixed;
-        right: 12px;
-        left: 12px;
-        bottom: 12px;
+        right: max(10px, env(safe-area-inset-right));
+        left: max(10px, env(safe-area-inset-left));
+        bottom: max(10px, env(safe-area-inset-bottom));
 
         z-index: 200;
 
