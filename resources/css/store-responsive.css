@@ -3119,3 +3119,30 @@ animation-duration:
         height: min(430px, 92vw);
     }
 }
+/* =========================================================
+   SHARED CART DRAWER — RESPONSIVE LAYER CONTRACT
+   The drawer is a global Store component. Hero must never
+   paint above it, regardless of its internal z-index layers.
+========================================================= */
+.cart-drawer {
+    z-index: 11000;
+}
+
+@media (max-width: 820px) {
+    .cart-drawer {
+        z-index: 11000;
+    }
+
+    .cart-drawer__panel {
+        width: min(470px, calc(100vw - 16px));
+        max-width: calc(100vw - 16px);
+    }
+}
+
+@media (max-width: 480px) {
+    .cart-drawer__panel {
+        width: calc(100vw - 12px);
+        max-width: calc(100vw - 12px);
+        border-radius: 0 18px 18px 0;
+    }
+}
