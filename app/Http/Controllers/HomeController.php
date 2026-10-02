@@ -6,13 +6,13 @@ use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Order;
 use App\Models\Product;
+use App\Services\HeroService;
 use App\Services\SeoService;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 
 class HomeController extends Controller
 {
-    public function index(SeoService $seo): View
+    public function index(SeoService $seo, HeroService $hero): View
     {
         $categories = Category::query()
             ->active()
@@ -127,53 +127,7 @@ class HomeController extends Controller
             ->limit(4)
             ->get();
 
-        $heroVersion = Cache::remember(
-            'store:home:hero:products:version',
-            now()->addYear(),
-            fn () => '1'
-        );
-
-        $heroSlides = Cache::remember(
-            'store:home:hero:products:' . $heroVersion,
-            now()->addMinutes(30),
-            fn () => Product::query()
-                ->active()
-                ->where('is_hero', true)
-                ->with([
-                    'brand:id,name',
-                    'brand.logoMedia',
-                    'category:id,name',
-                    'primaryGalleryMedia',
-                ])
-                ->orderBy('sort_order')
-                ->orderBy('id')
-                ->limit(48)
-                ->get()
-                ->values()
-                ->map(function (Product $product, int $index): array {
-                    $description = trim((string) (
-                        $product->short_description
-                        ?: $product->description
-                    ));
-
-                    if ($description === '') {
-                        $description = $product->category?->name
-                            ? 'منتخبی از دسته ' . $product->category->name . ' در جانان.'
-                            : 'منتخبی از کالکشن جانان.';
-                    }
-
-                    return [
-                        'number' => str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT),
-                        'image' => $product->primaryGalleryMedia?->url
-                            ?: $product->brand?->logoMedia?->url,
-                        'title' => $product->name,
-                        'description' => $description,
-                        'brand' => $product->brand?->name ?? 'JANAN',
-                        'url' => route('products.show', $product),
-                    ];
-                })
-                ->all()
-        );
+        $heroSlides = $hero->slides();
 
         return view('home.index', [
             'seo' => $seo->storeHome(),

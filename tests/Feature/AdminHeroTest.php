@@ -40,11 +40,11 @@ class AdminHeroTest extends TestCase
             ->assertSee($product->name);
     }
 
-    public function test_product_hero_selection_is_capped_at_forty_eight_products(): void
+    public function test_product_hero_selection_is_capped_at_thirty_products(): void
     {
         $admin = User::factory()->create(['is_admin' => true]);
 
-        $products = Product::factory()->count(48)->create([
+        $products = Product::factory()->count(30)->create([
             'is_active' => true,
             'is_hero' => true,
         ]);
@@ -66,7 +66,7 @@ class AdminHeroTest extends TestCase
         ]);
 
         $this->assertSame(
-            48,
+            30,
             Product::query()->where('is_hero', true)->count()
         );
     }

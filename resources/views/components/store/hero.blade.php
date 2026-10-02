@@ -2,12 +2,6 @@
     $slides = array_values($heroSlides ?? []);
 @endphp
 
-@if(!app()->environment('testing'))
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js" defer></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/Draggable.min.js" defer></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/Flip.min.js" defer></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/CustomEase.min.js" defer></script>
-@endif
 
 <section
     class="immersive-grid-hero"
@@ -15,9 +9,6 @@
     data-immersive-gallery
     aria-label="گالری تعاملی کالکشن جانان"
 >
-    <div class="immersive-preloader" id="immersivePreloader" aria-hidden="true"></div>
-
-
     <div class="immersive-vignette" aria-hidden="true"></div>
 
     <div class="immersive-viewport" id="immersiveViewport">
@@ -28,7 +19,7 @@
 
     <div class="immersive-split-screen" id="immersiveSplitScreen">
         <div class="immersive-split-screen__left" id="immersiveSplitLeft">
-            <a class="immersive-zoom-target" id="immersiveZoomTarget" href="{{ route('products.index') }}" aria-label="مشاهده محصول انتخاب‌شده"></a>
+            <a class="immersive-zoom-target" id="immersiveZoomTarget" href="{{ route('products.index') }}" aria-label="مشاهده محصول انتخاب‌شده" tabindex="-1" aria-hidden="true"></a>
         </div>
 
         <div class="immersive-split-screen__right" id="immersiveSplitRight"></div>

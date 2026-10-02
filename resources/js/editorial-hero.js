@@ -1,3 +1,950 @@
-document.addEventListener('DOMContentLoaded',()=>{if(window.__JANAN_IMMERSIVE_HERO_INITIALIZED__)return;window.__JANAN_IMMERSIVE_HERO_INITIALIZED__=true;const root=document.querySelector('[data-immersive-gallery]');if(!root)return;const q=s=>root.querySelector(s);const viewport=q('#immersiveViewport'),wrap=q('#immersiveCanvasWrapper'),grid=q('#immersiveGridContainer'),split=q('#immersiveSplitScreen'),target=q('#immersiveZoomTarget'),left=q('#immersiveSplitLeft'),right=q('#immersiveSplitRight'),close=q('#immersiveCloseButton'),overlay=q('#immersiveTitleOverlay'),num=q('#immersiveSlideNumber'),title=q('#immersiveSlideTitle'),desc=q('#immersiveSlideDescription'),link=q('#immersiveSlideLink'),controls=q('#immersiveControls'),percent=q('#immersivePercentage'),pre=q('#immersivePreloader'),data=q('#immersiveHeroData');if(!viewport||!wrap||!grid||!split||!target||!data)return;const gs=window.gsap,Drag=window.Draggable,Flip=window.Flip,CE=window.CustomEase;if(!gs||!Drag||!Flip){pre?.remove();viewport.style.opacity='1';return}const plugins=[Drag,Flip];if(CE)plugins.push(CE);gs.registerPlugin(...plugins);let slides=[];try{slides=JSON.parse(data.textContent||'[]')}catch{}const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;const ease=CE?CE.create('immersiveSmooth','.87,0,.13,1'):'power2.inOut',center=CE?CE.create('immersiveCenter','.25,.46,.45,.94'):'power2.out';const clampIndex=i=>slides.length?((i%slides.length)+slides.length)%slides.length:0;const getSlide=i=>slides.length?slides[clampIndex(i)]:{number:'01',title:'JANAN',description:'منتخبی از کالکشن جانان.',image:null,url:'#',brand:'JANAN'};
-class Preloader{run(){if(!pre)return Promise.resolve();const c=document.createElement('canvas');c.width=c.height=300;pre.append(c);const ctx=c.getContext('2d');let start=0,id=0;return new Promise(done=>{const tick=t=>{if(!start)start=t;const time=(t-start)/1000;ctx.clearRect(0,0,300,300);ctx.beginPath();ctx.arc(150,150,3,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();[{r:20,n:8},{r:35,n:12},{r:50,n:16},{r:65,n:20},{r:80,n:24}].forEach((ring,k)=>{for(let i=0;i<ring.n;i++){const a=i/ring.n*Math.PI*2,p=Math.sin(time*2-k*.4)*3,x=150+Math.cos(a)*(ring.r+p),y=150+Math.sin(a)*(ring.r+p),w=.4+Math.sin(time*2-k*.4+i*.2)*.6,hot=Math.sin(time*2-k*.4+i*.2)>.6;ctx.beginPath();ctx.moveTo(150,150);ctx.lineTo(x,y);ctx.lineWidth=.8;ctx.strokeStyle=hot?'rgba(255,255,255,.5)':'rgba(255,255,255,.18)';ctx.stroke();ctx.beginPath();ctx.arc(x,y,2.5,0,Math.PI*2);ctx.fillStyle='rgba(255,255,255,'+(hot?w:w*.55)+')';ctx.fill()}});if(t-start>=(reduce?250:2000)){cancelAnimationFrame(id);gs.to(pre,{opacity:0,duration:reduce?.05:.8,onComplete:()=>{pre.remove();done()}});return}id=requestAnimationFrame(tick)};id=requestAnimationFrame(tick)})}}
-class Gallery{constructor(){const cssSize=parseFloat(getComputedStyle(root).getPropertyValue('--immersive-item-size'))||320;const cols=Math.min(3,Math.max(1,slides.length));const rows=Math.max(1,Math.ceil(slides.length/cols));this.cfg={size:cssSize,rows,cols,zoom:.6,gap:32};this.items=[];this.dim={};this.drag=null;this.last={x:0,y:0};this.zoom={active:false,item:null,overlay:null};this.boundResize=()=>this.reset();this.boundLeave=()=>this.leave();this.boundKey=e=>{if(this.zoom.active)return;if(e.key==='1')this.setZoom(.3);if(e.key==='2')this.setZoom(.6);if(e.key==='3')this.setZoom(1);if(e.key.toLowerCase()==='f')this.fit();};this.boundClose=()=>this.exit();this.boundSplit=e=>{if(e.target===e.currentTarget)this.exit()}};gap(z){return z>=1?16:z>=.6?32:64};reset(){if(this.zoom.active){this.exit();return}const cssSize=parseFloat(getComputedStyle(root).getPropertyValue('--immersive-item-size'))||this.cfg.size;this.cfg.size=cssSize;const w=viewport.clientWidth,h=viewport.clientHeight,z=this.cfg.zoom,g=this.gap(z);this.cfg.gap=g;this.calc(g);wrap.style.width=this.dim.w+'px';wrap.style.height=this.dim.h+'px';this.items.forEach(d=>{d.baseX=d.col*(this.cfg.size+g);d.baseY=d.row*(this.cfg.size+g);gs.set(d.element,{left:d.baseX,top:d.baseY})});const b=this.bounds();const fallbackX=(w-this.dim.w*z)/2,fallbackY=(h-this.dim.h*z)/2;const x=Math.max(b.minX,Math.min(b.maxX,this.last.x||fallbackX)),y=Math.max(b.minY,Math.min(b.maxY,this.last.y||fallbackY));gs.set(wrap,{scale:z,x,y});this.last={x,y};this.dragInit()};calc(g=this.cfg.gap){const w=this.cfg.cols*(this.cfg.size+g)-g,h=this.cfg.rows*(this.cfg.size+g)-g;this.dim={w,h,sw:w*this.cfg.zoom,sh:h*this.cfg.zoom,g};return this.dim};build(){this.cfg.gap=this.gap(this.cfg.zoom);this.calc();wrap.style.width=this.dim.w+'px';wrap.style.height=this.dim.h+'px';grid.replaceChildren();this.items=[];for(let i=0;i<slides.length;i++){const row=Math.floor(i/this.cfg.cols),col=i%this.cfg.cols,x=col*(this.cfg.size+this.cfg.gap),y=row*(this.cfg.size+this.cfg.gap),s=getSlide(i),el=document.createElement('a');el.className='immersive-grid-item';el.href=s.url||'#';el.setAttribute('aria-label',(s.title||'محصول جانان')+' — مشاهده محصول');el.style.cssText='left:'+x+'px;top:'+y+'px;opacity:0';if(s.image){const img=document.createElement('img');img.src=s.image;img.alt=s.title||'محصول جانان';img.loading=i<8?'eager':'lazy';img.draggable=false;img.decoding='async';img.dataset.storeImageFallback='JANAN';img.dataset.storeImageFallbackClass='immersive-grid-placeholder';el.append(img)}else{const p=document.createElement('div');p.className='immersive-grid-placeholder';p.textContent='JANAN';el.append(p)}grid.append(el);const item={element:el,row,col,baseX:x,baseY:y,index:i,slide:s};el.addEventListener('click',event=>{if(this.zoom.active)return;event.preventDefault();this.enter(item)});this.items.push(item)}};bounds(){const w=viewport.clientWidth,h=viewport.clientHeight,m=this.dim.g*this.cfg.zoom;let minX,maxX,minY,maxY;if(this.dim.sw<=w)minX=maxX=(w-this.dim.sw)/2;else{maxX=m;minX=w-this.dim.sw-m}if(this.dim.sh<=h)minY=maxY=(h-this.dim.sh)/2;else{maxY=m;minY=h-this.dim.sh-m}return{minX,maxX,minY,maxY}};dragInit(){this.drag?.kill();this.calc();this.drag=Drag.create(wrap,{type:'x,y',bounds:this.bounds(),edgeResistance:.8,onDragStart:()=>{root.classList.add('is-dragging');this.last={x:this.drag.x,y:this.drag.y}},onDrag:()=>{this.last={x:this.drag.x,y:this.drag.y}},onDragEnd:()=>root.classList.remove('is-dragging')})[0]};leave(){if(!root.classList.contains('is-dragging'))return;root.classList.remove('is-dragging');gs.to(wrap,{x:this.last.x,y:this.last.y,duration:.5,ease:'power2.out'});this.drag?.endDrag()};lines(text){desc.innerHTML='';const temp=document.createElement('div');temp.style.cssText='position:absolute;visibility:hidden;width:'+(Math.min(460,desc.clientWidth||460))+'px;font-family:PPNeueMontreal;font-size:16px;font-weight:300;line-height:1.4';document.body.append(temp);let line='',out=[];for(const word of String(text||'').split(/\s+/)){const test=line?line+' '+word:word;temp.textContent=test;if(temp.offsetWidth>(desc.clientWidth||460)&&line){out.push(line);line=word}else line=test}if(line)out.push(line);temp.remove();out.forEach(v=>{const s=document.createElement('span');s.className='immersive-description-line';s.textContent=v;desc.append(s)});return[...desc.querySelectorAll('.immersive-description-line')]};showText(item){const s=item.slide||getSlide(item.index);num.textContent=String(s.number||item.index+1).padStart(2,'0');title.textContent=s.title||'JANAN';link.href=s.url||'#';link.hidden=!s.url;target.href=s.url||'#';target.setAttribute('aria-label',(s.title||'محصول جانان')+' — مشاهده محصول');return this.lines(s.description||(s.brand?s.brand+' · منتخب جانان برای این قاب.':'منتخبی از کالکشن جانان.'))};makeOverlay(item){const o=document.createElement('div');o.className='immersive-scaling-overlay';if(item.slide.image){const img=document.createElement('img');img.src=item.slide.image;img.alt=item.slide.title||'محصول جانان';img.dataset.storeImageFallback='JANAN';img.dataset.storeImageFallbackClass='immersive-overlay-placeholder';o.append(img)}else{o.innerHTML='<div class="immersive-overlay-placeholder"></div>'}root.append(o);const r=item.element.getBoundingClientRect();gs.set(o,{left:r.left,top:r.top,width:r.width,height:r.height,opacity:1});return o};enter(item){if(this.zoom.active)return;this.zoom={active:true,item,overlay:this.makeOverlay(item)};this.drag?.disable();root.classList.add('is-zoomed');document.body.classList.add('immersive-zoom-lock');split.classList.add('is-active');gs.to(split,{opacity:1,duration:reduce?.05:1.2,ease});gs.set(item.element,{opacity:0});Flip.fit(this.zoom.overlay,target,{absolute:true,duration:reduce?.05:1.2,ease,onComplete:()=>{const l=this.showText(item);gs.set(num,{y:20,opacity:0});gs.set(title,{y:60,opacity:0});gs.set(l,{y:80,opacity:0});overlay.classList.add('is-active');gs.to(overlay,{opacity:1,duration:reduce?.05:.3});gs.to(num,{y:0,opacity:1,duration:reduce?.05:.8,ease});gs.to(title,{y:0,opacity:1,duration:reduce?.05:.8,ease,delay:reduce?0:.08});gs.to(l,{y:0,opacity:1,duration:reduce?.05:.8,ease,delay:reduce?0:.16,stagger:reduce?0:.12})}});controls.classList.add('is-split');close.classList.add('is-active');gs.fromTo(close,{x:40,opacity:0},{x:0,opacity:1,duration:reduce?.05:.6,delay:reduce?0:.7});left.addEventListener('click',this.boundSplit);right.addEventListener('click',this.boundSplit)};exit(){if(!this.zoom.active)return;const z=this.zoom,o=z.overlay;left.removeEventListener('click',this.boundSplit);right.removeEventListener('click',this.boundSplit);const l=[...desc.querySelectorAll('.immersive-description-line')];gs.to(overlay,{opacity:0,duration:reduce?.05:.25});gs.to(num,{y:-20,opacity:0,duration:reduce?.05:.35});gs.to(title,{y:-60,opacity:0,duration:reduce?.05:.35});gs.to(l,{y:-80,opacity:0,duration:reduce?.05:.35,stagger:reduce?0:-.03});gs.to(close,{x:40,opacity:0,duration:reduce?.05:.25});controls.classList.remove('is-split');split.classList.remove('is-active');gs.to(split,{opacity:0,duration:reduce?.05:.7});Flip.fit(o,z.item.element,{absolute:true,duration:reduce?.05:1.2,ease,onComplete:()=>{gs.set(z.item.element,{opacity:1});o.remove();overlay.classList.remove('is-active');close.classList.remove('is-active');root.classList.remove('is-zoomed');document.body.classList.remove('immersive-zoom-lock');this.drag?.enable();this.zoom={active:false,item:null,overlay:null}}})};setZoom(z,b){if(this.zoom.active){this.exit();return}const old=this.cfg.zoom,newGap=this.gap(z);this.cfg.zoom=z;this.calc(this.cfg.gap);const w=viewport.clientWidth,h=viewport.clientHeight,x=(w-this.dim.w*old)/2,y=(h-this.dim.h*old)/2;gs.to(wrap,{x,y,duration:reduce?.05:.6,ease:center,onComplete:()=>{if(newGap!==this.cfg.gap){this.items.forEach(d=>{d.baseX=d.col*(this.cfg.size+newGap);d.baseY=d.row*(this.cfg.size+newGap);gs.to(d.element,{left:d.baseX,top:d.baseY,duration:reduce?.05:1.2,ease})});wrap.style.width=this.cfg.cols*(this.cfg.size+newGap)-newGap+'px';wrap.style.height=this.cfg.rows*(this.cfg.size+newGap)-newGap+'px';this.cfg.gap=newGap}this.calc(newGap);const fx=(w-this.dim.w*z)/2,fy=(h-this.dim.h*z)/2;gs.to(wrap,{scale:z,x:fx,y:fy,duration:reduce?.05:1.2,ease,onComplete:()=>{this.last={x:fx,y:fy};this.dragInit()}})}});percent.textContent=Math.round(z*100)+'%';root.querySelectorAll('.immersive-switch__button').forEach(x=>x.classList.remove('is-current'));b?.classList.add('is-current')};fit(){this.setZoom(Math.max(.1,Math.min(2,Math.min((viewport.clientWidth-80)/(this.cfg.cols*(this.cfg.size+16)-16),(viewport.clientHeight-120)/(this.cfg.rows*(this.cfg.size+16)-16)))))};init(){this.build();this.calc();gs.set(wrap,{scale:this.cfg.zoom});const x=(viewport.clientWidth-this.dim.sw)/2,y=(viewport.clientHeight-this.dim.sh)/2;gs.set(wrap,{x,y});this.last={x,y};percent.textContent='60%';root.querySelectorAll('.immersive-switch__button').forEach(x=>x.classList.remove('is-current'));root.querySelector('[data-zoom="0.6"]')?.classList.add('is-current');gs.to(viewport,{opacity:1,duration:reduce?.05:.6,ease:'power2.inOut',onComplete:()=>{const cx=(viewport.clientWidth/2-x)/this.cfg.zoom-this.cfg.size/2,cy=(viewport.clientHeight/2-y)/this.cfg.zoom-this.cfg.size/2;this.items.forEach((d,i)=>gs.set(d.element,{left:cx,top:cy,scale:.8,zIndex:this.items.length-i,opacity:0}));gs.to(this.items.map(d=>d.element),{left:i=>this.items[i].baseX,top:i=>this.items[i].baseY,scale:1,opacity:1,duration:reduce?.05:.2,ease:'power2.out',stagger:reduce?0:{amount:0.7,grid:[this.cfg.rows,this.cfg.cols],from:'start'},onComplete:()=>{controls.classList.add('is-visible');gs.to(q('.immersive-footer'),{opacity:1,duration:reduce?.05:1.2,delay:reduce?0:.3});this.dragInit()}})}})}};const g=new Gallery();const immersiveHeader=document.querySelector('.store-header--immersive');if(immersiveHeader&&'IntersectionObserver'in window){const headerObserver=new IntersectionObserver(([entry])=>{immersiveHeader.classList.toggle('is-over-content',entry.intersectionRatio<0.58)},{threshold:[0,.2,.58,.8,1]});headerObserver.observe(root)}let touchStart=null;root.addEventListener('touchstart',event=>{if(event.touches.length!==1||g.zoom.active)return;const t=event.touches[0];touchStart={x:t.clientX,y:t.clientY,target:event.target}},{passive:true});root.addEventListener('touchend',event=>{if(!touchStart||g.zoom.active){touchStart=null;return}const t=event.changedTouches[0],dx=t.clientX-touchStart.x,dy=t.clientY-touchStart.y,tapTarget=touchStart.target;touchStart=null;if(Math.abs(dy)<70||Math.abs(dy)<Math.abs(dx)*1.15)return;if(tapTarget?.closest('button,a,.immersive-switch'))return;const sectionTop=(element)=>Math.max(0,Math.round(element.getBoundingClientRect().top+window.scrollY));const next=root.nextElementSibling;if(dy<0&&next){window.scrollTo({top:sectionTop(next),behavior:reduce?'auto':'smooth'})}else if(dy>0){window.scrollTo({top:sectionTop(root),behavior:reduce?'auto':'smooth'})}},{passive:true});window.addEventListener('resize',g.boundResize);root.addEventListener('mouseleave',g.boundLeave);viewport.addEventListener('mouseleave',g.boundLeave);close.addEventListener('click',g.boundClose);document.addEventListener('keydown',g.boundKey);root.querySelectorAll('[data-zoom]').forEach(b=>b.addEventListener('click',()=>g.setZoom(Number(b.dataset.zoom),b)));root.querySelector('[data-fit]')?.addEventListener('click',()=>g.fit());new Preloader().run().then(()=>g.init())});
+(() => {
+    const boot = () => {
+        if (window.__JANAN_IMMERSIVE_HERO_INITIALIZED__) return;
+        window.__JANAN_IMMERSIVE_HERO_INITIALIZED__ = true;
+
+        const root = document.querySelector('[data-immersive-gallery]');
+        if (!root) return;
+
+        const q = (selector) => root.querySelector(selector);
+        const viewport = q('#immersiveViewport');
+        const wrap = q('#immersiveCanvasWrapper');
+        const grid = q('#immersiveGridContainer');
+        const split = q('#immersiveSplitScreen');
+        const target = q('#immersiveZoomTarget');
+        const left = q('#immersiveSplitLeft');
+        const right = q('#immersiveSplitRight');
+        const close = q('#immersiveCloseButton');
+        const overlay = q('#immersiveTitleOverlay');
+        const number = q('#immersiveSlideNumber');
+        const title = q('#immersiveSlideTitle');
+        const description = q('#immersiveSlideDescription');
+        const link = q('#immersiveSlideLink');
+        const controls = q('#immersiveControls');
+        const percentage = q('#immersivePercentage');
+        const data = q('#immersiveHeroData');
+
+        if (
+            !viewport ||
+            !wrap ||
+            !grid ||
+            !split ||
+            !target ||
+            !left ||
+            !right ||
+            !close ||
+            !overlay ||
+            !number ||
+            !title ||
+            !description ||
+            !link ||
+            !controls ||
+            !percentage ||
+            !data
+        ) {
+            return;
+        }
+
+        let slides = [];
+        try {
+            const payload = JSON.parse(data.textContent || '[]');
+            slides = Array.isArray(payload) ? payload.slice(0, 30) : [];
+        } catch {
+            slides = [];
+        }
+
+        const reducedMotion = window.matchMedia?.(
+            '(prefers-reduced-motion: reduce)'
+        ).matches ?? false;
+
+        const loadScript = (src) => new Promise((resolve, reject) => {
+            const existing = document.querySelector(
+                'script[data-janan-gsap-src="' + src + '"]'
+            );
+
+            if (existing) {
+                existing.addEventListener('load', () => resolve(), { once: true });
+                existing.addEventListener('error', () => reject(new Error('script-load-failed')), { once: true });
+                if (
+                    (src.endsWith('gsap.min.js') && window.gsap) ||
+                    (src.includes('Draggable') && window.Draggable) ||
+                    (src.includes('Flip') && window.Flip)
+                ) {
+                    resolve();
+                }
+                return;
+            }
+
+            const script = document.createElement('script');
+            script.src = src;
+            script.defer = true;
+            script.dataset.jananGsapSrc = src;
+            script.onload = resolve;
+            script.onerror = () => reject(new Error('script-load-failed'));
+            document.head.appendChild(script);
+        });
+
+        const ensureGsap = async () => {
+            if (window.gsap && window.Draggable && window.Flip) {
+                window.gsap.registerPlugin(window.Draggable, window.Flip);
+                return true;
+            }
+
+            if (!window.__JANAN_GSAP_LOAD__) {
+                window.__JANAN_GSAP_LOAD__ = (async () => {
+                    await loadScript(
+                        'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js'
+                    );
+                    await Promise.all([
+                        loadScript(
+                            'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/Draggable.min.js'
+                        ),
+                        loadScript(
+                            'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/Flip.min.js'
+                        ),
+                    ]);
+
+                    if (!window.gsap || !window.Draggable || !window.Flip) {
+                        throw new Error('gsap-incomplete');
+                    }
+
+                    window.gsap.registerPlugin(window.Draggable, window.Flip);
+                })();
+            }
+
+            try {
+                await window.__JANAN_GSAP_LOAD__;
+                return true;
+            } catch {
+                return false;
+            }
+        };
+
+        const renderStaticFallback = () => {
+            root.classList.add('is-static-fallback');
+            viewport.style.opacity = '1';
+            viewport.style.overflow = 'auto';
+            wrap.style.position = 'relative';
+            wrap.style.top = 'auto';
+            wrap.style.left = 'auto';
+            wrap.style.width = '100%';
+            wrap.style.height = '100%';
+            wrap.style.transform = 'none';
+            grid.style.display = 'grid';
+            grid.style.gridTemplateColumns =
+                window.innerWidth <= 540
+                    ? 'repeat(2, minmax(0, 1fr))'
+                    : 'repeat(4, minmax(0, 1fr))';
+            grid.style.gap = window.innerWidth <= 540 ? '6px' : '10px';
+            grid.replaceChildren();
+
+            slides.forEach((slide) => {
+                const item = document.createElement('a');
+                item.className = 'immersive-grid-item';
+                item.href = slide.url || '#';
+                item.style.position = 'relative';
+                item.style.inset = 'auto';
+                item.style.width = '100%';
+                item.style.height = 'auto';
+                item.style.aspectRatio = '1';
+                item.style.opacity = '1';
+
+                if (slide.image) {
+                    const image = document.createElement('img');
+                    image.src = slide.image;
+                    image.alt = slide.title || 'محصول جانان';
+                    image.loading = 'lazy';
+                    image.decoding = 'async';
+                    image.draggable = false;
+                    item.appendChild(image);
+                }
+
+                grid.appendChild(item);
+            });
+        };
+
+        const initGallery = () => {
+            if (!slides.length) {
+                root.classList.add('is-empty');
+                return;
+            }
+
+            class Gallery {
+                constructor() {
+                    this.cfg = {
+                        size: 320,
+                        gap: 32,
+                        zoom: 0.6,
+                        cols: 5,
+                        rows: 1,
+                    };
+
+                    this.items = [];
+                    this.dim = { width: 0, height: 0 };
+                    this.drag = null;
+                    this.zoom = {
+                        active: false,
+                        item: null,
+                        overlay: null,
+                    };
+                    this.last = { x: 0, y: 0 };
+                    this.layoutFrame = 0;
+                    this.touchStart = null;
+                }
+
+                getItemSize() {
+                    return parseFloat(
+                        getComputedStyle(root).getPropertyValue('--immersive-item-size')
+                    ) || 320;
+                }
+
+                getColumns() {
+                    const width = viewport.clientWidth;
+                    if (width <= 540) return Math.min(2, slides.length);
+                    if (width <= 820) return Math.min(3, slides.length);
+                    if (width <= 1100) return Math.min(4, slides.length);
+                    return Math.min(5, slides.length);
+                }
+
+                getGap(zoom = this.cfg.zoom) {
+                    if (zoom >= 1) return 16;
+                    if (zoom >= 0.6) return 26;
+                    return 42;
+                }
+
+                dimensions() {
+                    const width =
+                        this.cfg.cols * this.cfg.size +
+                        Math.max(0, this.cfg.cols - 1) * this.cfg.gap;
+
+                    const height =
+                        this.cfg.rows * this.cfg.size +
+                        Math.max(0, this.cfg.rows - 1) * this.cfg.gap;
+
+                    this.dim = { width, height };
+                    return this.dim;
+                }
+
+                syncConfig() {
+                    const oldCols = this.cfg.cols;
+                    const oldSize = this.cfg.size;
+
+                    this.cfg.size = this.getItemSize();
+                    this.cfg.cols = Math.max(1, this.getColumns());
+                    this.cfg.rows = Math.ceil(slides.length / this.cfg.cols);
+                    this.cfg.gap = this.getGap();
+
+                    return oldCols !== this.cfg.cols || oldSize !== this.cfg.size;
+                }
+
+                build() {
+                    this.syncConfig();
+                    this.dimensions();
+                    wrap.style.width = this.dim.width + 'px';
+                    wrap.style.height = this.dim.height + 'px';
+                    grid.replaceChildren();
+                    this.items = [];
+
+                    slides.forEach((slide, index) => {
+                        const row = Math.floor(index / this.cfg.cols);
+                        const col = index % this.cfg.cols;
+                        const x =
+                            col * (this.cfg.size + this.cfg.gap);
+                        const y =
+                            row * (this.cfg.size + this.cfg.gap);
+
+                        const item = document.createElement('a');
+                        item.className = 'immersive-grid-item';
+                        item.href = slide.url || '#';
+                        item.setAttribute(
+                            'aria-label',
+                            (slide.title || 'محصول جانان') + ' — مشاهده محصول'
+                        );
+                        item.style.left = x + 'px';
+                        item.style.top = y + 'px';
+                        item.style.opacity = '0';
+                        item.style.zIndex = String(slides.length - index);
+
+                        if (slide.image) {
+                            const image = document.createElement('img');
+                            image.src = slide.image;
+                            image.alt = slide.title || 'محصول جانان';
+                            image.loading = index < 8 ? 'eager' : 'lazy';
+                            image.decoding = 'async';
+                            image.fetchPriority = index === 0 ? 'high' : 'auto';
+                            image.draggable = false;
+                            image.dataset.storeImageFallback = 'JANAN';
+                            image.dataset.storeImageFallbackClass =
+                                'immersive-grid-placeholder';
+                            item.appendChild(image);
+                        } else {
+                            const placeholder = document.createElement('span');
+                            placeholder.className = 'immersive-grid-placeholder';
+                            placeholder.textContent = 'JANAN';
+                            item.appendChild(placeholder);
+                        }
+
+                        const model = {
+                            element: item,
+                            slide,
+                            index,
+                            row,
+                            col,
+                            baseX: x,
+                            baseY: y,
+                        };
+
+                        item.addEventListener('click', (event) => {
+                            if (
+                                event.button !== 0 ||
+                                event.metaKey ||
+                                event.ctrlKey ||
+                                event.shiftKey ||
+                                event.altKey
+                            ) {
+                                return;
+                            }
+
+                            event.preventDefault();
+
+                            this.open(model);
+                        });
+
+                        grid.appendChild(item);
+                        this.items.push(model);
+                    });
+                }
+
+                applyItemPositions(animated = false) {
+                    this.items.forEach((item) => {
+                        item.baseX =
+                            item.col * (this.cfg.size + this.cfg.gap);
+                        item.baseY =
+                            item.row * (this.cfg.size + this.cfg.gap);
+
+                        if (animated) {
+                            window.gsap.to(item.element, {
+                                left: item.baseX,
+                                top: item.baseY,
+                                duration: reducedMotion ? 0.01 : 0.42,
+                                ease: 'power2.out',
+                            });
+                        } else {
+                            window.gsap.set(item.element, {
+                                left: item.baseX,
+                                top: item.baseY,
+                            });
+                        }
+                    });
+                }
+
+                bounds() {
+                    const w = viewport.clientWidth;
+                    const h = viewport.clientHeight;
+                    const scaledWidth = this.dim.width * this.cfg.zoom;
+                    const scaledHeight = this.dim.height * this.cfg.zoom;
+                    const margin = Math.max(20, this.cfg.gap * this.cfg.zoom);
+
+                    const x = scaledWidth <= w
+                        ? (w - scaledWidth) / 2
+                        : {
+                            min: w - scaledWidth - margin,
+                            max: margin,
+                        };
+
+                    const y = scaledHeight <= h
+                        ? (h - scaledHeight) / 2
+                        : {
+                            min: h - scaledHeight - margin,
+                            max: margin,
+                        };
+
+                    return {
+                        minX: typeof x === 'number' ? x : x.min,
+                        maxX: typeof x === 'number' ? x : x.max,
+                        minY: typeof y === 'number' ? y : y.min,
+                        maxY: typeof y === 'number' ? y : y.max,
+                    };
+                }
+
+                centerPosition() {
+                    const w = viewport.clientWidth;
+                    const h = viewport.clientHeight;
+                    return {
+                        x: (w - this.dim.width * this.cfg.zoom) / 2,
+                        y: (h - this.dim.height * this.cfg.zoom) / 2,
+                    };
+                }
+
+                applyPosition(x, y, animated = false) {
+                    const b = this.bounds();
+                    const nextX = Math.max(b.minX, Math.min(b.maxX, x));
+                    const nextY = Math.max(b.minY, Math.min(b.maxY, y));
+
+                    if (animated) {
+                        window.gsap.to(wrap, {
+                            x: nextX,
+                            y: nextY,
+                            duration: reducedMotion ? 0.02 : 0.5,
+                            ease: 'power3.out',
+                            onUpdate: () => {
+                                this.last = {
+                                    x: window.gsap.getProperty(wrap, 'x'),
+                                    y: window.gsap.getProperty(wrap, 'y'),
+                                };
+                            },
+                        });
+                    } else {
+                        window.gsap.set(wrap, {
+                            x: nextX,
+                            y: nextY,
+                        });
+                        this.last = { x: nextX, y: nextY };
+                    }
+                }
+
+                init() {
+                    this.build();
+                    this.cfg.zoom = 0.6;
+                    this.cfg.gap = this.getGap();
+                    this.dimensions();
+                    wrap.style.width = this.dim.width + 'px';
+                    wrap.style.height = this.dim.height + 'px';
+
+                    const center = this.centerPosition();
+                    window.gsap.set(wrap, {
+                        x: center.x,
+                        y: center.y,
+                        scale: this.cfg.zoom,
+                    });
+                    this.last = center;
+
+                    const centerX = viewport.clientWidth / 2;
+                    const centerY = viewport.clientHeight / 2;
+
+                    this.items.forEach((item) => {
+                        window.gsap.set(item.element, {
+                            left: centerX / this.cfg.zoom - this.cfg.size / 2,
+                            top: centerY / this.cfg.zoom - this.cfg.size / 2,
+                            scale: 0.86,
+                            opacity: 0,
+                        });
+                    });
+
+                    window.gsap.set(viewport, { opacity: 1 });
+
+                    window.gsap.to(this.items.map((item) => item.element), {
+                        left: (i) => this.items[i].baseX,
+                        top: (i) => this.items[i].baseY,
+                        scale: 1,
+                        opacity: 1,
+                        duration: reducedMotion ? 0.05 : 0.52,
+                        ease: 'power2.out',
+                        stagger: reducedMotion
+                            ? 0
+                            : { amount: 0.45, from: 'start' },
+                        onComplete: () => {
+                            controls.classList.add('is-visible');
+                            window.gsap.to(root.querySelector('.immersive-footer'), {
+                                opacity: 1,
+                                duration: reducedMotion ? 0.01 : 0.45,
+                            });
+                            this.initDrag();
+                        },
+                    });
+                }
+
+                initDrag() {
+                    this.drag?.kill();
+                    this.dimensions();
+
+                    this.drag = window.Draggable.create(wrap, {
+                        type: 'x,y',
+                        bounds: this.bounds(),
+                        edgeResistance: 0.82,
+                        inertia: false,
+                        onDragStart: () => root.classList.add('is-dragging'),
+                        onDrag: () => {
+                            this.last = {
+                                x: this.drag.x,
+                                y: this.drag.y,
+                            };
+                        },
+                        onDragEnd: () => root.classList.remove('is-dragging'),
+                    })[0];
+                }
+
+                renderDescription(text) {
+                    description.replaceChildren();
+
+                    const value = String(text || '');
+                    const line = document.createElement('span');
+                    line.className = 'immersive-description-line';
+                    line.textContent = value;
+                    description.appendChild(line);
+
+                    return [line];
+                }
+
+                updateDetails(model) {
+                    const slide = model.slide || {};
+                    number.textContent = String(
+                        slide.number || model.index + 1
+                    ).padStart(2, '0');
+                    title.textContent = slide.title || 'JANAN';
+
+                    link.href = slide.url || '#';
+                    link.hidden = !slide.url;
+
+                    target.href = slide.url || '#';
+                    target.setAttribute(
+                        'aria-label',
+                        (slide.title || 'محصول جانان') + ' — مشاهده محصول'
+                    );
+
+                    return this.renderDescription(
+                        slide.description ||
+                        (slide.brand
+                            ? slide.brand + ' · منتخب جانان برای این قاب.'
+                            : 'منتخبی از کالکشن جانان.')
+                    );
+                }
+
+                createOverlay(model) {
+                    const anchor = document.createElement('a');
+                    anchor.className = 'immersive-scaling-overlay';
+                    anchor.href = model.slide.url || '#';
+                    anchor.setAttribute(
+                        'aria-label',
+                        (model.slide.title || 'محصول جانان') + ' — مشاهده محصول'
+                    );
+                    anchor.setAttribute('aria-live', 'off');
+
+                    if (model.slide.image) {
+                        const image = document.createElement('img');
+                        image.src = model.slide.image;
+                        image.alt = model.slide.title || 'محصول جانان';
+                        image.loading = 'eager';
+                        image.decoding = 'async';
+                        image.draggable = false;
+                        image.dataset.storeImageFallback = 'JANAN';
+                        image.dataset.storeImageFallbackClass =
+                            'immersive-overlay-placeholder';
+                        anchor.appendChild(image);
+                    } else {
+                        const placeholder = document.createElement('span');
+                        placeholder.className = 'immersive-overlay-placeholder';
+                        placeholder.textContent = 'JANAN';
+                        anchor.appendChild(placeholder);
+                    }
+
+                    root.appendChild(anchor);
+                    const rect = model.element.getBoundingClientRect();
+
+                    window.gsap.set(anchor, {
+                        left: rect.left,
+                        top: rect.top,
+                        width: rect.width,
+                        height: rect.height,
+                        opacity: 1,
+                    });
+
+                    return anchor;
+                }
+
+                open(model) {
+                    if (this.zoom.active) return;
+
+                    const overlayAnchor = this.createOverlay(model);
+                    this.zoom = {
+                        active: true,
+                        item: model,
+                        overlay: overlayAnchor,
+                    };
+
+                    overlayAnchor.style.pointerEvents = 'none';
+                    this.drag?.disable();
+                    root.classList.add('is-zoomed');
+                    document.body.classList.add('immersive-zoom-lock');
+                    split.classList.add('is-active');
+                    controls.classList.add('is-split');
+                    close.classList.add('is-active');
+
+                    const lines = this.updateDetails(model);
+                    window.gsap.set(overlay, { opacity: 0 });
+                    window.gsap.set([number, title, ...lines, close], {
+                        opacity: 0,
+                    });
+                    window.gsap.set(
+                        itemOrArray(model.element),
+                        { opacity: 0 }
+                    );
+
+                    const duration = reducedMotion ? 0.04 : 0.74;
+
+                    window.gsap.to(split, {
+                        opacity: 1,
+                        duration: reducedMotion ? 0.02 : 0.28,
+                    });
+
+                    window.gsap.to(overlay, {
+                        opacity: 1,
+                        duration: reducedMotion ? 0.02 : 0.22,
+                    });
+
+                    window.Flip.fit(overlayAnchor, target, {
+                        absolute: true,
+                        duration,
+                        ease: 'power3.inOut',
+                        onComplete: () => {
+                            overlayAnchor.style.pointerEvents = 'auto';
+                            overlay.classList.add('is-active');
+
+                            window.gsap.fromTo(
+                                number,
+                                { y: 16, opacity: 0 },
+                                { y: 0, opacity: 1, duration: reducedMotion ? 0.04 : 0.4 }
+                            );
+                            window.gsap.fromTo(
+                                title,
+                                { y: 32, opacity: 0 },
+                                { y: 0, opacity: 1, duration: reducedMotion ? 0.04 : 0.44, delay: reducedMotion ? 0 : 0.04 }
+                            );
+                            window.gsap.fromTo(
+                                lines,
+                                { y: 44, opacity: 0 },
+                                {
+                                    y: 0,
+                                    opacity: 1,
+                                    duration: reducedMotion ? 0.04 : 0.44,
+                                    delay: reducedMotion ? 0 : 0.08,
+                                }
+                            );
+                            window.gsap.fromTo(
+                                close,
+                                { x: 26, opacity: 0 },
+                                { x: 0, opacity: 1, duration: reducedMotion ? 0.04 : 0.34 }
+                            );
+                        },
+                    });
+                }
+
+                close() {
+                    if (!this.zoom.active) return;
+
+                    const current = this.zoom;
+                    const overlayAnchor = current.overlay;
+                    const lines = [...description.querySelectorAll(
+                        '.immersive-description-line'
+                    )];
+
+                    overlayAnchor.style.pointerEvents = 'none';
+
+                    window.gsap.to(
+                        [number, title, ...lines, close],
+                        {
+                            y: -12,
+                            opacity: 0,
+                            duration: reducedMotion ? 0.03 : 0.22,
+                            stagger: reducedMotion ? 0 : -0.02,
+                        }
+                    );
+
+                    window.gsap.to(overlay, {
+                        opacity: 0,
+                        duration: reducedMotion ? 0.03 : 0.18,
+                    });
+
+                    window.gsap.to(split, {
+                        opacity: 0,
+                        duration: reducedMotion ? 0.03 : 0.25,
+                    });
+
+                    window.Flip.fit(
+                        overlayAnchor,
+                        current.item.element,
+                        {
+                            absolute: true,
+                            duration: reducedMotion ? 0.04 : 0.62,
+                            ease: 'power3.inOut',
+                            onComplete: () => {
+                                current.item.element.style.opacity = '1';
+                                overlayAnchor.remove();
+                                overlay.classList.remove('is-active');
+                                close.classList.remove('is-active');
+                                controls.classList.remove('is-split');
+                                split.classList.remove('is-active');
+                                root.classList.remove('is-zoomed');
+                                document.body.classList.remove('immersive-zoom-lock');
+                                this.drag?.enable();
+                                this.zoom = {
+                                    active: false,
+                                    item: null,
+                                    overlay: null,
+                                };
+                            },
+                        }
+                    );
+                }
+
+                setZoom(value, button) {
+                    if (this.zoom.active) return;
+
+                    const zoom = Math.max(0.25, Math.min(1, value));
+                    const oldZoom = this.cfg.zoom;
+                    const oldCenter = {
+                        x: (viewport.clientWidth / 2 - this.last.x) / oldZoom,
+                        y: (viewport.clientHeight / 2 - this.last.y) / oldZoom,
+                    };
+
+                    this.cfg.zoom = zoom;
+                    this.cfg.gap = this.getGap(zoom);
+                    this.dimensions();
+                    this.applyItemPositions(true);
+
+                    const x = viewport.clientWidth / 2 - oldCenter.x * zoom;
+                    const y = viewport.clientHeight / 2 - oldCenter.y * zoom;
+
+                    window.gsap.to(wrap, {
+                        scale: zoom,
+                        x,
+                        y,
+                        duration: reducedMotion ? 0.04 : 0.62,
+                        ease: 'power3.inOut',
+                        onComplete: () => {
+                            this.last = {
+                                x: window.gsap.getProperty(wrap, 'x'),
+                                y: window.gsap.getProperty(wrap, 'y'),
+                            };
+                            this.initDrag();
+                        },
+                    });
+
+                    percentage.textContent = Math.round(zoom * 100) + '%';
+
+                    root.querySelectorAll('[data-zoom]').forEach((node) => {
+                        node.classList.toggle(
+                            'is-current',
+                            Number(node.dataset.zoom) === zoom
+                        );
+                    });
+
+                    button?.focus({ preventScroll: true });
+                }
+
+                fit() {
+                    if (this.zoom.active) return;
+
+                    this.cfg.zoom = 1;
+                    this.cfg.gap = this.getGap(1);
+                    this.dimensions();
+
+                    const scaleX = (viewport.clientWidth - 80) / this.dim.width;
+                    const scaleY = (viewport.clientHeight - 130) / this.dim.height;
+                    const zoom = Math.max(0.25, Math.min(1, scaleX, scaleY));
+
+                    this.cfg.zoom = zoom;
+                    this.cfg.gap = this.getGap(zoom);
+                    this.dimensions();
+                    this.applyItemPositions();
+
+                    const center = this.centerPosition();
+
+                    window.gsap.to(wrap, {
+                        scale: zoom,
+                        x: center.x,
+                        y: center.y,
+                        duration: reducedMotion ? 0.04 : 0.62,
+                        ease: 'power3.inOut',
+                        onComplete: () => this.initDrag(),
+                    });
+
+                    this.last = center;
+                    percentage.textContent = Math.round(zoom * 100) + '%';
+
+                    root.querySelectorAll('[data-zoom]').forEach((node) => {
+                        node.classList.remove('is-current');
+                    });
+                }
+
+                relayout() {
+                    if (root.classList.contains('is-static-fallback')) return;
+
+                    if (this.zoom.active) {
+                        const overlayAnchor = this.zoom.overlay;
+                        if (overlayAnchor) {
+                            window.Flip.fit(overlayAnchor, target, {
+                                absolute: true,
+                                duration: 0,
+                            });
+                        }
+                        return;
+                    }
+
+                    const changed = this.syncConfig();
+                    this.dimensions();
+                    wrap.style.width = this.dim.width + 'px';
+                    wrap.style.height = this.dim.height + 'px';
+
+                    const center = this.centerPosition();
+
+                    if (changed) {
+                        this.applyItemPositions(false);
+                    }
+
+                    this.applyPosition(
+                        changed ? center.x : this.last.x,
+                        changed ? center.y : this.last.y,
+                        false
+                    );
+
+                    this.initDrag();
+                }
+
+                scheduleRelayout() {
+                    if (this.layoutFrame) return;
+
+                    this.layoutFrame = window.requestAnimationFrame(() => {
+                        this.layoutFrame = 0;
+                        this.relayout();
+                    });
+                }
+            }
+
+            const itemOrArray = (item) => item;
+            const gallery = new Gallery();
+
+            left.addEventListener('click', (event) => {
+                if (event.target === left) gallery.close();
+            });
+
+            right.addEventListener('click', () => gallery.close());
+
+            close.addEventListener('click', (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                gallery.close();
+            });
+
+            root.querySelectorAll('[data-zoom]').forEach((button) => {
+                button.addEventListener('click', () => {
+                    gallery.setZoom(Number(button.dataset.zoom), button);
+                });
+            });
+
+            root.querySelector('[data-fit]')?.addEventListener('click', () => {
+                gallery.fit();
+            });
+
+            document.addEventListener('keydown', (event) => {
+                if (gallery.zoom.active) {
+                    if (event.key === 'Escape') {
+                        event.preventDefault();
+                        gallery.close();
+                    }
+                    return;
+                }
+
+                if (event.key === '1') gallery.setZoom(0.3);
+                if (event.key === '2') gallery.setZoom(0.6);
+                if (event.key === '3') gallery.setZoom(1);
+                if (event.key.toLowerCase() === 'f') gallery.fit();
+            });
+
+            root.addEventListener('mouseleave', () => {
+                if (!gallery.drag || gallery.zoom.active) return;
+                root.classList.remove('is-dragging');
+            });
+
+            root.addEventListener('touchstart', (event) => {
+                if (event.touches.length !== 1 || gallery.zoom.active) return;
+                const touch = event.touches[0];
+                gallery.touchStart = {
+                    x: touch.clientX,
+                    y: touch.clientY,
+                    target: event.target,
+                };
+            }, { passive: true });
+
+            root.addEventListener('touchend', (event) => {
+                if (!gallery.touchStart || gallery.zoom.active) {
+                    gallery.touchStart = null;
+                    return;
+                }
+
+                const touch = event.changedTouches[0];
+                const dx = touch.clientX - gallery.touchStart.x;
+                const dy = touch.clientY - gallery.touchStart.y;
+                const targetNode = gallery.touchStart.target;
+                gallery.touchStart = null;
+
+                if (
+                    Math.abs(dy) < 70 ||
+                    Math.abs(dy) < Math.abs(dx) * 1.15 ||
+                    targetNode?.closest('a,button')
+                ) {
+                    return;
+                }
+
+                const next = root.nextElementSibling;
+                if (dy < 0 && next) {
+                    window.scrollTo({
+                        top: Math.max(0, next.getBoundingClientRect().top + window.scrollY),
+                        behavior: reducedMotion ? 'auto' : 'smooth',
+                    });
+                } else if (dy > 0) {
+                    window.scrollTo({
+                        top: root.getBoundingClientRect().top + window.scrollY,
+                        behavior: reducedMotion ? 'auto' : 'smooth',
+                    });
+                }
+            }, { passive: true });
+
+            const observer =
+                'IntersectionObserver' in window
+                    ? new IntersectionObserver(
+                        ([entry]) => {
+                            document
+                                .querySelector('.store-header--immersive')
+                                ?.classList.toggle(
+                                    'is-over-content',
+                                    entry.intersectionRatio < 0.58
+                                );
+                        },
+                        { threshold: [0, 0.2, 0.58, 0.8, 1] }
+                    )
+                    : null;
+
+            observer?.observe(root);
+
+            if ('ResizeObserver' in window) {
+                const resizeObserver = new ResizeObserver(() => {
+                    gallery.scheduleRelayout();
+                });
+                resizeObserver.observe(viewport);
+                resizeObserver.observe(root);
+            } else {
+                window.addEventListener('orientationchange', () => {
+                    gallery.scheduleRelayout();
+                }, { passive: true });
+            }
+
+            gallery.init();
+        };
+
+        ensureGsap().then((ready) => {
+            if (!ready) {
+                renderStaticFallback();
+                return;
+            }
+
+            initGallery();
+        });
+    };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', boot, { once: true });
+    } else {
+        boot();
+    }
+})();

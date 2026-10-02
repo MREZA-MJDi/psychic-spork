@@ -7,6 +7,7 @@ export default defineConfig({
             input: [
                 'resources/css/store.css',
                 'resources/css/home.css',
+                'resources/css/hero.css',
                 'resources/css/wholesale.css',
                 'resources/css/auth.css',
                 'resources/js/app.js',
@@ -17,6 +18,7 @@ export default defineConfig({
                 'resources/js/editorial-hero.js',
                 'resources/js/home-product-carousel.js',
                 'resources/css/admin.css',
+                'resources/css/admin-responsive.css',
                 'resources/js/admin.js',
             ],
             refresh: true,

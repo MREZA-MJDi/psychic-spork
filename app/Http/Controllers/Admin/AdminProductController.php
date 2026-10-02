@@ -100,38 +100,12 @@ class AdminProductController extends Controller
         ]);
     }
 
-    public function toggleHero(Product $product): RedirectResponse
-    {
+    public function toggleHero(
+        Product $product,
+        HeroService $hero
+    ): RedirectResponse {
         try {
-            $isHero = DB::transaction(function () use ($product): bool {
-                $current = Product::query()
-                    ->whereKey($product->getKey())
-                    ->lockForUpdate()
-                    ->firstOrFail();
-
-                if (!$current->is_hero) {
-                    $heroIds = Product::query()
-                        ->where('is_hero', true)
-                        ->lockForUpdate()
-                        ->pluck('id');
-
-                    if ($heroIds->count() >= 48) {
-                        throw new \RuntimeException('hero_limit');
-                    }
-                }
-
-                $current->update([
-                    'is_hero' => !$current->is_hero,
-                ]);
-
-                return (bool) $current->is_hero;
-            });
-
-            Cache::put(
-                'store:home:hero:products:version',
-                (string) Str::uuid(),
-                now()->addYear()
-            );
+            $isHero = $hero->toggle($product);
 
             return back()->with(
                 'success',
@@ -143,7 +117,7 @@ class AdminProductController extends Controller
             if ($e->getMessage() === 'hero_limit') {
                 return back()->with(
                     'error',
-                    'حداکثر ۴۸ محصول می‌تواند همزمان در Hero صفحه اصلی باشد.'
+                    'حداکثر ' . HeroService::MAX_SLIDES . ' محصول می‌تواند همزمان در Hero صفحه اصلی باشد.'
                 );
             }
 

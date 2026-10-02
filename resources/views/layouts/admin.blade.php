@@ -10,6 +10,7 @@
 
     @vite([
         'resources/css/admin.css',
+        'resources/css/admin-responsive.css',
         'resources/js/admin.js',
     ])
 

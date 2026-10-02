@@ -49,6 +49,7 @@
     @php
         $storeAssets = [
             'resources/js/app.js',
+            'resources/js/store-customer-uiux.js',
             'resources/js/store-cart.js',
             'resources/js/store-search.js',
         ];
@@ -57,16 +58,13 @@
             $storeAssets[] = 'resources/css/wholesale.css';
         }
 
-        if (request()->routeIs('checkout')) {
-            $storeAssets[] = 'resources/js/store-customer-uiux.js';
-        }
-
         if (request()->routeIs('products.show')) {
             $storeAssets[] = 'resources/js/product-show.js';
         }
 
         if ($isHome) {
             $storeAssets[] = 'resources/css/home.css';
+            $storeAssets[] = 'resources/css/hero.css';
             $storeAssets[] = 'resources/js/editorial-hero.js';
 
             if (!app()->environment('testing')) {
