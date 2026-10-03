@@ -3468,3 +3468,58 @@ animation-duration:
         min-height: 36px;
     }
 }
+
+/* About page: keep the intro and its next step visually connected. */
+.about-page > .page-hero--premium {
+    min-height: clamp(320px, 38svh, 390px);
+    padding-block: clamp(30px, 4vw, 52px);
+}
+
+.about-page > .section-block--compact {
+    padding-block: 14px 20px;
+}
+
+.about-page > .section-block--compact .customer-action-strip {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    margin: 0;
+    padding: 14px 18px;
+    border: 1px solid var(--janan-line, #dce4e8);
+    border-radius: 16px;
+    background: linear-gradient(105deg, #f0f8fb, #fcf5f8);
+}
+
+.about-page > .section-block--compact .customer-action-strip__copy {
+    display: grid;
+    gap: 4px;
+}
+
+.about-page > .section-block--compact .customer-action-strip__copy small {
+    color: var(--janan-pink, #cc7897);
+    font-size: 8px;
+    font-weight: 800;
+}
+
+.about-page > .section-block--compact .customer-action-strip__copy strong {
+    font-size: 12px;
+}
+
+@media (max-width: 620px) {
+    .about-page > .page-hero--premium {
+        min-height: 0;
+        padding-block: 34px;
+    }
+
+    .about-page > .section-block--compact {
+        padding-block: 10px 16px;
+    }
+
+    .about-page > .section-block--compact .customer-action-strip {
+        align-items: stretch;
+        flex-direction: column;
+        gap: 12px;
+        padding: 14px;
+    }
+}

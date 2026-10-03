@@ -1,0 +1,19 @@
+[Unit]
+Description=Janan Laravel queue worker
+After=network.target mysql.service
+Wants=mysql.service
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/jani
+ExecStart=/usr/bin/php /var/www/jani/artisan queue:work database --sleep=3 --tries=3 --timeout=90 --max-time=3600
+Restart=always
+RestartSec=5
+KillSignal=SIGTERM
+TimeoutStopSec=3600
+UMask=0027
+
+[Install]
+WantedBy=multi-user.target
