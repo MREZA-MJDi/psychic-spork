@@ -18,7 +18,17 @@ class AdminWholesalePackController extends Controller
     public function index(): View
     {
         $packs = WholesalePack::query()
-            ->with(['items.variant.product.brand'])
+            ->select(['id','name','slug','pack_quantity','pack_price','sort_order','is_active'])
+            ->with([
+                'items' => fn ($query) => $query->select([
+                    'id','wholesale_pack_id','product_variant_id','quantity',
+                ]),
+                'items.variant' => fn ($query) => $query->select([
+                    'id','product_id','sku','size','color','sort_order',
+                ]),
+                'items.variant.product:id,name,brand_id',
+                'items.variant.product.brand:id,name',
+            ])
             ->orderBy('sort_order')
             ->orderByDesc('id')
             ->paginate(20);
@@ -49,10 +59,7 @@ class AdminWholesalePackController extends Controller
 
             $pack = WholesalePack::create($data);
             $pack->items()->createMany($items);
-
-            $pack->update([
-                'pack_quantity' => $pack->items()->sum('quantity'),
-            ]);
+            $pack->update(['pack_quantity' => $pack->items()->sum('quantity')]);
 
             return $pack;
         });
@@ -65,7 +72,7 @@ class AdminWholesalePackController extends Controller
     public function edit(WholesalePack $wholesalePack): View
     {
         $wholesalePack->load('items.variant.product.brand');
-        
+
         return view('admin.wholesale-packs.form', [
             'pack' => $wholesalePack,
             'variants' => $wholesalePack->items->pluck('variant')->filter()->values(),
@@ -78,22 +85,16 @@ class AdminWholesalePackController extends Controller
         $image = $data['image'] ?? null;
         $removeImage = $request->boolean('remove_image');
         unset($data['image'], $data['remove_image']);
-        if ($image) {
-            $data['image_path'] = $image->store('wholesale-packs', 'public');
-        } elseif ($removeImage) {
-            $data['image_path'] = null;
-        }
+        if ($image) $data['image_path'] = $image->store('wholesale-packs', 'public');
+        elseif ($removeImage) $data['image_path'] = null;
 
         DB::transaction(function () use ($data, $wholesalePack): void {
             $items = $data['items'];
             unset($data['items']);
-
             $wholesalePack->update($data);
             $wholesalePack->items()->delete();
             $wholesalePack->items()->createMany($items);
-            $wholesalePack->update([
-                'pack_quantity' => $wholesalePack->items()->sum('quantity'),
-            ]);
+            $wholesalePack->update(['pack_quantity' => $wholesalePack->items()->sum('quantity')]);
         });
 
         return back()->with('success', 'پک عمده به‌روزرسانی شد.');
@@ -102,16 +103,13 @@ class AdminWholesalePackController extends Controller
     public function destroy(WholesalePack $wholesalePack): RedirectResponse
     {
         $wholesalePack->delete();
-
         return back()->with('success', 'پک عمده حذف شد.');
     }
 
     private function validated(Request $request): array
     {
         $routePack = $request->route('wholesale_pack') ?? $request->route('wholesalePack');
-        $ignorePackId = $routePack instanceof WholesalePack
-            ? $routePack->getKey()
-            : $routePack;
+        $ignorePackId = $routePack instanceof WholesalePack ? $routePack->getKey() : $routePack;
 
         $request->merge([
             'pack_price' => NumericInput::normalize($request->input('pack_price')),
@@ -146,11 +144,7 @@ class AdminWholesalePackController extends Controller
             ->whereNull('wholesale_price')
             ->exists();
 
-        abort_unless(
-            ! $missingWholesalePrice,
-            422,
-            'تمام Variantهای داخل پک باید قیمت عمده داشته باشند.'
-        );
+        abort_unless(! $missingWholesalePrice, 422, 'تمام Variantهای داخل پک باید قیمت عمده داشته باشند.');
 
         $data['slug'] = filled($data['slug'] ?? null)
             ? Str::slug($data['slug'])
