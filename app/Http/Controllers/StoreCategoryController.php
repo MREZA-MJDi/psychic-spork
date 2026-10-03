@@ -20,7 +20,7 @@ class StoreCategoryController extends Controller
                 'product_variants.low_stock_threshold','product_variants.is_active','product_variants.sort_order',
             ]),
             'primaryGalleryMedia' => fn ($query) => $query->select([
-                'id','mediable_id','mediable_type','collection','path','sort_order',
+                'media.id','media.mediable_id','media.mediable_type','media.collection','media.path','media.sort_order',
             ]),
             'activeVariants' => fn ($query) => $query->select([
                 'id','product_id','sku','size','color','price','sale_price',
