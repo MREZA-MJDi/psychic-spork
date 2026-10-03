@@ -30,12 +30,12 @@ class WholesaleController extends Controller
                 'brand:id,name,slug',
                 'category:id,name,slug',
                 'primaryGalleryMedia' => fn ($query) => $query->select([
-                    'id',
-                    'mediable_id',
-                    'mediable_type',
-                    'collection',
-                    'path',
-                    'sort_order',
+                    'media.id',
+                    'media.mediable_id',
+                    'media.mediable_type',
+                    'media.collection',
+                    'media.path',
+                    'media.sort_order',
                 ]),
                 'activeVariants' => fn ($query) => $query
                     ->whereNotNull('wholesale_price')
