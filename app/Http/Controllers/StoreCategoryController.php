@@ -10,6 +10,25 @@ use Illuminate\View\View;
 
 class StoreCategoryController extends Controller
 {
+    private function catalogRelations(): array
+    {
+        return [
+            'category:id,name,slug',
+            'brand:id,name,slug',
+            'primaryActiveVariant' => fn ($query) => $query->select([
+                'id','product_id','sku','price','sale_price','stock',
+                'low_stock_threshold','is_active','sort_order',
+            ]),
+            'primaryGalleryMedia' => fn ($query) => $query->select([
+                'id','mediable_id','mediable_type','collection','path','sort_order',
+            ]),
+            'activeVariants' => fn ($query) => $query->select([
+                'id','product_id','sku','size','color','price','sale_price',
+                'stock','low_stock_threshold','is_active','sort_order',
+            ]),
+        ];
+    }
+
     public function index(SeoService $seo): View
     {
         $categories = Category::query()
@@ -36,31 +55,20 @@ class StoreCategoryController extends Controller
     public function show(Category $category, SeoService $seo, Request $request): View
     {
         abort_unless($category->is_active, 404);
-
         $category->load('coverMedia');
 
         $sort = in_array($request->query('sort'), [
-            'newest',
-            'oldest',
-            'price_asc',
-            'price_desc',
-            'name_asc',
-            'name_desc',
+            'newest','oldest','price_asc','price_desc','name_asc','name_desc',
         ], true) ? $request->query('sort') : 'newest';
 
-        $perPage = in_array((int) $request->query('per_page', 6), [6, 12, 24, 36], true)
+        $perPage = in_array((int) $request->query('per_page', 6), [6,12,24,36], true)
             ? (int) $request->query('per_page', 6)
             : 6;
 
         $products = Product::query()
+            ->select(['id','category_id','brand_id','name','slug','short_description','updated_at'])
             ->active()
-            ->with([
-                'category:id,name,slug',
-                'brand:id,name,slug',
-                'primaryActiveVariant',
-                'primaryGalleryMedia',
-                'activeVariants',
-            ])
+            ->with($this->catalogRelations())
             ->where('category_id', $category->id)
             ->when($sort === 'oldest', fn ($query) => $query->orderBy('updated_at')->orderBy('id'))
             ->when($sort === 'price_asc', fn ($query) => $query->orderByEffectivePrice('asc'))
