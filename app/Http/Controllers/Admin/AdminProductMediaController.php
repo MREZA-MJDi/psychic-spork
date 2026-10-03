@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Media;
 use App\Models\Product;
+use App\Services\HeroService;
 use App\Services\MediaService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -28,7 +29,8 @@ class AdminProductMediaController extends Controller
     public function store(
         Request $request,
         Product $product,
-        MediaService $media
+        MediaService $media,
+        HeroService $hero
     ): RedirectResponse {
         $validated = $request->validate([
             'images' => ['required', 'array', 'min:1', 'max:12'],
@@ -57,13 +59,18 @@ class AdminProductMediaController extends Controller
             }
         });
 
+        if ($product->is_hero) {
+            $hero->invalidate();
+        }
+
         return back()->with('success', 'تصاویر محصول با موفقیت اضافه شدند.');
     }
 
     public function update(
         Request $request,
         Product $product,
-        Media $media
+        Media $media,
+        HeroService $hero
     ): RedirectResponse {
         abort_unless(
             $media->mediable_type === $product->getMorphClass()
@@ -80,12 +87,17 @@ class AdminProductMediaController extends Controller
             'alt_text' => $validated['alt_text'] ?? null,
         ]);
 
+        if ($product->is_hero) {
+            $hero->invalidate();
+        }
+
         return back()->with('success', 'متن جایگزین تصویر ذخیره شد.');
     }
 
     public function reorder(
         Request $request,
-        Product $product
+        Product $product,
+        HeroService $hero
     ): JsonResponse {
         $validated = $request->validate([
             'media' => ['required', 'array', 'min:1'],
@@ -116,6 +128,10 @@ class AdminProductMediaController extends Controller
             }
         });
 
+        if ($product->is_hero) {
+            $hero->invalidate();
+        }
+
         return response()->json([
             'message' => 'ترتیب تصاویر ذخیره شد.',
         ]);
@@ -124,7 +140,8 @@ class AdminProductMediaController extends Controller
     public function destroy(
         Product $product,
         Media $media,
-        MediaService $mediaService
+        MediaService $mediaService,
+        HeroService $hero
     ): RedirectResponse {
         abort_unless(
             $media->mediable_type === $product->getMorphClass()
@@ -137,6 +154,10 @@ class AdminProductMediaController extends Controller
             $mediaService->deleteMedia($media);
             $media->delete();
         });
+
+        if ($product->is_hero) {
+            $hero->invalidate();
+        }
 
         return back()->with('success', 'تصویر حذف شد.');
     }
