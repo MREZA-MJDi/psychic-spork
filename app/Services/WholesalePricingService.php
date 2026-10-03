@@ -29,7 +29,7 @@ final class WholesalePricingService
 
         $items = $cart->items()
             ->with([
-                'productVariant.product.galleryMedia',
+                'productVariant.product',
             ])
             ->get();
 
