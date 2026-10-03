@@ -261,7 +261,8 @@ class AdminProductController extends Controller
     public function update(
         UpdateProductRequest $request,
         Product $product,
-        MediaService $media
+        MediaService $media,
+        HeroService $hero
     ): RedirectResponse {
         try {
             $data = $request->validated();
@@ -348,6 +349,10 @@ class AdminProductController extends Controller
                 }
             });
 
+            if ($product->is_hero) {
+                $hero->invalidate();
+            }
+
             return redirect()
                 ->route('admin.products.index')
                 ->with(
@@ -374,7 +379,8 @@ class AdminProductController extends Controller
 
     public function destroy(
         Product $product,
-        MediaService $media
+        MediaService $media,
+        HeroService $hero
     ): RedirectResponse {
         try {
             DB::transaction(function () use (
@@ -404,6 +410,10 @@ class AdminProductController extends Controller
 
                 $product->delete();
             });
+
+            if ($product->is_hero) {
+                $hero->invalidate();
+            }
 
             return redirect()
                 ->route('admin.products.index')
