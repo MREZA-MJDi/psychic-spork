@@ -43,13 +43,22 @@ class ProductVariant extends Model
             ->orderBy('id');
     }
 
+    /**
+     * Keep card/pack eager loading bounded to one real gallery asset per variant.
+     * Without ofMany(), eager loading this relation can hydrate every matching
+     * gallery row even though storefront cards only consume the first image.
+     */
     public function primaryGalleryMedia(): MorphOne
     {
-        return $this->morphOne(Media::class, 'mediable')
-            ->where('collection', 'gallery')
-            ->orderBy('sort_order')
-            ->orderBy('id');
+        return $this->morphOne(Media::class, 'mediable')->ofMany(
+            ['sort_order' => 'min', 'id' => 'min'],
+            fn ($query) => $query
+                ->where('collection', 'gallery')
+                ->whereNotNull('path')
+                ->whereRaw("TRIM(path) <> ''")
+        );
     }
+
     public function cartItems(): HasMany { return $this->hasMany(CartItem::class); }
     public function orderItems(): HasMany { return $this->hasMany(OrderItem::class); }
     public function inventoryMovements(): HasMany { return $this->hasMany(InventoryMovement::class); }
