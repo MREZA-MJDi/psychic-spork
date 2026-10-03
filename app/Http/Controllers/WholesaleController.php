@@ -8,23 +8,30 @@ use App\Models\Product;
 use App\Models\WholesalePack;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
 use Illuminate\Support\Facades\DB;
+use Illuminate\View\View;
 
 class WholesaleController extends Controller
 {
     public function show(Request $request): View
     {
         $products = Product::query()
+            ->select([
+                'id', 'category_id', 'brand_id', 'name', 'slug',
+                'is_featured', 'sort_order',
+            ])
             ->active()
             ->whereHas('activeVariants', fn ($query) => $query->whereNotNull('wholesale_price'))
             ->with([
-                'brand',
-                'category',
+                'brand:id,name,slug',
+                'category:id,name,slug',
                 'primaryGalleryMedia',
                 'activeVariants' => fn ($query) => $query
                     ->whereNotNull('wholesale_price')
-                    ->select(['id', 'product_id', 'color', 'size', 'stock', 'wholesale_price']),
+                    ->select([
+                        'id', 'product_id', 'sku', 'color', 'size',
+                        'stock', 'wholesale_price', 'sort_order',
+                    ]),
             ])
             ->orderByDesc('is_featured')
             ->orderBy('sort_order')
@@ -41,9 +48,11 @@ class WholesaleController extends Controller
             ->orderByDesc('id')
             ->get();
 
+        $user = $request->user();
+
         return view('pages.wholesale', [
-            'chequePermission' => $request->user()?->chequePermission()->first(),
-            'isCustomer' => $request->user()?->isCustomer() ?? false,
+            'chequePermission' => $user?->chequePermission()->first(),
+            'isCustomer' => $user?->isCustomer() ?? false,
             'products' => $products,
             'packs' => $packs,
         ]);
@@ -89,11 +98,17 @@ class WholesaleController extends Controller
             return 'requested';
         }, 3);
 
-        return back()->with('success', match ($result) {
+        $message = match ($result) {
             'already-approved' => 'مجوز پرداخت چکی این حساب از قبل فعال است.',
-            'already-pending' => 'درخواست پرداخت چکی شما در حال بررسی است.',
-            default => 'درخواست مجوز چک برای مدیریت ارسال شد.',
-        });
-    }
+            'already-pending' => 'درخواست پرداخت چکی شما ثبت شده و در انتظار تأیید مدیر است.',
+            default => 'درخواست پرداخت چکی شما با موفقیت ثبت شد و در انتظار تأیید مدیر است.',
+        };
 
+        // Redirect to the status block instead of a generic back(). This makes the
+        // persisted pending/approved state and the flash confirmation immediately
+        // visible after submitting the cheque request.
+        return redirect()
+            ->to(route('wholesale.show') . '#cheque-application')
+            ->with('success', $message);
+    }
 }
