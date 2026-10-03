@@ -13,6 +13,46 @@ use Illuminate\View\View;
 
 class StoreProductController extends Controller
 {
+    private function catalogRelations(): array
+    {
+        return [
+            'category:id,name,slug',
+            'brand:id,name,slug',
+            'primaryActiveVariant' => fn ($query) => $query->select([
+                'id',
+                'product_id',
+                'sku',
+                'price',
+                'sale_price',
+                'stock',
+                'low_stock_threshold',
+                'is_active',
+                'sort_order',
+            ]),
+            'primaryGalleryMedia' => fn ($query) => $query->select([
+                'id',
+                'mediable_id',
+                'mediable_type',
+                'collection',
+                'path',
+                'sort_order',
+            ]),
+            'activeVariants' => fn ($query) => $query->select([
+                'id',
+                'product_id',
+                'sku',
+                'size',
+                'color',
+                'price',
+                'sale_price',
+                'stock',
+                'low_stock_threshold',
+                'is_active',
+                'sort_order',
+            ]),
+        ];
+    }
+
     public function index(
         StoreProductFilterRequest $request,
         SeoService $seo
@@ -23,14 +63,17 @@ class StoreProductController extends Controller
         $perPage = (int) ($filters['per_page'] ?? 6);
 
         $products = Product::query()
-            ->active()
-            ->with([
-                'category:id,name,slug',
-                'brand:id,name,slug',
-                'primaryActiveVariant',
-                'primaryGalleryMedia',
-                'activeVariants',
+            ->select([
+                'id',
+                'category_id',
+                'brand_id',
+                'name',
+                'slug',
+                'short_description',
+                'updated_at',
             ])
+            ->active()
+            ->with($this->catalogRelations())
             ->when(
                 ! empty($filters['q']),
                 fn ($query) => $query->where(function ($query) use ($filters) {
@@ -141,13 +184,35 @@ class StoreProductController extends Controller
         $like = '%' . $term . '%';
 
         $items = Product::query()
+            ->select([
+                'id',
+                'category_id',
+                'brand_id',
+                'name',
+                'slug',
+            ])
             ->active()
             ->with([
                 'category:id,name',
                 'brand:id,name',
-                'primaryGalleryMedia',
-                'primaryActiveVariant',
-                'activeVariants',
+                'primaryGalleryMedia' => fn ($query) => $query->select([
+                    'id',
+                    'mediable_id',
+                    'mediable_type',
+                    'collection',
+                    'path',
+                    'sort_order',
+                ]),
+                'primaryActiveVariant' => fn ($query) => $query->select([
+                    'id',
+                    'product_id',
+                    'price',
+                    'sale_price',
+                    'stock',
+                    'low_stock_threshold',
+                    'is_active',
+                    'sort_order',
+                ]),
             ])
             ->where(function ($query) use ($like) {
                 $query
@@ -200,21 +265,57 @@ class StoreProductController extends Controller
         abort_unless($product->is_active, 404);
 
         $product->load([
-            'category',
-            'brand',
-            'activeVariants.primaryGalleryMedia',
-            'galleryMedia' => fn ($query) => $query->orderBy('sort_order')->orderBy('id')->limit(8),
+            'category:id,name,slug',
+            'brand:id,name,slug',
+            'activeVariants' => fn ($query) => $query->select([
+                'id',
+                'product_id',
+                'sku',
+                'size',
+                'color',
+                'color_code',
+                'price',
+                'sale_price',
+                'wholesale_price',
+                'stock',
+                'low_stock_threshold',
+                'is_active',
+                'sort_order',
+            ]),
+            'activeVariants.primaryGalleryMedia' => fn ($query) => $query->select([
+                'id',
+                'mediable_id',
+                'mediable_type',
+                'collection',
+                'path',
+                'sort_order',
+            ]),
+            'galleryMedia' => fn ($query) => $query
+                ->select([
+                    'id',
+                    'mediable_id',
+                    'mediable_type',
+                    'collection',
+                    'path',
+                    'sort_order',
+                ])
+                ->orderBy('sort_order')
+                ->orderBy('id')
+                ->limit(8),
         ]);
 
         $relatedProducts = Product::query()
-            ->active()
-            ->with([
-                'category:id,name,slug',
-                'brand:id,name,slug',
-                'primaryActiveVariant',
-                'primaryGalleryMedia',
-                'activeVariants',
+            ->select([
+                'id',
+                'category_id',
+                'brand_id',
+                'name',
+                'slug',
+                'short_description',
+                'updated_at',
             ])
+            ->active()
+            ->with($this->catalogRelations())
             ->where('id', '!=', $product->id)
             ->when(
                 $product->category_id,
@@ -232,14 +333,17 @@ class StoreProductController extends Controller
             $remaining = 4 - $relatedProducts->count();
 
             $fallbackProducts = Product::query()
-                ->active()
-                ->with([
-                    'category:id,name,slug',
-                    'brand:id,name,slug',
-                    'primaryActiveVariant',
-                    'primaryGalleryMedia',
-                    'activeVariants',
+                ->select([
+                    'id',
+                    'category_id',
+                    'brand_id',
+                    'name',
+                    'slug',
+                    'short_description',
+                    'updated_at',
                 ])
+                ->active()
+                ->with($this->catalogRelations())
                 ->where('id', '!=', $product->id)
                 ->whereNotIn(
                     'id',
