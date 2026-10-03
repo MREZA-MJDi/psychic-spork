@@ -1,5 +1,26 @@
 @import './app.css';
 
+/* Checkout layout contract: keep the primary form in normal document flow.
+   Only the order summary is sticky on desktop. This prevents the footer from
+   painting underneath a long checkout form when the page is scrolled. */
+.checkout-layout {
+    align-items: start;
+}
+
+.checkout-layout > .checkout-card:first-child {
+    position: relative;
+    top: auto;
+    align-self: start;
+    min-width: 0;
+}
+
+.checkout-layout > .checkout-card--summary {
+    position: sticky;
+    top: 104px;
+    align-self: start;
+    min-width: 0;
+}
+
 /* Checkout uses sky blue and charcoal as the main surfaces; pink remains an accent. */
 body.store-body.checkout-page-layout {
     background:
