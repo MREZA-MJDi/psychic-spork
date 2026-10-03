@@ -73,24 +73,10 @@ class WholesaleController extends Controller
                     'stock',
                     'sort_order',
                 ]),
-                'items.variant.primaryGalleryMedia' => fn ($query) => $query->select([
-                    'media.id',
-                    'media.mediable_id',
-                    'media.mediable_type',
-                    'media.collection',
-                    'media.path',
-                    'media.sort_order',
-                ]),
+                'items.variant.primaryGalleryMedia',
                 'items.variant.product:id,name,slug,brand_id',
                 'items.variant.product.brand:id,name',
-                'items.variant.product.primaryGalleryMedia' => fn ($query) => $query->select([
-                    'id',
-                    'mediable_id',
-                    'mediable_type',
-                    'collection',
-                    'path',
-                    'sort_order',
-                ]),
+                'items.variant.product.primaryGalleryMedia',
             ])
             ->orderBy('sort_order')
             ->orderByDesc('id')
