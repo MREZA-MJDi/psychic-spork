@@ -85,11 +85,7 @@ class StoreProductController extends Controller
                         ->orWhere('description', 'like', $term)
                         ->orWhereHas(
                             'variants',
-                            fn ($variant) => $variant->where(
-                                'sku',
-                                'like',
-                                $term
-                            )
+                            fn ($variant) => $variant->where('sku', 'like', $term)
                         )
                         ->orWhereHas(
                             'category',
@@ -282,14 +278,7 @@ class StoreProductController extends Controller
                 'is_active',
                 'sort_order',
             ]),
-            'activeVariants.primaryGalleryMedia' => fn ($query) => $query->select([
-                'id',
-                'mediable_id',
-                'mediable_type',
-                'collection',
-                'path',
-                'sort_order',
-            ]),
+            'activeVariants.primaryGalleryMedia',
             'galleryMedia' => fn ($query) => $query
                 ->select([
                     'id',
