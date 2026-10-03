@@ -38,13 +38,53 @@ class HomeController extends Controller
             ->get();
 
         $productsQuery = Product::query()
+            ->select([
+                'id',
+                'category_id',
+                'brand_id',
+                'name',
+                'slug',
+                'short_description',
+                'description',
+                'sort_order',
+                'updated_at',
+            ])
             ->active()
             ->with([
-                'category',
-                'brand',
-                'primaryActiveVariant',
-                'primaryGalleryMedia',
-                'activeVariants',
+                'category:id,name,slug',
+                'brand:id,name,slug',
+                'primaryActiveVariant' => fn ($query) => $query->select([
+                    'id',
+                    'product_id',
+                    'sku',
+                    'price',
+                    'sale_price',
+                    'stock',
+                    'low_stock_threshold',
+                    'is_active',
+                    'sort_order',
+                ]),
+                'primaryGalleryMedia' => fn ($query) => $query->select([
+                    'id',
+                    'mediable_id',
+                    'mediable_type',
+                    'collection',
+                    'path',
+                    'sort_order',
+                ]),
+                'activeVariants' => fn ($query) => $query->select([
+                    'id',
+                    'product_id',
+                    'sku',
+                    'size',
+                    'color',
+                    'price',
+                    'sale_price',
+                    'stock',
+                    'low_stock_threshold',
+                    'is_active',
+                    'sort_order',
+                ]),
             ]);
 
         $featuredProducts = (clone $productsQuery)
@@ -78,13 +118,37 @@ class HomeController extends Controller
         }
 
         $recentProducts = Product::query()
+            ->select([
+                'id',
+                'category_id',
+                'brand_id',
+                'name',
+                'slug',
+                'updated_at',
+                'created_at',
+            ])
             ->active()
             ->with([
                 'category:id,name',
                 'brand:id,name',
-                'primaryGalleryMedia',
-                'primaryActiveVariant',
-                'activeVariants',
+                'primaryGalleryMedia' => fn ($query) => $query->select([
+                    'id',
+                    'mediable_id',
+                    'mediable_type',
+                    'collection',
+                    'path',
+                    'sort_order',
+                ]),
+                'primaryActiveVariant' => fn ($query) => $query->select([
+                    'id',
+                    'product_id',
+                    'price',
+                    'sale_price',
+                    'stock',
+                    'low_stock_threshold',
+                    'is_active',
+                    'sort_order',
+                ]),
             ])
             ->latest('created_at')
             ->latest('id')
@@ -110,14 +174,37 @@ class HomeController extends Controller
         };
 
         $popularProducts = Product::query()
+            ->select([
+                'id',
+                'category_id',
+                'brand_id',
+                'name',
+                'slug',
+                'updated_at',
+            ])
             ->active()
             ->whereHas('orderItems', $popularSalesFilter)
             ->with([
                 'category:id,name',
                 'brand:id,name',
-                'primaryGalleryMedia',
-                'primaryActiveVariant',
-                'activeVariants',
+                'primaryGalleryMedia' => fn ($query) => $query->select([
+                    'id',
+                    'mediable_id',
+                    'mediable_type',
+                    'collection',
+                    'path',
+                    'sort_order',
+                ]),
+                'primaryActiveVariant' => fn ($query) => $query->select([
+                    'id',
+                    'product_id',
+                    'price',
+                    'sale_price',
+                    'stock',
+                    'low_stock_threshold',
+                    'is_active',
+                    'sort_order',
+                ]),
             ])
             ->withSum(
                 [
