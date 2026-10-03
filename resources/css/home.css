@@ -432,6 +432,52 @@ color:
         translate(-3px, -2px);
 }
 
+/* Compact, legible home product section with useful choices at a glance. */
+.home-page .home-product-section {
+    padding-block: clamp(38px, 4.4vw, 58px);
+    scroll-margin-top: 100px;
+}
+
+.home-page .home-product-section__head {
+    margin-bottom: 18px;
+}
+
+.home-product-section__head h2 {
+    margin-top: 6px;
+}
+
+.home-product-section__head p {
+    margin-top: 6px;
+}
+
+.home-product-section .product-card__topline {
+    color: var(--janan-muted);
+}
+
+.home-product-section .product-card__topline span:last-child {
+    color: var(--janan-blue-ink);
+    font-weight: 700;
+}
+
+.product-card__home-facts {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 9px;
+}
+
+.product-card__home-facts span {
+    padding: 4px 7px;
+    border: 1px solid rgba(57,65,74,.08);
+    border-radius: 999px;
+    color: var(--janan-ink-soft);
+    background: #f7fafb;
+    font-size: 8px;
+    line-height: 1.4;
+}
+
+
 .home-collections {
 position:
         relative;

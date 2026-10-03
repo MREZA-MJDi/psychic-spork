@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\ProductVariant;
 use App\Models\WholesalePack;
+use App\Support\NumericInput;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -29,13 +30,18 @@ class AdminWholesalePackController extends Controller
     {
         return view('admin.wholesale-packs.form', [
             'pack' => new WholesalePack(),
-            'variants' => $this->variants(),
+            'variants' => collect(),
         ]);
     }
 
     public function store(Request $request): RedirectResponse
     {
         $data = $this->validated($request);
+        $image = $data['image'] ?? null;
+        unset($data['image'], $data['remove_image']);
+        if ($image) {
+            $data['image_path'] = $image->store('wholesale-packs', 'public');
+        }
 
         $pack = DB::transaction(function () use ($data): WholesalePack {
             $items = $data['items'];
@@ -58,17 +64,25 @@ class AdminWholesalePackController extends Controller
 
     public function edit(WholesalePack $wholesalePack): View
     {
-        $wholesalePack->load('items');
+        $wholesalePack->load('items.variant.product.brand');
         
         return view('admin.wholesale-packs.form', [
             'pack' => $wholesalePack,
-            'variants' => $this->variants(),
+            'variants' => $wholesalePack->items->pluck('variant')->filter()->values(),
         ]);
     }
 
     public function update(Request $request, WholesalePack $wholesalePack): RedirectResponse
     {
         $data = $this->validated($request);
+        $image = $data['image'] ?? null;
+        $removeImage = $request->boolean('remove_image');
+        unset($data['image'], $data['remove_image']);
+        if ($image) {
+            $data['image_path'] = $image->store('wholesale-packs', 'public');
+        } elseif ($removeImage) {
+            $data['image_path'] = null;
+        }
 
         DB::transaction(function () use ($data, $wholesalePack): void {
             $items = $data['items'];
@@ -92,24 +106,23 @@ class AdminWholesalePackController extends Controller
         return back()->with('success', 'پک عمده حذف شد.');
     }
 
-    private function variants()
-    {
-        return ProductVariant::query()
-            ->with(['product.brand', 'product.category'])
-            ->where('is_active', true)
-            ->whereHas('product', fn ($query) => $query->where('is_active', true))
-            ->orderBy('product_id')
-            ->orderBy('sort_order')
-            ->orderBy('id')
-            ->get();
-    }
-
     private function validated(Request $request): array
     {
+        $routePack = $request->route('wholesale_pack') ?? $request->route('wholesalePack');
+        $ignorePackId = $routePack instanceof WholesalePack
+            ? $routePack->getKey()
+            : $routePack;
+
+        $request->merge([
+            'pack_price' => NumericInput::normalize($request->input('pack_price')),
+        ]);
+
         $data = $request->validate([
             'name' => ['required', 'string', 'max:180'],
-            'slug' => ['nullable', 'string', 'max:180', Rule::unique('wholesale_packs', 'slug')->ignore($request->route('wholesalePack'))],
+            'slug' => ['nullable', 'string', 'max:180', Rule::unique('wholesale_packs', 'slug')->ignore($ignorePackId)],
             'description' => ['nullable', 'string', 'max:5000'],
+            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'remove_image' => ['nullable', 'boolean'],
             'pack_price' => ['required', 'numeric', 'min:0'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
             'is_active' => ['nullable', 'boolean'],

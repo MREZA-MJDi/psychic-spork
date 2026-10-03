@@ -12,7 +12,6 @@ use App\Services\ChequePaymentMethod;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -45,28 +44,22 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         RateLimiter::for('login', function (Request $request): Limit {
-            $identifier = Str::lower(trim((string) $request->input('identifier')));
+            $identifier = Str::lower(trim((string) $request->input('phone')));
 
             return Limit::perMinute(5)
                 ->by($identifier . '|' . $request->ip());
         });
 
-        $contactSettings = Schema::hasTable('site_settings')
-            ? SiteSetting::query()
-                ->whereIn('key', [
-                    'contact.phone',
-                    'contact.email',
-                    'contact.address',
-                    'contact.working_hours',
-                ])
-                ->pluck('value', 'key')
-            : collect();
+        $contactSettings = SiteSetting::contactValues();
+
+        $brandNameFa = (string) config('app.store_name_fa', config('app.store_name', 'جانه جانان'));
+        $brandNameLatin = (string) config('app.store_name_latin', 'Jane Janan');
 
         View::share([
-            'siteBrandNameLatin' => 'Janan',
-            'siteBrandNameFa' => 'جانان',
-            'siteBrandName' => 'جانان',
-            'siteFooterText' => 'فروشگاه آنلاین جانان؛ انتخاب دقیق، تجربه‌ای ساده و سفارش مطمئن.',
+            'siteBrandNameLatin' => $brandNameLatin,
+            'siteBrandNameFa' => $brandNameFa,
+            'siteBrandName' => $brandNameFa,
+            'siteFooterText' => "فروشگاه آنلاین {$brandNameFa}؛ انتخاب دقیق، تجربه‌ای ساده و سفارش مطمئن.",
             'siteStorePhone' => $contactSettings['contact.phone'] ?? env('JANAN_STORE_PHONE'),
             'siteStoreEmail' => $contactSettings['contact.email'] ?? env('JANAN_STORE_EMAIL'),
             'siteStoreAddress' => $contactSettings['contact.address'] ?? env('JANAN_STORE_ADDRESS'),

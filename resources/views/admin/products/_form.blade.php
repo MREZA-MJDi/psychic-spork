@@ -445,7 +445,7 @@
                 </h2>
 
                 <p class="admin-card-description">
-                    اطلاعاتی که برای فروش محصول لازم است.
+                    این بخش یک گزینهٔ اولیه برای شروع فروش می‌سازد. برای رنگ یا سایزهای دیگر، پس از ذخیره محصول «مدیریت واریانت‌ها» را باز کن؛ هر ترکیب رنگ و سایز یک ردیف جداست و رنگ می‌تواند تکرار شود.
                 </p>
 
             </div>
@@ -584,11 +584,11 @@
 
                 <input
                     id="price"
-                    type="number"
+                    type="text"
                     name="price"
-                    min="0"
-                    step="1"
                     value="{{ old('price', $variant?->price ?? 0) }}"
+                    inputmode="numeric"
+                    data-money-input
                     required
                 >
 
@@ -609,11 +609,11 @@
 
                 <input
                     id="sale_price"
-                    type="number"
+                    type="text"
                     name="sale_price"
-                    min="0"
-                    step="1"
                     value="{{ old('sale_price', $variant?->sale_price) }}"
+                    inputmode="numeric"
+                    data-money-input
                     placeholder="اختیاری"
                 >
 
@@ -634,11 +634,11 @@
 
                 <input
                     id="wholesale_price"
-                    type="number"
+                    type="text"
                     name="wholesale_price"
-                    min="0"
-                    step="1"
                     value="{{ old('wholesale_price', $variant?->wholesale_price) }}"
+                    inputmode="numeric"
+                    data-money-input
                     placeholder="اختیاری"
                 >
 

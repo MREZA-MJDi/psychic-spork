@@ -14,11 +14,11 @@
                 aria-label="{{ $siteBrandNameLatin ?? 'Janan' }}"
             >
                 <span class="brand__latin">
-                    {{ $siteBrandNameLatin ?? 'Janan' }}
+                    {{ $siteBrandNameLatin ?? 'Jane Janan' }}
                 </span>
 
                 <span class="brand__fa">
-                    {{ $siteBrandNameFa ?? 'جانان' }}
+                    {{ $siteBrandNameFa ?? 'جانه جانان' }}
                 </span>
             </a>
 
@@ -307,7 +307,7 @@
 
         <span>
             © {{ date('Y') }}
-            {{ $siteBrandNameLatin ?? 'Janan' }}
+            {{ $siteBrandNameLatin ?? 'Jane Janan' }}
             · تمامی حقوق محفوظ است.
         </span>
 

@@ -304,27 +304,41 @@
                             {{-- CHEQUE PERMISSION --}}
 
                             <td>
-                                @if($customer->chequePermission?->enabled)
-                                    <span class="admin-badge admin-badge--success">مجاز</span>
-                                    <div class="admin-muted">
-                                        {{ $customer->chequePermission->max_order_amount !== null ? 'سقف: ' . number_format((float) $customer->chequePermission->max_order_amount) . ' تومان' : 'بدون سقف' }}
-                                    </div>
-                                    <form method="POST" action="{{ route('admin.customers.cheque.disable', $customer) }}" style="margin-top:8px;">
+                                @php
+                                    $chequePermission = $customer->chequePermission;
+                                    $chequeEnabled = $chequePermission?->isApproved() ?? false;
+                                    $chequeLimit = $chequePermission?->max_order_amount
+                                        ?? $chequePermission?->requested_amount;
+                                @endphp
+                                <div class="admin-customer-cheque" data-cheque-permission>
+                                    @if($chequeEnabled)
+                                        <span class="admin-badge admin-badge--success">فعال</span>
+                                    @elseif($chequePermission?->isPending())
+                                        <span class="admin-badge admin-badge--warning">درخواست مشتری در انتظار بررسی</span>
+                                        <div class="admin-muted">سقف پیشنهادی مشتری را می‌توانید تغییر دهید.</div>
+                                    @else
+                                        <span class="admin-badge admin-badge--neutral">غیرفعال</span>
+                                        <div class="admin-muted">مدیر می‌تواند بدون درخواست مشتری هم مجوز بدهد.</div>
+                                    @endif
+
+                                    <form method="POST" action="{{ route('admin.customers.cheque.enable', $customer) }}" class="admin-customer-cheque__form">
                                         @csrf
                                         @method('PATCH')
-                                        <button type="submit" class="admin-btn admin-btn--ghost admin-btn--sm">لغو مجوز</button>
-                                    </form>
-                                @else
-                                    <span class="admin-badge admin-badge--neutral">ندارد</span>
-                                    <form method="POST" action="{{ route('admin.customers.cheque.enable', $customer) }}" style="margin-top:8px;">
-                                        @csrf
-                                        @method('PATCH')
-                                        <div style="display:grid;gap:6px;">
-                                            <input type="number" name="max_order_amount" min="0" step="1" placeholder="سقف اختیاری">
-                                            <button type="submit" class="admin-btn admin-btn--secondary admin-btn--sm">صدور مجوز چک</button>
+                                        <input type="hidden" name="enabled" value="0">
+                                        <label class="admin-customer-cheque__toggle">
+                                            <input type="checkbox" name="enabled" value="1" data-cheque-toggle @checked($chequeEnabled)>
+                                            <span>خرید چکی مجاز باشد</span>
+                                        </label>
+                                        <div class="admin-customer-cheque__limit" data-cheque-limit @if(!$chequeEnabled) hidden @endif>
+                                            <label for="cheque-limit-{{ $customer->id }}">سقف هر سفارش (تومان)</label>
+                                            <input id="cheque-limit-{{ $customer->id }}" type="text" name="max_order_amount" inputmode="numeric" data-money-input value="{{ old('max_order_amount', $chequeLimit) }}" @required($chequeEnabled)>
                                         </div>
+                                        <button type="submit" class="admin-btn admin-btn--secondary admin-btn--sm">ذخیره</button>
                                     </form>
-                                @endif
+                                    @if($chequePermission?->requested_at)
+                                        <a class="admin-link" href="{{ route('admin.wholesale.index') }}#cheque-permission-requests">مشاهده درخواست مشتری</a>
+                                    @endif
+                                </div>
                             </td>
 
                             {{-- CREATED AT --}}

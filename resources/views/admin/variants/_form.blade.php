@@ -219,12 +219,11 @@
 
                 <input
                     id="price"
-                    type="number"
+                    type="text"
                     name="price"
-                    min="0"
-                    step="1"
                     value="{{ old('price', $variant->price) }}"
                     inputmode="numeric"
+                    data-money-input
                     placeholder="مثلاً ۱۲۹۰۰۰۰"
                     required
                 >
@@ -255,12 +254,11 @@
 
                 <input
                     id="wholesale_price"
-                    type="number"
+                    type="text"
                     name="wholesale_price"
-                    min="0"
-                    step="1"
                     value="{{ old('wholesale_price', $variant->wholesale_price) }}"
                     inputmode="numeric"
+                    data-money-input
                     placeholder="اختیاری"
                 >
 
@@ -290,12 +288,11 @@
 
                 <input
                     id="sale_price"
-                    type="number"
+                    type="text"
                     name="sale_price"
-                    min="0"
-                    step="1"
                     value="{{ old('sale_price', $variant->sale_price) }}"
                     inputmode="numeric"
+                    data-money-input
                     placeholder="اختیاری"
                 >
 

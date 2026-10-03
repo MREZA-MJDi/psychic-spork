@@ -16,7 +16,11 @@ class EnsureCustomer
             return redirect()->route('login');
         }
 
-        abort_if($user->isAdmin(), 403, 'این بخش فقط برای مشتری است.');
+        abort_unless(
+            $user->isCustomer(),
+            403,
+            'این بخش فقط برای مشتری است.'
+        );
 
         return $next($request);
     }

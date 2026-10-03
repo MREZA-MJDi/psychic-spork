@@ -48,7 +48,7 @@ body.home-immersive {
   cursor: grab;
   user-select: none;
   -webkit-user-select: none;
-  touch-action: none;
+  touch-action: pan-y;
 }
 
 .immersive-grid-hero.is-dragging {
@@ -164,7 +164,7 @@ body.home-immersive {
   height: 100%;
 }
 
- .immersive-grid-item {
+.immersive-grid-item {
   display: block;
   color: inherit;
   text-decoration: none;
@@ -176,6 +176,24 @@ body.home-immersive {
   cursor: pointer;
   will-change: transform, opacity;
   z-index: 1;
+}
+
+.immersive-grid-hero.is-static-fallback .immersive-grid-item {
+  opacity: 0;
+  animation: janan-hero-item-intro .56s cubic-bezier(.2,.7,.25,1) both;
+  animation-delay: calc(var(--hero-intro-index, 0) * 42ms);
+}
+
+@keyframes janan-hero-item-intro {
+  from { opacity: 0; transform: translateY(18px) scale(.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .immersive-grid-hero.is-static-fallback .immersive-grid-item {
+    opacity: 1;
+    animation: none;
+  }
 }
 
 .immersive-grid-item.is-out {
@@ -496,6 +514,20 @@ body.home-immersive {
 
 body.immersive-zoom-lock{overflow:hidden!important}
 
+.immersive-grid-hero .is-returning {
+    animation: hero-item-return .34s ease-out both;
+}
+
+@keyframes hero-item-return {
+    0% { filter: brightness(1.12); }
+    55% { filter: brightness(1.04); }
+    100% { filter: brightness(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .immersive-grid-hero .is-returning { animation-duration: .01ms; }
+}
+
 /* =========================================================
    IMMERSIVE HOMEPAGE — SHARED JANAN NAVBAR
    Keep the real storefront navbar; only change its surface
@@ -673,6 +705,47 @@ body.immersive-zoom-lock{overflow:hidden!important}
     border-color: rgba(252,253,254,.9);
 }
 
+/* The normal store stylesheet loads after this file. Keep the home header
+   above the hero without a white strip or opaque surface until the hero ends. */
+body.home-page-layout .store-header--immersive {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 10000;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    -webkit-mask-image: none;
+    mask-image: none;
+    transition: color .22s ease, background-color .22s ease, border-color .22s ease;
+}
+
+body.home-page-layout .store-header--immersive.is-over-content {
+    color: var(--janan-ink-strong);
+    background: rgba(252, 253, 254, .94);
+    border-bottom: 1px solid rgba(57, 65, 74, .07);
+    box-shadow: 0 10px 28px rgba(22, 31, 36, .06);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+}
+
+body.home-page-layout .store-header--immersive .icon-button,
+body.home-page-layout .store-header--immersive .mobile-menu-toggle {
+    color: #fff;
+    background: rgba(0, 0, 0, .28);
+    border-color: rgba(255, 255, 255, .22);
+    box-shadow: 0 2px 14px rgba(0, 0, 0, .12);
+}
+
+body.home-page-layout .store-header--immersive.is-over-content .icon-button,
+body.home-page-layout .store-header--immersive.is-over-content .mobile-menu-toggle {
+    color: #68737d;
+    background: rgba(255, 255, 255, .74);
+    border-color: transparent;
+    box-shadow: none;
+}
+
 /* Final immersive cart positioning: right side on desktop, full screen on small devices. */
 
 /* =========================================================
@@ -700,4 +773,3 @@ body.immersive-zoom-lock{overflow:hidden!important}
     max-block-size: calc(100svh - 24px);
     box-sizing: border-box;
 }
-

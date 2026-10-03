@@ -56,7 +56,7 @@ class StoreProductFilterRequest extends FormRequest
             'per_page' => [
                 'nullable',
                 'integer',
-                'in:12,24,36',
+                'in:6,12,24,36',
             ],
 
             'page' => [

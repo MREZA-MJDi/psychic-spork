@@ -11,9 +11,11 @@ use App\Models\ProductVariant;
 use App\Models\User;
 use App\Models\WholesaleProfile;
 use App\Models\ChequePermission;
+use App\Models\WholesalePack;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Http\UploadedFile;
 use Tests\TestCase;
@@ -22,29 +24,170 @@ class WholesaleFeatureTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_customer_can_save_wholesale_business_profile(): void
+    public function test_admin_can_add_a_cover_image_to_a_wholesale_pack_and_customers_see_it(): void
     {
-        $customer = User::factory()->create([
-            'is_admin' => false,
+        Storage::fake('public');
+        $admin = User::factory()->create(['is_admin' => true]);
+        [, $variant] = $this->makeProduct(stock: 20, wholesalePrice: 250000);
+
+        $this->actingAs($admin)
+            ->post(route('admin.wholesale-packs.store'), [
+                'name' => 'پک ۱۲ عددی ایزابلا',
+                'slug' => 'isabella-12-pack',
+                'pack_price' => '2400000',
+                'sort_order' => 1,
+                'is_active' => 1,
+                'items' => [
+                    $variant->id => [
+                        'variant_id' => $variant->id,
+                        'quantity' => 12,
+                    ],
+                ],
+                'image' => UploadedFile::fake()->image('isabella-pack.webp'),
+            ])
+            ->assertRedirect();
+
+        $pack = WholesalePack::query()->where('slug', 'isabella-12-pack')->firstOrFail();
+        $this->assertNotEmpty($pack->image_path);
+        Storage::disk('public')->assertExists($pack->image_path);
+
+        $firstImagePath = $pack->image_path;
+        $this->actingAs($admin)
+            ->get(route('admin.wholesale-packs.edit', $pack))
+            ->assertOk()
+            ->assertSee('data-pack-image-current', false)
+            ->assertSee('عکس فعلی جایگزین می‌شود');
+
+        $this->actingAs($admin)
+            ->post(route('admin.wholesale-packs.update', $pack), [
+                '_method' => 'PUT',
+                'name' => 'پک ۱۲ عددی ایزابلا',
+                'slug' => 'isabella-12-pack',
+                'pack_price' => '2400000',
+                'sort_order' => 1,
+                'is_active' => 1,
+                'items' => [
+                    $variant->id => [
+                        'variant_id' => $variant->id,
+                        'quantity' => 12,
+                    ],
+                ],
+                'image' => UploadedFile::fake()->image('isabella-pack-updated.png'),
+            ])
+            ->assertSessionHasNoErrors();
+
+        $pack->refresh();
+        $this->assertNotSame($firstImagePath, $pack->image_path);
+        Storage::disk('public')->assertExists($pack->image_path);
+
+        $this->get(route('wholesale.show'))
+            ->assertOk()
+            ->assertSee(Storage::disk('public')->url($pack->image_path), false)
+            ->assertSee('پک ۱۲ عددی ایزابلا');
+    }
+
+    public function test_wholesale_page_is_public_and_explains_cheque_access(): void
+    {
+        $this->get(route('wholesale.show'))
+            ->assertOk()
+            ->assertSee('خرید آنلاین عمده برای همه باز است')
+            ->assertSee('درخواست اعتبار خرید چکی')
+            ->assertSee(route('login', ['continue' => 'cheque']), false)
+            ->assertSee('درخواست خرید چکی');
+    }
+
+    public function test_customer_account_shows_cheque_request_status_and_next_step(): void
+    {
+        $customer = User::factory()->create(['is_admin' => false]);
+
+        $this->actingAs($customer)
+            ->get(route('account'))
+            ->assertOk()
+            ->assertSee('وضعیت درخواست خرید چکی')
+            ->assertSee(route('wholesale.show') . '#cheque-application', false)
+            ->assertSee('خرید عمده آنلاین هم برای همه باز است');
+
+        ChequePermission::create([
+            'user_id' => $customer->id,
+            'enabled' => false,
+            'requested_at' => now(),
+            'requested_amount' => 10000000,
         ]);
 
         $this->actingAs($customer)
-            ->post('/wholesale/apply', [
-                'business_name' => 'فروشگاه تست',
-                'business_type' => 'پوشاک',
-                'business_phone' => '02112345678',
-                'business_address' => 'تهران',
-            ])
-            ->assertRedirect('/wholesale');
+            ->get(route('account'))
+            ->assertOk()
+            ->assertSee('منتظر بررسی مدیر است')
+            ->assertSee('10,000,000');
+    }
 
-        $this->assertDatabaseHas('wholesale_profiles', [
+    public function test_cheque_request_accepts_grouped_customer_amount(): void
+    {
+        $customer = User::factory()->create(['is_admin' => false]);
+
+        $this->actingAs($customer)
+            ->post(route('wholesale.cheque.request'), ['requested_amount' => '10,000,000'])
+            ->assertRedirect()
+            ->assertSessionHas('success');
+
+        $this->assertDatabaseHas('cheque_permissions', [
             'user_id' => $customer->id,
-            'status' => 'approved',
-            'business_name' => 'فروشگاه تست',
+            'requested_amount' => 10000000,
         ]);
     }
 
-    public function test_guest_cannot_place_wholesale_order_online(): void
+    public function test_checkout_renders_cheque_request_for_approved_wholesale_customer(): void
+    {
+        $customer = User::factory()->create(['is_admin' => false]);
+        WholesaleProfile::create([
+            'user_id' => $customer->id,
+            'status' => 'approved',
+            'approved_at' => now(),
+        ]);
+        $variant = ProductVariant::factory()->create(['stock' => 3]);
+        $cart = Cart::create(['user_id' => $customer->id, 'last_activity_at' => now()]);
+        CartItem::create([
+            'cart_id' => $cart->id,
+            'product_variant_id' => $variant->id,
+            'quantity' => 1,
+        ]);
+
+        $this->actingAs($customer)
+            ->get(route('checkout'))
+            ->assertOk()
+            ->assertSee('درخواست مجوز چک')
+            ->assertSee(route('wholesale.cheque.request'), false);
+    }
+
+    public function test_cheque_permission_request_is_idempotent_without_wholesale_profile(): void
+    {
+        $customer = User::factory()->create(['is_admin' => false]);
+
+        $this->post(route('wholesale.cheque.request'), ['requested_amount' => '۵۰٬۰۰۰٬۰۰۰'])
+            ->assertRedirect(route('login'));
+
+        $this->actingAs($customer)
+            ->post(route('wholesale.cheque.request'), ['requested_amount' => '۵۰٬۰۰۰٬۰۰۰'])
+            ->assertRedirect()
+            ->assertSessionHas('success');
+
+        $this->assertDatabaseMissing('wholesale_profiles', ['user_id' => $customer->id]);
+
+        $requestedAt = ChequePermission::query()
+            ->where('user_id', $customer->id)
+            ->value('requested_at');
+
+        $this->travel(2)->seconds();
+        $this->post(route('wholesale.cheque.request'), ['requested_amount' => '۷۵۰۰۰۰۰۰'])
+            ->assertRedirect();
+
+        $this->assertEquals(
+            $requestedAt->toDateTimeString(),
+            ChequePermission::query()->where('user_id', $customer->id)->value('requested_at')->toDateTimeString()
+        );
+    }
+
+    public function test_guest_can_place_wholesale_order_online(): void
     {
         Config::set('payment.driver', 'zarinpal');
         Config::set('payment.zarinpal.merchant_id', 'test-merchant');
@@ -88,15 +231,14 @@ class WholesaleFeatureTest extends TestCase
                 'order_type' => 'wholesale',
                 'payment_method' => 'online',
             ]))
-            ->assertRedirect()
-            ->assertSessionHas('error');
+            ->assertRedirect();
 
-        $this->assertDatabaseMissing('orders', [
+        $this->assertDatabaseHas('orders', [
             'user_id' => null,
             'order_type' => 'wholesale',
         ]);
 
-        $this->assertSame(10, $variant->fresh()->stock);
+        $this->assertSame(8, $variant->fresh()->stock);
     }
 
     public function test_unapproved_customer_can_place_wholesale_order_online(): void

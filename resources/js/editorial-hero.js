@@ -57,6 +57,27 @@
             '(prefers-reduced-motion: reduce)'
         ).matches ?? false;
 
+        const header = document.querySelector('.store-header--immersive');
+        let headerUpdateFrame = 0;
+        const updateHeaderSurface = () => {
+            if (headerUpdateFrame) return;
+
+            headerUpdateFrame = window.requestAnimationFrame(() => {
+                headerUpdateFrame = 0;
+                if (!header) return;
+
+                const heroBounds = root.getBoundingClientRect();
+                const headerOverHero = heroBounds.top <= 0
+                    && heroBounds.bottom >= header.offsetHeight;
+
+                header.classList.toggle('is-over-content', !headerOverHero);
+            });
+        };
+
+        updateHeaderSurface();
+        window.addEventListener('scroll', updateHeaderSurface, { passive: true });
+        window.addEventListener('resize', updateHeaderSurface, { passive: true });
+
         const loadScript = (src) => new Promise((resolve, reject) => {
             const existing = document.querySelector(
                 'script[data-janan-gsap-src="' + src + '"]'
@@ -138,7 +159,7 @@
             grid.style.gap = window.innerWidth <= 540 ? '6px' : '10px';
             grid.replaceChildren();
 
-            slides.forEach((slide) => {
+            slides.forEach((slide, index) => {
                 const item = document.createElement('a');
                 item.className = 'immersive-grid-item';
                 item.href = slide.url || '#';
@@ -148,6 +169,7 @@
                 item.style.height = 'auto';
                 item.style.aspectRatio = '1';
                 item.style.opacity = '1';
+                item.style.setProperty('--hero-intro-index', String(Math.min(index, 12)));
 
                 if (slide.image) {
                     const image = document.createElement('img');
@@ -169,6 +191,10 @@
                 return;
             }
 
+            // Keep vertical scrolling and momentum native. GSAP still owns
+            // horizontal canvas dragging; no synthetic scroll is needed.
+            root.style.touchAction = 'pan-y';
+
             class Gallery {
                 constructor() {
                     this.cfg = {
@@ -189,7 +215,6 @@
                     };
                     this.last = { x: 0, y: 0 };
                     this.layoutFrame = 0;
-                    this.touchStart = null;
                 }
 
                 getItemSize() {
@@ -262,6 +287,8 @@
                         );
                         item.style.left = x + 'px';
                         item.style.top = y + 'px';
+                        item.style.width = this.cfg.size + 'px';
+                        item.style.height = this.cfg.size + 'px';
                         item.style.opacity = '0';
                         item.style.zIndex = String(slides.length - index);
 
@@ -321,6 +348,11 @@
                             item.col * (this.cfg.size + this.cfg.gap);
                         item.baseY =
                             item.row * (this.cfg.size + this.cfg.gap);
+
+                        // Keep the rendered card size in sync with the CSS
+                        // breakpoint value used to calculate the canvas.
+                        item.element.style.width = this.cfg.size + 'px';
+                        item.element.style.height = this.cfg.size + 'px';
 
                         if (animated) {
                             window.gsap.to(item.element, {
@@ -405,9 +437,20 @@
 
                 init() {
                     this.build();
-                    this.cfg.zoom = 0.6;
+                    this.cfg.zoom = viewport.clientWidth <= 540 ? 1 : 0.6;
                     this.cfg.gap = this.getGap();
                     this.dimensions();
+                    if (viewport.clientWidth <= 540) {
+                        const fit = Math.min(
+                            1,
+                            (viewport.clientWidth - 32) / this.dim.width,
+                            (viewport.clientHeight - 150) / this.dim.height
+                        );
+                        this.cfg.zoom = Math.max(0.25, fit);
+                        this.cfg.gap = this.getGap();
+                        this.dimensions();
+                        percentage.textContent = Math.round(this.cfg.zoom * 100) + '%';
+                    }
                     wrap.style.width = this.dim.width + 'px';
                     wrap.style.height = this.dim.height + 'px';
 
@@ -669,6 +712,13 @@
                             ease: 'power3.inOut',
                             onComplete: () => {
                                 current.item.element.style.opacity = '1';
+                                current.item.element.classList.remove('is-returning');
+                                // A small landing cue confirms the card has returned to its grid slot.
+                                void current.item.element.offsetWidth;
+                                current.item.element.classList.add('is-returning');
+                                current.item.element.addEventListener('animationend', () => {
+                                    current.item.element.classList.remove('is-returning');
+                                }, { once: true });
                                 overlayAnchor.remove();
                                 overlay.classList.remove('is-active');
                                 close.classList.remove('is-active');
@@ -855,67 +905,6 @@
                 if (!gallery.drag || gallery.zoom.active) return;
                 root.classList.remove('is-dragging');
             });
-
-            root.addEventListener('touchstart', (event) => {
-                if (event.touches.length !== 1 || gallery.zoom.active) return;
-                const touch = event.touches[0];
-                gallery.touchStart = {
-                    x: touch.clientX,
-                    y: touch.clientY,
-                    target: event.target,
-                };
-            }, { passive: true });
-
-            root.addEventListener('touchend', (event) => {
-                if (!gallery.touchStart || gallery.zoom.active) {
-                    gallery.touchStart = null;
-                    return;
-                }
-
-                const touch = event.changedTouches[0];
-                const dx = touch.clientX - gallery.touchStart.x;
-                const dy = touch.clientY - gallery.touchStart.y;
-                const targetNode = gallery.touchStart.target;
-                gallery.touchStart = null;
-
-                if (
-                    Math.abs(dy) < 70 ||
-                    Math.abs(dy) < Math.abs(dx) * 1.15 ||
-                    targetNode?.closest('a,button')
-                ) {
-                    return;
-                }
-
-                const next = root.nextElementSibling;
-                if (dy < 0 && next) {
-                    window.scrollTo({
-                        top: Math.max(0, next.getBoundingClientRect().top + window.scrollY),
-                        behavior: reducedMotion ? 'auto' : 'smooth',
-                    });
-                } else if (dy > 0) {
-                    window.scrollTo({
-                        top: root.getBoundingClientRect().top + window.scrollY,
-                        behavior: reducedMotion ? 'auto' : 'smooth',
-                    });
-                }
-            }, { passive: true });
-
-            const observer =
-                'IntersectionObserver' in window
-                    ? new IntersectionObserver(
-                        ([entry]) => {
-                            document
-                                .querySelector('.store-header--immersive')
-                                ?.classList.toggle(
-                                    'is-over-content',
-                                    entry.intersectionRatio < 0.58
-                                );
-                        },
-                        { threshold: [0, 0.2, 0.58, 0.8, 1] }
-                    )
-                    : null;
-
-            observer?.observe(root);
 
             if ('ResizeObserver' in window) {
                 const resizeObserver = new ResizeObserver(() => {

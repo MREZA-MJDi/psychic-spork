@@ -8,7 +8,7 @@
     <section class="catalog-masthead catalog-masthead--products">
         <div class="container">
             <div class="catalog-masthead__top">
-                <span class="eyebrow">JANAN / CATALOG / 01</span>
+                <span class="eyebrow">{{ $siteBrandNameLatin }} / CATALOG / 01</span>
 
                 <div class="catalog-masthead__stat">
                     <strong>{{ number_format($products->total()) }}</strong>
@@ -136,6 +136,7 @@
                 <div class="catalog-filter-bar__field">
                     <span>تعداد نمایش</span>
                     <select name="per_page" aria-label="تعداد نمایش در هر صفحه">
+                        <option value="6" @selected((int) request('per_page', $perPage) === 6)>۶</option>
                         <option value="12" @selected((int) request('per_page', $perPage) === 12)>۱۲</option>
                         <option value="24" @selected((int) request('per_page', $perPage) === 24)>۲۴</option>
                         <option value="36" @selected((int) request('per_page', $perPage) === 36)>۳۶</option>
@@ -170,17 +171,21 @@
 
             @if($products->isNotEmpty())
                 <header class="catalog-results__head">
-                    <div>
-                        <span class="eyebrow">CURATED CATALOG</span>
+                    <div class="catalog-results__title">
+                        <span class="eyebrow">{{ $siteBrandNameLatin }} / CATALOG</span>
                         <h2>
-                            {{ request('q') ? 'نتیجه جستجوی «'.request('q').'»' : 'محصولات فعال فروشگاه' }}
+                            {{ request('q') ? 'نتیجه جستجوی «'.request('q').'»' : 'محصولات جانه جانان' }}
                         </h2>
+                        <p>محصولات را بر اساس دسته، برند و قیمت مرتب کن و جزئیات هر گزینه را ببین.</p>
                     </div>
 
-                    <span class="catalog-results__page">
-                        صفحه {{ $products->currentPage() }}
-                        از {{ $products->lastPage() }}
-                    </span>
+                    <div class="catalog-results__meta" aria-live="polite">
+                        <span>
+                            نمایش {{ number_format($products->firstItem()) }} تا {{ number_format($products->lastItem()) }}
+                            از {{ number_format($products->total()) }} محصول
+                        </span>
+                        <span>صفحه {{ number_format($products->currentPage()) }} از {{ number_format($products->lastPage()) }}</span>
+                    </div>
                 </header>
 
                 <div class="product-grid">
@@ -191,7 +196,7 @@
 
                 @if($products->hasPages())
                     <nav class="store-pagination" aria-label="صفحه‌بندی محصولات">
-                        {{ $products->onEachSide(1)->links() }}
+                        {{ $products->onEachSide(1)->links('vendor.pagination.store') }}
                     </nav>
                 @endif
 

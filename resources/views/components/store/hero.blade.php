@@ -38,7 +38,7 @@
             id="immersiveSlideLink"
             href="{{ route('products.index') }}"
         >
-            <span>View product</span>
+            <span>مشاهده محصول</span>
             <span aria-hidden="true">↗</span>
         </a>
     </div>
@@ -60,30 +60,30 @@
         <div class="immersive-switch" id="immersiveSwitch">
             <button type="button" class="immersive-switch__button immersive-switch__button--current" data-zoom="0.3">
                 <span></span>
-                ZOOM OUT
+                کوچک‌نمایی
             </button>
             <button type="button" class="immersive-switch__button immersive-switch__button--current-false" data-zoom="0.6">
                 <span></span>
-                NORMAL
+                اندازه عادی
             </button>
             <button type="button" class="immersive-switch__button" data-zoom="1">
                 <span></span>
-                ZOOM IN
+                بزرگ‌نمایی
             </button>
             <button type="button" class="immersive-switch__button" data-fit="1">
                 <span></span>
-                FIT
+                نمایش کامل
             </button>
         </div>
     </div>
 
     <footer class="immersive-footer">
         <div class="immersive-footer__info">
-            <p>Est. 2026 · Janan Collection</p>
+            <p>جانان · انتخاب‌شده برای تو</p>
             <p>{{ config('app.url') ? parse_url(config('app.url'), PHP_URL_HOST) : 'JANAN' }}</p>
         </div>
         <div class="immersive-footer__counter">
-            <span>Interactive Product Grid</span>
+            <span>گالری تعاملی محصولات</span>
         </div>
     </footer>
 

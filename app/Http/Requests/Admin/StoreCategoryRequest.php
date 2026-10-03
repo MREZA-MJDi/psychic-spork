@@ -19,6 +19,8 @@ class StoreCategoryRequest extends FormRequest
             'name' => $this->trimValue($this->input('name')),
             'slug' => $this->trimValue($this->input('slug')),
             'description' => $this->trimValue($this->input('description')),
+            'meta_title' => $this->trimValue($this->input('meta_title')),
+            'meta_description' => $this->trimValue($this->input('meta_description')),
             'sort_order' => $this->input('sort_order') === ''
                 ? null
                 : $this->input('sort_order'),
@@ -55,6 +57,9 @@ class StoreCategoryRequest extends FormRequest
                 'string',
                 'max:5000',
             ],
+
+            'meta_title' => ['nullable', 'string', 'max:180'],
+            'meta_description' => ['nullable', 'string', 'max:320'],
 
             'image_file' => [
                 'nullable',

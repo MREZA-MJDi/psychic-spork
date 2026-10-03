@@ -170,6 +170,34 @@
 
 
 {{-- =========================================================
+    SEO METADATA
+========================================================= --}}
+
+<div class="admin-card admin-form-section">
+    <div class="admin-card-header">
+        <div>
+            <h2 class="admin-card-title">نمایش در موتورهای جستجو</h2>
+            <p class="admin-card-description">عنوان و توضیح نتایج جستجوی صفحه برند؛ در صورت خالی ماندن، مقدار پیش‌فرض نمایش داده می‌شود.</p>
+        </div>
+    </div>
+    <div class="admin-card-body">
+        <div class="admin-form-grid">
+            <div class="admin-field admin-field-full">
+                <label for="meta_title">عنوان SEO</label>
+                <input id="meta_title" name="meta_title" type="text" maxlength="180" value="{{ old('meta_title', $brand->meta_title) }}">
+                @error('meta_title')<small class="admin-help" style="color:var(--admin-danger);">{{ $message }}</small>@enderror
+            </div>
+            <div class="admin-field admin-field-full">
+                <label for="meta_description">توضیحات SEO</label>
+                <textarea id="meta_description" name="meta_description" rows="3" maxlength="320">{{ old('meta_description', $brand->meta_description) }}</textarea>
+                @error('meta_description')<small class="admin-help" style="color:var(--admin-danger);">{{ $message }}</small>@enderror
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{{-- =========================================================
     LOGO
 ========================================================= --}}
 

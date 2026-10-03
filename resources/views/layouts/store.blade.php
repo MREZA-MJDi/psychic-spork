@@ -6,7 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     @php
-        $brandName = $siteBrandNameLatin ?? 'Janan';
+        $brandName = $siteBrandNameFa ?? 'جانه جانان';
 
         $seo = $seo ?? app(\App\Services\SeoService::class)->page(
             "{$brandName} — فروشگاه آنلاین",
@@ -18,6 +18,7 @@
         );
 
         $isHome = request()->routeIs('home');
+    $isCheckout = request()->routeIs('checkout');
     @endphp
 
     <title>{{ $seo['title'] }}</title>
@@ -74,6 +75,7 @@
 
         if (!app()->environment('testing')) {
             $storeAssets[] = 'resources/css/store.css';
+            $storeAssets[] = 'resources/css/store-responsive.css';
         }
     @endphp
 
@@ -81,7 +83,7 @@
 
 </head>
 
-<body class="store-body customer-store">
+<body class="store-body customer-store {{ $isHome ? 'home-page-layout' : '' }} {{ $isCheckout ? 'checkout-page-layout' : '' }}">
 <div class="site-shell">
     <x-store.header />
 

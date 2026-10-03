@@ -15,9 +15,15 @@ return [
 
     'name' => env('APP_NAME', 'Laravel'),
 
-    'store_name' => env('JANAN_STORE_NAME', 'Janan'),
+    'store_name' => env('JANAN_STORE_NAME', 'جانه جانان'),
+    'store_name_fa' => env('JANAN_STORE_NAME_FA', 'جانه جانان'),
+    'store_name_latin' => env('JANAN_STORE_NAME_LATIN', 'Jane Janan'),
 
     'admin' => [
+        'phone' => env(
+            'JANAN_ADMIN_PHONE',
+            env('APP_ENV', 'production') === 'local' ? '09120000000' : null
+        ),
         'name' => env(
             'JANAN_ADMIN_NAME',
             env('APP_ENV', 'production') === 'local'

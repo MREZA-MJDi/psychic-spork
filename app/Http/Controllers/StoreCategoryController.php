@@ -48,9 +48,9 @@ class StoreCategoryController extends Controller
             'name_desc',
         ], true) ? $request->query('sort') : 'newest';
 
-        $perPage = in_array((int) $request->query('per_page', 12), [12, 24, 36], true)
-            ? (int) $request->query('per_page', 12)
-            : 12;
+        $perPage = in_array((int) $request->query('per_page', 6), [6, 12, 24, 36], true)
+            ? (int) $request->query('per_page', 6)
+            : 6;
 
         $products = Product::query()
             ->active()
@@ -59,6 +59,7 @@ class StoreCategoryController extends Controller
                 'brand:id,name,slug',
                 'primaryActiveVariant',
                 'primaryGalleryMedia',
+                'activeVariants',
             ])
             ->where('category_id', $category->id)
             ->when($sort === 'oldest', fn ($query) => $query->orderBy('updated_at')->orderBy('id'))

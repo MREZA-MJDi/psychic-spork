@@ -6,6 +6,7 @@ export default defineConfig({
         laravel({
             input: [
                 'resources/css/store.css',
+                'resources/css/store-responsive.css',
                 'resources/css/home.css',
                 'resources/css/hero.css',
                 'resources/css/wholesale.css',

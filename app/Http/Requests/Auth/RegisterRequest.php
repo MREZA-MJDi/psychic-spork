@@ -5,6 +5,7 @@ namespace App\Http\Requests\Auth;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
+use App\Support\IranianMobileNumber;
 
 class RegisterRequest extends FormRequest
 {
@@ -19,11 +20,14 @@ class RegisterRequest extends FormRequest
 
         foreach ([
                      'name',
-                     'email',
                  ] as $field) {
             if (is_string($this->input($field))) {
                 $data[$field] = trim($this->input($field));
             }
+        }
+
+        if (is_string($this->input('phone'))) {
+            $data['phone'] = IranianMobileNumber::normalize($this->input('phone'));
         }
 
         if ($data !== []) {
@@ -41,9 +45,16 @@ class RegisterRequest extends FormRequest
                 'max:120',
             ],
 
-            'email' => [
+            'phone' => [
                 'bail',
                 'required',
+                'string',
+                'regex:/^09\d{9}$/',
+                Rule::unique('users', 'phone'),
+            ],
+
+            'email' => [
+                'nullable',
                 'email',
                 'max:255',
                 Rule::unique('users', 'email'),
@@ -70,17 +81,16 @@ class RegisterRequest extends FormRequest
             'name.max' =>
                 'مقدار :attribute بیش از حد مجاز است.',
 
-            'email.required' =>
-                'وارد کردن :attribute الزامی است.',
-
+            'phone.required' => 'وارد کردن :attribute الزامی است.',
+            'phone.regex' => 'شماره موبایل معتبر وارد کنید.',
+            'phone.unique' => 'این شماره موبایل قبلاً ثبت شده است.',
             'email.email' =>
                 'فرمت ایمیل نامعتبر است.',
 
             'email.max' =>
                 'مقدار :attribute بیش از حد مجاز است.',
 
-            'email.unique' =>
-                'این ایمیل قبلاً ثبت شده است.',
+            'email.unique' => 'این ایمیل قبلاً ثبت شده است.',
 
             'password.required' =>
                 'وارد کردن :attribute الزامی است.',
@@ -94,7 +104,8 @@ class RegisterRequest extends FormRequest
     {
         return [
             'name' => 'نام',
-            'email' => 'ایمیل',
+            'phone' => 'شماره موبایل',
+            'email' => 'ایمیل (اختیاری)',
             'password' => 'رمز عبور',
             'password_confirmation' => 'تکرار رمز عبور',
         ];

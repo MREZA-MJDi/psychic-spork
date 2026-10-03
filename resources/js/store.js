@@ -92,7 +92,14 @@
 
         const desktopQuery = window.matchMedia('(min-width: 901px)');
         const syncDesktopNavigation = (event) => {
-            if (!event.matches) return;
+            if (event.matches) {
+                mobileMenu?.classList.remove('is-open');
+                mobileMenu?.setAttribute('aria-hidden', 'false');
+                storeNav?.classList.remove('is-open');
+                menuToggle?.setAttribute('aria-expanded', 'false');
+                return;
+            }
+
             mobileMenu?.classList.remove('is-open');
             mobileMenu?.setAttribute('aria-hidden', 'true');
             storeNav?.classList.remove('is-open');

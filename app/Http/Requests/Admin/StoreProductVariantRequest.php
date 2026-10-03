@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Support\NumericInput;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -193,25 +194,6 @@ class StoreProductVariantRequest extends FormRequest
 
     private function normalizeNumber(mixed $value): mixed
     {
-        if (!is_string($value)) {
-            return $value;
-        }
-
-        return strtr(trim($value), [
-            '۰' => '0',
-            '۱' => '1',
-            '۲' => '2',
-            '۳' => '3',
-            '۴' => '4',
-            '۵' => '5',
-            '۶' => '6',
-            '۷' => '7',
-            '۸' => '8',
-            '۹' => '9',
-            '٬' => '',
-            ',' => '',
-            '،' => '',
-            ' ' => '',
-        ]);
+        return NumericInput::normalize($value);
     }
 }

@@ -10,11 +10,29 @@ use App\Models\SiteSetting;
 use App\Services\SeoService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Throwable;
 
 class StorePageController extends Controller
 {
+    public function dashboardGuide(SeoService $seo): View
+    {
+        $markdown = file_get_contents(base_path('docs/راهنمای-مدیریت-فروشگاه.md'));
+
+        return view('pages.dashboard-guide', [
+            'seo' => $seo->page(
+                'راهنمای استفاده از پنل جانان',
+                'راهنمای ساده و کاربردی مدیریت محصولات، سفارش‌ها، مشتریان و محتوای فروشگاه جانان.',
+                route('dashboard.guide')
+            ),
+            'guideHtml' => Str::markdown($markdown, [
+                'html_input' => 'strip',
+                'allow_unsafe_links' => false,
+            ]),
+        ]);
+    }
+
     public function about(SeoService $seo): View
     {
         $latestProduct = Product::query()

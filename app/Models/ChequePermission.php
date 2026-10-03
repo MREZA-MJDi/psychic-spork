@@ -16,6 +16,8 @@ class ChequePermission extends Model
         'max_order_amount',
         'approved_by',
         'approved_at',
+        'requested_at',
+        'requested_amount',
         'disabled_by',
         'disabled_at',
         'admin_note',
@@ -27,6 +29,8 @@ class ChequePermission extends Model
             'enabled' => 'boolean',
             'max_order_amount' => 'decimal:2',
             'approved_at' => 'datetime',
+            'requested_at' => 'datetime',
+            'requested_amount' => 'decimal:2',
             'disabled_at' => 'datetime',
         ];
     }
@@ -48,10 +52,22 @@ class ChequePermission extends Model
 
     public function allows(float $amount): bool
     {
-        return $this->enabled
+        return $this->isApproved()
             && (
                 $this->max_order_amount === null
                 || $amount <= (float) $this->max_order_amount
             );
+    }
+
+    public function isApproved(): bool
+    {
+        return $this->enabled && $this->approved_at !== null;
+    }
+
+    public function isPending(): bool
+    {
+        return ! $this->enabled
+            && $this->requested_at !== null
+            && $this->disabled_at === null;
     }
 }

@@ -95,45 +95,27 @@
         </a>
 
         <a
-            class="{{ request()->routeIs('account', 'admin.*') ? 'is-active' : '' }}"
-            href="{{
-                !auth()->check()
-                    ? route('login')
-                    : (
-                        auth()->user()->isAdmin()
-                            ? route('admin.dashboard')
-                            : route('account')
-                    )
-            }}"
-            aria-label="حساب کاربری"
+            class="{{ request()->routeIs('wholesale.show') ? 'is-active' : '' }}"
+            href="{{ route('wholesale.show') }}"
+            aria-label="خرید عمده و شرایط پرداخت چکی"
         >
             <svg viewBox="0 0 24 24" aria-hidden="true">
-                <circle cx="12" cy="8" r="3.2"/>
-                <path d="M5.5 20c.8-3.4 3-5.2 6.5-5.2s5.7 1.8 6.5 5.2"/>
+                <path d="M4 7.5h16v12H4z"/>
+                <path d="M7 7.5V5h10v2.5M8 12h8M8 15h5"/>
             </svg>
-            <span>حساب</span>
+            <span>عمده</span>
         </a>
 
         <a
-            class="{{ request()->routeIs('cart') ? 'is-active' : '' }}"
-            href="{{ route('cart') }}"
-            aria-label="سبد خرید"
-            data-cart-open
+            class="{{ request()->routeIs('brands.*') ? 'is-active' : '' }}"
+            href="{{ route('brands.index') }}"
+            aria-label="برندها"
         >
             <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M5 8h14l-1.2 11H6.2L5 8Z"/>
-                <path d="M9 8a3 3 0 0 1 6 0"/>
+                <path d="M4 7.5 12 4l8 3.5v9L12 20l-8-3.5z"/>
+                <path d="m4.5 7.7 7.5 3.4 7.5-3.4M12 11v8.5"/>
             </svg>
-
-            <b
-                class="cart-count"
-                data-cart-count
-                @if(($cartCount ?? 0) < 1) hidden @endif
-            >
-                {{ $cartCount ?? 0 }}
-            </b>
-
-            <span>سبد</span>
+            <span>برندها</span>
         </a>
     @endif
 </nav>

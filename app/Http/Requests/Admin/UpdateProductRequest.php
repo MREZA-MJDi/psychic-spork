@@ -5,6 +5,7 @@ namespace App\Http\Requests\Admin;
 use App\Models\Product;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use App\Support\NumericInput;
 
 class UpdateProductRequest extends FormRequest
 {
@@ -27,10 +28,13 @@ class UpdateProductRequest extends FormRequest
             'size' => $this->trimValue($this->input('size')),
             'color' => $this->trimValue($this->input('color')),
             'color_code' => $this->trimValue($this->input('color_code')),
+            'price' => NumericInput::normalize($this->input('price')),
+            'sale_price' => NumericInput::normalize($this->input('sale_price')),
+            'wholesale_price' => NumericInput::normalize($this->input('wholesale_price')),
         ];
 
-        $price = $this->input('price');
-        $salePrice = $this->input('sale_price');
+        $price = $data['price'];
+        $salePrice = $data['sale_price'];
 
         if (
             is_numeric($price) &&

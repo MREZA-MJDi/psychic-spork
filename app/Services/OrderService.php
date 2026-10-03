@@ -41,6 +41,7 @@ final class OrderService
                 ->with([
                     'productVariant.product.galleryMedia',
                 ])
+                ->orderBy('product_variant_id')
                 ->get();
 
             abort_if(
@@ -208,7 +209,7 @@ final class OrderService
                 'items',
                 'payments',
             ]);
-        });
+        }, 3);
     }
 
     public function updateStatus(
@@ -249,6 +250,21 @@ final class OrderService
                 $newStatus
             );
 
+            abort_if(
+                $newStatus === 'returned'
+                    && $oldPaymentStatus === 'paid'
+                    && $paymentStatus !== 'refunded',
+                422,
+                'برای ثبت مرجوعی سفارش پرداخت‌شده، بازپرداخت را هم‌زمان ثبت کنید.'
+            );
+
+            abort_if(
+                $paymentStatus === 'refunded'
+                    && ($newStatus !== 'returned' || $oldPaymentStatus !== 'paid'),
+                422,
+                'بازپرداخت فقط همراه با مرجوعی سفارش پرداخت‌شده مجاز است.'
+            );
+
             $wasCancelledLike = in_array(
                 $oldStatus,
                 Order::CANCEL_LIKE_STATUSES,
@@ -265,6 +281,20 @@ final class OrderService
                 ! $wasCancelledLike
                 && $willBeCancelledLike
             ) {
+                $cheque = $order->chequePayment()
+                    ->lockForUpdate()
+                    ->first();
+
+                abort_if(
+                    $cheque && in_array($cheque->status, ['deposited'], true),
+                    409,
+                    'سفارش دارای چک واریزشده را تا تعیین تکلیف چک نمی‌توان لغو کرد.'
+                );
+
+                if ($cheque && in_array($cheque->status, ['submitted', 'under_review', 'accepted'], true)) {
+                    $cheque->update(['status' => 'cancelled']);
+                }
+
                 $this->restoreInventory($order);
             }
 
@@ -317,7 +347,7 @@ final class OrderService
                 'items',
                 'payments',
             ]);
-        });
+        }, 3);
     }
 
     private function restoreInventory(Order $order): void

@@ -33,10 +33,14 @@ final class SeoService
         $brand = $this->brandName();
         $variant = $product->defaultVariant();
         $image = $product->galleryMedia->first()?->url;
-        $description = $product->description ?: "مشاهده و خرید {$product->name} از {$brand}.";
+        $description = filled($product->meta_description)
+            ? trim($product->meta_description)
+            : ($product->description ?: "مشاهده و خرید {$product->name} از {$brand}.");
 
         return $this->page(
-            "{$product->name} — {$brand}",
+            filled($product->meta_title)
+                ? trim($product->meta_title)
+                : "{$product->name} — {$brand}",
             $description,
             route('products.show', $product),
             'index,follow',
@@ -64,8 +68,12 @@ final class SeoService
     public function category(Category $category): array
     {
         return $this->page(
-            "{$category->name} — {$this->brandName()}",
-            $category->description ?: "محصولات {$category->name} در فروشگاه.",
+            filled($category->meta_title)
+                ? trim($category->meta_title)
+                : "{$category->name} — {$this->brandName()}",
+            filled($category->meta_description)
+                ? trim($category->meta_description)
+                : ($category->description ?: "محصولات {$category->name} در فروشگاه."),
             route('categories.show', $category),
             'index,follow',
             $category->coverMedia?->url
@@ -75,8 +83,12 @@ final class SeoService
     public function brand(Brand $brand): array
     {
         return $this->page(
-            "{$brand->name} — {$this->brandName()}",
-            $brand->description ?: "معرفی برند {$brand->name} و محصولات مرتبط.",
+            filled($brand->meta_title)
+                ? trim($brand->meta_title)
+                : "{$brand->name} — {$this->brandName()}",
+            filled($brand->meta_description)
+                ? trim($brand->meta_description)
+                : ($brand->description ?: "معرفی برند {$brand->name} و محصولات مرتبط."),
             route('brands.show', $brand),
             'index,follow',
             $brand->logoMedia?->url

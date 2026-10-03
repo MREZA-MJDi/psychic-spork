@@ -21,7 +21,7 @@
                 </h2>
 
                 <p>
-                    چهار محصول هم‌زمان نمایش داده می‌شوند؛ برای دیدن انتخاب‌های بعدی حرکت کن یا وارد کالکشن کامل شو.
+                    برای دیدن انتخاب‌های بعدی حرکت کن یا وارد فهرست کامل محصولات شو.
                 </p>
             </div>
 
@@ -86,7 +86,7 @@
                                 role="group"
                                 aria-label="محصول {{ $loop->iteration }} از {{ $products->count() }}"
                             >
-                                <x-store.product-card :product="$product" />
+                                <x-store.product-card :product="$product" variant="home" />
                             </div>
                         @endforeach
                     </div>

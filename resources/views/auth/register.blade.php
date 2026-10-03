@@ -94,18 +94,36 @@
 
                         <label class="auth-field">
                             <span class="auth-field__label">
-                                ایمیل
-                                <small>EMAIL</small>
+                                    شماره موبایل
+                                    <small>MOBILE NUMBER</small>
                             </span>
                             <div class="auth-input-wrap">
                                 <span class="auth-input-index" aria-hidden="true">02</span>
                                 <input
+                                    type="tel"
+                                    name="phone"
+                                    value="{{ old('phone') }}"
+                                    placeholder="09123456789"
+                                    autocomplete="tel"
+                                    inputmode="tel"
+                                    maxlength="16"
+                                    required
+                                >
+                            </div>
+                        </label>
+
+                        <label class="auth-field">
+                            <span class="auth-field__label">
+                                ایمیل
+                                <small>OPTIONAL</small>
+                            </span>
+                            <div class="auth-input-wrap">
+                                <input
                                     type="email"
                                     name="email"
                                     value="{{ old('email') }}"
-                                    placeholder="you@example.com"
+                                    placeholder="برای اطلاع‌رسانی (اختیاری)"
                                     autocomplete="email"
-                                    required
                                 >
                             </div>
                         </label>
@@ -182,16 +200,17 @@
 
                     <footer class="auth-panel__foot">
                         <span>NEW ACCOUNT / CUSTOMER ACCESS</span>
-                        <span>قبلاً حساب ساختی؟ <a href="{{ route('login') }}">وارد شو</a></span>
+                        <span>قبلاً حساب ساختی؟ <a href="{{ route('login', request()->query()) }}">وارد شو</a></span>
                     </footer>
                 </div>
 
                 <aside class="auth-context" aria-label="مسیرهای دسترسی">
+                    <img src="{{ asset('images/auth.webp') }}" alt="" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0">
                     <span class="auth-context__kicker">START HERE</span>
                     <strong>یک حساب،<br>یک تجربه شخصی.</strong>
 
                     <div class="auth-context__items">
-                        <a href="{{ route('login') }}" class="auth-context__item">
+                        <a href="{{ route('login', request()->query()) }}" class="auth-context__item">
                             <span>01</span>
                             <div>
                                 <strong>ورود</strong>

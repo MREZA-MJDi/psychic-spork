@@ -14,6 +14,7 @@ class WholesalePack extends Model
         'name',
         'slug',
         'description',
+        'image_path',
         'pack_quantity',
         'pack_price',
         'sort_order',

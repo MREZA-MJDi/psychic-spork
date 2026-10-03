@@ -8,7 +8,7 @@
     <section class="catalog-masthead catalog-masthead--directory catalog-masthead--brands">
         <div class="container">
             <div class="catalog-masthead__top">
-                <span class="eyebrow">JANAN / HOUSES / 03</span>
+                <span class="eyebrow">{{ $siteBrandNameLatin }} / BRANDS / 03</span>
 
                 <div class="catalog-masthead__stat">
                     <strong>{{ number_format($brands->count()) }}</strong>
@@ -18,7 +18,7 @@
 
             <div class="catalog-masthead__content">
                 <div>
-                    <h1>برندهایی که در جانان انتخاب شده‌اند.</h1>
+                    <h1>برندهای منتخب جانه جانان.</h1>
                     <p>
                         هر برند، زبان طراحی و شخصیت خودش را دارد. از اینجا وارد دنیای هرکدام شو.
                     </p>
@@ -38,7 +38,7 @@
 
             <div class="customer-action-strip customer-action-strip--spaced">
                 <div class="customer-action-strip__copy">
-                    <small>JANAN / BRAND MAP</small>
+                    <small>{{ $siteBrandNameLatin }} / BRAND MAP</small>
                     <strong>هویت برند را ببین و بعد مستقیم وارد محصولاتش شو.</strong>
                 </div>
                 <div class="customer-action-strip__actions">
@@ -53,9 +53,7 @@
                     <h2>نام‌ها، لوگوها، شخصیت‌ها.</h2>
                 </div>
 
-                <p>
-                    برای دیدن انتخاب‌های هر برند، روی هویت آن کلیک کن.
-                </p>
+                <p>لوگو، معرفی کوتاه و تعداد محصولات هر برند را یک‌جا ببین؛ برای ورود به فهرست محصولات روی کارت بزن.</p>
             </header>
 
             @if($brands->isNotEmpty())

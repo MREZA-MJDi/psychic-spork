@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Models\ChequePermission;
 use App\Models\ChequePayment;
 use App\Models\Order;
-use App\Models\WholesaleProfile;
 use App\Models\Payment;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
@@ -143,9 +142,9 @@ final class ChequePaymentService
         }
     }
 
-    public function moveToReview(ChequePayment $cheque): ChequePayment
+    public function moveToReview(ChequePayment $cheque, User $admin): ChequePayment
     {
-        return $this->transition($cheque, 'under_review');
+        return $this->transition($cheque, $admin, 'under_review');
     }
 
     public function accept(
@@ -153,21 +152,18 @@ final class ChequePaymentService
         User $admin,
         ?string $note = null
     ): ChequePayment {
-        abort_unless(
-            $admin->isAdmin(),
-            403,
-            'فقط مدیر می‌تواند چک را تأیید کند.'
-        );
+        $this->assertAdmin($admin);
 
         return DB::transaction(function () use (
             $cheque,
             $admin,
             $note
         ): ChequePayment {
-            $cheque = ChequePayment::query()
-                ->lockForUpdate()
-                ->with(['order', 'payment'])
-                ->findOrFail($cheque->id);
+            $cheque = $this->lockChequeFlow($cheque);
+
+            if ($cheque->status === 'accepted') {
+                return $cheque;
+            }
 
             abort_unless(
                 $cheque->canTransitionTo('accepted'),
@@ -177,7 +173,8 @@ final class ChequePaymentService
 
             abort_unless(
                 $cheque->order
-                && $cheque->order->status !== 'cancelled'
+                && ! in_array($cheque->order->status, Order::CANCEL_LIKE_STATUSES, true)
+                && in_array($cheque->order->status, ['pending', 'confirmed'], true)
                 && $cheque->payment->status === 'pending',
                 422,
                 'سفارش یا پرداخت چک دیگر قابل تأیید نیست.'
@@ -196,6 +193,8 @@ final class ChequePaymentService
 
             return $cheque->fresh(['order', 'payment']);
         });
+
+        return $result;
     }
 
     public function reject(
@@ -203,17 +202,18 @@ final class ChequePaymentService
         User $admin,
         ?string $note = null
     ): ChequePayment {
-        abort_unless($admin->isAdmin(), 403);
+        $this->assertAdmin($admin);
 
         $result = DB::transaction(function () use (
             $cheque,
             $admin,
             $note
         ): ChequePayment {
-            $cheque = ChequePayment::query()
-                ->lockForUpdate()
-                ->with('order')
-                ->findOrFail($cheque->id);
+            $cheque = $this->lockChequeFlow($cheque);
+
+            if ($cheque->status === 'rejected') {
+                return $cheque;
+            }
 
             abort_unless(
                 $cheque->canTransitionTo('rejected'),
@@ -228,35 +228,47 @@ final class ChequePaymentService
                 'review_note' => $note,
             ]);
 
-            if (
-                $cheque->order->status !== 'cancelled'
-                && $cheque->order->payment_status !== 'paid'
-            ) {
+            if ($cheque->order->payment_status !== 'paid') {
+                if (! in_array($cheque->order->status, Order::CANCEL_LIKE_STATUSES, true)) {
                 $this->orders->updateStatus(
                     $cheque->order,
                     'cancelled',
                     'failed',
                     $note ?: 'پرداخت چکی توسط مدیریت رد شد.'
                 );
+                } else {
+                    $this->payments->markFailed($cheque->order, 'cheque');
+                }
             }
 
             return $cheque->fresh(['order', 'payment']);
         });
+
+        return $result;
     }
 
     public function markDeposited(ChequePayment $cheque, User $admin): ChequePayment
     {
-        abort_unless($admin->isAdmin(), 403);
+        $this->assertAdmin($admin);
 
         return DB::transaction(function () use ($cheque): ChequePayment {
-            $cheque = ChequePayment::query()
-                ->lockForUpdate()
-                ->findOrFail($cheque->id);
+            $cheque = $this->lockChequeFlow($cheque);
+
+            if ($cheque->status === 'deposited') {
+                return $cheque;
+            }
 
             abort_unless(
                 $cheque->canTransitionTo('deposited'),
                 422,
                 'این چک هنوز قابل ثبت به عنوان واریزی نیست.'
+            );
+
+            abort_unless(
+                ! in_array($cheque->order->status, Order::CANCEL_LIKE_STATUSES, true)
+                    && $cheque->payment->status === 'pending',
+                422,
+                'سفارش یا پرداخت چک دیگر قابل واریز نیست.'
             );
 
             $cheque->update([
@@ -270,18 +282,27 @@ final class ChequePaymentService
 
     public function markCleared(ChequePayment $cheque, User $admin): ChequePayment
     {
-        abort_unless($admin->isAdmin(), 403);
+        $this->assertAdmin($admin);
 
         return DB::transaction(function () use ($cheque): ChequePayment {
-            $cheque = ChequePayment::query()
-                ->lockForUpdate()
-                ->with(['order', 'payment'])
-                ->findOrFail($cheque->id);
+            $cheque = $this->lockChequeFlow($cheque);
+
+            if ($cheque->status === 'cleared') {
+                return $cheque;
+            }
 
             abort_unless(
                 $cheque->canTransitionTo('cleared'),
                 422,
                 'این چک هنوز قابل تسویه نیست.'
+            );
+
+            abort_unless(
+                ! in_array($cheque->order->status, Order::CANCEL_LIKE_STATUSES, true)
+                    && $cheque->order->payment_status === 'pending'
+                    && $cheque->payment->status === 'pending',
+                409,
+                'سفارش یا پرداخت چک دیگر قابل تسویه نیست.'
             );
 
             $this->payments->markPaid(
@@ -304,21 +325,28 @@ final class ChequePaymentService
         User $admin,
         ?string $note = null
     ): ChequePayment {
-        abort_unless($admin->isAdmin(), 403);
+        $this->assertAdmin($admin);
 
         return DB::transaction(function () use (
             $cheque,
             $note
         ): ChequePayment {
-            $cheque = ChequePayment::query()
-                ->lockForUpdate()
-                ->with(['order', 'payment'])
-                ->findOrFail($cheque->id);
+            $cheque = $this->lockChequeFlow($cheque);
+
+            if ($cheque->status === 'bounced') {
+                return $cheque;
+            }
 
             abort_unless(
                 $cheque->canTransitionTo('bounced'),
                 422,
                 'این چک هنوز قابل ثبت به عنوان برگشتی نیست.'
+            );
+
+            abort_unless(
+                $cheque->order->payment_status !== 'paid',
+                409,
+                'برای سفارش تسویه‌شده امکان ثبت برگشت چک وجود ندارد.'
             );
 
             $cheque->update([
@@ -327,7 +355,16 @@ final class ChequePaymentService
                 'review_note' => $note ?: $cheque->review_note,
             ]);
 
-            $this->payments->markFailed($cheque->order, 'cheque');
+            if (! in_array($cheque->order->status, Order::CANCEL_LIKE_STATUSES, true)) {
+                $this->orders->updateStatus(
+                    $cheque->order,
+                    'cancelled',
+                    'failed',
+                    $note ?: 'چک برگشت خورد و سفارش لغو شد.'
+                );
+            } else {
+                $this->payments->markFailed($cheque->order, 'cheque');
+            }
 
             return $cheque->fresh(['order', 'payment']);
         });
@@ -335,15 +372,16 @@ final class ChequePaymentService
 
     private function transition(
         ChequePayment $cheque,
+        User $admin,
         string $next
     ): ChequePayment {
+        $this->assertAdmin($admin);
+
         return DB::transaction(function () use (
             $cheque,
             $next
         ): ChequePayment {
-            $cheque = ChequePayment::query()
-                ->lockForUpdate()
-                ->findOrFail($cheque->id);
+            $cheque = $this->lockChequeFlow($cheque);
 
             abort_unless(
                 $cheque->canTransitionTo($next),
@@ -351,10 +389,33 @@ final class ChequePaymentService
                 'تغییر وضعیت چک مجاز نیست.'
             );
 
-            $cheque->update(['status' => $next]);
+            if ($cheque->status !== $next) {
+                $cheque->update(['status' => $next]);
+            }
 
             return $cheque->fresh(['order', 'payment']);
         });
+    }
+
+    private function assertAdmin(User $admin): void
+    {
+        abort_unless(
+            $admin->exists && $admin->isAdmin(),
+            403,
+            'فقط مدیر فروشگاه مجاز به مدیریت چک است.'
+        );
+    }
+
+    private function lockChequeFlow(ChequePayment $cheque): ChequePayment
+    {
+        // Match the order -> payment -> cheque lock order used by payment callbacks.
+        Order::query()->lockForUpdate()->findOrFail($cheque->order_id);
+        Payment::query()->lockForUpdate()->findOrFail($cheque->payment_id);
+
+        return ChequePayment::query()
+            ->lockForUpdate()
+            ->with(['order', 'payment'])
+            ->findOrFail($cheque->id);
     }
 
     private function nullableString(mixed $value): ?string

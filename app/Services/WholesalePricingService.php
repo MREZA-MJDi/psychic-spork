@@ -17,10 +17,15 @@ final class WholesalePricingService
         Cart $cart,
         ?User $user = null
     ): array {
-        // Wholesale is available to customers online, but never to guests.
-        $profile = $user
-            ? $this->eligibility->assertWholesaleAllowed($user)
-            : abort(403, 'برای خرید عمده باید وارد حساب مشتری شوید.');
+        // Wholesale online checkout is public. Only authenticated customers may
+        // have individual minimum terms; guests use the public catalogue prices.
+        abort_if(
+            $user && ! $user->isCustomer(),
+            403,
+            'حساب مدیریت برای ثبت سفارش مشتری استفاده نمی‌شود.'
+        );
+
+        $profile = $user?->wholesaleProfile()->first();
 
         $items = $cart->items()
             ->with([

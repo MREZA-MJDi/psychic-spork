@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Brand;
 use App\Models\Category;
+use App\Models\ChequePermission;
 use App\Models\ChequePayment;
 use App\Models\ContactMessage;
 use App\Models\FinancialTransaction;
@@ -85,7 +86,7 @@ class AdminDashboardController extends Controller
 
         $revenue = (float) ($ledgerByCode->get('sales')?->credit_total ?? 0);
         $salesReturns = (float) ($ledgerByCode->get('sales_returns')?->debit_total ?? 0);
-        $revenue = max(0, $revenue - $salesReturns);
+        $revenue -= $salesReturns;
 
         $settledFundsIn = (float) $ledgerByCode
             ->filter(fn ($row, $code) => in_array($code, ['cash', 'bank'], true))
@@ -99,10 +100,12 @@ class AdminDashboardController extends Controller
 
         $expenses = (float) FinancialTransaction::query()
             ->where('type', 'expense')
-            ->whereBetween('transaction_date', [
-                $from->toDateString(),
-                $to->toDateString(),
-            ])
+            // Refunds are already reflected as credits to cash/bank in the ledger.
+            ->where(fn ($query) => $query
+                ->whereNull('category')
+                ->orWhere('category', '!=', 'refund'))
+            ->whereDate('transaction_date', '>=', $from->toDateString())
+            ->whereDate('transaction_date', '<=', $to->toDateString())
             ->sum('amount');
 
         $netCash = $settledFunds - $expenses;
@@ -114,44 +117,46 @@ class AdminDashboardController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $rows = (clone $baseOrders)
+        $orderRows = (clone $baseOrders)
             ->selectRaw(
-                "DATE(placed_at) as day,
-                COUNT(*) as orders,
-                COALESCE(
-                    SUM(
-                        CASE
-                            WHEN payment_status = 'paid'
-                            THEN total
-                            ELSE 0
-                        END
-                    ),
-                    0
-                ) as income"
+                'DATE(placed_at) as day, COUNT(*) as orders'
             )
             ->groupByRaw('DATE(placed_at)')
             ->get()
             ->keyBy('day');
 
+        $ledgerIncomeRows = JournalLine::query()
+            ->join('journal_entries', 'journal_entries.id', '=', 'journal_lines.journal_entry_id')
+            ->join('ledger_accounts', 'ledger_accounts.id', '=', 'journal_lines.ledger_account_id')
+            ->whereDate('journal_entries.entry_date', '>=', $from->toDateString())
+            ->whereDate('journal_entries.entry_date', '<=', $to->toDateString())
+            ->whereIn('ledger_accounts.code', ['sales', 'sales_returns'])
+            ->selectRaw("DATE(journal_entries.entry_date) as day,
+                SUM(CASE
+                    WHEN ledger_accounts.code = 'sales' THEN journal_lines.credit - journal_lines.debit
+                    WHEN ledger_accounts.code = 'sales_returns' THEN journal_lines.credit - journal_lines.debit
+                    ELSE 0
+                END) as income")
+            ->groupByRaw('DATE(journal_entries.entry_date)')
+            ->get()
+            ->keyBy('day');
+
         $daily = collect(range(0, $period - 1))
-            ->map(function (int $index) use ($from, $rows): array {
+            ->map(function (int $index) use ($from, $orderRows, $ledgerIncomeRows): array {
                 $day = $from->copy()->addDays($index);
 
-                $row = $rows->get(
+                $orders = $orderRows->get(
                     $day->toDateString()
                 );
+                $ledgerIncome = $ledgerIncomeRows->get($day->toDateString());
 
                 return [
                     'label' => $day->format('m/d'),
                     'date' => $day->toDateString(),
 
-                    'income' => (float) (
-                        $row->income ?? 0
-                    ),
+                    'income' => (float) ($ledgerIncome->income ?? 0),
 
-                    'orders' => (int) (
-                        $row->orders ?? 0
-                    ),
+                    'orders' => (int) ($orders->orders ?? 0),
                 ];
             });
 
@@ -205,7 +210,9 @@ class AdminDashboardController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $dailyMaxIncome = (float) $daily->max('income');
+        $dailyMaxIncome = (float) $daily->max(
+            fn (array $row) => abs((float) $row['income'])
+        );
 
         $paidOrdersCount = (clone $baseOrders)
             ->where('payment_status', 'paid')
@@ -268,6 +275,35 @@ class AdminDashboardController extends Controller
             ->whereNotNull('wholesale_price')
             ->count();
 
+        $productsMissingSeo = Product::query()
+            ->active()
+            ->where(fn ($query) => $query
+                ->whereNull('meta_title')->orWhereRaw("TRIM(COALESCE(meta_title, '')) = ''")
+                ->orWhereNull('meta_description')->orWhereRaw("TRIM(COALESCE(meta_description, '')) = ''")
+            )
+            ->count();
+
+        $productsMissingImage = Product::query()
+            ->active()
+            ->whereDoesntHave('galleryMedia')
+            ->count();
+
+        $categoriesMissingSeo = Category::query()
+            ->active()
+            ->where(fn ($query) => $query
+                ->whereNull('meta_title')->orWhereRaw("TRIM(COALESCE(meta_title, '')) = ''")
+                ->orWhereNull('meta_description')->orWhereRaw("TRIM(COALESCE(meta_description, '')) = ''")
+            )
+            ->count();
+
+        $brandsMissingSeo = Brand::query()
+            ->active()
+            ->where(fn ($query) => $query
+                ->whereNull('meta_title')->orWhereRaw("TRIM(COALESCE(meta_title, '')) = ''")
+                ->orWhereNull('meta_description')->orWhereRaw("TRIM(COALESCE(meta_description, '')) = ''")
+            )
+            ->count();
+
         /*
         |--------------------------------------------------------------------------
         | Management queues
@@ -284,6 +320,12 @@ class AdminDashboardController extends Controller
 
         $pendingWholesaleApplications = WholesaleProfile::query()
             ->where('status', 'pending')
+            ->count();
+
+        $pendingChequePermissions = ChequePermission::query()
+            ->where('enabled', false)
+            ->whereNotNull('requested_at')
+            ->whereNull('disabled_at')
             ->count();
 
         /*
@@ -348,12 +390,10 @@ class AdminDashboardController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | Top products
+        | Top products in the selected period
         |
-        | NOTE:
-        | Currently calculated across all order items.
-        | We will only make this period-aware after checking OrderItem
-        | so cancelled/returned orders are handled correctly.
+        | Exclude cancelled/returned orders and unpaid orders so the
+        | ranking reflects paid product quantity for this report range.
         |--------------------------------------------------------------------------
         */
         $topProductSalesFilter = function ($query) use ($from, $to) {
@@ -438,10 +478,15 @@ class AdminDashboardController extends Controller
                 'catalogCategories' => $catalogCategories,
                 'catalogVariants' => $catalogVariants,
                 'catalogWholesalePricedVariants' => $catalogWholesalePricedVariants,
+                'productsMissingSeo' => $productsMissingSeo,
+                'productsMissingImage' => $productsMissingImage,
+                'categoriesMissingSeo' => $categoriesMissingSeo,
+                'brandsMissingSeo' => $brandsMissingSeo,
 
                 'chequesAwaitingReview' => $chequesAwaitingReview,
                 'chequesAwaitingReviewAmount' => $chequesAwaitingReviewAmount,
                 'pendingWholesaleApplications' => $pendingWholesaleApplications,
+                'pendingChequePermissions' => $pendingChequePermissions,
 
                 'nilaProductMappings' => $nilaProductMappings,
                 'nilaVariantMappings' => $nilaVariantMappings,

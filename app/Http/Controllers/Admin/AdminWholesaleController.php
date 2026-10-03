@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\ApproveChequePermissionRequest;
 use App\Models\ChequePermission;
 use App\Models\User;
 use App\Models\WholesaleProfile;
+use App\Support\NumericInput;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -15,6 +17,13 @@ class AdminWholesaleController extends Controller
 {
     public function index(Request $request): View
     {
+        $chequePermissions = ChequePermission::query()
+            ->with('user')
+            ->whereHas('user', fn ($query) => $query->customers())
+            ->latest('requested_at')
+            ->paginate(20, ['*'], 'cheques_page')
+            ->withQueryString();
+
         $profiles = WholesaleProfile::query()
             ->with(['user.chequePermission'])
             ->when($request->filled('q'), function ($query) use ($request): void {
@@ -39,6 +48,7 @@ class AdminWholesaleController extends Controller
 
         return view('admin.wholesale.index', [
             'profiles' => $profiles,
+            'chequePermissions' => $chequePermissions,
             'statuses' => WholesaleProfile::STATUSES,
         ]);
     }
@@ -86,6 +96,10 @@ class AdminWholesaleController extends Controller
     {
         abort_unless($customer->isCustomer(), 404);
 
+        $request->merge([
+            'minimum_order_amount' => NumericInput::normalize($request->input('minimum_order_amount')),
+        ]);
+
         $data = $request->validate([
             'minimum_order_amount' => ['nullable', 'numeric', 'min:0'],
             'minimum_order_quantity' => ['nullable', 'integer', 'min:1'],
@@ -128,29 +142,81 @@ class AdminWholesaleController extends Controller
         return back()->with('success', 'پروفایل خرید عمده مشتری تعلیق شد.');
     }
 
-    public function enableCheque(User $customer, Request $request): RedirectResponse
+    public function enableCheque(User $customer, ApproveChequePermissionRequest $request): RedirectResponse
     {
         abort_unless($customer->isCustomer(), 404);
+        $data = $request->validated();
 
-        $data = $request->validate([
-            'max_order_amount' => ['nullable', 'numeric', 'min:0'],
-            'note' => ['nullable', 'string', 'max:2000'],
-        ]);
+        DB::transaction(function () use ($customer, $request, $data): void {
+            $permission = ChequePermission::query()
+                ->where('user_id', $customer->id)
+                ->lockForUpdate()
+                ->first();
 
-        ChequePermission::updateOrCreate(
-            ['user_id' => $customer->id],
-            [
+            if (! $data['enabled']) {
+                if ($permission) {
+                    $permission->update([
+                        'enabled' => false,
+                        'disabled_by' => $request->user()->id,
+                        'disabled_at' => now(),
+                        'admin_note' => $data['note'] ?? $permission->admin_note,
+                    ]);
+                }
+
+                return;
+            }
+
+            $permission ??= new ChequePermission(['user_id' => $customer->id]);
+
+            $permission->fill([
                 'enabled' => true,
-                'max_order_amount' => $data['max_order_amount'] ?? null,
+                'max_order_amount' => $data['max_order_amount'],
                 'approved_by' => $request->user()->id,
                 'approved_at' => now(),
                 'disabled_by' => null,
                 'disabled_at' => null,
-                'admin_note' => $data['note'] ?? null,
-            ]
-        );
+                'admin_note' => $data['note'] ?? $permission->admin_note,
+            ]);
+            $permission->save();
+        }, 3);
 
-        return back()->with('success', 'پرداخت چکی برای این مشتری فعال شد.');
+        return back()->with(
+            'success',
+            $data['enabled']
+                ? 'مجوز خرید چکی و سقف اعتبار مشتری ذخیره شد.'
+                : 'مجوز خرید چکی مشتری غیرفعال شد.'
+        );
+    }
+
+    public function rejectCheque(User $customer, Request $request): RedirectResponse
+    {
+        abort_unless($customer->isCustomer(), 404);
+
+        $data = $request->validate([
+            'note' => ['nullable', 'string', 'max:2000'],
+        ]);
+
+        DB::transaction(function () use ($customer, $request, $data): void {
+            $permission = ChequePermission::query()
+                ->where('user_id', $customer->id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            abort_unless(
+                $permission->isPending(),
+                422,
+                'این درخواست دیگر در انتظار بررسی نیست.'
+            );
+
+            $permission->update([
+                'enabled' => false,
+                'disabled_by' => $request->user()->id,
+                'disabled_at' => now(),
+                'admin_note' => $data['note'] ?? null,
+            ]);
+        }, 3);
+
+        return back()->with('success', 'درخواست خرید چکی رد شد.');
     }
 
     public function disableCheque(User $customer, Request $request): RedirectResponse

@@ -44,14 +44,17 @@
             'variant' => $variant,
         ])
 
-        @include('admin.components.media-uploader', [
-            'mediaItem' => $variant->galleryMedia->first(),
-            'uploadType' => 'variant',
-            'uploadId' => $variant->id,
-            'title' => 'تصویر یا ویدئوی واریانت',
-            'description' => 'برای هر رنگ یا سایز می‌توانی تصویر اختصاصی داشته باشی؛ ویدئوی کوتاه هم پشتیبانی می‌شود.',
-        ])
-
     </form>
+
+    @include('admin.components.media-uploader', [
+        'mediaItem' => $variant->galleryMedia->first(),
+        'uploadType' => 'variant',
+        'uploadId' => $variant->id,
+        'title' => 'تصویر اختصاصی همین واریانت',
+        'description' => 'این عکس فقط برای همین ترکیب رنگ و سایز است و از تصویر اصلی محصول جدا نمایش داده می‌شود.',
+        'videoAllowed' => false,
+        'accept' => 'image/jpeg,image/png,image/webp,image/avif',
+    ])
+
 
 @endsection

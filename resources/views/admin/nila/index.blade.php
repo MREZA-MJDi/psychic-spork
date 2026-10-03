@@ -8,7 +8,7 @@
     <div>
         <h1 class="admin-page-head__title">مرکز کنترل نیلا / Holoo</h1>
         <p class="admin-page-head__text">
-            مرکز کنترل Mapping و ورود داده؛ اتصال واقعی API فقط بعد از دریافت قرارداد رسمی Nila فعال می‌شود.
+            وضعیت واردسازی کاتالوگ نیلا / هلو. این صفحه فعلاً اتصال زنده یا بارگذاری فایل ندارد؛ فقط نگاشت‌هایی را نشان می‌دهد که Importer داخلی ساخته است.
         </p>
     </div>
 </div>
@@ -40,18 +40,18 @@
             <p class="admin-card-description">
                 Nila منبع داده‌های کاتالوگ است؛ Janan مالک Media و نحوه نمایش Store است.
             </p>
-            <p class="admin-card-description">همگام‌سازی API بدون قرارداد واقعی اجرا نمی‌شود.</p>
+            <p class="admin-card-description">برای اجرای واردسازی ۲۰۰۰ محصول، ابتدا باید خروجی واقعی نیلا یا هلو و قالب فایل/فیلدهای آن مشخص شود. در این ریپو Adapter متصل به سرویس بیرونی یا ابزار بارگذاری CSV/XLSX وجود ندارد.</p>
         </div>
     </div>
 
     <div class="admin-form-grid">
         <div class="admin-card">
             <strong>Nila / Holoo</strong>
-            <p class="admin-muted">نام، SKU، قیمت و موجودی فقط در محدوده‌ای که قرارداد واقعی Integration تأیید کند.</p>
+            <p class="admin-muted">Importer داخلی داده نرمال‌شده را می‌پذیرد و نام، SKU، قیمت و موجودی را نگاشت می‌کند؛ قرارداد API و Adapter سرویس بیرونی هنوز متصل نیستند.</p>
         </div>
         <div class="admin-card">
             <strong>Janan</strong>
-            <p class="admin-muted">تصاویر، ویدئو، ترتیب گالری، Alt، ارائه Store و تنظیمات تجربه کاربری.</p>
+            <p class="admin-muted">تصاویر، ویدئو، ترتیب گالری، Alt و ارائه فروشگاه در جانان مدیریت می‌شوند. فعلاً تصاویر محصول باید در پنل جانان بارگذاری شوند.</p>
         </div>
     </div>
 </div>

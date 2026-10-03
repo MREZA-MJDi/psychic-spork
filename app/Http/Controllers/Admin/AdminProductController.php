@@ -9,6 +9,7 @@ use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductVariant;
+use App\Services\HeroService;
 use App\Services\MediaService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -28,6 +29,12 @@ class AdminProductController extends Controller
 
     public function index(Request $request): View
     {
+        $quality = in_array($request->query('quality'), [
+            'missing-seo',
+            'missing-image',
+            'missing-variant',
+        ], true) ? $request->query('quality') : null;
+
         $products = Product::query()
             ->with([
                 'category:id,name',
@@ -73,6 +80,18 @@ class AdminProductController extends Controller
                 $request->input('stock') === 'low',
                 fn ($query) => $query->lowStock()
             )
+            ->when($quality === 'missing-seo', fn ($query) => $query
+                ->where('is_active', true)
+                ->where(fn ($seo) => $seo
+                    ->whereNull('meta_title')->orWhereRaw("TRIM(COALESCE(meta_title, '')) = ''")
+                    ->orWhereNull('meta_description')->orWhereRaw("TRIM(COALESCE(meta_description, '')) = ''")
+                ))
+            ->when($quality === 'missing-image', fn ($query) => $query
+                ->where('is_active', true)
+                ->whereDoesntHave('galleryMedia'))
+            ->when($quality === 'missing-variant', fn ($query) => $query
+                ->where('is_active', true)
+                ->whereDoesntHave('activeVariants'))
             ->when(
                 $request->filled('status'),
                 function ($query) use ($request) {
@@ -95,6 +114,7 @@ class AdminProductController extends Controller
 
         return view('admin.products.index', [
             'products' => $products,
+            'quality' => $quality,
             'categories' => $this->categories(),
             'brands' => $this->brands(),
         ]);

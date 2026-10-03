@@ -8,6 +8,8 @@ use App\Services\ChequePaymentService;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class AdminChequeController extends Controller
 {
@@ -24,17 +26,22 @@ class AdminChequeController extends Controller
             'cancelled' => 'لغو شده',
         ];
 
+        $filters = $request->validate([
+            'status' => ['nullable', 'string', 'in:' . implode(',', array_keys($statusNames))],
+            'q' => ['nullable', 'string', 'max:120'],
+        ]);
+
         $cheques = ChequePayment::query()
             ->with([
                 'order.user',
                 'payment',
                 'reviewedBy',
             ])
-            ->when($request->filled('status'), function ($query) use ($request): void {
-                $query->where('status', $request->string('status')->toString());
+            ->when(! empty($filters['status']), function ($query) use ($filters): void {
+                $query->where('status', $filters['status']);
             })
-            ->when($request->filled('q'), function ($query) use ($request): void {
-                $term = $request->string('q')->toString();
+            ->when(! empty($filters['q']), function ($query) use ($filters): void {
+                $term = trim($filters['q']);
 
                 $query->where(function ($search) use ($term): void {
                     $search
@@ -59,11 +66,26 @@ class AdminChequeController extends Controller
         ]);
     }
 
+    public function image(ChequePayment $chequePayment): BinaryFileResponse
+    {
+        abort_unless(filled($chequePayment->image_path), 404);
+
+        $disk = Storage::disk('local');
+        abort_unless($disk->exists($chequePayment->image_path), 404);
+
+        return response()->file($disk->path($chequePayment->image_path), [
+            'Content-Type' => $disk->mimeType($chequePayment->image_path) ?: 'application/octet-stream',
+            'Cache-Control' => 'private, no-store, max-age=0',
+            'X-Content-Type-Options' => 'nosniff',
+        ]);
+    }
+
     public function review(
         ChequePayment $chequePayment,
+        Request $request,
         ChequePaymentService $cheques
     ): RedirectResponse {
-        $cheques->moveToReview($chequePayment);
+        $cheques->moveToReview($chequePayment, $request->user());
 
         return back()->with('success', 'چک وارد مرحله بررسی شد.');
     }
@@ -76,7 +98,7 @@ class AdminChequeController extends Controller
         $cheques->accept(
             $chequePayment,
             $request->user(),
-            $request->input('note')
+            $this->note($request)
         );
 
         return back()->with('success', 'چک پذیرفته شد و سفارش تأیید شد.');
@@ -90,7 +112,7 @@ class AdminChequeController extends Controller
         $cheques->reject(
             $chequePayment,
             $request->user(),
-            $request->input('note')
+            $this->note($request)
         );
 
         return back()->with('success', 'چک رد شد.');
@@ -130,9 +152,16 @@ class AdminChequeController extends Controller
         $cheques->markBounced(
             $chequePayment,
             $request->user(),
-            $request->input('note')
+            $this->note($request)
         );
 
         return back()->with('success', 'برگشت چک ثبت شد.');
+    }
+
+    private function note(Request $request): ?string
+    {
+        return $request->validate([
+            'note' => ['nullable', 'string', 'max:2000'],
+        ])['note'] ?? null;
     }
 }

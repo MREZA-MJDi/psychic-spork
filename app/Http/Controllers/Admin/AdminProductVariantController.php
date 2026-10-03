@@ -8,11 +8,57 @@ use App\Http\Requests\Admin\UpdateProductVariantRequest;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class AdminProductVariantController extends Controller
 {
+    public function lookup(Request $request): JsonResponse
+    {
+        $term = trim((string) $request->query('q', ''));
+
+        $variants = ProductVariant::query()
+            ->with(['product:id,name,slug,brand_id', 'product.brand:id,name'])
+            ->where('is_active', true)
+            ->whereHas('product', fn ($query) => $query->where('is_active', true))
+            ->when($request->boolean('wholesale'), fn ($query) => $query->whereNotNull('wholesale_price'))
+            ->when($term !== '', function ($query) use ($term): void {
+                $query->where(function ($query) use ($term): void {
+                    $query->where('sku', 'like', "%{$term}%")
+                        ->orWhere('color', 'like', "%{$term}%")
+                        ->orWhere('size', 'like', "%{$term}%")
+                        ->orWhereHas('product', function ($product) use ($term): void {
+                            $product->where('name', 'like', "%{$term}%")
+                                ->orWhere('slug', 'like', "%{$term}%")
+                                ->orWhereHas('brand', fn ($brand) => $brand->where('name', 'like', "%{$term}%"));
+                        });
+                });
+            })
+            ->orderBy('product_id')
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->simplePaginate(20)
+            ->withQueryString();
+
+        return response()->json([
+            'data' => $variants->getCollection()->map(fn (ProductVariant $variant): array => [
+                'id' => $variant->id,
+                'name' => $variant->product?->name ?? 'محصول',
+                'brand' => $variant->product?->brand?->name ?? 'بدون برند',
+                'sku' => $variant->sku,
+                'size' => $variant->size,
+                'color' => $variant->color,
+                'display_name' => $variant->display_name,
+                'stock' => (int) $variant->stock,
+                'wholesale_price' => $variant->wholesale_price,
+            ])->values(),
+            'next_page_url' => $variants->nextPageUrl(),
+            'current_page' => $variants->currentPage(),
+        ]);
+    }
+
     public function index(Product $product): View
     {
         $product->load([

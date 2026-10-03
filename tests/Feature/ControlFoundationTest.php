@@ -24,6 +24,11 @@ class ControlFoundationTest extends TestCase
             'status' => 'pending',
         ]);
 
+        ChequePermission::create([
+            'user_id' => $customer->id,
+            'requested_at' => now(),
+        ]);
+
         $this->actingAs($admin)
             ->patch(route('admin.customers.cheque.enable', $customer), [
                 'max_order_amount' => 50_000_000,
@@ -90,6 +95,6 @@ class ControlFoundationTest extends TestCase
             ->get(route('admin.nila.index'))
             ->assertOk()
             ->assertSee('Mapping')
-            ->assertSee('قرارداد رسمی Nila');
+            ->assertSee('Adapter متصل به سرویس بیرونی یا ابزار بارگذاری CSV/XLSX وجود ندارد');
     }
 }

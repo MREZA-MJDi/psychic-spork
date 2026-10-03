@@ -56,20 +56,16 @@ class AdminInventoryController extends Controller
             ->limit(20)
             ->get();
 
-        $variantOptions = ProductVariant::query()
-            ->with('product')
-            ->whereHas('product')
-            ->orderBy('product_id')
-            ->orderBy('sort_order')
-            ->orderBy('id')
-            ->get();
+        $selectedVariant = old('product_variant_id')
+            ? ProductVariant::query()->with('product')->find(old('product_variant_id'))
+            : null;
 
         return view(
             'admin.inventory.index',
             compact(
                 'variants',
                 'movements',
-                'variantOptions'
+                'selectedVariant'
             )
         );
     }

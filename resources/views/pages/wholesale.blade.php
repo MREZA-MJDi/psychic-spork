@@ -24,6 +24,7 @@
                         <div class="customer-action-strip__actions">
                             <a class="button button--ghost" href="{{ route('products.index') }}">دیدن کاتالوگ</a>
                             <a class="button button--primary" href="{{ route('products.index') }}">شروع خرید عمده</a>
+                            <a class="button button--ghost" href="#cheque-application">درخواست خرید چکی</a>
                         </div>
                     </div>
                 </div>
@@ -35,27 +36,10 @@
                         <div class="alert alert--success" role="status">{{ session('success') }}</div>
                     @endif
 
-                    @if($profile?->isApproved())
-                        <div class="wholesale-status__state">مجاز برای خرید</div>
-                        <div class="wholesale-status__hint">
-                            خرید عمده آنلاین برای این حساب باز است. مجوز چک، در صورت وجود، جداگانه بررسی می‌شود.
-                        </div>
-                    @elseif($profile?->status === 'pending')
-                        <div class="wholesale-status__state">خرید آنلاین آزاد</div>
-                        <div class="wholesale-status__hint">
-                            وضعیت درخواست قبلی شما مانع سفارش عمده آنلاین نیست؛ فقط پرداخت چکی نیازمند مجوز است.
-                        </div>
-                    @elseif($profile?->status === 'suspended')
-                        <div class="wholesale-status__state">خرید آنلاین آزاد</div>
-                        <div class="wholesale-status__hint">
-                            حتی با وضعیت غیر‌فعال پروفایل عمده، سفارش آنلاین قابل ثبت است؛ مجوز چک مستقل است.
-                        </div>
-                    @else
-                        <div class="wholesale-status__state">عمومی / آماده خرید</div>
-                        <div class="wholesale-status__hint">
-                            می‌توانی همین حالا کاتالوگ را ببینی و سفارش عمده را با پرداخت آنلاین ثبت کنی.
-                        </div>
-                    @endif
+                    <div class="wholesale-status__state">خرید آنلاین عمده باز است</div>
+                    <div class="wholesale-status__hint">
+                        قیمت عمده برای همه قابل استفاده است؛ فقط پرداخت چکی به حساب مشتری و تأیید مدیر نیاز دارد.
+                    </div>
                 </aside>
             </div>
 
@@ -110,6 +94,20 @@
                 <div class="wholesale-pack-grid">
                     @foreach($packs as $pack)
                         <article class="wholesale-pack-card">
+                            @php
+                                $firstPackVariant = $pack->items->first()?->variant;
+                                $packImage = $pack->image_path
+                                    ? \Illuminate\Support\Facades\Storage::disk('public')->url($pack->image_path)
+                                    : ($firstPackVariant?->primaryGalleryMedia?->url ?? $firstPackVariant?->product?->primaryGalleryMedia?->url);
+                            @endphp
+                            <div class="wholesale-pack-card__cover">
+                                @if($packImage)
+                                    <img src="{{ $packImage }}" alt="{{ $pack->image_path ? $pack->name : 'تصویر نمونه از اقلام ' . $pack->name }}" loading="lazy">
+                                    @unless($pack->image_path)<span class="wholesale-pack-card__cover-note">تصویر نمونه از اقلام پک</span>@endunless
+                                @else
+                                    <div class="wholesale-pack-card__cover-empty">برای این بسته هنوز عکسی ثبت نشده</div>
+                                @endif
+                            </div>
                             <div class="wholesale-pack-card__top">
                                 <div>
                                     <span class="wholesale-pack-card__eyebrow">WHOLESALE PACK</span>
@@ -126,15 +124,21 @@
                                 @foreach($pack->items as $item)
                                     @php $v = $item->variant; @endphp
                                     <a href="{{ $v?->product ? route('products.show', $v->product) : '#' }}" class="wholesale-pack-item">
-                                        <div>
+                                        <span class="wholesale-pack-item__media">
+                                            <x-store.image
+                                                :src="$v?->primaryGalleryMedia?->url ?? $v?->product?->primaryGalleryMedia?->url"
+                                                :alt="$v?->display_name ?? $v?->product?->name ?? 'واریانت پک عمده'"
+                                                fallback-tag="span"
+                                                fallback-class=""
+                                                fallback="JANAN"
+                                            />
+                                        </span>
+                                        <span class="wholesale-pack-item__copy">
                                             <strong>{{ $v?->product?->name ?? 'محصول' }}</strong>
-                                            <span>
-                                                {{ $v?->product?->brand?->name ?? 'بدون برند' }}
-                                                · {{ $v?->display_name ?? 'Variant' }}
-                                                · SKU {{ $v?->sku ?? '—' }}
-                                            </span>
-                                        </div>
-                                        <b>× {{ number_format($item->quantity) }}</b>
+                                            <span>{{ $v?->product?->brand?->name ?? 'بدون برند' }} · {{ $v?->display_name ?? 'واریانت' }}</span>
+                                            <small>SKU {{ $v?->sku ?? '—' }} · {{ $v?->stock !== null ? 'موجودی '.number_format($v->stock) : 'موجودی نامشخص' }}</small>
+                                        </span>
+                                        <b class="wholesale-pack-item__quantity">× {{ number_format($item->quantity) }}</b>
                                     </a>
                                 @endforeach
                             </div>
@@ -175,6 +179,18 @@
                                     <span>{{ $product->brand?->name ?? 'Janan' }}</span>
                                     <span>{{ $product->category?->name ?? 'محصول' }}</span>
                                 </div>
+                                @php
+                                    $wholesaleColorCount = $product->activeVariants
+                                        ->pluck('color')->filter(fn ($value) => filled(trim((string) $value)))
+                                        ->map(fn ($value) => mb_strtolower(trim((string) $value)))->unique()->count();
+                                    $wholesaleSizeCount = $product->activeVariants
+                                        ->pluck('size')->filter(fn ($value) => filled(trim((string) $value)))
+                                        ->map(fn ($value) => mb_strtolower(trim((string) $value)))->unique()->count();
+                                @endphp
+                                <div class="wholesale-product-card__facts" aria-label="{{ $wholesaleColorCount }} رنگ، {{ $wholesaleSizeCount }} سایز">
+                                    <span>{{ $wholesaleColorCount > 0 ? number_format($wholesaleColorCount).' رنگ' : 'رنگ نامشخص' }}</span>
+                                    <span>{{ $wholesaleSizeCount > 0 ? number_format($wholesaleSizeCount).' سایز' : 'سایز نامشخص' }}</span>
+                                </div>
                                 <a href="{{ route('products.show', $product) }}" class="wholesale-product-card__title">{{ $product->name }}</a>
 
                                 <div class="wholesale-variant-list">
@@ -182,7 +198,7 @@
                                         <div class="wholesale-variant-row">
                                             <div>
                                                 <strong>{{ $variant->display_name }}</strong>
-                                                <span>SKU {{ $variant->sku ?: '—' }} · موجودی {{ number_format($variant->stock) }}</span>
+                                                <span>موجودی {{ number_format($variant->stock) }}</span>
                                             </div>
                                             <div class="wholesale-variant-price">
                                                 {{ number_format($variant->wholesale_price) }}
@@ -213,119 +229,69 @@
         </div>
     </section>
 
-    <section class="section-block section-block--soft" id="wholesale-form">
+    <section class="section-block section-block--soft" id="cheque-application">
         <div class="container wholesale-content">
-            <section class="customer-surface wholesale-form-card">
-                <header class="section-head">
-                    <div>
-                        <span class="eyebrow">BUSINESS PROFILE</span>
-                        <h2>{{ $profile ? 'اطلاعات پروفایل عمده' : 'خرید عمده و مجوزهای پرداخت' }}</h2>
-                        <p>
-                            سفارش آنلاین نیاز به تأیید عمده ندارد؛ فرم کسب‌وکار فقط برای ثبت یا تکمیل پروفایل شماست.
-                        </p>
-                    </div>
-                </header>
-
-                @if($profile?->isApproved())
-                    <div class="customer-action-strip">
-                        <div class="customer-action-strip__copy">
-                            <small>WHOLESALE ACCOUNT</small>
-                            <strong>حساب شما آماده سفارش عمده است.</strong>
-                        </div>
-                        <div class="customer-action-strip__actions">
-                            <a class="button button--primary" href="{{ route('products.index') }}">انتخاب محصولات</a>
-                            <a class="button button--ghost" href="{{ route('checkout') }}">رفتن به تسویه</a>
-                        </div>
-                    </div>
-                @elseif($profile?->status === 'pending')
-                    <div class="customer-inline-status">
-                        <strong>درخواست شما قبلاً ثبت شده است.</strong>
-                        <p>
-                            تا مشخص شدن نتیجه، ارسال دوباره درخواست لازم نیست.
-                        </p>
-                    </div>
-                @else
-                    @auth
-                    <form method="POST" action="{{ route('wholesale.apply') }}" class="checkout-form">
-                        @csrf
-
-                        <div class="form-grid">
-                            <label>
-                                نام فروشگاه یا مجموعه *
-                                <input name="business_name" value="{{ old('business_name', $profile?->business_name) }}" required autocomplete="organization">
-                            </label>
-
-                            <label>
-                                نوع فعالیت
-                                <input name="business_type" value="{{ old('business_type', $profile?->business_type) }}">
-                            </label>
-
-                            <label>
-                                شماره تماس کاری
-                                <input name="business_phone" value="{{ old('business_phone', $profile?->business_phone) }}" inputmode="tel" autocomplete="tel">
-                            </label>
-
-                            <label class="form-grid__full">
-                                آدرس کاری
-                                <textarea name="business_address" rows="4">{{ old('business_address', $profile?->business_address) }}</textarea>
-                            </label>
-                        </div>
-
-                        <button class="button button--primary" type="submit">
-                            ارسال درخواست خرید عمده
-                            <span aria-hidden="true">↗</span>
-                        </button>
-                    </form>
-                    @else
-                        <div class="customer-inline-status">
-                            <strong>برای ثبت یا ویرایش پروفایل کسب‌وکار وارد شو.</strong>
-                            <p>برای دیدن کاتالوگ و خرید عمده آنلاین نیازی به این فرم نداری.</p>
-                            <div class="customer-action-strip__actions">
-                                <a class="button button--primary" href="{{ route('login') }}">ورود</a>
-                                <a class="button button--ghost" href="{{ route('register') }}">ساخت حساب</a>
-                            </div>
-                        </div>
-                    @endauth
-                @endif
-            </section>
-
             <aside class="customer-surface wholesale-process">
                 <span class="eyebrow">HOW IT WORKS</span>
                 <h2 class="customer-panel-title">مسیر خرید عمده</h2>
-
                 <ol>
-                    <li>
-                        <span>01</span>
-                        <div>
-                            <strong>انتخاب محصول</strong>
-                            <p>از کاتالوگ، واریانت‌های دارای قیمت عمده را انتخاب کن.</p>
-                        </div>
-                    </li>
-                    <li>
-                        <span>02</span>
-                        <div>
-                            <strong>انتخاب خرید عمده</strong>
-                            <p>در checkout نوع سفارش را روی خرید عمده بگذار.</p>
-                        </div>
-                    </li>
-                    <li>
-                        <span>03</span>
-                        <div>
-                            <strong>پرداخت آنلاین</strong>
-                            <p>بدون تأیید قبلی پروفایل، سفارش را از درگاه پرداخت کن.</p>
-                        </div>
-                    </li>
-                    <li>
-                        <span>04</span>
-                        <div>
-                            <strong>پرداخت چکی</strong>
-                            <p>فقط این روش به تأیید مدیریت و مجوز فعال همان حساب نیاز دارد.</p>
-                        </div>
-                    </li>
+                    <li><span>01</span><div><strong>انتخاب محصول</strong><p>واریانت‌هایی را انتخاب کن که قیمت عمده دارند.</p></div></li>
+                    <li><span>02</span><div><strong>پرداخت آنلاین</strong><p>خرید عمده آنلاین برای همه باز است و تأیید حساب نمی‌خواهد.</p></div></li>
+                    <li><span>03</span><div><strong>درخواست پرداخت چکی</strong><p>برای درخواست، با حساب مشتری وارد شو و مبلغ اعتبار مدنظرت را ثبت کن.</p></div></li>
+                    <li><span>04</span><div><strong>تأیید مدیر</strong><p>مدیر درخواست را بررسی و سقف مجاز هر سفارش را تعیین می‌کند.</p></div></li>
                 </ol>
             </aside>
+
+            <section class="customer-surface wholesale-form-card" aria-labelledby="cheque-application-title">
+                <header class="section-head">
+                    <div>
+                        <span class="eyebrow">CHEQUE PAYMENT</span>
+                        <h2 id="cheque-application-title">درخواست اعتبار خرید چکی</h2>
+                        <p>خرید آنلاین عمده برای همه باز است؛ این درخواست فقط برای فعال‌شدن پرداخت چکی است.</p>
+                    </div>
+                </header>
+
+                @if(session('success'))
+                    <div class="alert alert--success" role="status">{{ session('success') }}</div>
+                @endif
+
+                @if($chequePermission?->isApproved())
+                    <div class="customer-inline-status">
+                        <strong>مجوز پرداخت چکی فعال است.</strong>
+                        <p>سقف هر سفارش: {{ $chequePermission->max_order_amount !== null ? number_format((float) $chequePermission->max_order_amount) . ' تومان' : 'بدون سقف تعیین‌شده' }}.</p>
+                        <a class="button button--primary" href="{{ route('checkout') }}#payment-options">رفتن به پرداخت</a>
+                    </div>
+                @elseif($chequePermission?->isPending())
+                    <div class="customer-inline-status" role="status">
+                        <strong>درخواستت در انتظار بررسی مدیر است.</strong>
+                        <p>مبلغ درخواستی: {{ number_format((float) $chequePermission->requested_amount) }} تومان.</p>
+                    </div>
+                @elseif($isCustomer)
+                    <form method="POST" action="{{ route('wholesale.cheque.request') }}" class="checkout-form cheque-request-form">
+                        @csrf
+                        <label for="cheque-request-amount">مبلغ اعتبار درخواستی (تومان)</label>
+                        <div class="cheque-request-form__amount">
+                            <input id="cheque-request-amount" name="requested_amount" type="text" inputmode="numeric" autocomplete="off" required maxlength="20" value="{{ old('requested_amount') }}" placeholder="مثلاً ۵۰٬۰۰۰٬۰۰۰" data-money-input aria-describedby="cheque-request-amount-help">
+                            <span>تومان</span>
+                        </div>
+                        <small id="cheque-request-amount-help">این مبلغ پیشنهاد توست؛ سقف نهایی را مدیر تأیید می‌کند.</small>
+                        @error('requested_amount')<small class="form-error" role="alert">{{ $message }}</small>@enderror
+                        <button class="button button--primary" type="submit">ارسال درخواست به مدیر</button>
+                    </form>
+                @elseif(auth()->check())
+                    <div class="customer-inline-status"><strong>این درخواست برای حساب مشتری است.</strong><p>با حساب مدیریت امکان ثبت درخواست پرداخت چکی وجود ندارد.</p></div>
+                @else
+                    <div class="customer-inline-status">
+                        <strong>برای پرداخت چکی، حساب مشتری بساز یا وارد شو.</strong>
+                        <p>ثبت و تأیید درخواست فقط برای پرداخت چکی است؛ خرید آنلاین عمده نیازی به حساب ندارد.</p>
+                        <div class="customer-action-strip__actions">
+                            <a class="button button--primary" href="{{ route('login', ['continue' => 'cheque']) }}">ورود</a>
+                            <a class="button button--ghost" href="{{ route('register', ['continue' => 'cheque']) }}">ساخت حساب</a>
+                        </div>
+                    </div>
+                @endif
+            </section>
         </div>
     </section>
-
 </div>
 @endsection

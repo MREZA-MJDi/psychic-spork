@@ -220,6 +220,16 @@
 
                     </div>
 
+                    <div class="admin-field">
+                        <label for="quality">آمادگی کاتالوگ و SEO</label>
+                        <select id="quality" name="quality">
+                            <option value="">همه محصولات</option>
+                            <option value="missing-seo" @selected(($quality ?? null) === 'missing-seo')>بدون عنوان یا توضیح SEO</option>
+                            <option value="missing-image" @selected(($quality ?? null) === 'missing-image')>بدون تصویر محصول</option>
+                            <option value="missing-variant" @selected(($quality ?? null) === 'missing-variant')>بدون واریانت فعال</option>
+                        </select>
+                    </div>
+
 
                     <div class="admin-filter-actions">
 
@@ -762,4 +772,3 @@
     </div>
 
 @endsection
-

@@ -115,9 +115,10 @@ const showQuickPreview = (payload, fallbackForm = null) => {
 };
 
 const animateProductToCart = (form = null) => {
-    const target =
-        document.querySelector('[data-cart-open]:not([hidden])') ||
-        document.querySelector('[data-cart-open]');
+    const target = [...document.querySelectorAll('[data-cart-open]')].find((node) => {
+        const rect = node.getBoundingClientRect();
+        return !node.hidden && rect.width > 0 && rect.height > 0;
+    });
 
     if (!target) return;
 

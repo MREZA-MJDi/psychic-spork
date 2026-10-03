@@ -19,9 +19,12 @@ class AccountController extends Controller
             ->limit(10)
             ->get();
 
+        $chequePermission = $user->chequePermission()->first();
+
         return view('account', [
             'user' => $user,
             'orders' => $orders,
+            'chequePermission' => $chequePermission,
             'statusNames' => [
                 'pending' => 'در انتظار',
                 'confirmed' => 'تأیید شده',

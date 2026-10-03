@@ -26,12 +26,15 @@
             </p>
         </div>
 
-        <a
-            href="{{ route('admin.products.index') }}"
-            class="admin-btn admin-btn--ghost admin-btn--sm"
-        >
-            بازگشت
-        </a>
+        <div class="admin-actions">
+            <a href="{{ route('admin.products.variants.index', $product) }}" class="admin-btn admin-btn--secondary admin-btn--sm">
+                مدیریت رنگ‌ها و سایزها
+            </a>
+            <a href="{{ route('admin.products.media.index', $product) }}" class="admin-btn admin-btn--ghost admin-btn--sm">
+                مدیریت تصاویر محصول
+            </a>
+            <a href="{{ route('admin.products.index') }}" class="admin-btn admin-btn--ghost admin-btn--sm">بازگشت</a>
+        </div>
 
     </div>
 

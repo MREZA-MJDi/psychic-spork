@@ -1,4 +1,24 @@
+import { initMoneyInputs } from './money-input.js';
+
+initMoneyInputs();
+
 document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('[data-cheque-permission]').forEach((control) => {
+        const checkbox = control.querySelector('[data-cheque-toggle]');
+        const limit = control.querySelector('[data-cheque-limit]');
+        const amount = limit?.querySelector('input[name="max_order_amount"]');
+        const sync = () => {
+            const enabled = Boolean(checkbox?.checked);
+            if (limit) limit.hidden = !enabled;
+            if (amount) {
+                amount.required = enabled;
+                amount.disabled = !enabled;
+            }
+        };
+        checkbox?.addEventListener('change', sync);
+        sync();
+    });
+
     const sidebar = document.querySelector('[data-admin-sidebar]');
     const menu = document.querySelector('[data-admin-menu]');
     const backdrop = document.querySelector('[data-admin-sidebar-backdrop]');
@@ -1033,6 +1053,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const directionField = document.getElementById('adjustment-direction-field');
         const directionInput = document.getElementById('adjustment_direction');
         const variantSelect = document.querySelector('[data-inventory-variant]');
+        const variantSearch = document.querySelector('[data-inventory-variant-search]');
+        const variantNext = document.querySelector('[data-inventory-next]');
         const currentStock = document.querySelector('[data-current-stock]');
         const quantityHelp = document.getElementById('quantity-help');
 
@@ -1044,6 +1066,48 @@ document.addEventListener('DOMContentLoaded', () => {
                 ? '—'
                 : new Intl.NumberFormat('fa-IR').format(Number(stock)) + ' عدد';
         };
+
+        let lookupPage = 1;
+        let lookupTerm = '';
+        let lookupNext = false;
+        let lookupTimer;
+        let lookupController;
+        const loadVariants = async (append = false) => {
+            if (!variantSearch || !variantSelect) return;
+            lookupController?.abort();
+            lookupController = new AbortController();
+            const page = append ? lookupPage + 1 : 1;
+            lookupTerm = variantSearch.value.trim();
+            try {
+                const url = new URL(variantSearch.dataset.lookupUrl, window.location.origin);
+                url.searchParams.set('q', lookupTerm);
+                url.searchParams.set('page', String(page));
+                const response = await fetch(url, { headers: { Accept: 'application/json' }, signal: lookupController.signal });
+                if (!response.ok) return;
+                const payload = await response.json();
+                if (!append) {
+                    const selected = variantSelect.selectedOptions[0];
+                    const keep = selected?.value ? selected.cloneNode(true) : null;
+                    variantSelect.replaceChildren(new Option('یک واریانت را انتخاب کن', ''));
+                    if (keep) variantSelect.append(keep);
+                }
+                payload.data.forEach((variant) => {
+                    const option = new Option(`${variant.name} — ${variant.display_name} — موجودی: ${new Intl.NumberFormat('fa-IR').format(variant.stock)}`, String(variant.id));
+                    option.dataset.stock = String(variant.stock);
+                    variantSelect.append(option);
+                });
+                lookupPage = page;
+                lookupNext = Boolean(payload.next_page_url);
+                if (variantNext) variantNext.hidden = !lookupNext;
+            } catch (error) {
+                if (error.name !== 'AbortError') console.error('Variant lookup failed', error);
+            }
+        };
+        variantSearch?.addEventListener('input', () => {
+            clearTimeout(lookupTimer);
+            lookupTimer = setTimeout(() => loadVariants(false), 250);
+        });
+        variantNext?.addEventListener('click', () => { if (lookupNext) loadVariants(true); });
 
         const updateQuantity = () => {
             if (!typeInput || !quantityAmountInput || !quantityInput) return;
@@ -1083,32 +1147,171 @@ document.addEventListener('DOMContentLoaded', () => {
         quantityAmountInput?.addEventListener('input', updateQuantity);
         updateDirectionVisibility();
         updateCurrentStock();
+        loadVariants(false);
         form.addEventListener('submit', updateQuantity);
     };
 
     const initWholesalePackForm = () => {
         const search = document.getElementById('variant-search');
+        const list = document.querySelector('[data-pack-variant-list]');
+        const pager = document.querySelector('[data-pack-variant-pages]');
+        const form = document.querySelector('[data-wholesale-pack-form]');
         const rows = [...document.querySelectorAll('[data-variant-row]')];
-        if (!search || !rows.length) return;
+        const selectedCount = document.querySelector('[data-pack-selected-count]');
+        const unitCount = document.querySelector('[data-pack-unit-count]');
+        const noResults = document.querySelector('[data-pack-no-results]');
+        const imageInput = document.querySelector('[data-pack-image-input]');
+        const imagePreview = document.querySelector('[data-pack-image-preview]');
+        const digits = new Intl.NumberFormat('fa-IR');
 
-        search.addEventListener('input', () => {
-            const term = search.value.trim().toLowerCase();
-            rows.forEach((row) => {
-                row.hidden = Boolean(term) && !row.dataset.search.includes(term);
-            });
+        imageInput?.addEventListener('change', () => {
+            const file = imageInput.files?.[0];
+            if (!file || !imagePreview) return;
+            let image = imagePreview.querySelector('img');
+            if (!image) {
+                imagePreview.querySelector('[data-pack-image-empty]')?.remove();
+                image = document.createElement('img');
+                image.alt = 'پیش‌نمایش عکس بسته';
+                imagePreview.append(image);
+            }
+            if (image.dataset.previewUrl) URL.revokeObjectURL(image.dataset.previewUrl);
+            const previewUrl = URL.createObjectURL(file);
+            image.dataset.previewUrl = previewUrl;
+            image.src = previewUrl;
         });
 
+        if (!list || !form) return;
+
+        const selectedVariants = new Map();
         rows.forEach((row) => {
-            const checkbox = row.querySelector('input[type="checkbox"]');
-            const quantity = row.querySelector('.wholesale-pack-qty');
-            checkbox?.addEventListener('change', () => {
-                if (!quantity) return;
+            const checkbox = row.querySelector('[data-pack-variant-toggle]');
+            const quantity = row.querySelector('[data-pack-quantity]');
+            if (checkbox?.checked) {
+                selectedVariants.set(checkbox.value, { quantity: Math.max(1, Number.parseInt(quantity?.value || '1', 10) || 1) });
+            }
+        });
+
+        const renderRow = (variant) => {
+            const id = String(variant.id);
+            const selected = selectedVariants.get(id);
+            const row = document.createElement('article');
+            row.className = 'wholesale-pack-variant';
+            row.dataset.variantRow = '';
+            row.dataset.search = [variant.name, variant.brand, variant.sku, variant.size, variant.color].join(' ').toLowerCase();
+            const pick = document.createElement('label');
+            pick.className = 'wholesale-pack-variant__pick';
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox'; checkbox.value = id; checkbox.dataset.packVariantToggle = '';
+            checkbox.checked = Boolean(selected);
+            checkbox.disabled = variant.wholesale_price === null && !selected;
+            const copy = document.createElement('span'); copy.className = 'wholesale-pack-variant__copy';
+            const name = document.createElement('strong'); name.textContent = variant.name;
+            const meta = document.createElement('span'); meta.className = 'wholesale-pack-variant__meta';
+            const brand = document.createElement('b'); brand.textContent = variant.brand;
+            const display = document.createElement('span'); display.textContent = variant.display_name || 'بدون رنگ و سایز';
+            const sku = document.createElement('code'); sku.dir = 'ltr'; sku.textContent = variant.sku || 'بدون SKU';
+            meta.append(brand, display, sku);
+            const detail = document.createElement('small');
+            detail.textContent = `قیمت عمدهٔ تکی: ${variant.wholesale_price === null ? 'ثبت نشده' : `${new Intl.NumberFormat('fa-IR').format(Number(variant.wholesale_price))} تومان`} · موجودی: ${new Intl.NumberFormat('fa-IR').format(variant.stock)}`;
+            copy.append(name, meta, detail); pick.append(checkbox, copy);
+            const qtyLabel = document.createElement('label'); qtyLabel.className = 'wholesale-pack-variant__quantity';
+            const qtyLabelText = document.createElement('span'); qtyLabelText.textContent = 'تعداد در پک';
+            const quantity = document.createElement('input'); quantity.className = 'wholesale-pack-qty'; quantity.type = 'number'; quantity.min = '1'; quantity.max = '100000'; quantity.value = String(selected?.quantity || 1); quantity.disabled = !selected || checkbox.disabled; quantity.dataset.packQuantity = '';
+            quantity.setAttribute('aria-label', `تعداد ${variant.name}، ${variant.display_name}`);
+            qtyLabel.append(qtyLabelText, quantity); row.append(pick, qtyLabel);
+            checkbox.addEventListener('change', () => {
+                if (checkbox.checked) selectedVariants.set(id, { quantity: Math.max(1, Number.parseInt(quantity.value || '1', 10) || 1) });
+                else selectedVariants.delete(id);
                 quantity.disabled = !checkbox.checked;
-                if (checkbox.checked && Number(quantity.value || 0) < 1) {
-                    quantity.value = '1';
+                if (checkbox.checked && Number(quantity.value || 0) < 1) quantity.value = '1';
+                refresh();
+            });
+            quantity.addEventListener('input', () => {
+                if (checkbox.checked) selectedVariants.set(id, { quantity: Math.max(1, Number.parseInt(quantity.value || '1', 10) || 1) });
+                refresh();
+            });
+            return row;
+        };
+
+        let page = 1;
+        let hasNext = false;
+        let searchTimer;
+        let searchController;
+        const loadPage = async (next = false) => {
+            searchController?.abort(); searchController = new AbortController();
+            const targetPage = next ? page + 1 : 1;
+            const url = new URL(form.dataset.lookupUrl, window.location.origin);
+            url.searchParams.set('q', search?.value.trim() || '');
+            url.searchParams.set('page', String(targetPage));
+            try {
+                const response = await fetch(url, { headers: { Accept: 'application/json' }, signal: searchController.signal });
+                if (!response.ok) return;
+                const payload = await response.json();
+                if (!next) list.replaceChildren();
+                payload.data.forEach((variant) => list.append(renderRow(variant)));
+                page = targetPage; hasNext = Boolean(payload.next_page_url);
+                if (pager) {
+                    pager.replaceChildren(); pager.hidden = !hasNext;
+                    if (hasNext) {
+                        const button = document.createElement('button'); button.type = 'button'; button.className = 'admin-btn admin-btn--ghost admin-btn--sm'; button.textContent = 'واریانت‌های بعدی';
+                        button.addEventListener('click', () => loadPage(true)); pager.append(button);
+                    }
+                }
+                refresh();
+            } catch (error) { if (error.name !== 'AbortError') console.error('Wholesale variant lookup failed', error); }
+        };
+
+        const refresh = () => {
+            let selected = selectedVariants.size;
+            let units = [...selectedVariants.values()].reduce((sum, item) => sum + item.quantity, 0);
+            let visible = 0;
+
+            list.querySelectorAll('[data-variant-row]').forEach((row) => { const checkbox = row.querySelector('[data-pack-variant-toggle]'); row.classList.toggle('is-selected', Boolean(checkbox?.checked)); visible += 1; });
+
+            if (selectedCount) selectedCount.textContent = digits.format(selected);
+            if (unitCount) unitCount.textContent = digits.format(units);
+            if (noResults) noResults.hidden = visible !== 0;
+        };
+
+        search?.addEventListener('input', () => { clearTimeout(searchTimer); searchTimer = setTimeout(() => loadPage(false), 250); });
+
+        document.querySelector('[data-pack-select-visible]')?.addEventListener('click', () => {
+            list.querySelectorAll('[data-variant-row]').forEach((row) => {
+                const checkbox = row.querySelector('[data-pack-variant-toggle]');
+                const quantity = row.querySelector('[data-pack-quantity]');
+                if (!checkbox || checkbox.disabled) return;
+                checkbox.checked = true;
+                selectedVariants.set(checkbox.value, { quantity: Math.max(1, Number.parseInt(quantity?.value || '1', 10) || 1) });
+                if (quantity) {
+                    quantity.disabled = false;
+                    if (Number(quantity.value || 0) < 1) quantity.value = '1';
                 }
             });
+            refresh();
         });
+
+        document.querySelector('[data-pack-clear-all]')?.addEventListener('click', () => {
+            selectedVariants.clear();
+            list.querySelectorAll('[data-variant-row]').forEach((row) => {
+                const checkbox = row.querySelector('[data-pack-variant-toggle]');
+                const quantity = row.querySelector('[data-pack-quantity]');
+                if (checkbox) checkbox.checked = false;
+                if (quantity) quantity.disabled = true;
+            });
+            refresh();
+        });
+
+        form.addEventListener('submit', () => {
+            form.querySelectorAll('[data-pack-submitted-item]').forEach((input) => input.remove());
+            selectedVariants.forEach((item, id) => {
+                const idInput = document.createElement('input'); idInput.type = 'hidden'; idInput.name = `items[${id}][variant_id]`; idInput.value = id; idInput.dataset.packSubmittedItem = '';
+                const qtyInput = document.createElement('input'); qtyInput.type = 'hidden'; qtyInput.name = `items[${id}][quantity]`; qtyInput.value = String(item.quantity); qtyInput.dataset.packSubmittedItem = '';
+                form.append(idInput, qtyInput);
+            });
+        });
+
+        refresh();
+        loadPage(false);
     };
 
     initProductForm();

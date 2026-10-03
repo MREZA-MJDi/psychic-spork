@@ -32,12 +32,13 @@ class AuthAuthorizationTest extends TestCase
     {
         $admin = User::factory()->create([
             'email' => 'admin-test@janan.local',
+            'phone' => '09120000003',
             'password' => Hash::make('AdminPass123!'),
             'is_admin' => true,
         ]);
 
         $this->post(route('login.store'), [
-            'identifier' => $admin->email,
+            'phone' => $admin->phone,
             'password' => 'AdminPass123!',
         ])
             ->assertRedirect(route('admin.dashboard'));
@@ -50,6 +51,7 @@ class AuthAuthorizationTest extends TestCase
         $this->post(route('register.store'), [
             'name' => 'Customer Test',
             'email' => 'customer-test@janan.local',
+            'phone' => '09120000004',
             'password' => 'CustomerPass123!',
             'password_confirmation' => 'CustomerPass123!',
         ])

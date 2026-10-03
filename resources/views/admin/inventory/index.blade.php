@@ -413,46 +413,15 @@
                             محصول و واریانت *
                         </label>
 
-                        <select
-                            id="product_variant_id"
-                            name="product_variant_id"
-                            required
-                            data-inventory-variant
-                        >
-
-                            <option value="">
-                                انتخاب محصول
-                            </option>
-
-                            @foreach($variantOptions as $variantOption)
-
-                                <option
-                                value="{{ $variantOption->id }}"
-                                data-stock="{{ (int) $variantOption->stock }}"
-                                @selected(old('product_variant_id') == $variantOption->id)
-                            >
-                                {{ $variantOption->product?->name ?? 'محصول' }}
-
-                                @if($variantOption->sku)
-                                    — {{ $variantOption->sku }}
-                                @endif
-
-                                @if($variantOption->size)
-                                    — {{ $variantOption->size }}
-                                @endif
-
-                                @if($variantOption->color)
-                                    — {{ $variantOption->color }}
-                                @endif
-
-                                — موجودی:
-                                {{ number_format((int) $variantOption->stock) }}
-
-                                </option>
-
-                            @endforeach
-
+                        <input type="search" id="inventory-variant-search" placeholder="نام محصول، برند، SKU، رنگ یا سایز را جستجو کن…" autocomplete="off" data-inventory-variant-search data-lookup-url="{{ route('admin.variant-lookup') }}">
+                        <select id="product_variant_id" name="product_variant_id" required data-inventory-variant aria-label="نتیجه‌های جستجوی واریانت">
+                            <option value="">اول جستجو کن و یک واریانت انتخاب کن</option>
+                            @if($selectedVariant)
+                                <option value="{{ $selectedVariant->id }}" data-stock="{{ (int) $selectedVariant->stock }}" selected>{{ $selectedVariant->product?->name ?? 'محصول' }} — {{ $selectedVariant->display_name }} — موجودی: {{ number_format((int) $selectedVariant->stock) }}</option>
+                            @endif
                         </select>
+                        <button type="button" class="admin-btn admin-btn--ghost admin-btn--sm" data-inventory-next hidden>بارگذاری نتیجه‌های بعدی</button>
+                        <small class="admin-help">نتایج به‌صورت صفحه‌ای بارگذاری می‌شوند تا فهرست بزرگ واریانت‌ها باعث کندی نشود.</small>
 
 
                         @error('product_variant_id')

@@ -59,7 +59,7 @@ class AdminHeroTest extends TestCase
             ->assertRedirect()
             ->assertSessionHas('error');
 
-        $this->assertDatabaseCount('products', 49);
+        $this->assertDatabaseCount('products', $products->count() + 1);
         $this->assertDatabaseHas('products', [
             'id' => $candidate->id,
             'is_hero' => false,

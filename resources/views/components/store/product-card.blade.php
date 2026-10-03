@@ -8,6 +8,40 @@
     $image = $product->primaryGalleryMedia?->url;
     $stock = (int) ($productVariant?->stock ?? 0);
     $isOnSale = (bool) ($productVariant?->is_on_sale ?? false);
+    $activeVariants = $product->relationLoaded('activeVariants')
+        ? $product->activeVariants
+        : collect();
+    $colorCount = $activeVariants->pluck('color')
+        ->filter(fn ($value) => filled(trim((string) $value)))
+        ->map(fn ($value) => mb_strtolower(trim((string) $value)))
+        ->unique()
+        ->count();
+    $sizeCount = $activeVariants->pluck('size')
+        ->filter(fn ($value) => filled(trim((string) $value)))
+        ->map(fn ($value) => mb_strtolower(trim((string) $value)))
+        ->unique()
+        ->count();
+    $variantPrices = $activeVariants
+        ->map(fn ($item) => (float) $item->effective_price)
+        ->filter(fn ($price) => $price > 0)
+        ->values();
+    $minimumPrice = $variantPrices->isNotEmpty()
+        ? $variantPrices->min()
+        : ($productVariant?->effective_price ?? null);
+    $minimumPrice = $minimumPrice !== null && (float) $minimumPrice > 0
+        ? $minimumPrice
+        : null;
+    $maximumPrice = $variantPrices->isNotEmpty()
+        ? $variantPrices->max()
+        : $minimumPrice;
+    $priceVaries = $minimumPrice !== null && $maximumPrice !== null && $maximumPrice > $minimumPrice;
+    $variantFacts = array_values(array_filter([
+        $colorCount > 1 ? number_format($colorCount).' رنگ' : null,
+        $sizeCount > 1 ? number_format($sizeCount).' سایز' : null,
+        $colorCount === 0 && $sizeCount === 0 && $activeVariants->count() > 1
+            ? number_format($activeVariants->count()).' گزینه'
+            : null,
+    ]));
 
     $discount = $isOnSale
         ? max(
@@ -40,7 +74,7 @@
                 :src="$image"
                 :alt="$product->name"
                 fallback-class="product-image-placeholder"
-                fallback="JANAN"
+                fallback="JANE JANAN"
             />
         </a>
 
@@ -49,16 +83,21 @@
     <div class="product-card__body">
 
         <div class="product-card__topline">
-            <span>
-                {{ $product->category?->name ?? 'Janan' }}
-            </span>
-
-            @if($productVariant?->sku)
-                <span>
-                    {{ $productVariant->sku }}
-                </span>
+            @if($product->brand?->name)
+                <span class="product-card__brand">{{ $product->brand->name }}</span>
+            @endif
+            @if($product->category?->name)
+                <span class="product-card__category">{{ $product->category->name }}</span>
             @endif
         </div>
+
+        @if(count($variantFacts))
+            <div class="product-card__facts" aria-label="{{ implode('، ', $variantFacts) }}">
+                @foreach($variantFacts as $fact)
+                    <span>{{ $fact }}</span>
+                @endforeach
+            </div>
+        @endif
 
         <a
             href="{{ route('products.show', $product) }}"
@@ -67,16 +106,19 @@
             {{ $product->name }}
         </a>
 
-        @if($productVariant)
+        @if($minimumPrice !== null)
 
             <div class="product-price">
                 <strong>
-                    {{ number_format($productVariant->effective_price) }}
+                    @if($priceVaries)
+                        <span class="product-price__prefix">از</span>
+                    @endif
+                    {{ number_format($minimumPrice) }}
                 </strong>
 
                 <span>تومان</span>
 
-                @if($isOnSale)
+                @if($isOnSale && !$priceVaries)
                     <del>
                         {{ number_format($productVariant->price) }}
                     </del>
@@ -123,6 +165,14 @@
             <span class="product-card__no-variant">
                 اطلاعات قیمت در دسترس نیست.
             </span>
+
+            <a
+                class="product-card__no-price-link"
+                href="{{ route('products.show', $product) }}"
+            >
+                مشاهده جزئیات محصول
+                <span aria-hidden="true">←</span>
+            </a>
 
         @endif
 

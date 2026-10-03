@@ -44,6 +44,7 @@ class HomeController extends Controller
                 'brand',
                 'primaryActiveVariant',
                 'primaryGalleryMedia',
+                'activeVariants',
             ]);
 
         $featuredProducts = (clone $productsQuery)
@@ -83,6 +84,7 @@ class HomeController extends Controller
                 'brand:id,name',
                 'primaryGalleryMedia',
                 'primaryActiveVariant',
+                'activeVariants',
             ])
             ->latest('created_at')
             ->latest('id')
@@ -115,6 +117,7 @@ class HomeController extends Controller
                 'brand:id,name',
                 'primaryGalleryMedia',
                 'primaryActiveVariant',
+                'activeVariants',
             ])
             ->withSum(
                 [

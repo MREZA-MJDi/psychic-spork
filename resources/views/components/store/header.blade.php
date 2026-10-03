@@ -28,7 +28,7 @@
             </span>
 
             <span class="brand__nastaliq">
-                {{ $siteBrandNameFa ?? 'جانان' }}
+                {{ $siteBrandNameFa ?? 'جانه جانان' }}
             </span>
         </a>
 
@@ -38,7 +38,7 @@
             id="store-mobile-menu"
             class="store-nav"
             aria-label="منوی اصلی فروشگاه"
-            aria-hidden="true"
+            aria-hidden="false"
             data-mobile-menu
         >
             <a
@@ -93,20 +93,6 @@
 
         {{-- Header Actions --}}
         <div class="header-actions">
-
-            {{-- Mobile navigation --}}
-            <button
-                type="button"
-                class="mobile-menu-toggle"
-                aria-label="باز کردن منوی فروشگاه"
-                aria-expanded="false"
-                aria-controls="store-mobile-menu"
-                data-menu-toggle
-            >
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
 
             {{-- Search --}}
             <button

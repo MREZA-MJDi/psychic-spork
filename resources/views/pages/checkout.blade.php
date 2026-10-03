@@ -7,19 +7,19 @@
     $user = auth()->user();
     $isCustomer = $user?->isCustomer() ?? false;
     $chequePermission = $user?->chequePermission;
-    $chequeApproved = $chequePermission?->isApproved() ?? false;
+    $chequeApproved = $chequeEnabled;
     $chequePending = $chequePermission?->isPending() ?? false;
 @endphp
 
-<section class="page-hero page-hero--motion">
+<section class="page-hero page-hero--motion page-hero--checkout">
     <div class="container">
         <span class="eyebrow">JANAN / CHECKOUT</span>
-        <h1>تکمیل سفارش</h1>
-        <p>نوع خرید و روش پرداخت را انتخاب کن؛ بعد اطلاعات ارسال را کامل کن.</p>
+        <h1>پرداخت و ثبت سفارش</h1>
+        <p>نوع خرید و روش پرداخت را انتخاب کن، اطلاعات ارسال را بررسی کن و سفارش را ثبت کن.</p>
     </div>
 </section>
 
-<section class="section-block">
+<section class="section-block checkout-section">
     <div class="container checkout-layout">
 
         <section class="checkout-card">
@@ -70,13 +70,13 @@
                             </span>
                         </label>
 
-                        <label class="checkout-choice {{ ! $isCustomer ? 'is-disabled' : '' }}">
+                        <label class="checkout-choice {{ ! $canSelectWholesale ? 'is-disabled' : '' }}">
                             <input
                                 type="radio"
                                 name="order_type"
                                 value="wholesale"
                                 @checked(old('order_type') === 'wholesale')
-                                @disabled(! $isCustomer)
+                                @disabled(! $canSelectWholesale)
                             >
                             <span>
                                 <strong>خرید عمده</strong>
@@ -89,12 +89,12 @@
 
                     @guest
                         <p class="checkout-choice-note">
-                            برای ثبت سفارش عمده، ابتدا وارد حساب مشتری شو.
+                            خرید عمده با پرداخت آنلاین به حساب کاربری نیاز ندارد؛ ورود و تأیید مدیر فقط برای پرداخت چکی لازم است.
                         </p>
                     @endguest
                 </fieldset>
 
-                <fieldset class="checkout-choice-group">
+                <fieldset class="checkout-choice-group" id="payment-options">
                     <legend>
                         <span class="eyebrow">PAYMENT</span>
                         <strong>روش پرداخت</strong>
@@ -133,13 +133,19 @@
                         @else
                             <div class="checkout-payment-request">
                                 <div>
-                                    <span class="checkout-payment-request__badge">CHEQUE ACCESS</span>
-                                    <strong>پرداخت با چک هنوز برای این حساب فعال نیست.</strong>
-
+                                    <span class="checkout-payment-request__badge">مجوز پرداخت چکی</span>
                                     @if($chequePending)
-                                        <p>درخواست شما ثبت شده و در انتظار بررسی مدیریت است.</p>
+                                        <strong>درخواست چک در انتظار بررسی است.</strong>
+                                        <p>بعد از تأیید مدیر، روش پرداخت چکی برای سفارش عمده فعال می‌شود.</p>
+                                    @elseif($isCustomer)
+                                        <strong>برای پرداخت چکی درخواست مجوز بده.</strong>
+                                        <p>درخواست برای حساب مشتری ثبت می‌شود و مدیر سقف مجاز هر سفارش را تعیین می‌کند.</p>
+                                    @elseif($user)
+                                        <strong>این روش پرداخت برای حساب مدیریت در دسترس نیست.</strong>
+                                        <p>پرداخت چکی فقط برای حساب مشتری و سفارش عمده فعال می‌شود.</p>
                                     @else
-                                        <p>خرید عمده آزاد است؛ برای استفاده از چک فقط یک‌بار درخواست مجوز بده.</p>
+                                        <strong>پرداخت چکی نیاز به حساب مشتری و تأیید مدیر دارد.</strong>
+                                        <p>می‌توانی بدون ورود، خرید عمده را آنلاین پرداخت کنی.</p>
                                     @endif
                                 </div>
 
@@ -151,6 +157,11 @@
                                     >
                                         درخواست مجوز چک
                                     </button>
+                                @elseif(! $user)
+                                    <div class="customer-action-strip__actions">
+                                        <a class="button button--primary" href="{{ route('login', ['continue' => 'cheque']) }}">ورود</a>
+                                        <a class="button button--ghost" href="{{ route('register', ['continue' => 'cheque']) }}">ساخت حساب</a>
+                                    </div>
                                 @endif
                             </div>
                         @endif
@@ -317,7 +328,7 @@
                 <form
                     id="cheque-permission-request"
                     method="POST"
-                    action="{{ route('wholesale.cheque.request') }}"
+                action="{{ route('wholesale.cheque.request') }}"
                     hidden
                 >
                     @csrf

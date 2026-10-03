@@ -77,7 +77,7 @@
             <div class="dashboard-v2__hero-actions">
                 <div class="dashboard-v2__live">
                     <i aria-hidden="true"></i>
-                    <span>سیستم فعال</span>
+                    <span>پنل فروشگاه</span>
                 </div>
 
                 <form
@@ -203,6 +203,60 @@
             </div>
         </section>
 
+        <section class="dashboard-v2__control-center" aria-label="آمادگی محتوا و SEO">
+            <div class="dashboard-v2__control-head">
+                <div>
+                    <span class="dashboard-v2__kicker">CONTENT / SEO</span>
+                    <h2>آمادگی محتوا برای انتشار و جستجو</h2>
+                    <p>این شمارنده‌ها از محصولات، دسته‌بندی‌ها و برندهای فعال خوانده می‌شوند. عکس‌های کاتالوگ را جانان بارگذاری می‌کند؛ داده نیلا عکس را جایگزین نمی‌کند.</p>
+                </div>
+            </div>
+
+            <div class="dashboard-v2__control-grid">
+                <a href="{{ route('admin.products.index', ['quality' => 'missing-seo']) }}" class="dashboard-v2__control-item {{ $productsMissingSeo > 0 ? 'is-attention' : '' }}">
+                    <span class="dashboard-v2__control-icon">SEO</span>
+                    <div>
+                        <strong>SEO محصولات</strong>
+                        <small>{{ $formatFaNumber((int) $productsMissingSeo) }} محصول فعال بدون عنوان یا توضیح SEO</small>
+                    </div>
+                    <b aria-hidden="true">←</b>
+                </a>
+
+                <a href="{{ route('admin.products.index', ['quality' => 'missing-image']) }}" class="dashboard-v2__control-item {{ $productsMissingImage > 0 ? 'is-attention' : '' }}">
+                    <span class="dashboard-v2__control-icon">عکس</span>
+                    <div>
+                        <strong>تصاویر محصول</strong>
+                        <small>{{ $formatFaNumber((int) $productsMissingImage) }} محصول فعال بدون تصویر گالری</small>
+                    </div>
+                    <b aria-hidden="true">←</b>
+                </a>
+
+                <a href="{{ route('admin.categories.index') }}" class="dashboard-v2__control-item {{ $categoriesMissingSeo > 0 ? 'is-attention' : '' }}">
+                    <span class="dashboard-v2__control-icon">دسته</span>
+                    <div>
+                        <strong>SEO دسته‌بندی‌ها</strong>
+                        <small>{{ $formatFaNumber((int) $categoriesMissingSeo) }} دسته فعال نیازمند بازبینی</small>
+                    </div>
+                    <b aria-hidden="true">←</b>
+                </a>
+
+                <a href="{{ route('admin.brands.index') }}" class="dashboard-v2__control-item {{ $brandsMissingSeo > 0 ? 'is-attention' : '' }}">
+                    <span class="dashboard-v2__control-icon">برند</span>
+                    <div>
+                        <strong>SEO برندها</strong>
+                        <small>{{ $formatFaNumber((int) $brandsMissingSeo) }} برند فعال نیازمند بازبینی</small>
+                    </div>
+                    <b aria-hidden="true">←</b>
+                </a>
+            </div>
+
+            <div class="dashboard-v2__panel-links">
+                <a href="{{ route('seo.sitemap') }}" target="_blank" rel="noopener">مشاهده نقشه سایت XML ↗</a>
+                <a href="{{ route('seo.robots') }}" target="_blank" rel="noopener">مشاهده robots.txt ↗</a>
+                <a href="{{ route('admin.content.about') }}">ویرایش محتوای درباره ما ↗</a>
+            </div>
+        </section>
+
         <section class="dashboard-v2__control-center" aria-label="مرکز اقدام مدیریت">
             <div class="dashboard-v2__control-head">
                 <div>
@@ -231,6 +285,15 @@
                     <b aria-hidden="true">←</b>
                 </a>
 
+                <a href="{{ route('admin.wholesale.index') }}#cheque-permission-requests" class="dashboard-v2__control-item {{ ($pendingChequePermissions ?? 0) > 0 ? 'is-attention' : '' }}">
+                    <span class="dashboard-v2__control-icon">مجوز</span>
+                    <div>
+                        <strong>درخواست مجوز پرداخت چکی</strong>
+                        <small>{{ $formatFaNumber((int) ($pendingChequePermissions ?? 0)) }} درخواست در انتظار تأیید مدیر</small>
+                    </div>
+                    <b aria-hidden="true">←</b>
+                </a>
+
                 <a href="{{ route('admin.inventory.index') }}" class="dashboard-v2__control-item {{ $lowStock > 0 ? 'is-attention' : '' }}">
                     <span class="dashboard-v2__control-icon">انبار</span>
                     <div>
@@ -243,8 +306,8 @@
                 <a href="{{ route('admin.nila.index') }}" class="dashboard-v2__control-item">
                     <span class="dashboard-v2__control-icon">نیلا</span>
                     <div>
-                        <strong>مرز داده نیلا</strong>
-                        <small>{{ $formatFaNumber((int) $nilaProductMappings) }} محصول و {{ $formatFaNumber((int) $nilaVariantMappings) }} واریانت mapping شده‌اند؛ آخرین تغییر mapping: <span data-admin-date="{{ optional($nilaLastMappedAt)->toIso8601String() }}" data-admin-date-format="day">{{ optional($nilaLastMappedAt)->format('Y/m/d') ?: '—' }}</span>.</small>
+                        <strong>واردسازی و نگاشت نیلا / هلو</strong>
+                        <small>{{ $formatFaNumber((int) $nilaProductMappings) }} محصول و {{ $formatFaNumber((int) $nilaVariantMappings) }} واریانت نگاشت داخلی دارند. این عدد به معنی اتصال زنده نیست.</small>
                     </div>
                     <span class="dashboard-v2__control-state">کنترل نیلا ←</span>
                 </a>
@@ -258,7 +321,7 @@
                     <div>
                         <span class="dashboard-v2__kicker">SALES SIGNAL</span>
                         <h2>روند فروش روزانه</h2>
-                        <p>درآمد پرداخت‌شده و تعداد سفارش‌ها در {{ $formatFaNumber($period) }} روز اخیر.</p>
+                        <p>درآمد ثبت‌شده در دفترکل و تعداد سفارش‌های ثبت‌شده در {{ $formatFaNumber($period) }} روز اخیر.</p>
                     </div>
 
                     <div class="dashboard-v2__mini-stat">
@@ -272,20 +335,25 @@
                         @foreach($daily as $day)
                             @php
                                 $income = (float) ($day['income'] ?? 0);
-                                $height = $income > 0
-                                    ? max(6, ($income / $chartMax) * 100)
+                                $magnitude = abs($income);
+                                $height = $magnitude > 0
+                                    ? max(6, ($magnitude / $chartMax) * 100)
                                     : 3;
+                                $incomeLabel = $magnitude > 0
+                                    ? ($income < 0 ? '−' : '') . $formatFaNumber($magnitude / 1000000, 1) . 'M'
+                                    : '—';
+                                $incomeTitle = ($income < 0 ? 'کاهش خالص ' : '') . $formatFaNumber($magnitude) . ' تومان';
                             @endphp
 
                             <div class="dashboard-v2__bar-column">
-                                <div class="dashboard-v2__bar-value">
-                                    {{ $income > 0 ? $formatFaNumber($income / 1000000, 1) . 'M' : '—' }}
+                                <div class="dashboard-v2__bar-value {{ $income < 0 ? 'is-negative' : '' }}">
+                                    {{ $incomeLabel }}
                                 </div>
 
                                 <div class="dashboard-v2__bar-track">
                                     <span
-                                        style="height: {{ $height }}%"
-                                        title="{{ $formatFaNumber($income) }} تومان"
+                                        style="height: {{ $height }}%;{{ $income < 0 ? 'background:linear-gradient(180deg,#d89bad,#8f405e);' : '' }}"
+                                        title="{{ $incomeTitle }}"
                                     ></span>
                                 </div>
 
@@ -305,7 +373,7 @@
 
                 <footer class="dashboard-v2__chart-footer">
                     <span>مقیاس مبلغ: میلیون تومان</span>
-                    <span>سفارش‌ها: عدد پایین هر ستون</span>
+                    <span>مبلغ بر اساس تاریخ سند؛ سفارش بر اساس تاریخ ثبت</span>
                 </footer>
             </article>
 
@@ -358,11 +426,11 @@
 
                 <div class="dashboard-v2__cash-list">
                     <div>
-                        <span>درآمد پرداخت‌شده</span>
+                        <span>درآمد خالص دفترکل</span>
                         <strong>{{ $formatFaNumber((float) $revenue) }} <small>تومان</small></strong>
                     </div>
                     <div>
-                        <span>هزینه‌ها</span>
+                        <span>هزینه‌های ثبت‌شده، بدون بازپرداخت</span>
                         <strong>{{ $formatFaNumber((float) $expenses) }} <small>تومان</small></strong>
                     </div>
                     <div class="dashboard-v2__cash-total">

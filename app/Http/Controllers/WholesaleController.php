@@ -2,20 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\WholesaleApplicationRequest;
-use App\Models\WholesaleProfile;
+use App\Http\Requests\StoreChequePermissionRequest;
+use App\Models\ChequePermission;
 use App\Models\Product;
 use App\Models\WholesalePack;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\DB;
 
 class WholesaleController extends Controller
 {
     public function show(Request $request): View
     {
-        $profile = $request->user()?->wholesaleProfile()->first();
-
         $products = Product::query()
             ->active()
             ->whereHas('activeVariants', fn ($query) => $query->whereNotNull('wholesale_price'))
@@ -23,7 +22,9 @@ class WholesaleController extends Controller
                 'brand',
                 'category',
                 'primaryGalleryMedia',
-                'activeVariants' => fn ($query) => $query->whereNotNull('wholesale_price'),
+                'activeVariants' => fn ($query) => $query
+                    ->whereNotNull('wholesale_price')
+                    ->select(['id', 'product_id', 'color', 'size', 'stock', 'wholesale_price']),
             ])
             ->orderByDesc('is_featured')
             ->orderBy('sort_order')
@@ -32,6 +33,7 @@ class WholesaleController extends Controller
         $packs = WholesalePack::query()
             ->where('is_active', true)
             ->with([
+                'items.variant.primaryGalleryMedia',
                 'items.variant.product.brand',
                 'items.variant.product.primaryGalleryMedia',
             ])
@@ -40,48 +42,58 @@ class WholesaleController extends Controller
             ->get();
 
         return view('pages.wholesale', [
-            'profile' => $profile,
+            'chequePermission' => $request->user()?->chequePermission()->first(),
+            'isCustomer' => $request->user()?->isCustomer() ?? false,
             'products' => $products,
             'packs' => $packs,
         ]);
     }
 
-    public function apply(
-        WholesaleApplicationRequest $request
-    ): RedirectResponse {
+    public function requestCheque(StoreChequePermissionRequest $request): RedirectResponse
+    {
         $user = $request->user();
+        $data = $request->validated();
 
-        abort_unless(
-            $user->isCustomer(),
-            403,
-            'فقط حساب مشتری می‌تواند برای خرید عمده درخواست بدهد.'
-        );
+        $result = DB::transaction(function () use ($user, $data): string {
+            \App\Models\User::query()
+                ->lockForUpdate()
+                ->findOrFail($user->id);
 
-        $profile = $user->wholesaleProfile()->first();
+            $permission = ChequePermission::query()
+                ->where('user_id', $user->id)
+                ->lockForUpdate()
+                ->first();
 
-        // Wholesale online purchasing is open to every customer.
-        // This profile form is optional business information; it does not grant or revoke wholesale access.
+            if ($permission?->isApproved()) {
+                return 'already-approved';
+            }
 
-        WholesaleProfile::updateOrCreate(
-            ['user_id' => $user->id],
-            [
-                'status' => 'approved',
-                'business_name' => $request->validated('business_name'),
-                'business_type' => $request->validated('business_type'),
-                'business_phone' => $request->validated('business_phone'),
-                'business_address' => $request->validated('business_address'),
-                'approved_by' => null,
-                'approved_at' => null,
-                'suspended_by' => null,
-                'suspended_at' => null,
-            ]
-        );
+            if ($permission?->isPending()) {
+                return 'already-pending';
+            }
 
-        return redirect()
-            ->route('wholesale.show')
-            ->with(
-                'success',
-                'اطلاعات پروفایل کسب‌وکار ذخیره شد. خرید عمده آنلاین برای همه مشتریان فعال است.'
+            ChequePermission::updateOrCreate(
+                ['user_id' => $user->id],
+                [
+                    'enabled' => false,
+                    'max_order_amount' => null,
+                    'requested_amount' => $data['requested_amount'],
+                    'requested_at' => now(),
+                    'approved_by' => null,
+                    'approved_at' => null,
+                    'disabled_by' => null,
+                    'disabled_at' => null,
+                ]
             );
+
+            return 'requested';
+        }, 3);
+
+        return back()->with('success', match ($result) {
+            'already-approved' => 'مجوز پرداخت چکی این حساب از قبل فعال است.',
+            'already-pending' => 'درخواست پرداخت چکی شما در حال بررسی است.',
+            default => 'درخواست مجوز چک برای مدیریت ارسال شد.',
+        });
     }
+
 }

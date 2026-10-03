@@ -115,6 +115,9 @@ Route::get('/returns', [StorePageController::class, 'returns'])
 Route::get('/faq', [StorePageController::class, 'faq'])
     ->name('faq');
 
+Route::get('/guide/dashboard', [StorePageController::class, 'dashboardGuide'])
+    ->name('dashboard.guide');
+
 /*
 |--------------------------------------------------------------------------
 | Cart
@@ -163,9 +166,9 @@ Route::get('/drclubz', [StorePageController::class, 'club'])
 Route::get('/wholesale', [WholesaleController::class, 'show'])
     ->name('wholesale.show');
 
-Route::post('/wholesale/apply', [WholesaleController::class, 'apply'])
-    ->middleware(['auth', 'customer'])
-    ->name('wholesale.apply');
+Route::post('/wholesale/cheque/request', [WholesaleController::class, 'requestCheque'])
+    ->middleware(['auth', 'customer', 'throttle:5,60'])
+    ->name('wholesale.cheque.request');
 
 /*
 |--------------------------------------------------------------------------
@@ -256,6 +259,8 @@ Route::prefix('admin')
 
         Route::resource('products.variants', AdminProductVariantController::class)
             ->except(['show']);
+        Route::get('variant-lookup', [AdminProductVariantController::class, 'lookup'])
+            ->name('variant-lookup');
 
         Route::resource('categories', AdminCategoryController::class)
             ->except(['show']);
@@ -311,6 +316,11 @@ Route::prefix('admin')
         )->name('customers.cheque.enable');
 
         Route::patch(
+            'customers/{customer}/cheque/reject',
+            [AdminWholesaleController::class, 'rejectCheque']
+        )->name('customers.cheque.reject');
+
+        Route::patch(
             'customers/{customer}/cheque/disable',
             [AdminWholesaleController::class, 'disableCheque']
         )->name('customers.cheque.disable');
@@ -332,6 +342,9 @@ Route::prefix('admin')
 
         Route::get('cheques', [AdminChequeController::class, 'index'])
             ->name('cheques.index');
+
+        Route::get('cheques/{chequePayment}/image', [AdminChequeController::class, 'image'])
+            ->name('cheques.image');
 
         Route::patch(
             'cheques/{chequePayment}/review',
@@ -374,12 +387,6 @@ Route::prefix('admin')
 
         Route::get('nila', [AdminNilaController::class, 'index'])
             ->name('nila.index');
-
-        Route::get('hero', [AdminHeroController::class, 'index'])
-            ->name('hero.index');
-
-        Route::put('hero', [AdminHeroController::class, 'update'])
-            ->name('hero.update');
 
         Route::post('inventory', [AdminInventoryController::class, 'store'])
             ->name('inventory.store');

@@ -1,114 +1,52 @@
+import { initMoneyInputs } from './money-input.js';
+
+initMoneyInputs();
+
 (() => {
-    const boot = () => {
-        if (window.__JANAN_APP_INITIALIZED__) return;
-        window.__JANAN_APP_INITIALIZED__ = true;
-
-        const runReveal = () => {
-            const items = [...document.querySelectorAll('.reveal-up')];
-
-            if (!items.length) return;
-
-            if (!('IntersectionObserver' in window)) {
-                items.forEach((item) => item.classList.add('is-visible'));
-                return;
-            }
-
-            const observer = new IntersectionObserver((entries, instance) => {
-                entries.forEach((entry) => {
-                    if (!entry.isIntersecting) return;
+    const revealItems = document.querySelectorAll('.reveal-up');
+    if ('IntersectionObserver' in window) {
+        const observer = new IntersectionObserver((entries, current) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
                     entry.target.classList.add('is-visible');
-                    instance.unobserve(entry.target);
-                });
-            }, {
-                threshold: 0.12,
-                rootMargin: '0px 0px -7% 0px',
-            });
-
-            items.forEach((item) => observer.observe(item));
-        };
-
-        const demoFill = document.querySelector('[data-demo-fill]');
-
-        demoFill?.addEventListener('click', () => {
-            const email = document.querySelector('[data-demo-email]')?.textContent?.trim();
-            const password = document.querySelector('[data-demo-password]')?.textContent?.trim();
-            const identifier = document.querySelector('input[name="identifier"]');
-            const passwordInput = document.querySelector('input[name="password"]');
-
-            if (identifier && email) identifier.value = email;
-            if (passwordInput && password) passwordInput.value = password;
-            identifier?.focus();
-        });
-
-        document.querySelectorAll('[data-copy-target]').forEach((button) => {
-            button.addEventListener('click', async () => {
-                const target = button.dataset.copyTarget;
-                const selector = target === 'email'
-                    ? '[data-demo-email]'
-                    : '[data-demo-password]';
-                const value = document.querySelector(selector)?.textContent?.trim();
-
-                if (!value || !navigator.clipboard) return;
-
-                try {
-                    await navigator.clipboard.writeText(value);
-                    const original = button.textContent;
-                    button.textContent = 'کپی شد';
-                    window.setTimeout(() => {
-                        button.textContent = original;
-                    }, 1200);
-                } catch {
-                    // Clipboard is optional on local HTTP development.
+                    current.unobserve(entry.target);
                 }
             });
-        });
-
-        document.querySelectorAll('[data-password-toggle]').forEach((toggle) => {
-            toggle.addEventListener('click', () => {
-                const input = toggle.closest('.auth-password-wrap')?.querySelector(
-                    'input[data-password-input]'
-                );
-
-                if (!input) return;
-
-                const showing = input.type === 'text';
-                input.type = showing ? 'password' : 'text';
-                toggle.setAttribute('aria-pressed', String(!showing));
-                toggle.setAttribute(
-                    'aria-label',
-                    showing ? 'نمایش رمز عبور' : 'مخفی کردن رمز عبور'
-                );
-            });
-        });
-
-        const passwordSource = document.querySelector('[data-password-meter-source]');
-        const passwordMeter = document.querySelector('[data-password-meter]');
-
-        const updatePasswordMeter = () => {
-            if (!passwordSource || !passwordMeter) return;
-
-            const value = passwordSource.value || '';
-            let strength = 0;
-
-            if (value.length >= 8) strength += 25;
-            if (value.length >= 12) strength += 20;
-            if (/[a-z]/.test(value)) strength += 15;
-            if (/[A-Z]/.test(value)) strength += 15;
-            if (/\d/.test(value)) strength += 10;
-            if (/[^a-zA-Z\d]/.test(value)) strength += 15;
-
-            passwordMeter.style.width = Math.min(strength, 100) + '%';
-        };
-
-        passwordSource?.addEventListener('input', updatePasswordMeter);
-        updatePasswordMeter();
-
-        runReveal();
-    };
-
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', boot, { once: true });
+        }, { threshold: 0.08, rootMargin: '0px 0px -24px 0px' });
+        revealItems.forEach((item) => observer.observe(item));
     } else {
-        boot();
+        revealItems.forEach((item) => item.classList.add('is-visible'));
     }
+
+    document.querySelectorAll('[data-password-toggle]').forEach((button) => {
+        button.addEventListener('click', () => {
+            const input = button.closest('.auth-password-wrap')?.querySelector('[data-password-input]');
+            if (!input) return;
+            const show = input.type === 'password';
+            input.type = show ? 'text' : 'password';
+            button.setAttribute('aria-pressed', String(show));
+            button.setAttribute('aria-label', show ? 'پنهان کردن رمز عبور' : 'نمایش رمز عبور');
+        });
+    });
+
+    const password = document.querySelector('[data-password-meter-source]');
+    const meter = document.querySelector('[data-password-meter]');
+    const updateMeter = () => {
+        if (!password || !meter) return;
+        const value = password.value;
+        const score = [value.length >= 8, /[a-z]/i.test(value), /\d/.test(value), /[^a-z\d]/i.test(value)].filter(Boolean).length;
+        meter.style.width = `${score * 25}%`;
+        meter.dataset.strength = String(score);
+    };
+    password?.addEventListener('input', updateMeter);
+    updateMeter();
+
+    document.querySelectorAll('[data-demo-fill]').forEach((button) => {
+        button.addEventListener('click', () => {
+            const phone = document.querySelector('[name="phone"]');
+            const password = document.querySelector('[name="password"]');
+            if (phone) phone.value = button.dataset.demoPhone || '';
+            if (password) password.value = button.dataset.demoPassword || '';
+        });
+    });
 })();

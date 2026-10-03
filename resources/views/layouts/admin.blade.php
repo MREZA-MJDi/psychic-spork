@@ -24,7 +24,7 @@
     <aside class="admin-sidebar" data-admin-sidebar>
         <div class="admin-brand">
             <a href="{{ route('admin.dashboard') }}" class="admin-brand__main">
-                <span class="admin-brand__name">جانان</span>
+                <span class="admin-brand__name">جانه جانان</span>
                 <span class="admin-brand__sub">ADMIN / STORE</span>
             </a>
 
@@ -153,6 +153,11 @@
             >
                 <span class="admin-link-icon">₮</span>
                 <span>حسابداری</span>
+            </a>
+
+            <a href="{{ route('dashboard.guide') }}" class="admin-link">
+                <span class="admin-link-icon">؟</span>
+                <span>راهنمای استفاده از پنل</span>
             </a>
         </nav>
 

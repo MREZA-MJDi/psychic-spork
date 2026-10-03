@@ -14,7 +14,7 @@
             </h1>
 
             <p class="admin-page-head__text">
-                {{ $product->name }}
+                {{ $product->name }} — هر ترکیب رنگ و سایز یک گزینهٔ جداست؛ تکرار رنگ اشکالی ندارد. مثلاً «قرمز / S» و «قرمز / M» دو واریانت‌اند.
             </p>
 
         </div>
@@ -42,5 +42,14 @@
         ])
 
     </form>
+
+    <section class="admin-card admin-variant-image-note">
+        <div class="admin-card-header">
+            <div>
+                <h2 class="admin-card-title">عکس همین رنگ یا سایز</h2>
+                <p class="admin-card-description">بعد از ساخت واریانت، از فهرست واریانت‌ها وارد «ویرایش» همین گزینه شو و بخش «تصویر اختصاصی واریانت» را جدا از عکس اصلی محصول پر کن.</p>
+            </div>
+        </div>
+    </section>
 
 @endsection

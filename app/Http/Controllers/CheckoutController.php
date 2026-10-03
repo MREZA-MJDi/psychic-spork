@@ -33,17 +33,19 @@ class CheckoutController extends Controller
         }
 
         $user = $request->user();
-        $chequePermission = $user?->chequePermission;
+        $chequePermission = $user?->chequePermission()->first();
+        $canSelectWholesale = ! $user || $user->isCustomer();
 
         $chequeEnabled = (bool) (
             $user?->isCustomer()
-            && $chequePermission?->enabled
+            && $chequePermission?->isApproved()
         );
 
         return view('pages.checkout', [
             'items' => $items,
             'total' => (float) $items->sum('line_total'),
             'chequeEnabled' => $chequeEnabled,
+            'canSelectWholesale' => $canSelectWholesale,
             'chequeMaxOrderAmount' => $chequePermission?->max_order_amount,
         ]);
     }

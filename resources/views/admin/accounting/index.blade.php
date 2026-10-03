@@ -30,7 +30,7 @@
         FINANCIAL SUMMARY
     ====================================================== --}}
 
-    <div class="admin-dashboard-stats">
+    <div class="admin-dashboard-stats accounting-summary-stats">
 
         <div class="admin-stat-card admin-stat-card--success">
 
@@ -149,40 +149,40 @@
                 </div>
             </div>
 
-            @forelse(($journalEntries ?? collect()) as $entry)
-                <article style="padding:16px 0;border-bottom:1px solid var(--admin-border,#e5e7eb);">
-                    <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;">
-                        <strong>{{ $entry->entry_number }}</strong>
-                        <span class="admin-muted">{{ optional($entry->entry_date)->format('Y/m/d') }}</span>
-                    </div>
-                    <p class="admin-muted" style="margin:7px 0;">
-                        {{ $entry->description ?: 'بدون شرح' }}
-                    </p>
-                    @foreach($entry->lines as $line)
-                        <div style="display:flex;justify-content:space-between;gap:12px;font-size:.9rem;">
-                            <span>{{ $line->account?->name ?? 'حساب' }}</span>
-                            <span>
-                                @if((float) $line->debit > 0)
-                                    بدهکار {{ number_format((float) $line->debit) }}
-                                @else
-                                    بستانکار {{ number_format((float) $line->credit) }}
-                                @endif
-                                تومان
-                            </span>
+            <div class="admin-card-body accounting-journal-list">
+                @forelse(($journalEntries ?? collect()) as $entry)
+                    <article class="accounting-journal-entry">
+                        <header class="accounting-journal-entry__head">
+                            <code dir="ltr">{{ $entry->entry_number }}</code>
+                            <time>{{ optional($entry->entry_date)->format('Y/m/d') }}</time>
+                        </header>
+                        <p class="accounting-journal-entry__description">
+                            {{ $entry->description ?: 'بدون شرح' }}
+                        </p>
+                        <div class="accounting-journal-entry__lines">
+                            @foreach($entry->lines as $line)
+                                <div>
+                                    <span>{{ $line->account?->name ?? 'حساب' }}</span>
+                                    <strong>
+                                        @if((float) $line->debit > 0)
+                                            بدهکار {{ number_format((float) $line->debit) }}
+                                        @else
+                                            بستانکار {{ number_format((float) $line->credit) }}
+                                        @endif
+                                        <small>تومان</small>
+                                    </strong>
+                                </div>
+                            @endforeach
                         </div>
-                    @endforeach
-                </article>
-            @empty
-                <div class="admin-empty">
-                    <h3 class="admin-empty__title">سندی وجود ندارد</h3>
-                </div>
-            @endforelse
-
-            <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--admin-border,#e5e7eb);">
-                <small class="admin-muted">
-                    تراکنش‌های دستی قدیمی همچنان در دفتر تراکنش مالی نگهداری می‌شوند؛
-                    سندهای فروش و بازپرداخت از اینجا از Ledger خوانده می‌شوند.
-                </small>
+                    </article>
+                @empty
+                    <div class="admin-empty">
+                        <h3 class="admin-empty__title">سندی وجود ندارد</h3>
+                    </div>
+                @endforelse
+                <p class="accounting-journal-list__note">
+                    تراکنش‌های دستی قدیمی در دفتر تراکنش مالی هستند؛ سندهای فروش و بازپرداخت از دفتر کل خوانده می‌شوند.
+                </p>
             </div>
         </div>
 
@@ -730,6 +730,7 @@
                             inputmode="numeric"
                             autocomplete="off"
                             placeholder="مثلاً ۱٬۵۰۰٬۰۰۰"
+                            data-money-input
                             required
                         >
 

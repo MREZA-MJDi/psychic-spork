@@ -20,13 +20,14 @@ class StoreFrontendTest extends TestCase
     public function test_local_admin_seeder_creates_a_working_admin_account(): void
     {
         Config::set('app.admin.name', 'Janan Admin');
+        Config::set('app.admin.phone', '09120000005');
         Config::set('app.admin.email', 'admin@janan.local');
         Config::set('app.admin.password', 'password');
 
         $this->seed(AdminUserSeeder::class);
 
         $this->post(route('login.store'), [
-            'identifier' => 'admin@janan.local',
+            'phone' => '۰۹۱۲۰۰۰۰۰۰۵',
             'password' => 'password',
         ])->assertRedirect(route('admin.dashboard'));
 
@@ -40,9 +41,19 @@ class StoreFrontendTest extends TestCase
         $this->get(route('login'))
             ->assertOk()
             ->assertSee('خوش برگشتی.')
-            ->assertSee('ایمیل یا نام کاربری')
+            ->assertSee('شماره موبایل')
             ->assertSee('رمز عبور')
-            ->assertSee('ورود به جانان');
+            ->assertSee('ورود به حساب');
+    }
+
+    public function test_public_dashboard_guide_is_available_from_the_storefront(): void
+    {
+        $this->get(route('dashboard.guide'))
+            ->assertOk()
+            ->assertSee('راهنمای کار با پنل جانان')
+            ->assertSee('محصولات و واریانت‌ها')
+            ->assertSee('عکس خودِ بسته')
+            ->assertSee('از کجا شروع کنم؟');
     }
 
     public function test_homepage_contains_the_product_carousel_and_rotation_data(): void
@@ -86,7 +97,16 @@ class StoreFrontendTest extends TestCase
                 ->assertSee('data-product-next', false)
                 ->assertSee('دیدن بیشتر محصولات')
                 ->assertSee('محصول تست 1')
-                ->assertSee('محصول تست 12');
+                ->assertSee('محصول تست 12')
+                ->assertDontSee('رنگ نامشخص')
+                ->assertDontSee('سایز نامشخص');
+
+            $this->get(route('products.index'))
+                ->assertOk()
+                ->assertSee('نمایش 1 تا 6', false)
+                ->assertSee('store-pagination__inner', false)
+                ->assertSee('صفحه بعدی')
+                ->assertDontSee('Showing');
         } finally {
             Model::preventLazyLoading(false);
         }

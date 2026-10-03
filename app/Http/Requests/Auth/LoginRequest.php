@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Auth;
 
+use App\Support\IranianMobileNumber;
 use Illuminate\Foundation\Http\FormRequest;
 
 class LoginRequest extends FormRequest
@@ -15,8 +16,8 @@ class LoginRequest extends FormRequest
     {
         $data = [];
 
-        if (is_string($this->input('identifier'))) {
-            $data['identifier'] = trim($this->input('identifier'));
+        if (is_string($this->input('phone'))) {
+            $data['phone'] = IranianMobileNumber::normalize($this->input('phone'));
         }
 
         if ($this->has('remember')) {
@@ -31,11 +32,11 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'identifier' => [
+            'phone' => [
                 'bail',
                 'required',
                 'string',
-                'max:255',
+                'regex:/^09\d{9}$/',
             ],
             'password' => [
                 'bail',
@@ -52,8 +53,8 @@ class LoginRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'identifier.required' => 'وارد کردن :attribute الزامی است.',
-            'identifier.max' => 'مقدار :attribute بیش از حد مجاز است.',
+            'phone.required' => 'وارد کردن :attribute الزامی است.',
+            'phone.regex' => 'شماره موبایل معتبر وارد کنید.',
             'password.required' => 'وارد کردن :attribute الزامی است.',
             'password.string' => ':attribute نامعتبر است.',
         ];
@@ -62,7 +63,7 @@ class LoginRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'identifier' => 'ایمیل یا نام کاربری',
+            'phone' => 'شماره موبایل',
             'password' => 'رمز عبور',
             'remember' => 'مرا به خاطر بسپار',
         ];

@@ -22,7 +22,7 @@ class PaymentArchitectureTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_cheque_requires_approved_wholesale_and_explicit_permission(): void
+    public function test_cheque_requires_explicit_customer_permission(): void
     {
         $customer = User::factory()->create();
 
@@ -43,6 +43,26 @@ class PaymentArchitectureTest extends TestCase
         } catch (HttpException $e) {
             $this->assertSame(403, $e->getStatusCode());
         }
+    }
+
+    public function test_approved_cheque_permission_works_without_wholesale_profile(): void
+    {
+        $customer = User::factory()->create();
+        ChequePermission::create([
+            'user_id' => $customer->id,
+            'enabled' => true,
+            'approved_at' => now(),
+        ]);
+        $order = $this->orderFor($customer, 100000);
+
+        $payment = app(ChequePaymentService::class)->submit($order, $customer, [
+                'sayad_id' => '1234567890123456',
+                'bank_name' => 'Test Bank',
+                'due_date' => now()->addDays(10)->toDateString(),
+            ]);
+
+        $this->assertSame('cheque', $payment->gateway);
+        $this->assertDatabaseMissing('wholesale_profiles', ['user_id' => $customer->id]);
     }
 
     public function test_wholesale_page_is_public(): void
@@ -79,12 +99,6 @@ class PaymentArchitectureTest extends TestCase
     public function test_approved_customer_can_submit_only_one_cheque_for_an_order(): void
     {
         $customer = User::factory()->create();
-
-        WholesaleProfile::create([
-            'user_id' => $customer->id,
-            'status' => 'approved',
-            'approved_at' => now(),
-        ]);
 
         ChequePermission::create([
             'user_id' => $customer->id,
@@ -164,7 +178,14 @@ class PaymentArchitectureTest extends TestCase
 
         $cheque = $order->fresh()->chequePayment;
 
-        $service->moveToReview($cheque->fresh());
+        try {
+            $service->moveToReview($cheque->fresh(), $customer);
+            $this->fail('Customers must not be able to move cheque payments through admin states.');
+        } catch (HttpException $e) {
+            $this->assertSame(403, $e->getStatusCode());
+        }
+
+        $service->moveToReview($cheque->fresh(), $admin);
         $this->assertSame('under_review', $cheque->fresh()->status);
 
         $service->accept($cheque->fresh(), $admin);
@@ -184,6 +205,38 @@ class PaymentArchitectureTest extends TestCase
             'reference_type' => Order::class,
             'reference_id' => $order->id,
         ]);
+    }
+
+    public function test_rejecting_a_cheque_cancels_the_order_and_fails_its_payment(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        $customer = User::factory()->create();
+        WholesaleProfile::create([
+            'user_id' => $customer->id,
+            'status' => 'approved',
+            'approved_at' => now(),
+        ]);
+        ChequePermission::create([
+            'user_id' => $customer->id,
+            'enabled' => true,
+            'approved_at' => now(),
+        ]);
+        $order = $this->orderFor($customer, 100000);
+        $service = app(ChequePaymentService::class);
+        $service->submit($order, $customer, [
+            'sayad_id' => '1234567890123456',
+            'bank_name' => 'Test Bank',
+            'due_date' => now()->addDays(10)->toDateString(),
+        ]);
+        $cheque = $order->fresh()->chequePayment;
+        $service->moveToReview($cheque, $admin);
+
+        $service->reject($cheque->fresh(), $admin, 'اطلاعات چک ناقص است.');
+
+        $this->assertSame('rejected', $cheque->fresh()->status);
+        $this->assertSame('cancelled', $order->fresh()->status);
+        $this->assertSame('failed', $order->fresh()->payment_status);
+        $this->assertSame('اطلاعات چک ناقص است.', $cheque->fresh()->review_note);
     }
 
     public function test_payment_idempotency_key_is_persisted(): void

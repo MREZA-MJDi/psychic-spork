@@ -20,7 +20,7 @@ class StoreProductController extends Controller
         $filters = $request->validated();
 
         $sort = $filters['sort'] ?? 'newest';
-        $perPage = (int) ($filters['per_page'] ?? 12);
+        $perPage = (int) ($filters['per_page'] ?? 6);
 
         $products = Product::query()
             ->active()
@@ -29,6 +29,7 @@ class StoreProductController extends Controller
                 'brand:id,name,slug',
                 'primaryActiveVariant',
                 'primaryGalleryMedia',
+                'activeVariants',
             ])
             ->when(
                 ! empty($filters['q']),
@@ -146,6 +147,7 @@ class StoreProductController extends Controller
                 'brand:id,name',
                 'primaryGalleryMedia',
                 'primaryActiveVariant',
+                'activeVariants',
             ])
             ->where(function ($query) use ($like) {
                 $query
@@ -211,6 +213,7 @@ class StoreProductController extends Controller
                 'brand:id,name,slug',
                 'primaryActiveVariant',
                 'primaryGalleryMedia',
+                'activeVariants',
             ])
             ->where('id', '!=', $product->id)
             ->when(
@@ -235,6 +238,7 @@ class StoreProductController extends Controller
                     'brand:id,name,slug',
                     'primaryActiveVariant',
                     'primaryGalleryMedia',
+                    'activeVariants',
                 ])
                 ->where('id', '!=', $product->id)
                 ->whereNotIn(
