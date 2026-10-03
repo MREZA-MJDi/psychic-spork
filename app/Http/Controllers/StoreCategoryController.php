@@ -16,8 +16,8 @@ class StoreCategoryController extends Controller
             'category:id,name,slug',
             'brand:id,name,slug',
             'primaryActiveVariant' => fn ($query) => $query->select([
-                'id','product_id','sku','price','sale_price','stock',
-                'low_stock_threshold','is_active','sort_order',
+                'product_variants.id','product_variants.product_id','product_variants.sku','product_variants.price','product_variants.sale_price','product_variants.stock',
+                'product_variants.low_stock_threshold','product_variants.is_active','product_variants.sort_order',
             ]),
             'primaryGalleryMedia' => fn ($query) => $query->select([
                 'id','mediable_id','mediable_type','collection','path','sort_order',
