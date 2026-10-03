@@ -77,7 +77,10 @@ class Product extends Model
     {
         return $this->morphOne(Media::class, 'mediable')->ofMany(
             ['sort_order' => 'min', 'id' => 'min'],
-            fn ($query) => $query->where('collection', 'gallery')
+            fn ($query) => $query
+                ->where('collection', 'gallery')
+                ->whereNotNull('path')
+                ->whereRaw("TRIM(path) <> ''")
         );
     }
 
