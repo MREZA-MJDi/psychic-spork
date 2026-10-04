@@ -864,6 +864,65 @@
             const itemOrArray = (item) => item;
             const gallery = new Gallery();
 
+            // Mobile touch contract:
+            // GSAP Draggable owns the canvas gesture, so provide an explicit
+            // tap path for cards. A tap is only accepted when the pointer
+            // travels less than the threshold; real drags remain untouched.
+            let mobileTapStart = null;
+            let mobileTapHandledUntil = 0;
+            const mobileTapQuery = window.matchMedia?.('(max-width: 820px)');
+
+            root.addEventListener('pointerdown', (event) => {
+                if (!mobileTapQuery?.matches || event.pointerType === 'mouse') return;
+
+                const item = event.target.closest?.('.immersive-grid-item');
+                if (!item || !root.contains(item)) {
+                    mobileTapStart = null;
+                    return;
+                }
+
+                mobileTapStart = {
+                    pointerId: event.pointerId,
+                    x: event.clientX,
+                    y: event.clientY,
+                    item,
+                };
+            }, true);
+
+            root.addEventListener('pointerup', (event) => {
+                if (!mobileTapQuery?.matches || event.pointerType === 'mouse') return;
+                if (!mobileTapStart || mobileTapStart.pointerId !== event.pointerId) return;
+
+                const start = mobileTapStart;
+                mobileTapStart = null;
+
+                const distance = Math.hypot(
+                    event.clientX - start.x,
+                    event.clientY - start.y
+                );
+
+                if (distance > 10 || gallery.zoom.active) return;
+
+                const model = gallery.items.find(
+                    (candidate) => candidate.element === start.item
+                );
+
+                if (!model) return;
+
+                event.preventDefault();
+                event.stopPropagation();
+                mobileTapHandledUntil = performance.now() + 450;
+                gallery.open(model);
+            }, true);
+
+            root.addEventListener('click', (event) => {
+                if (mobileTapHandledUntil > performance.now()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    mobileTapHandledUntil = 0;
+                }
+            }, true);
+
             left.addEventListener('click', (event) => {
                 if (event.target === left) gallery.close();
             });
