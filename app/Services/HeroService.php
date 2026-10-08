@@ -12,8 +12,10 @@ final class HeroService
 {
     public const MAX_SLIDES = 30;
 
-    private const VERSION_KEY = 'store:home:hero:products:version';
-    private const CACHE_PREFIX = 'store:home:hero:products:';
+    // Cache only request-independent slide data. URLs are kept relative so a request
+    // arriving through an old proxy/port can never poison the shared hero cache.
+    private const VERSION_KEY = 'store:home:hero:products:version:v2';
+    private const CACHE_PREFIX = 'store:home:hero:products:v2:';
     private const CACHE_TTL_MINUTES = 30;
 
     public function slides(): array
@@ -121,7 +123,7 @@ final class HeroService
                     'title' => $product->name,
                     'description' => Str::limit($description, 220),
                     'brand' => $product->brand?->name ?? 'JANAN',
-                    'url' => route('products.show', $product),
+                    'url' => route('products.show', $product, false),
                 ];
             })
             ->all();
