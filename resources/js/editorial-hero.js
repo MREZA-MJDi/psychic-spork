@@ -160,9 +160,10 @@
             grid.replaceChildren();
 
             slides.forEach((slide, index) => {
-                const item = document.createElement('a');
+                const item = document.createElement('button');
+                item.type = 'button';
                 item.className = 'immersive-grid-item';
-                item.href = slide.url || '#';
+                item.dataset.productUrl = slide.url || '';
                 item.style.position = 'relative';
                 item.style.inset = 'auto';
                 item.style.width = '100%';
@@ -333,6 +334,7 @@
                             }
 
                             event.preventDefault();
+                            event.stopPropagation();
 
                             this.open(model);
                         });
@@ -554,9 +556,10 @@
                 }
 
                 createOverlay(model) {
-                    const anchor = document.createElement('a');
+                    const anchor = document.createElement('button');
+                    anchor.type = 'button';
                     anchor.className = 'immersive-scaling-overlay';
-                    anchor.href = model.slide.url || '#';
+                    anchor.dataset.productUrl = model.slide.url || '';
                     anchor.setAttribute(
                         'aria-label',
                         (model.slide.title || 'محصول جانان') + ' — مشاهده محصول'
@@ -593,6 +596,24 @@
                     });
 
                     return anchor;
+                }
+
+                navigateToProduct(url) {
+                    if (!url) return;
+
+                    try {
+                        const targetUrl = new URL(url, window.location.origin);
+
+                        if (targetUrl.origin !== window.location.origin) {
+                            return;
+                        }
+
+                        window.location.assign(
+                            targetUrl.pathname + targetUrl.search + targetUrl.hash
+                        );
+                    } catch {
+                        return;
+                    }
                 }
 
                 open(model) {
@@ -642,6 +663,12 @@
                         onComplete: () => {
                             overlayAnchor.style.pointerEvents = 'auto';
                             overlay.classList.add('is-active');
+
+                            overlayAnchor.addEventListener('click', (event) => {
+                                event.preventDefault();
+                                event.stopPropagation();
+                                this.navigateToProduct(model.slide.url);
+                            }, { once: true });
 
                             window.gsap.fromTo(
                                 number,
@@ -928,6 +955,18 @@
             });
 
             right.addEventListener('click', () => gallery.close());
+
+            link.addEventListener('click', (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                gallery.navigateToProduct(link.href);
+            });
+
+            target.addEventListener('click', (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                gallery.navigateToProduct(target.href);
+            });
 
             close.addEventListener('click', (event) => {
                 event.preventDefault();
