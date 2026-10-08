@@ -90,4 +90,8 @@
     <script type="application/json" id="immersiveHeroData">
         @json($slides)
     </script>
+
+    {{-- The entire visual hero is a client-side gallery, so links must be
+         generated from the same APP_URL used by the current request. --}}
+
 </section>
