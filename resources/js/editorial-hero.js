@@ -604,10 +604,6 @@
                     try {
                         const targetUrl = new URL(url, window.location.origin);
 
-                        if (targetUrl.origin !== window.location.origin) {
-                            return;
-                        }
-
                         window.location.assign(
                             targetUrl.pathname + targetUrl.search + targetUrl.hash
                         );
