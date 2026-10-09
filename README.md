@@ -2,6 +2,9 @@
 
 This Laravel application contains an e-commerce storefront and a broad administration area. The current routes include product, product variant/media, brand, category, customer, order, inventory, financial, site-content, and account operations. This repository also contains cheque and wholesale-related controllers; consult the current routes and tests for exact behavior.
 
+## Dedicated admin dashboard
+The project includes its own dedicated administration dashboard for managing the store's operational modules. The current repository includes cheque- and wholesale-related code; consult the routes and tests for the exact behavior of each module.
+
 ## Stack
 - PHP `^8.2`, Laravel `^12.0`
 - Blade, Vite and Laravel's Eloquent ORM
