@@ -8,7 +8,7 @@
     <div>
         <h1 class="admin-page-head__title">مرکز کنترل نیلا / Holoo</h1>
         <p class="admin-page-head__text">
-            وضعیت واردسازی کاتالوگ نیلا / هلو. این صفحه فعلاً اتصال زنده یا بارگذاری فایل ندارد؛ فقط نگاشت‌هایی را نشان می‌دهد که Importer داخلی ساخته است.
+            این صفحه وضعیت نگاشت‌های ذخیره‌شده را نشان می‌دهد. دریافت زنده از سرویس Holoo از طریق دستور Artisan انجام می‌شود، نه از این صفحه.
         </p>
     </div>
 </div>
@@ -38,20 +38,23 @@
         <div>
             <h2 class="admin-card-title">مرز مالکیت داده</h2>
             <p class="admin-card-description">
-                Nila منبع داده‌های کاتالوگ است؛ Janan مالک Media و نحوه نمایش Store است.
+                Holoo منبع کاتالوگ، کد کالا، قیمت و موجودی است؛ Janan مالک محتوای فروشگاهی، وضعیت انتشار و Media است.
             </p>
-            <p class="admin-card-description">برای اجرای واردسازی ۲۰۰۰ محصول، ابتدا باید خروجی واقعی نیلا یا هلو و قالب فایل/فیلدهای آن مشخص شود. در این ریپو Adapter متصل به سرویس بیرونی یا ابزار بارگذاری CSV/XLSX وجود ندارد.</p>
+            <p class="admin-card-description">
+                اتصال HTTP و دستور دریافت داده آماده‌اند، اما قبل از اولین import باید NILA_* در فایل env تنظیم و واحد قیمت با داده واقعی Holoo تطبیق داده شود. ابتدا یک پیش‌نمایش بدون نوشتن در دیتابیس اجرا کن.
+            </p>
+            <p class="admin-card-description"><code>php artisan nila:sync-products --dry-run --limit=10</code></p>
         </div>
     </div>
 
     <div class="admin-form-grid">
         <div class="admin-card">
             <strong>Nila / Holoo</strong>
-            <p class="admin-muted">Importer داخلی داده نرمال‌شده را می‌پذیرد و نام، SKU، قیمت و موجودی را نگاشت می‌کند؛ قرارداد API و Adapter سرویس بیرونی هنوز متصل نیستند.</p>
+            <p class="admin-muted">نام کالا، شناسه ERP، کد/SKU، قیمت انتخابی و موجودی از سرویس خوانده می‌شوند. گروه‌های اصلی و فرعی در زمان import واقعی به دسته‌بندی‌های دارای Mapping تبدیل می‌شوند.</p>
         </div>
         <div class="admin-card">
             <strong>Janan</strong>
-            <p class="admin-muted">تصاویر، ویدئو، ترتیب گالری، Alt و ارائه فروشگاه در جانان مدیریت می‌شوند. فعلاً تصاویر محصول باید در پنل جانان بارگذاری شوند.</p>
+            <p class="admin-muted">تصاویر، ویدئو، ترتیب گالری، Alt، توضیحات فروشگاهی و وضعیت انتشار در جانان مدیریت می‌شوند. محصولات تازه‌وارد به‌طور پیش‌فرض غیرفعال هستند تا بعد از بررسی قیمت و بارگذاری تصویر منتشر شوند.</p>
         </div>
     </div>
 </div>
@@ -60,7 +63,7 @@
     <div class="admin-card-header">
         <div>
             <h2 class="admin-card-title">آخرین Mappingها</h2>
-            <p class="admin-card-description">این جدول وضعیت Catalog داخلی را نشان می‌دهد، نه اتصال زنده به API.</p>
+            <p class="admin-card-description">این جدول وضعیت داده‌های نگاشت‌شده در دیتابیس را نشان می‌دهد، نه وضعیت اتصال زنده به API.</p>
         </div>
     </div>
 
@@ -92,7 +95,7 @@
     @else
         <div class="admin-empty">
             <h3 class="admin-empty__title">هنوز Mapping ثبت نشده</h3>
-            <p class="admin-empty__text">Importer بعد از دریافت داده نرمال‌شده از Adapter، Mapping را ایجاد می‌کند.</p>
+            <p class="admin-empty__text">بعد از اجرای import آزمایشی و سپس واردسازی واقعی، نگاشت شناسه‌های Holoo و رکوردهای جانان اینجا نمایش داده می‌شود.</p>
         </div>
     @endif
 </div>
