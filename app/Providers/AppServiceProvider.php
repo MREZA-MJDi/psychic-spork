@@ -50,7 +50,12 @@ class AppServiceProvider extends ServiceProvider
                 ->by($identifier . '|' . $request->ip());
         });
 
-        $contactSettings = SiteSetting::contactValues();
+        // Composer's package:discover and other maintenance commands must not
+        // require a configured database or the cache table to bootstrap Laravel.
+        // Real HTTP requests and feature tests still read persisted site settings.
+        $contactSettings = ($this->app->runningInConsole() && ! $this->app->runningUnitTests())
+            ? []
+            : SiteSetting::contactValues();
 
         $brandNameFa = (string) config('app.store_name_fa', config('app.store_name', 'جانه جانان'));
         $brandNameLatin = (string) config('app.store_name_latin', 'Jane Janan');

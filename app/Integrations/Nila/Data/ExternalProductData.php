@@ -5,10 +5,12 @@ namespace App\Integrations\Nila\Data;
 final readonly class ExternalProductData
 {
     /**
-     * This is the normalized contract between Nila and Janan.
+     * Normalized data from an external catalog provider.
      *
-     * The HTTP/API response is intentionally not represented here. A Nila
-     * adapter can map whatever the real provider returns into this DTO later.
+     * Nullable fields mean the provider doesn't own or didn't supply that field.
+     * The importer uses this to preserve store-managed content during sync.
+     *
+     * @param array<int, ExternalVariantData> $variants
      */
     public function __construct(
         public string $externalId,
@@ -20,9 +22,9 @@ final readonly class ExternalProductData
         public ?array $attributes = null,
         public ?int $categoryId = null,
         public ?int $brandId = null,
-        public bool $isActive = true,
-        public bool $isFeatured = false,
-        public int $sortOrder = 0,
+        public ?bool $isActive = null,
+        public ?bool $isFeatured = null,
+        public ?int $sortOrder = null,
         public array $metadata = [],
     ) {
         if ($externalId === '') {
