@@ -141,7 +141,7 @@ class AdminProductController extends Controller
             'quality' => $quality,
             'sort' => $sort,
             'perPage' => $perPage,
-            'heroCount' => Product::query()->where('is_hero', true)->count(),
+            'heroCount' => Product::query()->where('is_active', true)->where('is_hero', true)->count(),
             'heroLimit' => HeroService::MAX_SLIDES,
             'categories' => $this->categories(),
             'brands' => $this->brands(),
@@ -165,7 +165,14 @@ class AdminProductController extends Controller
             if ($e->getMessage() === 'hero_limit') {
                 return back()->with(
                     'error',
-                    'حداکثر ' . HeroService::MAX_SLIDES . ' محصول می‌تواند همزمان در Hero صفحه اصلی باشد.'
+                    'حداکثر ' . HeroService::MAX_SLIDES . ' محصول فعال می‌تواند همزمان در Hero صفحه اصلی باشد.'
+                );
+            }
+
+            if ($e->getMessage() === 'hero_requires_active') {
+                return back()->with(
+                    'error',
+                    'برای نمایش محصول در Hero، ابتدا باید محصول را فعال و منتشر کنید.'
                 );
             }
 
