@@ -46,11 +46,10 @@
     <form method="POST" action="{{ route('admin.nila.imports.store') }}" enctype="multipart/form-data">
         @csrf
         <div class="admin-form-grid">
-            <div>
-                <label class="admin-label" for="nila-import-file">فایل خروجی نیلا / هلو</label>
+            <div class="admin-field">
+                <label for="nila-import-file">فایل خروجی نیلا / هلو</label>
                 <input
                     id="nila-import-file"
-                    class="admin-input"
                     type="file"
                     name="file"
                     accept=".xlsx,.csv,.txt"
@@ -58,12 +57,12 @@
                 >
                 <p class="admin-muted">فرمت مجاز: XLSX یا CSV، حداکثر ۱۰ مگابایت. فقط شیت اول فایل XLSX بررسی می‌شود.</p>
                 @error('file')
-                    <p class="admin-field-error">{{ $message }}</p>
+                    <div class="alert error">{{ $message }}</div>
                 @enderror
             </div>
         </div>
         <div class="admin-form-actions">
-            <button type="submit" class="admin-button admin-button--primary">بارگذاری و بررسی فایل</button>
+            <button type="submit" class="admin-btn admin-btn--secondary">بارگذاری و بررسی فایل</button>
         </div>
     </form>
 </div>
@@ -109,7 +108,7 @@
                 </tbody>
             </table>
         </div>
-        <div class="admin-pagination">{{ $batches->links() }}</div>
+        <div>{{ $batches->links() }}</div>
     @else
         <div class="admin-empty">
             <h3 class="admin-empty__title">هنوز فایلی بررسی نشده است</h3>
