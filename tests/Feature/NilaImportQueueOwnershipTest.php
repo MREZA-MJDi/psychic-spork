@@ -48,7 +48,7 @@ class NilaImportQueueOwnershipTest extends TestCase
         );
     }
 
-    public function test_import_exception_releases_only_the_execution_that_owns_the_batch(): void
+    public function test_import_exception_keeps_the_lease_for_retry_then_failed_job_releases_it(): void
     {
         Storage::fake('local');
         Storage::disk('local')->put('nila/previews/broken.json', '{ invalid');
@@ -79,6 +79,19 @@ class NilaImportQueueOwnershipTest extends TestCase
         } catch (\JsonException $exception) {
             $this->assertNotEmpty($exception->getMessage());
         }
+
+        $batch->refresh();
+        $this->assertSame('queued', $batch->status);
+        $this->assertSame(
+            'current-execution-token',
+            $batch->metadata['queue_token']
+        );
+
+        (new RunNilaSpreadsheetImport(
+            $batch->id,
+            5,
+            'current-execution-token'
+        ))->failed(new RuntimeException('Retry budget exhausted'));
 
         $batch->refresh();
         $this->assertSame('ready', $batch->status);
