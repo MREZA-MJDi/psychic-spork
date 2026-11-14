@@ -376,10 +376,30 @@ final class NilaSpreadsheetParser
             }
         }
 
+        foreach ($rows as &$record) {
+            $group = $groups[$record['product_code']] ?? null;
+
+            if ($group && $group['name_conflict']) {
+                $record['is_valid'] = false;
+                $record['errors'][] = 'نام پایه در ردیف‌های این کد محصول یکسان نیست.';
+            }
+        }
+        unset($record);
+
         foreach ($groups as &$group) {
-            if ($group['name_conflict']) {
-                $group['invalid_rows'] += $group['valid_rows'];
-                $group['valid_rows'] = 0;
+            $group['valid_rows'] = 0;
+            $group['invalid_rows'] = 0;
+
+            foreach ($rows as $record) {
+                if ($record['product_code'] !== $group['product_code']) {
+                    continue;
+                }
+
+                if ($record['is_valid']) {
+                    $group['valid_rows']++;
+                } else {
+                    $group['invalid_rows']++;
+                }
             }
         }
         unset($group);
