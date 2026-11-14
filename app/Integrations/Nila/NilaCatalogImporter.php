@@ -52,17 +52,19 @@ final class NilaCatalogImporter
     {
         $product = $this->resolveProduct($data);
 
+        $isNewProduct = ! $product->exists;
+
         $product->fill([
             'name' => $data->name,
             'slug' => $this->resolveSlug($data, $product),
-            'short_description' => $data->shortDescription,
-            'description' => $data->description,
-            'attributes' => $data->attributes,
-            'category_id' => $data->categoryId,
-            'brand_id' => $data->brandId,
-            'is_active' => $data->isActive,
-            'is_featured' => $data->isFeatured,
-            'sort_order' => $data->sortOrder,
+            'short_description' => $data->shortDescription ?? $product->short_description,
+            'description' => $data->description ?? $product->description,
+            'attributes' => $data->attributes ?? $product->attributes,
+            'category_id' => $data->categoryId ?? $product->category_id,
+            'brand_id' => $data->brandId ?? $product->brand_id,
+            'is_active' => $data->isActive ?? ($isNewProduct ? false : $product->is_active),
+            'is_featured' => $data->isFeatured ?? ($isNewProduct ? false : $product->is_featured),
+            'sort_order' => $data->sortOrder ?? ($isNewProduct ? 0 : $product->sort_order),
         ]);
         $product->save();
 
@@ -135,16 +137,18 @@ final class NilaCatalogImporter
 
         $previousStock = (int) ($variant->stock ?? 0);
 
+        $isNewVariant = ! $variant->exists;
+
         $variant->fill([
             'product_id' => $product->id,
             'sku' => $data->sku,
-            'size' => $data->size,
-            'color' => $data->color,
-            'color_code' => $data->colorCode,
+            'size' => $data->size ?? $variant->size,
+            'color' => $data->color ?? $variant->color,
+            'color_code' => $data->colorCode ?? $variant->color_code,
             'price' => $data->price,
-            'sale_price' => $data->salePrice,
-            'is_active' => $data->isActive,
-            'sort_order' => $data->sortOrder,
+            'sale_price' => $data->salePrice ?? $variant->sale_price,
+            'is_active' => $data->isActive ?? ($isNewVariant ? false : $variant->is_active),
+            'sort_order' => $data->sortOrder ?? ($isNewVariant ? 0 : $variant->sort_order),
         ]);
         $variant->save();
 

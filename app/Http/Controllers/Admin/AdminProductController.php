@@ -35,6 +35,23 @@ class AdminProductController extends Controller
             'missing-variant',
         ], true) ? $request->query('quality') : null;
 
+        $sort = in_array($request->query('sort'), [
+            'newest', 'oldest', 'name_asc', 'name_desc',
+            'price_asc', 'price_desc', 'stock_asc', 'stock_desc',
+        ], true) ? $request->query('sort') : 'newest';
+
+        $perPage = in_array((int) $request->query('per_page', 15), [15, 30, 50], true)
+            ? (int) $request->query('per_page', 15)
+            : 15;
+
+        $stockSubquery = ProductVariant::query()
+            ->selectRaw('COALESCE(stock, 0)')
+            ->whereColumn('product_id', 'products.id')
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->limit(1);
+
         $products = Product::query()
             ->with([
                 'category:id,name',
@@ -108,13 +125,22 @@ class AdminProductController extends Controller
                     };
                 }
             )
-            ->latest('updated_at')
-            ->paginate(15)
+            ->when($sort === 'oldest', fn ($query) => $query->orderBy('created_at')->orderBy('id'))
+            ->when($sort === 'name_asc', fn ($query) => $query->orderBy('name')->orderBy('id'))
+            ->when($sort === 'name_desc', fn ($query) => $query->orderByDesc('name')->orderBy('id'))
+            ->when($sort === 'price_asc', fn ($query) => $query->orderByEffectivePrice('asc'))
+            ->when($sort === 'price_desc', fn ($query) => $query->orderByEffectivePrice('desc'))
+            ->when($sort === 'stock_asc', fn ($query) => $query->orderBy($stockSubquery, 'asc')->orderBy('id'))
+            ->when($sort === 'stock_desc', fn ($query) => $query->orderBy($stockSubquery, 'desc')->orderBy('id'))
+            ->when($sort === 'newest', fn ($query) => $query->latest('updated_at')->latest('id'))
+            ->paginate($perPage)
             ->withQueryString();
 
         return view('admin.products.index', [
             'products' => $products,
             'quality' => $quality,
+            'sort' => $sort,
+            'perPage' => $perPage,
             'categories' => $this->categories(),
             'brands' => $this->brands(),
         ]);

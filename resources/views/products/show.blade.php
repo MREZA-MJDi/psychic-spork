@@ -160,7 +160,12 @@
                                 <div class="product-variant-visuals__grid">
                                     @foreach($variants as $variantOption)
                                         @php
-                                            $variantImage = $variantOption->primaryGalleryMedia?->url;
+                                            $variantMediaPath = $variantOption->primaryGalleryMedia?->path;
+                                            $variantImage = filled($variantMediaPath)
+                                                ? (preg_match('/^https?:\\/\\//i', $variantMediaPath)
+                                                    ? $variantMediaPath
+                                                    : route('store.media', ['path' => ltrim($variantMediaPath, '/')]))
+                                                : null;
                                             $variantColorCode = (string) ($variantOption->color_code ?? '');
                                             $variantSafeColor = preg_match('/^#[0-9A-Fa-f]{3,8}$/', $variantColorCode)
                                                 ? $variantColorCode

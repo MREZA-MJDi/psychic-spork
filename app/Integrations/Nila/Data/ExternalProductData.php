@@ -20,9 +20,9 @@ final readonly class ExternalProductData
         public ?array $attributes = null,
         public ?int $categoryId = null,
         public ?int $brandId = null,
-        public bool $isActive = true,
-        public bool $isFeatured = false,
-        public int $sortOrder = 0,
+        public ?bool $isActive = null,
+        public ?bool $isFeatured = null,
+        public ?int $sortOrder = null,
         public array $metadata = [],
     ) {
         if ($externalId === '') {
