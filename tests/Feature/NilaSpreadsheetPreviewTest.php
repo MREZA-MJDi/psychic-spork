@@ -110,6 +110,51 @@ class NilaSpreadsheetPreviewTest extends TestCase
         $this->assertSame(0, $batch->failed_groups);
     }
 
+    public function test_import_progresses_in_bounded_chunks_and_can_resume(): void
+    {
+        Storage::fake('local');
+
+        $admin = User::factory()->create(['is_admin' => true]);
+        $lines = [
+            'holooCode,holooName,holooRegularPrice,holooStockQuantity,holooCustomerCode',
+        ];
+
+        foreach (range(1, 6) as $number) {
+            $baseCode = '01020' . str_pad((string) $number, 2, '0', STR_PAD_LEFT);
+            $lines[] = $baseCode . '*1,محصول ' . $number . '-مشکی,100000,2,1';
+        }
+
+        $this->actingAs($admin)->post(
+            route('admin.nila.imports.store'),
+            ['file' => UploadedFile::fake()->createWithContent('six-products.csv', implode("\n", $lines))]
+        )->assertRedirect();
+
+        $batch = NilaImportBatch::query()->firstOrFail();
+
+        $this->actingAs($admin)->post(
+            route('admin.nila.imports.import', $batch),
+            ['batch_size' => 5]
+        )->assertRedirect();
+
+        $batch->refresh();
+        $this->assertSame('ready', $batch->status);
+        $this->assertSame(5, $batch->next_group_offset);
+        $this->assertSame(5, $batch->imported_groups);
+        $this->assertDatabaseCount('products', 5);
+
+        $this->actingAs($admin)->post(
+            route('admin.nila.imports.import', $batch),
+            ['batch_size' => 50]
+        )->assertRedirect();
+
+        $batch->refresh();
+        $this->assertSame('completed', $batch->status);
+        $this->assertSame(6, $batch->next_group_offset);
+        $this->assertSame(6, $batch->imported_groups);
+        $this->assertDatabaseCount('products', 6);
+        $this->assertDatabaseCount('product_variants', 6);
+    }
+
     public function test_blank_price_is_reported_as_invalid_and_is_not_converted_to_zero(): void
     {
         Storage::fake('local');
