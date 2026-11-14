@@ -85,8 +85,8 @@ final class NilaSpreadsheetParser
 
     private function readXlsx(string $path): array
     {
-        if (! class_exists(ZipArchive::class)) {
-            throw new RuntimeException('برای خواندن XLSX، افزونه PHP zip باید روی سرور فعال باشد.');
+        if (! class_exists(ZipArchive::class) || ! function_exists('simplexml_load_string')) {
+            throw new RuntimeException('برای خواندن XLSX، افزونه‌های PHP zip و simplexml باید روی سرور فعال باشند.');
         }
 
         $zip = new ZipArchive();
