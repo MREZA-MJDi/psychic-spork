@@ -37,19 +37,6 @@ class StoreProductController extends Controller
                 'media.path',
                 'media.sort_order',
             ]),
-            'activeVariants' => fn ($query) => $query->select([
-                'id',
-                'product_id',
-                'sku',
-                'size',
-                'color',
-                'price',
-                'sale_price',
-                'stock',
-                'low_stock_threshold',
-                'is_active',
-                'sort_order',
-            ]),
         ];
     }
 
@@ -73,6 +60,9 @@ class StoreProductController extends Controller
                 'updated_at',
             ])
             ->active()
+
+            ->withCatalogMetrics()
+
             ->with($this->catalogRelations())
             ->when(
                 ! empty($filters['q']),
@@ -304,6 +294,9 @@ class StoreProductController extends Controller
                 'updated_at',
             ])
             ->active()
+
+            ->withCatalogMetrics()
+
             ->with($this->catalogRelations())
             ->where('id', '!=', $product->id)
             ->when(
@@ -332,6 +325,9 @@ class StoreProductController extends Controller
                     'updated_at',
                 ])
                 ->active()
+
+                ->withCatalogMetrics()
+
                 ->with($this->catalogRelations())
                 ->where('id', '!=', $product->id)
                 ->whereNotIn(

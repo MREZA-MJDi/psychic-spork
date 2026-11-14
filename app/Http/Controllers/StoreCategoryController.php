@@ -22,10 +22,6 @@ class StoreCategoryController extends Controller
             'primaryGalleryMedia' => fn ($query) => $query->select([
                 'media.id','media.mediable_id','media.mediable_type','media.collection','media.path','media.sort_order',
             ]),
-            'activeVariants' => fn ($query) => $query->select([
-                'id','product_id','sku','size','color','price','sale_price',
-                'stock','low_stock_threshold','is_active','sort_order',
-            ]),
         ];
     }
 
@@ -70,6 +66,9 @@ class StoreCategoryController extends Controller
         $products = Product::query()
             ->select(['id','category_id','brand_id','name','slug','short_description','updated_at'])
             ->active()
+
+            ->withCatalogMetrics()
+
             ->with($this->catalogRelations())
             ->where('category_id', $category->id)
             ->when($sort === 'oldest', fn ($query) => $query->orderBy('updated_at')->orderBy('id'))
