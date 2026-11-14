@@ -167,7 +167,12 @@ class NilaSpreadsheetPreviewTest extends TestCase
 
         $this->assertDatabaseCount('products', 1);
         $this->assertDatabaseCount('product_variants', 1);
-        $this->assertSame(1, $existing->id);
+        $this->assertDatabaseHas('integration_mappings', [
+            'integration' => 'nila',
+            'entity_type' => \\App\\Models\\Product::class,
+            'entity_id' => $existing->id,
+            'external_id' => '0102001',
+        ]);
     }
 
     public function test_import_progresses_in_bounded_chunks_and_can_resume(): void
@@ -193,7 +198,7 @@ class NilaSpreadsheetPreviewTest extends TestCase
 
         $this->actingAs($admin)->post(
             route('admin.nila.imports.import', $batch),
-            ['batch_size' => 5]
+            ['batch_size' => 5, 'confirm_stock_snapshot' => 1]
         )->assertRedirect();
 
         $batch->refresh();
