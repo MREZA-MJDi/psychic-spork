@@ -109,8 +109,9 @@ final class NilaSpreadsheetParser
             $documentRelNs = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships';
             $packageRelNs = 'http://schemas.openxmlformats.org/package/2006/relationships';
 
-            $sheets = $workbook->children($officeNs)->sheets->children($officeNs);
-            $firstSheet = $sheets->sheet[0] ?? null;
+            $workbook->registerXPathNamespace('main', $officeNs);
+            $sheets = $workbook->xpath('/main:workbook/main:sheets/main:sheet') ?: [];
+            $firstSheet = $sheets[0] ?? null;
 
             if (! $firstSheet) {
                 throw new RuntimeException('هیچ Sheet قابل خواندنی در فایل پیدا نشد.');
@@ -119,7 +120,9 @@ final class NilaSpreadsheetParser
             $relationshipId = (string) $firstSheet->attributes($documentRelNs)['id'];
             $target = null;
 
-            foreach ($relations->children($packageRelNs)->Relationship as $relationship) {
+            $relations->registerXPathNamespace('rel', $packageRelNs);
+
+            foreach ($relations->xpath('/rel:Relationships/rel:Relationship') ?: [] as $relationship) {
                 if ((string) $relationship['Id'] === $relationshipId) {
                     $target = (string) $relationship['Target'];
                     break;
@@ -142,23 +145,36 @@ final class NilaSpreadsheetParser
 
             $sharedStrings = $this->readSharedStrings($zip, $officeNs);
             $sheet = $this->xml($sheetXml);
-            $sheetData = $sheet->children($officeNs)->sheetData;
+            $sheet->registerXPathNamespace('main', $officeNs);
+            $sheetDataNodes = $sheet->xpath('/main:worksheet/main:sheetData') ?: [];
+            $sheetData = $sheetDataNodes[0] ?? null;
+
+            if (! $sheetData) {
+                throw new RuntimeException('بخش SheetData در فایل اکسل پیدا نشد.');
+            }
+
             $rows = [];
 
-            foreach ($sheetData->children($officeNs)->row as $row) {
+            foreach ($sheetData->xpath('./main:row') ?: [] as $row) {
+                $row->registerXPathNamespace('main', $officeNs);
                 $cells = [];
 
-                foreach ($row->children($officeNs)->c as $cell) {
-                    $reference = (string) $cell['r'];
+                foreach ($row->xpath('./main:c') ?: [] as $cell) {
+                    $cell->registerXPathNamespace('main', $officeNs);
+                    $attributes = $cell->attributes();
+                    $reference = (string) ($attributes['r'] ?? '');
                     $column = $this->columnIndex($reference);
-                    $type = (string) $cell['t'];
+                    $type = (string) ($attributes['t'] ?? '');
                     $value = '';
 
                     if ($type === 'inlineStr') {
-                        $inline = $cell->children($officeNs)->is;
-                        $value = $this->collectText($inline, $officeNs);
+                        $inlineNodes = $cell->xpath('./main:is') ?: [];
+                        $value = isset($inlineNodes[0])
+                            ? $this->collectText($inlineNodes[0], $officeNs)
+                            : '';
                     } else {
-                        $rawValue = (string) ($cell->children($officeNs)->v ?? '');
+                        $valueNodes = $cell->xpath('./main:v') ?: [];
+                        $rawValue = isset($valueNodes[0]) ? (string) $valueNodes[0] : '';
 
                         if ($type === 's') {
                             $value = $sharedStrings[(int) $rawValue] ?? '';
@@ -212,9 +228,10 @@ final class NilaSpreadsheetParser
         }
 
         $root = $this->xml($xml);
+        $root->registerXPathNamespace('main', $namespace);
         $strings = [];
 
-        foreach ($root->children($namespace)->si as $item) {
+        foreach ($root->xpath('/main:sst/main:si') ?: [] as $item) {
             $strings[] = $this->collectText($item, $namespace);
         }
 
@@ -223,14 +240,11 @@ final class NilaSpreadsheetParser
 
     private function collectText(SimpleXMLElement $element, string $namespace): string
     {
+        $element->registerXPathNamespace('main', $namespace);
         $text = '';
 
-        foreach ($element->children($namespace) as $child) {
-            if ($child->getName() === 't') {
-                $text .= (string) $child;
-            } else {
-                $text .= $this->collectText($child, $namespace);
-            }
+        foreach ($element->xpath('.//main:t') ?: [] as $textNode) {
+            $text .= (string) $textNode;
         }
 
         return $text;
