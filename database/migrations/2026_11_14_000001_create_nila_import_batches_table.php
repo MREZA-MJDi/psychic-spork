@@ -18,6 +18,9 @@ return new class extends Migration
             $table->unsignedInteger('valid_rows')->default(0);
             $table->unsignedInteger('invalid_rows')->default(0);
             $table->unsignedInteger('product_groups')->default(0);
+            $table->unsignedInteger('next_group_offset')->default(0);
+            $table->unsignedInteger('imported_groups')->default(0);
+            $table->unsignedInteger('failed_groups')->default(0);
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->json('metadata')->nullable();
             $table->timestamps();
