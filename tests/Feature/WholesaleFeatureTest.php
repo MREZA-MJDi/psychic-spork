@@ -193,7 +193,7 @@ class WholesaleFeatureTest extends TestCase
         Config::set('payment.zarinpal.merchant_id', 'test-merchant');
 
         Http::fake([
-            'https://api.zarinpal.com/pg/v4/payment/request.json' =>
+            config('payment.zarinpal.request_url') =>
                 Http::response([
                     'data' => [
                         'code' => 100,
@@ -247,7 +247,7 @@ class WholesaleFeatureTest extends TestCase
         Config::set('payment.zarinpal.merchant_id', 'test-merchant');
 
         Http::fake([
-            'https://api.zarinpal.com/pg/v4/payment/request.json' =>
+            config('payment.zarinpal.request_url') =>
                 Http::response([
                     'data' => [
                         'code' => 100,
@@ -301,7 +301,7 @@ class WholesaleFeatureTest extends TestCase
         Config::set('payment.zarinpal.merchant_id', 'test-merchant');
 
         Http::fake([
-            'https://api.zarinpal.com/pg/v4/payment/request.json' =>
+            config('payment.zarinpal.request_url') =>
                 Http::response([
                     'data' => [
                         'code' => 100,
@@ -457,7 +457,7 @@ class WholesaleFeatureTest extends TestCase
         Config::set('payment.zarinpal.merchant_id', 'test-merchant');
 
         Http::fake([
-            'https://api.zarinpal.com/pg/v4/payment/request.json' =>
+            config('payment.zarinpal.request_url') =>
                 Http::response([
                     'data' => [
                         'code' => 100,
