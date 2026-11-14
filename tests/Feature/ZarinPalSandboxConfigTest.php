@@ -69,6 +69,10 @@ class ZarinPalSandboxConfigTest extends TestCase
                 'https://payment.zarinpal.com/pg/v4/payment/request.json',
                 $config['zarinpal']['request_url']
             );
+            $this->assertSame(
+                'https://www.zarinpal.com/pg/StartPay',
+                $config['zarinpal']['startpay_url']
+            );
         } finally {
             if ($hadEnv) {
                 $_ENV['ZARINPAL_SANDBOX'] = $originalEnv;
