@@ -40,11 +40,11 @@ class AdminHeroTest extends TestCase
             ->assertSee($product->name);
     }
 
-    public function test_product_hero_selection_is_capped_at_thirty_products(): void
+    public function test_product_hero_selection_is_capped_at_thirty_six_products(): void
     {
         $admin = User::factory()->create(['is_admin' => true]);
 
-        $products = Product::factory()->count(30)->create([
+        $products = Product::factory()->count(36)->create([
             'is_active' => true,
             'is_hero' => true,
         ]);
@@ -66,8 +66,24 @@ class AdminHeroTest extends TestCase
         ]);
 
         $this->assertSame(
-            30,
+            36,
             Product::query()->where('is_hero', true)->count()
         );
+
+    public function test_homepage_can_render_thirty_six_hero_products(): void
+    {
+        Product::factory()->count(36)->create([
+            'is_active' => true,
+            'is_hero' => true,
+        ]);
+
+        $response = $this->get(route('home'));
+
+        $response->assertOk()->assertViewHas('heroSlides', function (array $slides): bool {
+            return count($slides) === 36
+                && $slides[0]['number'] === '01'
+                && $slides[35]['number'] === '36';
+        });
+    }
     }
 }
