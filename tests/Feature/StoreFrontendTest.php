@@ -336,6 +336,10 @@ class StoreFrontendTest extends TestCase
             $this->get(route('home'))
                 ->assertOk()
                 ->assertSee($imageUrl, false);
+
+            $this->get(route('products.show', $product))
+                ->assertOk()
+                ->assertSee($imageUrl, false);
         } finally {
             Model::preventLazyLoading(false);
         }
