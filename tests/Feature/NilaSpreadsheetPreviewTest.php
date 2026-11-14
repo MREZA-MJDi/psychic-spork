@@ -169,7 +169,7 @@ class NilaSpreadsheetPreviewTest extends TestCase
         $this->assertDatabaseCount('product_variants', 1);
         $this->assertDatabaseHas('integration_mappings', [
             'integration' => 'nila',
-            'entity_type' => \\App\\Models\\Product::class,
+            'entity_type' => \App\Models\Product::class,
             'entity_id' => $existing->id,
             'external_id' => '0102001',
         ]);
