@@ -104,10 +104,12 @@
 <div class="admin-card">
     <h2 class="admin-card-title">نمونه ردیف‌های فایل</h2>
     <p class="admin-card-description">حداکثر ۱۰۰ ردیف اول نمایش داده می‌شود. قیمت خالی خطا محسوب می‌شود و هرگز به صفر تبدیل نمی‌شود.</p>
-    @if($batch->imported_groups === 0 && $batch->failed_groups === 0)
-        <p class="admin-muted">وضعیت فعلی: فقط پیش‌نمایش؛ هنوز هیچ محصولی وارد دیتابیس نشده است.</p>
+    @if($batch->imported_groups > 0)
+        <p class="admin-muted">نتیجه Import در این گزارش نگهداری می‌شود و گروه‌های موفق در جدول‌های اصلی کاتالوگ ثبت شده‌اند.</p>
+    @elseif($batch->failed_groups > 0)
+        <p class="admin-muted">گروه‌ها بررسی شدند اما هیچ محصولی ثبت نشد؛ ردیف‌های دارای خطا را اصلاح و فایل را دوباره بارگذاری کنید.</p>
     @else
-        <p class="admin-muted">این گزارش همراه با نتیجه اجرای Import نگهداری می‌شود؛ اطلاعات محصول در جدول‌های اصلی کاتالوگ ثبت شده‌اند.</p>
+        <p class="admin-muted">وضعیت فعلی: فقط پیش‌نمایش؛ هنوز هیچ محصولی وارد دیتابیس نشده است.</p>
     @endif
     <div class="admin-table-wrap">
         <table class="admin-table">
