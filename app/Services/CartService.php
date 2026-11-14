@@ -68,6 +68,8 @@ final class CartService
                 return $cart->fresh();
             }
 
+            $cartItemCount = (int) $cart->items()->count();
+
             foreach ($guest->items as $guestItem) {
                 $variant = ProductVariant::query()
                     ->with('product')
@@ -94,8 +96,8 @@ final class CartService
 
                 $quantity = min(
                     (int) $variant->stock,
-                    (int) ($existing?->quantity ?? 0)
-                    + (int) $guestItem->quantity
+                    self::MAX_QUANTITY_PER_ITEM,
+                    (int) ($existing?->quantity ?? 0) + (int) $guestItem->quantity
                 );
 
                 if ($quantity < 1) {
@@ -107,10 +109,15 @@ final class CartService
                         'quantity' => $quantity,
                     ]);
                 } else {
+                    if ($cartItemCount >= self::MAX_ITEMS) {
+                        continue;
+                    }
+
                     $cart->items()->create([
                         'product_variant_id' => $variant->id,
                         'quantity' => $quantity,
                     ]);
+                    $cartItemCount++;
                 }
             }
 
@@ -147,7 +154,8 @@ final class CartService
 
                 $quantity = min(
                     (int) $item->quantity,
-                    (int) $variant->stock
+                    (int) $variant->stock,
+                    self::MAX_QUANTITY_PER_ITEM
                 );
 
                 if ($quantity < 1) {
@@ -187,11 +195,6 @@ final class CartService
             422,
             'تعداد محصول باید حداقل یک عدد باشد.'
         );
-        abort_if(
-            $quantity > self::MAX_QUANTITY_PER_ITEM,
-            422,
-            'حداکثر تعداد مجاز برای هر تنوع ۹۹ عدد است.'
-        );
 
         DB::transaction(function () use (
             $cart,
@@ -217,12 +220,6 @@ final class CartService
                 + $quantity;
 
             abort_if(
-                $newQuantity > self::MAX_QUANTITY_PER_ITEM,
-                422,
-                'حداکثر تعداد مجاز برای هر تنوع ۹۹ عدد است.'
-            );
-
-            abort_if(
                 $newQuantity > $variant->stock,
                 422,
                 "حداکثر تعداد قابل سفارش از «{$variant->product->name}» {$variant->stock} عدد است."
@@ -233,12 +230,6 @@ final class CartService
                     'quantity' => $newQuantity,
                 ]);
             } else {
-                abort_if(
-                    $cart->items()->count() >= self::MAX_ITEMS,
-                    422,
-                    'سبد خرید نمی‌تواند بیش از ۱۰۰ تنوع متفاوت داشته باشد.'
-                );
-
                 $cart->items()->create([
                     'product_variant_id' => $variant->id,
                     'quantity' => $quantity,
@@ -263,12 +254,6 @@ final class CartService
 
             return;
         }
-
-        abort_if(
-            $quantity < 0 || $quantity > self::MAX_QUANTITY_PER_ITEM,
-            422,
-            'تعداد هر تنوع باید بین ۱ تا ۹۹ باشد.'
-        );
 
         DB::transaction(function () use (
             $cart,
@@ -348,6 +333,8 @@ final class CartService
         DB::transaction(function () use ($cart, $order): void {
             $order->load('items');
 
+            $cartItemCount = (int) $cart->items()->count();
+
             foreach ($order->items as $orderItem) {
                 $variant = ProductVariant::query()
                     ->lockForUpdate()
@@ -371,8 +358,8 @@ final class CartService
 
                 $quantity = min(
                     (int) $variant->stock,
-                    (int) ($existing?->quantity ?? 0)
-                    + (int) $orderItem->quantity
+                    self::MAX_QUANTITY_PER_ITEM,
+                    (int) ($existing?->quantity ?? 0) + (int) $orderItem->quantity
                 );
 
                 if ($quantity < 1) {
@@ -384,10 +371,15 @@ final class CartService
                         'quantity' => $quantity,
                     ]);
                 } else {
+                    if ($cartItemCount >= self::MAX_ITEMS) {
+                        continue;
+                    }
+
                     $cart->items()->create([
                         'product_variant_id' => $variant->id,
                         'quantity' => $quantity,
                     ]);
+                    $cartItemCount++;
                 }
             }
 
