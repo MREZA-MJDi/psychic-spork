@@ -105,6 +105,36 @@ class AdminNilaController extends Controller
             ->with('success', 'فایل با موفقیت بررسی اولیه شد؛ هنوز هیچ محصولی وارد دیتابیس نشده است.');
     }
 
+    public function importNext(
+        Request $request,
+        NilaImportBatch $batch,
+        NilaSpreadsheetImportService $service
+    ): RedirectResponse {
+        $validated = $request->validate([
+            'batch_size' => ['nullable', 'integer', 'min:1', 'max:50'],
+        ]);
+
+        try {
+            $result = $service->importNext($batch, (int) ($validated['batch_size'] ?? 5));
+        } catch (RuntimeException $exception) {
+            return back()->with('error', $exception->getMessage());
+        } catch (Throwable $exception) {
+            report($exception);
+
+            return back()->with('error', 'اجرای این مرحله کامل نشد؛ وضعیت فایل برای تلاش دوباره حفظ شد.');
+        }
+
+        return back()->with(
+            'success',
+            sprintf(
+                'این مرحله تمام شد: %d گروه بررسی شد، %d گروه ثبت شد و %d گروه به‌دلیل خطا کنار گذاشته شد.',
+                $result['processed'],
+                $result['imported'],
+                $result['failed']
+            )
+        );
+    }
+
     public function showImport(
         NilaImportBatch $batch,
         NilaSpreadsheetParser $parser
