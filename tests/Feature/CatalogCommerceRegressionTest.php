@@ -165,7 +165,7 @@ class CatalogCommerceRegressionTest extends TestCase
         $old = $media->attach(
             $product,
             'gallery',
-            UploadedFile::fake()->image('old.png', 600, 600),
+            UploadedFile::fake()->create('old.png', 10, 'image/png'),
             'products',
             'Old image'
         );
@@ -175,7 +175,7 @@ class CatalogCommerceRegressionTest extends TestCase
         $new = $media->replace(
             $product,
             'gallery',
-            UploadedFile::fake()->image('new.png', 700, 700),
+            UploadedFile::fake()->create('new.png', 12, 'image/png'),
             'products',
             'New image'
         );
