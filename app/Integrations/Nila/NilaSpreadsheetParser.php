@@ -98,7 +98,7 @@ final class NilaSpreadsheetParser
             $workbookXml = $this->readZipEntry($zip, 'xl/workbook.xml', 1_000_000);
             $relationsXml = $this->readZipEntry($zip, 'xl/_rels/workbook.xml.rels', 1_000_000);
 
-            if ($workbookXml === false || $relationsXml === false) {
+            if ($workbookXml === null || $workbookXml === '' || $relationsXml === null || $relationsXml === '') {
                 throw new RuntimeException('ساختار داخلی فایل XLSX ناقص است.');
             }
 
@@ -136,7 +136,7 @@ final class NilaSpreadsheetParser
 
             $sheetXml = $this->readZipEntry($zip, $sheetPath, 25_000_000);
 
-            if ($sheetXml === false) {
+            if ($sheetXml === null || $sheetXml === '') {
                 throw new RuntimeException('محتوای Worksheet قابل خواندن نیست.');
             }
 
@@ -207,7 +207,7 @@ final class NilaSpreadsheetParser
     {
         $xml = $this->readZipEntry($zip, 'xl/sharedStrings.xml', 10_000_000);
 
-        if ($xml === false) {
+        if ($xml === null || $xml === '') {
             return [];
         }
 

@@ -27,11 +27,11 @@ final class NilaSpreadsheetImportService
      *
      * @return array{processed: int, imported: int, failed: int, next_offset: int, completed: bool}
      */
-    public function importNext(NilaImportBatch $batch, int $limit = 5): array
+    public function importNext(NilaImportBatch $batch, int $limit = 5, ?string $queueToken = null): array
     {
         $limit = max(1, min(50, $limit));
 
-        $state = DB::transaction(function () use ($batch): array {
+        $state = DB::transaction(function () use ($batch, $queueToken): array {
             $locked = NilaImportBatch::query()
                 ->lockForUpdate()
                 ->findOrFail($batch->id);
@@ -40,11 +40,29 @@ final class NilaSpreadsheetImportService
                 throw new RuntimeException('این فایل قبلاً به پایان رسیده است.');
             }
 
-            if (
-                $locked->status === 'processing'
-                && $locked->updated_at?->greaterThan(now()->subMinutes(15))
-            ) {
-                throw new RuntimeException('این فایل در حال پردازش است؛ کمی بعد دوباره تلاش کنید.');
+            $metadata = $locked->metadata ?? [];
+
+            if ($queueToken !== null) {
+                $storedToken = (string) ($metadata['queue_token'] ?? '');
+
+                if (
+                    $locked->status !== 'queued'
+                    || $storedToken === ''
+                    || ! hash_equals($storedToken, $queueToken)
+                ) {
+                    return ['skip' => true];
+                }
+            } else {
+                if ($locked->status === 'queued') {
+                    throw new RuntimeException('این فایل در صف اجرا قرار دارد.');
+                }
+
+                if (
+                    $locked->status === 'processing'
+                    && $locked->updated_at?->greaterThan(now()->subMinutes(15))
+                ) {
+                    throw new RuntimeException('این فایل در حال پردازش است؛ کمی بعد دوباره تلاش کنید.');
+                }
             }
 
             $locked->update(['status' => 'processing']);
@@ -53,13 +71,38 @@ final class NilaSpreadsheetImportService
                 'disk' => $locked->disk,
                 'path' => $locked->file_path,
                 'offset' => $locked->next_group_offset,
-                'metadata' => $locked->metadata ?? [],
+                'metadata' => $metadata,
+                'skip' => false,
             ];
         });
 
+        if ($state['skip'] ?? false) {
+            return [
+                'processed' => 0,
+                'imported' => 0,
+                'failed' => 0,
+                'next_offset' => (int) $batch->next_group_offset,
+                'completed' => false,
+                'skipped' => true,
+            ];
+        }
+
         try {
-            $file = Storage::disk($state['disk'])->path($state['path']);
-            $parsed = $this->parser->parse($file);
+            $previewPath = $state['metadata']['preview_path'] ?? null;
+            if (is_string($previewPath) && $previewPath !== '' && Storage::disk('local')->exists($previewPath)) {
+                $parsed = json_decode(
+                    Storage::disk('local')->get($previewPath),
+                    true,
+                    512,
+                    JSON_THROW_ON_ERROR
+                );
+                if (! is_array($parsed) || ! isset($parsed['rows'], $parsed['groups'])) {
+                    throw new RuntimeException('فایل پیش‌نمایش ذخیره‌شده معتبر نیست.');
+                }
+            } else {
+                $file = Storage::disk($state['disk'])->path($state['path']);
+                $parsed = $this->parser->parse($file);
+            }
             $groups = $parsed['groups'];
             $totalGroups = count($groups);
             $offset = (int) $state['offset'];
@@ -161,10 +204,21 @@ final class NilaSpreadsheetImportService
                 'completed' => $completed,
             ];
         } catch (Throwable $exception) {
-            NilaImportBatch::query()
-                ->whereKey($batch->id)
-                ->where('status', 'processing')
-                ->update(['status' => 'ready', 'updated_at' => now()]);
+            DB::transaction(function () use ($batch): void {
+                $locked = NilaImportBatch::query()
+                    ->lockForUpdate()
+                    ->find($batch->id);
+
+                if ($locked && $locked->status === 'processing') {
+                    $metadata = $locked->metadata ?? [];
+                    unset($metadata['queue_token']);
+
+                    $locked->update([
+                        'status' => 'ready',
+                        'metadata' => $metadata,
+                    ]);
+                }
+            });
 
             throw $exception;
         }
@@ -193,6 +247,7 @@ final class NilaSpreadsheetImportService
                 ->findOrFail($batchId);
 
             $metadata = $batch->metadata ?? [];
+            unset($metadata['queue_token']);
             $existingFailures = $metadata['failed_products'] ?? [];
             $metadata['failed_products'] = array_slice(
                 array_merge($existingFailures, $failures),
