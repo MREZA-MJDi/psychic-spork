@@ -342,14 +342,20 @@ class AdminProductController extends Controller
                 $variantId = (int) ($data['variant_id']
                     ?? $product->variants()->orderBy('sort_order')->orderBy('id')->value('id'));
 
-                $variant = $product->variants()
-                    ->whereKey($variantId)
-                    ->lockForUpdate()
-                    ->first();
+                $variant = $variantId > 0
+                    ? $product->variants()
+                        ->whereKey($variantId)
+                        ->lockForUpdate()
+                        ->first()
+                    : null;
 
-                abort_unless($variant, 422, 'تنوع انتخاب‌شده متعلق به این محصول نیست.');
+                abort_if(
+                    $variantId > 0 && ! $variant,
+                    422,
+                    'تنوع انتخاب‌شده متعلق به این محصول نیست.'
+                );
 
-                if (!$variant) {
+                if (! $variant) {
                     $variant = $product->variants()->create([
                         'sku' => $data['sku'] ?? null,
                         'size' => $data['size'] ?? null,

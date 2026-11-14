@@ -170,8 +170,6 @@ class AdminNilaController extends Controller
             });
 
             RunNilaSpreadsheetImport::dispatch($batch->id, $limit, $token);
-        } catch (RuntimeException $exception) {
-            return back()->with('error', $exception->getMessage());
         } catch (Throwable $exception) {
             DB::transaction(function () use ($batch, $token): void {
                 $locked = NilaImportBatch::query()
@@ -195,9 +193,16 @@ class AdminNilaController extends Controller
                 ]);
             });
 
-            report($exception);
+            if (! $exception instanceof RuntimeException) {
+                report($exception);
+            }
 
-            return back()->with('error', 'قرار دادن مرحله Import در صف انجام نشد؛ فایل برای تلاش دوباره آماده شد.');
+            return back()->with(
+                'error',
+                $exception instanceof RuntimeException
+                    ? $exception->getMessage()
+                    : 'قرار دادن مرحله Import در صف انجام نشد؛ فایل برای تلاش دوباره آماده شد.'
+            );
         }
 
         return back()->with(
