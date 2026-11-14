@@ -153,6 +153,7 @@ final class NilaSpreadsheetParser
                 throw new RuntimeException('بخش SheetData در فایل اکسل پیدا نشد.');
             }
 
+            $sheetData->registerXPathNamespace('main', $officeNs);
             $rows = [];
 
             foreach ($sheetData->xpath('./main:row') ?: [] as $row) {
