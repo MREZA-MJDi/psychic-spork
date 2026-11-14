@@ -74,7 +74,6 @@ final class CartService
 
             $cartItemCount = (int) $cart->items()->count();
             $cartPackCount = (int) $cart->wholesalePacks()->count();
-            $cartPackCount = (int) $cart->wholesalePacks()->count();
 
             foreach ($guest->items as $guestItem) {
                 $variant = ProductVariant::query()
@@ -396,6 +395,7 @@ final class CartService
             $order->load(['items', 'wholesalePacks']);
 
             $cartItemCount = (int) $cart->items()->count();
+            $cartPackCount = (int) $cart->wholesalePacks()->count();
 
             foreach ($order->items->whereNull('wholesale_pack_order_id') as $orderItem) {
                 $variant = ProductVariant::query()
