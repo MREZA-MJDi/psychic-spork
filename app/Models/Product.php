@@ -101,12 +101,9 @@ class Product extends Model
         $direction = strtolower($direction) === 'desc' ? 'desc' : 'asc';
 
         $priceSubquery = ProductVariant::query()
-            ->selectRaw('COALESCE(sale_price, price)')
+            ->selectRaw('MIN(COALESCE(sale_price, price))')
             ->whereColumn('product_id', 'products.id')
-            ->where('is_active', true)
-            ->orderBy('sort_order')
-            ->orderBy('id')
-            ->limit(1);
+            ->where('is_active', true);
 
         return $query
             ->orderBy($priceSubquery, $direction)
@@ -115,6 +112,30 @@ class Product extends Model
 
     public function scopeActive($query) { return $query->where('is_active', true); }
     public function scopeFeatured($query) { return $query->where('is_featured', true); }
+
+    public function scopeWithCatalogMetrics($query)
+    {
+        $activeVariants = ProductVariant::query()
+            ->whereColumn('product_id', 'products.id')
+            ->where('is_active', true);
+
+        return $query->addSelect([
+            'active_variants_count' => (clone $activeVariants)->selectRaw('COUNT(*)'),
+            'active_variant_colors_count' => (clone $activeVariants)->selectRaw(
+                "COUNT(DISTINCT NULLIF(TRIM(color), ''))"
+            ),
+            'active_variant_sizes_count' => (clone $activeVariants)->selectRaw(
+                "COUNT(DISTINCT NULLIF(TRIM(size), ''))"
+            ),
+            'active_stock_total' => (clone $activeVariants)->selectRaw('COALESCE(SUM(stock), 0)'),
+            'minimum_effective_price' => (clone $activeVariants)->selectRaw(
+                'MIN(COALESCE(sale_price, price))'
+            ),
+            'maximum_effective_price' => (clone $activeVariants)->selectRaw(
+                'MAX(COALESCE(sale_price, price))'
+            ),
+        ]);
+    }
 
     public function scopeLowStock($query)
     {
