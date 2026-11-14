@@ -12,6 +12,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class WholesaleController extends Controller
 {
@@ -61,9 +62,22 @@ class WholesaleController extends Controller
     {
         $filters = $request->validate([
             'q' => ['nullable', 'string', 'max:120'],
-            'category_id' => ['nullable', 'integer', 'exists:categories,id'],
-            'brand_id' => ['nullable', 'integer', 'exists:brands,id'],
+            'category_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('categories', 'id')->where('is_active', true)->whereNull('deleted_at'),
+            ],
+            'brand_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('brands', 'id')->where('is_active', true)->whereNull('deleted_at'),
+            ],
+            'sort' => ['nullable', 'in:featured,newest,price_asc,price_desc,name_asc'],
+            'per_page' => ['nullable', 'integer', 'in:12,24,36'],
         ]);
+
+        $sort = $filters['sort'] ?? 'featured';
+        $perPage = (int) ($filters['per_page'] ?? 12);
 
         $products = Product::query()
             ->select([
@@ -72,9 +86,12 @@ class WholesaleController extends Controller
                 'brand_id',
                 'name',
                 'slug',
+                'is_featured',
+                'sort_order',
                 'updated_at',
             ])
             ->active()
+            ->withCatalogMetrics()
             ->whereHas('activeVariants', fn ($query) => $query->whereNotNull('wholesale_price'))
             ->withCount([
                 'activeVariants as wholesale_variants_count' => fn ($query) => $query
@@ -88,6 +105,10 @@ class WholesaleController extends Controller
                 'activeVariants as maximum_wholesale_price' => fn ($query) => $query
                     ->whereNotNull('wholesale_price'),
             ], 'wholesale_price')
+            ->withSum([
+                'activeVariants as wholesale_stock_total' => fn ($query) => $query
+                    ->whereNotNull('wholesale_price'),
+            ], 'stock')
             ->with([
                 'brand:id,name,slug',
                 'category:id,name,slug',
@@ -123,14 +144,18 @@ class WholesaleController extends Controller
                 $filters['brand_id'] ?? null,
                 fn ($query, int $brandId) => $query->where('brand_id', $brandId)
             )
-            ->orderByDesc('is_featured')
-            ->orderBy('sort_order')
-            ->orderBy('id')
-            ->paginate(12, ['*'], 'products_page')
+            ->when($sort === 'price_asc', fn ($query) => $query->orderBy('minimum_wholesale_price')->orderBy('id'))
+            ->when($sort === 'price_desc', fn ($query) => $query->orderByDesc('minimum_wholesale_price')->orderBy('id'))
+            ->when($sort === 'name_asc', fn ($query) => $query->orderBy('name')->orderBy('id'))
+            ->when($sort === 'newest', fn ($query) => $query->latest('updated_at')->latest('id'))
+            ->when($sort === 'featured', fn ($query) => $query->orderByDesc('is_featured')->orderBy('sort_order')->orderBy('id'))
+            ->paginate($perPage, ['*'], 'products_page')
             ->withQueryString();
 
         return view('pages.wholesale-catalog', [
             'products' => $products,
+            'sort' => $sort,
+            'perPage' => $perPage,
             'categories' => Category::query()
                 ->active()
                 ->select(['id', 'name'])
