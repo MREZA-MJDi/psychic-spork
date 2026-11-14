@@ -13,9 +13,6 @@ use Illuminate\Support\Facades\DB;
 
 final class CartService
 {
-    public const MAX_ITEMS = 100;
-    public const MAX_QUANTITY_PER_ITEM = 99;
-
     public function current(Request $request): Cart
     {
         if ($request->user()) {
@@ -190,6 +187,11 @@ final class CartService
             422,
             'تعداد محصول باید حداقل یک عدد باشد.'
         );
+        abort_if(
+            $quantity > self::MAX_QUANTITY_PER_ITEM,
+            422,
+            'حداکثر تعداد مجاز برای هر تنوع ۹۹ عدد است.'
+        );
 
         DB::transaction(function () use (
             $cart,
@@ -215,6 +217,12 @@ final class CartService
                 + $quantity;
 
             abort_if(
+                $newQuantity > self::MAX_QUANTITY_PER_ITEM,
+                422,
+                'حداکثر تعداد مجاز برای هر تنوع ۹۹ عدد است.'
+            );
+
+            abort_if(
                 $newQuantity > $variant->stock,
                 422,
                 "حداکثر تعداد قابل سفارش از «{$variant->product->name}» {$variant->stock} عدد است."
@@ -225,6 +233,12 @@ final class CartService
                     'quantity' => $newQuantity,
                 ]);
             } else {
+                abort_if(
+                    $cart->items()->count() >= self::MAX_ITEMS,
+                    422,
+                    'سبد خرید نمی‌تواند بیش از ۱۰۰ تنوع متفاوت داشته باشد.'
+                );
+
                 $cart->items()->create([
                     'product_variant_id' => $variant->id,
                     'quantity' => $quantity,
@@ -249,6 +263,12 @@ final class CartService
 
             return;
         }
+
+        abort_if(
+            $quantity < 0 || $quantity > self::MAX_QUANTITY_PER_ITEM,
+            422,
+            'تعداد هر تنوع باید بین ۱ تا ۹۹ باشد.'
+        );
 
         DB::transaction(function () use (
             $cart,
