@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Contracts\PaymentGateway;
 use App\Models\Cart;
+use Illuminate\Database\Eloquent\Model;
 use App\Models\SiteSetting;
 use App\Services\ZarinPalPaymentGateway;
 use App\Services\PaymentMethodManager;
@@ -43,6 +44,9 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // Catch accidental N+1 queries while developing locally; production remains unchanged.
+        Model::preventLazyLoading(app()->isLocal());
+
         RateLimiter::for('login', function (Request $request): Limit {
             $identifier = Str::lower(trim((string) $request->input('phone')));
 
