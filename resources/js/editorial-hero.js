@@ -48,7 +48,7 @@
         let slides = [];
         try {
             const payload = JSON.parse(data.textContent || '[]');
-            slides = Array.isArray(payload) ? payload.slice(0, 30) : [];
+            slides = Array.isArray(payload) ? payload.slice(0, 36) : [];
         } catch {
             slides = [];
         }

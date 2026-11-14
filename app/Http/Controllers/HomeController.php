@@ -91,13 +91,13 @@ class HomeController extends Controller
             ->featured()
             ->latest('updated_at')
             ->latest('id')
-            ->take(12)
+            ->take(36)
             ->get();
 
         $products = $featuredProducts;
 
-        if ($products->count() < 12) {
-            $remaining = 12 - $products->count();
+        if ($products->count() < 36) {
+            $remaining = 36 - $products->count();
 
             $latestProducts = (clone $productsQuery)
                 ->when(

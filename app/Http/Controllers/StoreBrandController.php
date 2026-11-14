@@ -40,7 +40,8 @@ class StoreBrandController extends Controller
             ])
             ->orderBy('name')
             ->orderBy('id')
-            ->get();
+            ->paginate(24)
+            ->withQueryString();
 
         return view('brands.index', [
             'seo' => $seo->page(

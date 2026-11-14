@@ -33,9 +33,10 @@
     </div>
 </div>
 
-<div class="admin-card">
+<div class="admin-card nila-panel nila-panel--upload">
     <div class="admin-card-header">
         <div>
+            <span class="nila-step-label">مرحله ۱ · دریافت و بررسی</span>
             <h2 class="admin-card-title">۱. بررسی فایل اکسل هولو</h2>
             <p class="admin-card-description">
                 فایل در فضای خصوصی سرور ذخیره می‌شود. در این مرحله فقط ساختار و داده‌ها خوانده می‌شوند و هیچ محصول، تنوع، دسته یا برندی در کاتالوگ ساخته یا ویرایش نمی‌شود.
@@ -43,11 +44,12 @@
         </div>
     </div>
 
-    <form method="POST" action="{{ route('admin.nila.imports.store') }}" enctype="multipart/form-data">
+    <form class="nila-upload-form" method="POST" action="{{ route('admin.nila.imports.store') }}" enctype="multipart/form-data">
         @csrf
         <div class="admin-form-grid">
-            <div class="admin-field">
+            <div class="admin-field nila-file-field">
                 <label for="nila-import-file">فایل خروجی نیلا / هلو</label>
+                <div class="nila-file-help">فایل خروجی را انتخاب کن تا فقط پیش‌نمایش و اعتبارسنجی انجام شود.</div>
                 <input
                     id="nila-import-file"
                     type="file"
@@ -55,21 +57,23 @@
                     accept=".xlsx,.csv,.txt"
                     required
                 >
-                <p class="admin-muted">فرمت مجاز: XLSX یا CSV، حداکثر ۱۰ مگابایت. فقط شیت اول فایل XLSX بررسی می‌شود.</p>
+                <p class="admin-muted nila-file-hint">فرمت مجاز: XLSX یا CSV · حداکثر ۱۰ مگابایت · فقط شیت اول XLSX بررسی می‌شود.</p>
                 @error('file')
                     <div class="alert error">{{ $message }}</div>
                 @enderror
             </div>
         </div>
-        <div class="admin-form-actions">
-            <button type="submit" class="admin-btn admin-btn--secondary">بارگذاری و بررسی فایل</button>
+        <div class="admin-form-actions nila-upload-actions">
+            <span class="nila-safe-note">بارگذاری فایل به‌تنهایی هیچ محصولی را ثبت یا تغییر نمی‌دهد.</span>
+            <button type="submit" class="admin-btn admin-btn--secondary">بارگذاری و ساخت پیش‌نمایش</button>
         </div>
     </form>
 </div>
 
-<div class="admin-card">
+<div class="admin-card nila-panel nila-panel--history">
     <div class="admin-card-header">
         <div>
+            <span class="nila-step-label">مرحله ۲ · پیگیری فایل‌ها</span>
             <h2 class="admin-card-title">۲. تاریخچه بررسی فایل‌ها</h2>
             <p class="admin-card-description">هر فایل یک شناسه مستقل دارد تا بررسی‌ها قابل پیگیری باشند.</p>
         </div>
@@ -77,7 +81,7 @@
 
     @if($batches->count() > 0)
         <div class="admin-table-wrap">
-            <table class="admin-table">
+            <table class="admin-table nila-table">
                 <thead>
                 <tr>
                     <th>نام فایل</th>
@@ -131,30 +135,32 @@
     @endif
 </div>
 
-<div class="admin-card">
+<div class="admin-card nila-panel nila-panel--ownership">
     <div class="admin-card-header">
         <div>
+            <span class="nila-step-label">قواعد همگام‌سازی</span>
             <h2 class="admin-card-title">مرز مالکیت اطلاعات</h2>
             <p class="admin-card-description">
                 اطلاعات کاتالوگ و موجودی از نیلا / هلو می‌آیند؛ تصاویر، محتوای نمایشی، توضیحات تکمیلی و انتشار محصول در جانان مدیریت می‌شوند.
             </p>
         </div>
     </div>
-    <div class="admin-form-grid">
-        <div class="admin-card">
+    <div class="nila-info-grid">
+        <div class="nila-info-card">
             <strong>ساختار کاتالوگ</strong>
             <p class="admin-muted">ورود نهایی فقط از جدول‌های فعلی products و product_variants استفاده می‌کند. کد کامل هولو شناسه تنوع و SKU خواهد بود و کد پایه برای گروه‌بندی محصول به کار می‌رود.</p>
         </div>
-        <div class="admin-card">
+        <div class="nila-info-card">
             <strong>اطلاعاتی که از فایل فعلی قابل استخراج نیست</strong>
             <p class="admin-muted">فایل فعلی ستون دسته‌بندی و برند ندارد؛ بنابراین هیچ دسته یا برندی از روی حدس ساخته نمی‌شود. holooCustomerCode نیز فعلاً فقط به‌عنوان داده مرجع نگهداری می‌شود.</p>
         </div>
     </div>
 </div>
 
-<div class="admin-card">
+<div class="admin-card nila-panel nila-panel--mappings">
     <div class="admin-card-header">
         <div>
+            <span class="nila-step-label">شناسه‌های متصل‌شده</span>
             <h2 class="admin-card-title">آخرین Mappingهای ثبت‌شده</h2>
             <p class="admin-card-description">این جدول ارتباط شناسه‌های خارجی با رکوردهای فعلی کاتالوگ را نشان می‌دهد.</p>
         </div>

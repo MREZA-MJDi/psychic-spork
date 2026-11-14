@@ -6,6 +6,7 @@ use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;
 
 class AdminHeroTest extends TestCase
@@ -40,11 +41,11 @@ class AdminHeroTest extends TestCase
             ->assertSee($product->name);
     }
 
-    public function test_product_hero_selection_is_capped_at_thirty_products(): void
+    public function test_product_hero_selection_is_capped_at_thirty_six_active_products(): void
     {
         $admin = User::factory()->create(['is_admin' => true]);
 
-        $products = Product::factory()->count(30)->create([
+        $products = Product::factory()->count(36)->create([
             'is_active' => true,
             'is_hero' => true,
         ]);
@@ -66,8 +67,45 @@ class AdminHeroTest extends TestCase
         ]);
 
         $this->assertSame(
-            30,
-            Product::query()->where('is_hero', true)->count()
+            36,
+            Product::query()->where('is_active', true)->where('is_hero', true)->count()
         );
+    }
+
+    public function test_inactive_product_cannot_be_added_to_homepage_hero(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        $product = Product::factory()->create([
+            'is_active' => false,
+            'is_hero' => false,
+        ]);
+
+        $this->actingAs($admin)
+            ->patch(route('admin.products.hero.toggle', $product))
+            ->assertRedirect()
+            ->assertSessionHas('error');
+
+        $this->assertDatabaseHas('products', [
+            'id' => $product->id,
+            'is_hero' => false,
+        ]);
+    }
+
+    public function test_homepage_can_render_thirty_six_hero_products(): void
+    {
+        Cache::flush();
+
+        Product::factory()->count(36)->create([
+            'is_active' => true,
+            'is_hero' => true,
+        ]);
+
+        $response = $this->get(route('home'));
+
+        $response->assertOk()->assertViewHas('heroSlides', function (array $slides): bool {
+            return count($slides) === 36
+                && $slides[0]['number'] === '01'
+                && $slides[35]['number'] === '36';
+        });
     }
 }

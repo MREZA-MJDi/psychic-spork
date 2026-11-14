@@ -3805,3 +3805,115 @@ body.admin-nav-open {
     display: grid;
     gap: 8px;
 }
+
+
+/* =========================================================
+   NILA / HOLoo IMPORT WORKSPACE
+   Clear, step-based upload and pilot review experience.
+========================================================= */
+.nila-panel {
+    overflow: hidden;
+    border: 1px solid var(--admin-border);
+    box-shadow: var(--admin-shadow-xs);
+}
+.nila-panel .admin-card-header { padding-bottom: 18px; }
+.nila-step-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 8px;
+    color: var(--admin-info);
+    font-size: 11px;
+    font-weight: 800;
+}
+.nila-upload-form { display: grid; gap: 14px; }
+.nila-file-field {
+    padding: 18px;
+    border: 1px dashed var(--admin-border-strong);
+    border-radius: var(--admin-radius-md);
+    background: var(--admin-surface-soft);
+}
+.nila-file-help { margin: 6px 0 12px; color: var(--admin-text-soft); font-size: 12px; }
+.nila-file-field input[type="file"] {
+    display: block;
+    width: 100%;
+    min-height: 48px;
+    padding: 10px;
+    border: 1px solid var(--admin-border);
+    border-radius: 10px;
+    background: var(--admin-surface);
+    color: var(--admin-text);
+}
+.nila-file-hint { margin-top: 9px; line-height: 1.9; }
+.nila-upload-actions,
+.nila-pilot-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+}
+.nila-safe-note {
+    color: var(--admin-muted);
+    font-size: 11px;
+    line-height: 1.9;
+}
+.nila-table { min-width: 880px; }
+.nila-info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    padding: 0 18px 18px;
+}
+.nila-info-card {
+    min-width: 0;
+    padding: 16px;
+    border: 1px solid var(--admin-border);
+    border-radius: 13px;
+    background: var(--admin-surface-soft);
+}
+.nila-info-card strong { display: block; margin-bottom: 8px; font-size: 13px; }
+.nila-info-card p { margin: 0; line-height: 2; }
+.nila-progress-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 12px;
+}
+.nila-progress-heading .admin-card-title { margin: 0; }
+.nila-progress-value {
+    color: var(--admin-info);
+    font-size: 22px;
+    font-variant-numeric: tabular-nums;
+}
+.nila-progress-track {
+    height: 9px;
+    overflow: hidden;
+    margin: 0 0 18px;
+    border-radius: 999px;
+    background: var(--admin-surface-muted);
+}
+.nila-progress-track span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--admin-success);
+    transition: width 220ms ease;
+}
+.nila-preview-head { gap: 16px; }
+.nila-preview-head .admin-page-head__title { margin-top: 0; }
+.nila-pilot-actions { padding-top: 12px; border-top: 1px solid var(--admin-border); }
+.nila-panel--rules { border-color: rgba(165, 109, 22, .22); background: var(--admin-warning-bg); }
+.nila-panel--rules ul { margin: 12px 0 0; padding-right: 20px; line-height: 2.1; }
+.nila-panel--rules li + li { margin-top: 4px; }
+
+@media (max-width: 760px) {
+    .nila-info-grid { grid-template-columns: 1fr; padding: 0 14px 14px; }
+    .nila-upload-actions,
+    .nila-pilot-actions { align-items: stretch; flex-direction: column; }
+    .nila-upload-actions .admin-btn,
+    .nila-pilot-actions .admin-btn { width: 100%; }
+    .nila-progress-heading { align-items: flex-start; }
+    .nila-progress-value { font-size: 18px; }
+    .nila-file-field { padding: 14px; }
+}

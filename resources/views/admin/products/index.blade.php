@@ -23,6 +23,12 @@
                     مدیریت محصولات، قیمت، موجودی و وضعیت انتشار
                 </p>
 
+                <p class="admin-muted" style="margin-top:8px;">
+                    ظرفیت Hero صفحه اصلی:
+                    <strong>{{ number_format($heroCount ?? 0) }} از {{ number_format($heroLimit ?? 36) }}</strong>
+                    محصول فعال
+                </p>
+
             </div>
 
 
