@@ -167,6 +167,9 @@ Route::get('/checkout/success', [CheckoutController::class, 'success'])
 Route::get('/drclubz', [StorePageController::class, 'club'])
     ->name('club');
 
+Route::get('/wholesale/catalog', [WholesaleController::class, 'catalog'])
+    ->name('wholesale.catalog');
+
 Route::get('/wholesale', [WholesaleController::class, 'show'])
     ->name('wholesale.show');
 

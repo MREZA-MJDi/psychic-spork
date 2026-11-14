@@ -96,6 +96,38 @@ class WholesaleFeatureTest extends TestCase
             ->assertSee('درخواست خرید چکی');
     }
 
+    public function test_wholesale_landing_page_keeps_the_catalog_on_a_separate_screen(): void
+    {
+        [$product] = $this->makeProduct(stock: 8, wholesalePrice: 70000);
+
+        $this->get(route('wholesale.show'))
+            ->assertOk()
+            ->assertSee(route('wholesale.catalog'), false)
+            ->assertDontSee($product->name);
+    }
+
+    public function test_wholesale_catalog_filters_products_and_aggregates_prices_without_loading_all_variants(): void
+    {
+        [$wholesaleProduct] = $this->makeProduct(stock: 8, wholesalePrice: 70000);
+        [$retailOnlyProduct] = $this->makeProduct(stock: 8, wholesalePrice: null);
+
+        $this->get(route('wholesale.catalog'))
+            ->assertOk()
+            ->assertSee($wholesaleProduct->name)
+            ->assertDontSee($retailOnlyProduct->name)
+            ->assertViewHas('products', function ($products) use ($wholesaleProduct): bool {
+                $product = $products->first();
+
+                return $products->total() === 1
+                    && $product !== null
+                    && $product->id === $wholesaleProduct->id
+                    && ! $product->relationLoaded('activeVariants')
+                    && (int) $product->wholesale_variants_count === 1
+                    && (float) $product->minimum_wholesale_price === 70000.0
+                    && (float) $product->maximum_wholesale_price === 70000.0;
+            });
+    }
+
     public function test_customer_account_shows_cheque_request_status_and_next_step(): void
     {
         $customer = User::factory()->create(['is_admin' => false]);
