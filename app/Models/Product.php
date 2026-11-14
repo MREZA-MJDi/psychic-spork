@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\DB;
 
 class Product extends Model
 {
@@ -100,14 +101,12 @@ class Product extends Model
     {
         $direction = strtolower($direction) === 'desc' ? 'desc' : 'asc';
 
-        $priceSubquery = ProductVariant::query()
-            ->selectRaw('MIN(COALESCE(sale_price, price))')
-            ->whereColumn('product_id', 'products.id')
-            ->where('is_active', true);
-
+        // Storefront price sorting is paired with withCatalogMetrics(), which
+        // joins one grouped variant aggregate instead of running a correlated
+        // MIN() query once for each product in the result set.
         return $query
-            ->orderBy($priceSubquery, $direction)
-            ->orderBy('id');
+            ->orderBy('catalog_variant_metrics.minimum_effective_price', $direction)
+            ->orderBy('products.id');
     }
 
     public function scopeActive($query) { return $query->where('is_active', true); }
@@ -115,26 +114,33 @@ class Product extends Model
 
     public function scopeWithCatalogMetrics($query)
     {
-        $activeVariants = ProductVariant::query()
-            ->whereColumn('product_id', 'products.id')
-            ->where('is_active', true);
+        $metrics = ProductVariant::query()
+            ->select('product_id')
+            ->selectRaw('COUNT(*) as active_variants_count')
+            ->selectRaw("COUNT(DISTINCT NULLIF(TRIM(color), '')) as active_variant_colors_count")
+            ->selectRaw("COUNT(DISTINCT NULLIF(TRIM(size), '')) as active_variant_sizes_count")
+            ->selectRaw('COALESCE(SUM(stock), 0) as active_stock_total')
+            ->selectRaw('MIN(COALESCE(sale_price, price)) as minimum_effective_price')
+            ->selectRaw('MAX(COALESCE(sale_price, price)) as maximum_effective_price')
+            ->where('is_active', true)
+            ->groupBy('product_id');
 
-        return $query->addSelect([
-            'active_variants_count' => (clone $activeVariants)->selectRaw('COUNT(*)'),
-            'active_variant_colors_count' => (clone $activeVariants)->selectRaw(
-                "COUNT(DISTINCT NULLIF(TRIM(color), ''))"
-            ),
-            'active_variant_sizes_count' => (clone $activeVariants)->selectRaw(
-                "COUNT(DISTINCT NULLIF(TRIM(size), ''))"
-            ),
-            'active_stock_total' => (clone $activeVariants)->selectRaw('COALESCE(SUM(stock), 0)'),
-            'minimum_effective_price' => (clone $activeVariants)->selectRaw(
-                'MIN(COALESCE(sale_price, price))'
-            ),
-            'maximum_effective_price' => (clone $activeVariants)->selectRaw(
-                'MAX(COALESCE(sale_price, price))'
-            ),
-        ]);
+        return $query
+            ->leftJoinSub($metrics, 'catalog_variant_metrics', function ($join): void {
+                $join->on(
+                    'catalog_variant_metrics.product_id',
+                    '=',
+                    'products.id'
+                );
+            })
+            ->addSelect([
+                DB::raw('COALESCE(catalog_variant_metrics.active_variants_count, 0) as active_variants_count'),
+                DB::raw('COALESCE(catalog_variant_metrics.active_variant_colors_count, 0) as active_variant_colors_count'),
+                DB::raw('COALESCE(catalog_variant_metrics.active_variant_sizes_count, 0) as active_variant_sizes_count'),
+                DB::raw('COALESCE(catalog_variant_metrics.active_stock_total, 0) as active_stock_total'),
+                'catalog_variant_metrics.minimum_effective_price',
+                'catalog_variant_metrics.maximum_effective_price',
+            ]);
     }
 
     public function scopeLowStock($query)
