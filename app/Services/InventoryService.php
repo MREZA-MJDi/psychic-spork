@@ -55,6 +55,43 @@ final class InventoryService
         }, 3);
     }
 
+    /**
+     * Record a movement on a variant row that the caller already locked.
+     * The caller must run this inside the transaction holding that lock.
+     */
+    public function moveLocked(
+        ProductVariant $locked,
+        int $quantity,
+        string $type,
+        ?string $note = null,
+        ?int $createdBy = null,
+        ?string $referenceType = null,
+        ?int $referenceId = null
+    ): InventoryMovement {
+        abort_unless(
+            in_array($type, InventoryMovement::TYPES, true),
+            422,
+            'نوع گردش موجودی معتبر نیست.'
+        );
+        abort_if($quantity === 0, 422, 'مقدار گردش موجودی نمی‌تواند صفر باشد.');
+
+        $newStock = (int) $locked->stock + $quantity;
+        abort_if($newStock < 0, 422, 'موجودی نمی‌تواند منفی شود.');
+        abort_if($newStock > 2147483647, 422, 'موجودی از محدوده مجاز بیشتر است.');
+
+        $locked->update(['stock' => $newStock]);
+
+        return $locked->inventoryMovements()->create([
+            'type' => $type,
+            'quantity' => $quantity,
+            'stock_after' => $newStock,
+            'reference_type' => $referenceType,
+            'reference_id' => $referenceId,
+            'note' => $note,
+            'created_by' => $createdBy,
+        ]);
+    }
+
     public function setStock(
         ProductVariant $variant,
         int $targetStock,
