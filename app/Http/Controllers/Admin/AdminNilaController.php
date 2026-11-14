@@ -154,6 +154,7 @@ class AdminNilaController extends Controller
             'groups' => $parsed['groups'],
             'rows' => array_slice($parsed['rows'], 0, 100),
             'hasMoreRows' => count($parsed['rows']) > 100,
+            'failedProducts' => $batch->metadata['failed_products'] ?? [],
         ]);
     }
 }
