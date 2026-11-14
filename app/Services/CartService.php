@@ -125,7 +125,29 @@ final class CartService
                 }
             }
 
+            foreach ($guest->wholesalePacks()->get() as $guestPack) {
+                $existingPack = $cart->wholesalePacks()
+                    ->where('wholesale_pack_id', $guestPack->wholesale_pack_id)
+                    ->lockForUpdate()
+                    ->first();
+
+                if ($existingPack) {
+                    $existingPack->update([
+                        'quantity' => min(
+                            CartService::MAX_QUANTITY_PER_ITEM,
+                            (int) $existingPack->quantity + (int) $guestPack->quantity
+                        ),
+                    ]);
+                } else {
+                    $cart->wholesalePacks()->create([
+                        'wholesale_pack_id' => $guestPack->wholesale_pack_id,
+                        'quantity' => min(CartService::MAX_QUANTITY_PER_ITEM, (int) $guestPack->quantity),
+                    ]);
+                }
+            }
+
             $guest->items()->delete();
+            $guest->wholesalePacks()->delete();
             $guest->delete();
 
             $cart->update([
@@ -348,6 +370,7 @@ final class CartService
                 ->findOrFail($cart->id);
 
             $lockedCart->items()->delete();
+            $lockedCart->wholesalePacks()->delete();
             $lockedCart->update(['last_activity_at' => now()]);
         });
     }

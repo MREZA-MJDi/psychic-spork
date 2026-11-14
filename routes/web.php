@@ -20,6 +20,7 @@ use App\Http\Controllers\Admin\AdminProfileController;
 use App\Http\Controllers\Admin\AdminSiteContentController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\WholesalePackCartController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PaymentController;
@@ -142,6 +143,13 @@ Route::put('/cart/{item}', [CartController::class, 'update'])
 
 Route::delete('/cart/{item}', [CartController::class, 'remove'])
     ->name('cart.remove');
+
+Route::post('/cart/wholesale-packs/{wholesalePack}', [WholesalePackCartController::class, 'store'])
+    ->name('cart.wholesale-packs.store');
+Route::put('/cart/wholesale-packs/{cartWholesalePack}', [WholesalePackCartController::class, 'update'])
+    ->name('cart.wholesale-packs.update');
+Route::delete('/cart/wholesale-packs/{cartWholesalePack}', [WholesalePackCartController::class, 'destroy'])
+    ->name('cart.wholesale-packs.remove');
 
 /*
 |--------------------------------------------------------------------------
