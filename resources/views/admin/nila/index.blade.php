@@ -109,6 +109,8 @@
                         <td>
                             @if($batch->status === 'completed')
                                 تکمیل‌شده
+                            @elseif($batch->status === 'queued')
+                                در صف اجرا
                             @elseif($batch->status === 'processing')
                                 در حال پردازش
                             @elseif($batch->status === 'ready')

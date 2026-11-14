@@ -6,9 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreInventoryMovementRequest;
 use App\Models\InventoryMovement;
 use App\Models\ProductVariant;
+use App\Services\InventoryService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use Throwable;
 
@@ -71,40 +71,22 @@ class AdminInventoryController extends Controller
     }
 
     public function store(
-        StoreInventoryMovementRequest $request
+        StoreInventoryMovementRequest $request,
+        InventoryService $inventory
     ): RedirectResponse {
         try {
             $data = $request->validated();
 
-            DB::transaction(function () use ($data): void {
-                $variant = ProductVariant::query()
-                    ->lockForUpdate()
-                    ->findOrFail(
-                        $data['product_variant_id']
-                    );
+            $variant = ProductVariant::query()
+                ->findOrFail($data['product_variant_id']);
 
-                $quantity = (int) $data['quantity'];
-
-                $newStock = (int) $variant->stock + $quantity;
-
-                abort_if(
-                    $newStock < 0,
-                    422,
-                    'موجودی نمی‌تواند منفی شود.'
-                );
-
-                $variant->update([
-                    'stock' => $newStock,
-                ]);
-
-                $variant->inventoryMovements()->create([
-                    'type' => $data['type'],
-                    'quantity' => $quantity,
-                    'stock_after' => $newStock,
-                    'note' => $data['note'] ?? null,
-                    'created_by' => auth()->id(),
-                ]);
-            });
+            $inventory->move(
+                $variant,
+                (int) $data['quantity'],
+                $data['type'],
+                $data['note'] ?? null,
+                auth()->id()
+            );
 
             return back()->with(
                 'success',

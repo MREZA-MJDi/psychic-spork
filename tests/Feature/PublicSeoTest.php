@@ -39,6 +39,17 @@ class PublicSeoTest extends TestCase
 
         $this->get('/sitemap.xml')
             ->assertOk()
+            ->assertSee('<sitemapindex', false)
+            ->assertSee(route('seo.sitemap.segment', [
+                'type' => 'products',
+                'page' => 1,
+            ]), false);
+
+        $this->get(route('seo.sitemap.segment', [
+            'type' => 'products',
+            'page' => 1,
+        ]))
+            ->assertOk()
             ->assertSee(route('products.show', $product));
 
         $this->get(route('products.show', $product))

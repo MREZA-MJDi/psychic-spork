@@ -50,6 +50,9 @@ class HomeController extends Controller
                 'updated_at',
             ])
             ->active()
+
+            ->withCatalogMetrics()
+
             ->with([
                 'category:id,name,slug',
                 'brand:id,name,slug',
@@ -71,19 +74,6 @@ class HomeController extends Controller
                     'media.collection',
                     'media.path',
                     'media.sort_order',
-                ]),
-                'activeVariants' => fn ($query) => $query->select([
-                    'id',
-                    'product_id',
-                    'sku',
-                    'size',
-                    'color',
-                    'price',
-                    'sale_price',
-                    'stock',
-                    'low_stock_threshold',
-                    'is_active',
-                    'sort_order',
                 ]),
             ]);
 
@@ -128,6 +118,9 @@ class HomeController extends Controller
                 'created_at',
             ])
             ->active()
+
+            ->withCatalogMetrics()
+
             ->with([
                 'category:id,name',
                 'brand:id,name',
@@ -183,6 +176,7 @@ class HomeController extends Controller
                 'updated_at',
             ])
             ->active()
+            ->withCatalogMetrics()
             ->whereHas('orderItems', $popularSalesFilter)
             ->with([
                 'category:id,name',

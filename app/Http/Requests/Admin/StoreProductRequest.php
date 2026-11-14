@@ -5,6 +5,7 @@ namespace App\Http\Requests\Admin;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use App\Support\NumericInput;
+use App\Rules\ValidProductAttributes;
 
 class StoreProductRequest extends FormRequest
 {
@@ -146,6 +147,7 @@ class StoreProductRequest extends FormRequest
             'attributes_json' => [
                 'nullable',
                 'string',
+                new ValidProductAttributes(),
             ],
 
             'is_active' => [

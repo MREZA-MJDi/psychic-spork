@@ -62,22 +62,18 @@ class PaymentController extends Controller
                 $authority
             )
         ) {
-            return $this->cancel(
+            return $this->pending(
                 $request,
                 $orderModel,
-                $orders,
-                $cart,
-                'اطلاعات بازگشت از درگاه معتبر نیست.'
+                'اطلاعات بازگشت از درگاه معتبر نیست؛ وضعیت سفارش برای بررسی بعدی حفظ شد.'
             );
         }
 
         if ($status !== 'OK') {
-            return $this->cancel(
+            return $this->pending(
                 $request,
                 $orderModel,
-                $orders,
-                $cart,
-                'پرداخت توسط شما تکمیل نشد.'
+                'درگاه تکمیل پرداخت را تأیید نکرد؛ سفارش تا مشخص‌شدن نتیجه در انتظار باقی ماند.'
             );
         }
 
@@ -86,22 +82,18 @@ class PaymentController extends Controller
         } catch (Throwable $e) {
             report($e);
 
-            return $this->cancel(
+            return $this->pending(
                 $request,
                 $orderModel,
-                $orders,
-                $cart,
-                'تأیید پرداخت انجام نشد؛ سفارش به وضعیت ناموفق برگشت.'
+                'ارتباط یا تأیید درگاه موقتاً ناموفق بود؛ موجودی و سفارش حفظ شده‌اند. وضعیت پرداخت را دوباره بررسی کنید.'
             );
         }
 
         if ($verified->status !== 'paid') {
-            return $this->cancel(
+            return $this->pending(
                 $request,
                 $orderModel,
-                $orders,
-                $cart,
-                'پرداخت توسط درگاه تأیید نشد.'
+                'درگاه هنوز پرداخت را تأیید نکرده است؛ سفارش برای بررسی بعدی در انتظار باقی ماند.'
             );
         }
 
@@ -134,37 +126,22 @@ class PaymentController extends Controller
         );
     }
 
-    private function cancel(
+    private function pending(
         Request $request,
         \App\Models\Order $order,
-        OrderService $orders,
-        CartService $cart,
         string $message
     ): RedirectResponse {
-        try {
-            if (
-                $order->status !== 'cancelled'
-                && $order->payment_status !== 'paid'
-            ) {
-                $orders->updateStatus(
-                    $order,
-                    'cancelled',
-                    'failed',
-                    $message
-                );
-
-                $cart->restoreFromOrder(
-                    $cart->current($request),
-                    $order
-                );
-            }
-        } catch (Throwable $e) {
-            report($e);
-        }
+        $request->session()->put('completed_order', [
+            'orderNumber' => $order->order_number,
+            'total' => (float) $order->total,
+            'orderStatus' => $order->status,
+            'paymentStatus' => $order->payment_status,
+            'paymentMethod' => $order->payment_method,
+        ]);
 
         return redirect()
-            ->route('cart')
-            ->with('error', $message);
+            ->route('checkout.success')
+            ->with('warning', $message);
     }
 
     private function finish(
@@ -179,6 +156,7 @@ class PaymentController extends Controller
                 'total' => (float) $order->total,
                 'orderStatus' => $order->status,
                 'paymentStatus' => $order->payment_status,
+                'paymentMethod' => $order->payment_method,
             ]
         );
 

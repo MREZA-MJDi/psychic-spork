@@ -6,6 +6,7 @@ use App\Models\Product;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use App\Support\NumericInput;
+use App\Rules\ValidProductAttributes;
 
 class UpdateProductRequest extends FormRequest
 {
@@ -65,9 +66,11 @@ class UpdateProductRequest extends FormRequest
         /** @var Product|null $product */
         $product = $this->route('product');
 
-        $variantId = $product?->variants()
-            ->orderBy('id')
-            ->value('id');
+        $variantId = $this->input('variant_id')
+            ?: $product?->variants()
+                ->orderBy('sort_order')
+                ->orderBy('id')
+                ->value('id');
 
         return [
             'category_id' => [
@@ -126,6 +129,7 @@ class UpdateProductRequest extends FormRequest
             'attributes_json' => [
                 'nullable',
                 'string',
+                new ValidProductAttributes(),
             ],
 
             'is_active' => [
@@ -143,6 +147,14 @@ class UpdateProductRequest extends FormRequest
                 'integer',
                 'min:0',
                 'max:9999',
+            ],
+
+            'variant_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('product_variants', 'id')
+                    ->where('product_id', $product?->id ?? 0)
+                    ->whereNull('deleted_at'),
             ],
 
             'sku' => [

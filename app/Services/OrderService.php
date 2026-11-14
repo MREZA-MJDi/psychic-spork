@@ -16,6 +16,7 @@ final class OrderService
         private readonly PaymentService $payment,
         private readonly CartService $cart,
         private readonly WholesalePricingService $wholesalePricing,
+        private readonly InventoryService $inventory,
     ) {
     }
 
@@ -38,9 +39,6 @@ final class OrderService
             );
 
             $cartItems = $cart->items()
-                ->with([
-                    'productVariant.product.galleryMedia',
-                ])
                 ->orderBy('product_variant_id')
                 ->get();
 
@@ -49,6 +47,20 @@ final class OrderService
                 422,
                 'سبد خرید خالی است.'
             );
+
+            abort_if(
+                $cartItems->count() > CartService::MAX_ITEMS,
+                422,
+                'سبد خرید از حداکثر تعداد تنوع مجاز بیشتر است.'
+            );
+
+            $lockedVariants = ProductVariant::query()
+                ->with('product.galleryMedia')
+                ->whereIn('id', $cartItems->pluck('product_variant_id')->unique())
+                ->orderBy('id')
+                ->lockForUpdate()
+                ->get()
+                ->keyBy('id');
 
             $addressId = $this->resolveAddressId(
                 $customer['address_id'] ?? null,
@@ -108,12 +120,9 @@ final class OrderService
             $subtotal = 0;
             $orderQuantity = 0;
             foreach ($cartItems as $cartItem) {
-                $variant = ProductVariant::query()
-                    ->with([
-                        'product.galleryMedia',
-                    ])
-                    ->lockForUpdate()
-                    ->find($cartItem->product_variant_id);
+                $variant = $lockedVariants->get(
+                    $cartItem->product_variant_id
+                );
 
                 abort_unless(
                     $variant
@@ -167,18 +176,15 @@ final class OrderService
                     'line_total' => $lineTotal,
                 ]);
 
-                $variant->decrement('stock', $quantity);
-                $variant->refresh();
-
-                $variant->inventoryMovements()->create([
-                    'type' => 'sale',
-                    'quantity' => -$quantity,
-                    'stock_after' => $variant->stock,
-                    'reference_type' => Order::class,
-                    'reference_id' => $order->id,
-                    'note' => "کسر موجودی سفارش {$order->order_number}",
-                    'created_by' => $user?->id,
-                ]);
+                $this->inventory->moveLocked(
+                    $variant,
+                    -$quantity,
+                    'sale',
+                    "کسر موجودی سفارش {$order->order_number}",
+                    $user?->id,
+                    Order::class,
+                    $order->id
+                );
             }
 
             // Wholesale orders are open for online checkout.
@@ -352,52 +358,59 @@ final class OrderService
 
     private function restoreInventory(Order $order): void
     {
-        $order->load('items');
+        $order->loadMissing('items');
+
+        $variants = ProductVariant::query()
+            ->whereIn(
+                'id',
+                $order->items
+                    ->pluck('product_variant_id')
+                    ->filter()
+                    ->unique()
+            )
+            ->orderBy('id')
+            ->lockForUpdate()
+            ->get()
+            ->keyBy('id');
 
         foreach ($order->items as $item) {
-            if (! $item->product_variant_id) {
-                continue;
-            }
-
-            $variant = ProductVariant::query()
-                ->lockForUpdate()
-                ->find($item->product_variant_id);
+            $variant = $variants->get($item->product_variant_id);
 
             if (! $variant) {
                 continue;
             }
 
-            $variant->increment(
-                'stock',
-                (int) $item->quantity
+            $this->inventory->moveLocked(
+                $variant,
+                (int) $item->quantity,
+                'return',
+                "بازگشت موجودی سفارش {$order->order_number}",
+                auth()->id(),
+                Order::class,
+                $order->id
             );
-
-            $variant->refresh();
-
-            $variant->inventoryMovements()->create([
-                'type' => 'return',
-                'quantity' => (int) $item->quantity,
-                'stock_after' => $variant->stock,
-                'reference_type' => Order::class,
-                'reference_id' => $order->id,
-                'note' => "بازگشت موجودی سفارش {$order->order_number}",
-                'created_by' => auth()->id(),
-            ]);
         }
     }
 
     private function deductInventoryAgain(Order $order): void
     {
-        $order->load('items');
+        $order->loadMissing('items');
+
+        $variants = ProductVariant::query()
+            ->whereIn(
+                'id',
+                $order->items
+                    ->pluck('product_variant_id')
+                    ->filter()
+                    ->unique()
+            )
+            ->orderBy('id')
+            ->lockForUpdate()
+            ->get()
+            ->keyBy('id');
 
         foreach ($order->items as $item) {
-            if (! $item->product_variant_id) {
-                continue;
-            }
-
-            $variant = ProductVariant::query()
-                ->lockForUpdate()
-                ->find($item->product_variant_id);
+            $variant = $variants->get($item->product_variant_id);
 
             abort_unless(
                 $variant
@@ -406,22 +419,15 @@ final class OrderService
                 "موجودی برای فعال‌سازی مجدد سفارش «{$order->order_number}» کافی نیست."
             );
 
-            $variant->decrement(
-                'stock',
-                (int) $item->quantity
+            $this->inventory->moveLocked(
+                $variant,
+                -((int) $item->quantity),
+                'sale',
+                "کسر مجدد موجودی سفارش {$order->order_number}",
+                auth()->id(),
+                Order::class,
+                $order->id
             );
-
-            $variant->refresh();
-
-            $variant->inventoryMovements()->create([
-                'type' => 'sale',
-                'quantity' => -((int) $item->quantity),
-                'stock_after' => $variant->stock,
-                'reference_type' => Order::class,
-                'reference_id' => $order->id,
-                'note' => "کسر مجدد موجودی سفارش {$order->order_number}",
-                'created_by' => auth()->id(),
-            ]);
         }
     }
 

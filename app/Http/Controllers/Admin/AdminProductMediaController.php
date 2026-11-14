@@ -151,8 +151,7 @@ class AdminProductMediaController extends Controller
         );
 
         DB::transaction(function () use ($media, $mediaService): void {
-            $mediaService->deleteMedia($media);
-            $media->delete();
+            $mediaService->remove($media);
         });
 
         if ($product->is_hero) {

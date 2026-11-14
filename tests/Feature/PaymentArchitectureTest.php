@@ -294,13 +294,13 @@ class PaymentArchitectureTest extends TestCase
     public function test_zarinpal_gateway_uses_request_and_verify_provider_contract(): void
     {
         Http::fake([
-            'https://api.zarinpal.com/pg/v4/payment/request.json' => Http::response([
+            config('payment.zarinpal.request_url') => Http::response([
                 'data' => [
                     'code' => 100,
                     'authority' => 'AUTHORITY-123',
                 ],
             ]),
-            'https://api.zarinpal.com/pg/v4/payment/verify.json' => Http::response([
+            config('payment.zarinpal.verify_url') => Http::response([
                 'data' => [
                     'code' => 100,
                     'ref_id' => 'REF-123',

@@ -122,6 +122,7 @@ class CheckoutController extends Controller
                             'total' => (float) $order->total,
                             'orderStatus' => $order->status,
                             'paymentStatus' => $order->payment_status,
+                            'paymentMethod' => $order->payment_method,
                         ]);
 
                         return redirect()

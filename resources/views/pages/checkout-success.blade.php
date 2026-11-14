@@ -1,6 +1,6 @@
 @extends('layouts.store')
 
-@section('title', 'پرداخت موفق — ' . ($siteBrandNameLatin ?? 'Janan'))
+@section('title', 'وضعیت سفارش — ' . ($siteBrandNameLatin ?? 'Janan'))
 
 @section('content')
 <section class="section-block checkout-success-section">
@@ -18,22 +18,34 @@
                     JANAN / CHEQUE SUBMITTED
                 </span>
 
-                <h1>
-                    درخواست پرداخت چکی ثبت شد.
-                </h1>
+                <h1>درخواست پرداخت چکی ثبت شد.</h1>
 
                 <p>
                     اطلاعات چک شما ثبت شده و در انتظار بررسی مدیریت است.
                     تا زمان تأیید و تسویه چک، پرداخت قطعی محسوب نمی‌شود.
+                </p>
+            @elseif(($paymentStatus ?? 'pending') !== 'paid')
+                <span class="eyebrow">
+                    JANAN / PAYMENT PENDING
+                </span>
+
+                <h1>وضعیت پرداخت در انتظار تأیید است.</h1>
+
+                <p>
+                    سفارش شما ثبت شده است، اما درگاه هنوز نتیجه قطعی پرداخت را اعلام نکرده است.
+                    موجودی سفارش تا روشن شدن وضعیت پرداخت حفظ شده و سفارش دوباره لغو نمی‌شود.
+                </p>
+
+                <p>
+                    اگر مبلغ از حساب شما کسر شده، از ثبت دوباره سفارش خودداری کنید و شماره سفارش را برای پیگیری نگه دارید.
+                    در صورت تأیید مجدد درگاه، وضعیت سفارش به‌روزرسانی خواهد شد.
                 </p>
             @else
                 <span class="eyebrow">
                     JANAN / PAYMENT CONFIRMED
                 </span>
 
-                <h1>
-                    پرداخت توسط درگاه تأیید شد.
-                </h1>
+                <h1>پرداخت توسط درگاه تأیید شد.</h1>
 
                 @if(($orderStatus ?? 'confirmed') === 'confirmed')
                     <p>
@@ -64,7 +76,7 @@
                 @if(($paymentMethod ?? 'online') === 'cheque')
                     در انتظار بررسی چک
                 @else
-                    {{ ($paymentStatus ?? 'paid') === 'paid' ? 'موفق' : 'در حال نهایی‌سازی' }}
+                    {{ ($paymentStatus ?? 'pending') === 'paid' ? 'موفق' : 'در انتظار تأیید درگاه' }}
                 @endif
             </div>
 

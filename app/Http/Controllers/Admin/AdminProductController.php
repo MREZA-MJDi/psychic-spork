@@ -10,6 +10,7 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Services\HeroService;
+use App\Services\InventoryService;
 use App\Services\MediaService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -204,7 +205,8 @@ class AdminProductController extends Controller
 
     public function store(
         StoreProductRequest $request,
-        MediaService $media
+        MediaService $media,
+        InventoryService $inventory
     ): RedirectResponse {
         try {
             $data = $request->validated();
@@ -212,13 +214,14 @@ class AdminProductController extends Controller
             $product = DB::transaction(function () use (
                 $data,
                 $request,
-                $media
+                $media,
+                $inventory
             ) {
                 $product = Product::create(
                     $this->productData($data)
                 );
 
-                $product->variants()->create([
+                $variant = $product->variants()->create([
                     'sku' => $data['sku'] ?? null,
                     'size' => $data['size'] ?? null,
                     'color' => $data['color'] ?? null,
@@ -226,7 +229,7 @@ class AdminProductController extends Controller
                     'price' => $data['price'],
                     'sale_price' => $data['sale_price'] ?? null,
                     'wholesale_price' => $data['wholesale_price'] ?? null,
-                    'stock' => (int) ($data['stock'] ?? 0),
+                    'stock' => 0,
                     'low_stock_threshold' => (int) (
                         $data['low_stock_threshold'] ?? 5
                     ),
@@ -234,6 +237,13 @@ class AdminProductController extends Controller
                         $data['is_active'] ?? true
                     ),
                 ]);
+
+                $inventory->setStock(
+                    $variant,
+                    (int) ($data['stock'] ?? 0),
+                    'ثبت موجودی اولیه هنگام ایجاد محصول',
+                    auth()->id()
+                );
 
                 if ($request->hasFile('image_file')) {
                     $media->attach(
@@ -297,7 +307,8 @@ class AdminProductController extends Controller
         UpdateProductRequest $request,
         Product $product,
         MediaService $media,
-        HeroService $hero
+        HeroService $hero,
+        InventoryService $inventory
     ): RedirectResponse {
         try {
             $data = $request->validated();
@@ -306,7 +317,8 @@ class AdminProductController extends Controller
                 $data,
                 $request,
                 $product,
-                $media
+                $media,
+                $inventory
             ) {
                 /*
                 |--------------------------------------------------------------------------
@@ -327,12 +339,23 @@ class AdminProductController extends Controller
                 |--------------------------------------------------------------------------
                 */
 
-                $variant = $product->variants()
-                    ->lockForUpdate()
-                    ->orderBy('id')
-                    ->first();
+                $variantId = (int) ($data['variant_id']
+                    ?? $product->variants()->orderBy('sort_order')->orderBy('id')->value('id'));
 
-                if (!$variant) {
+                $variant = $variantId > 0
+                    ? $product->variants()
+                        ->whereKey($variantId)
+                        ->lockForUpdate()
+                        ->first()
+                    : null;
+
+                abort_if(
+                    $variantId > 0 && ! $variant,
+                    422,
+                    'تنوع انتخاب‌شده متعلق به این محصول نیست.'
+                );
+
+                if (! $variant) {
                     $variant = $product->variants()->create([
                         'sku' => $data['sku'] ?? null,
                         'size' => $data['size'] ?? null,
@@ -341,7 +364,7 @@ class AdminProductController extends Controller
                         'price' => $data['price'],
                         'sale_price' => $data['sale_price'] ?? null,
                         'wholesale_price' => $data['wholesale_price'] ?? null,
-                        'stock' => (int) ($data['stock'] ?? 0),
+                        'stock' => 0,
                         'low_stock_threshold' => (int) (
                             $data['low_stock_threshold'] ?? 5
                         ),
@@ -357,7 +380,7 @@ class AdminProductController extends Controller
                         'color_code' => $data['color_code'] ?? null,
                         'price' => $data['price'],
                         'sale_price' => $data['sale_price'] ?? null,
-                        'stock' => (int) ($data['stock'] ?? 0),
+                        'wholesale_price' => $data['wholesale_price'] ?? null,
                         'low_stock_threshold' => (int) (
                             $data['low_stock_threshold'] ?? 5
                         ),
@@ -366,6 +389,13 @@ class AdminProductController extends Controller
                         ),
                     ]);
                 }
+
+                $inventory->setStock(
+                    $variant,
+                    (int) ($data['stock'] ?? 0),
+                    'به‌روزرسانی موجودی از فرم ویرایش محصول',
+                    auth()->id()
+                );
 
                 /*
                 |--------------------------------------------------------------------------
@@ -508,6 +538,9 @@ class AdminProductController extends Controller
 
             'description' =>
                 $data['description'] ?? null,
+
+            'meta_title' => $data['meta_title'] ?? null,
+            'meta_description' => $data['meta_description'] ?? null,
 
             'attributes' => $attributes,
 

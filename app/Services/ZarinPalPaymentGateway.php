@@ -131,9 +131,9 @@ final class ZarinPalPaymentGateway implements PaymentGateway
             return $payment->fresh();
         }
 
-        $payment->update(['status' => 'failed']);
-
-        return $payment->fresh();
+        throw new RuntimeException(
+            'درگاه پرداخت هنوز نتیجه قطعی تأیید را اعلام نکرده است.'
+        );
     }
 
     public function refund(Payment $payment): Payment

@@ -35,6 +35,7 @@
     $imagePreviewUrl = $galleryImage?->url;
 @endphp
 
+<input type="hidden" name="variant_id" value="{{ old('variant_id', $variant?->id) }}">
 
 <div class="admin-form-grid">
 
