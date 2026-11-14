@@ -21,10 +21,20 @@ class CartController extends Controller
     ): View {
         $current = $cart->current($request);
         $items = $cart->items($current);
+        $packLines = $current->wholesalePacks()
+            ->with(['pack.items.variant.product.primaryGalleryMedia', 'pack.items.variant.primaryGalleryMedia'])
+            ->latest('id')
+            ->get();
+
+        $packTotal = (float) $packLines->sum(
+            fn ($line) => (float) $line->pack?->pack_price * (int) $line->quantity
+        );
 
         return view('pages.cart', [
             'items' => $items,
-            'total' => (float) $items->sum('line_total'),
+            'packLines' => $packLines,
+            'packTotal' => $packTotal,
+            'total' => (float) $items->sum('line_total') + $packTotal,
         ]);
     }
 
@@ -175,10 +185,28 @@ class CartController extends Controller
     private function payload($cartModel, CartService $cart): array
     {
         $items = $cart->items($cartModel);
+        $packLines = $cartModel->wholesalePacks()
+            ->with('pack')
+            ->get();
+
+        $packCount = (int) $packLines->sum(
+            fn ($line) => (int) ($line->pack?->pack_quantity ?? 0) * (int) $line->quantity
+        );
+        $packTotal = (float) $packLines->sum(
+            fn ($line) => (float) ($line->pack?->pack_price ?? 0) * (int) $line->quantity
+        );
 
         return [
-            'count' => (int) $items->sum('quantity'),
-            'total' => (float) $items->sum('line_total'),
+            'count' => (int) $items->sum('quantity') + $packCount,
+            'total' => (float) $items->sum('line_total') + $packTotal,
+            'packs' => $packLines->map(fn ($line): array => [
+                'id' => $line->id,
+                'name' => $line->pack?->name ?? 'پک عمده',
+                'quantity' => (int) $line->quantity,
+                'pack_quantity' => (int) ($line->pack?->pack_quantity ?? 0),
+                'unit_price' => (float) ($line->pack?->pack_price ?? 0),
+                'line_total' => (float) ($line->pack?->pack_price ?? 0) * (int) $line->quantity,
+            ])->values()->all(),
             'items' => $items->map(function (array $item): array {
                 return [
                     'id' => $item['id'],

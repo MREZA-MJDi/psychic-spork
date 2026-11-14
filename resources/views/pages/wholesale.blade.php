@@ -147,6 +147,25 @@
                                 <span>قیمت پک عمده</span>
                                 <strong>{{ number_format($pack->display_price) }} تومان</strong>
                             </div>
+                            @php
+                                $packAvailable = $pack->items->isNotEmpty() && $pack->items->every(
+                                    fn ($item) => $item->variant
+                                        && $item->variant->is_active
+                                        && $item->variant->product?->is_active
+                                        && $item->variant->stock >= $item->quantity
+                                        && $item->variant->wholesale_price !== null
+                                );
+                            @endphp
+                            <form method="POST" action="{{ route('cart.wholesale-packs.store', $pack) }}" class="wholesale-pack-card__purchase">
+                                @csrf
+                                <label>
+                                    تعداد پک
+                                    <input type="number" name="quantity" min="1" max="99" value="1" @disabled(!$packAvailable) aria-label="تعداد پک {{ $pack->name }}">
+                                </label>
+                                <button class="button button--primary" type="submit" @disabled(!$packAvailable)>
+                                    {{ $packAvailable ? 'افزودن پک به سبد خرید' : 'موجودی کافی نیست' }}
+                                </button>
+                            </form>
                         </article>
                     @endforeach
                 </div>
