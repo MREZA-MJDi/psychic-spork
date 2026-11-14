@@ -60,7 +60,10 @@ class NilaSpreadsheetParserTest extends TestCase
             . '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>'
             . '</Relationships>';
 
-        $path = tempnam(sys_get_temp_dir(), 'nila-xlsx-') . '.xlsx';
+        $temporaryPath = tempnam(sys_get_temp_dir(), 'nila-xlsx-');
+        $this->assertNotFalse($temporaryPath);
+        @unlink($temporaryPath);
+        $path = $temporaryPath . '.xlsx';
         $zip = new ZipArchive();
 
         try {
@@ -95,7 +98,10 @@ class NilaSpreadsheetParserTest extends TestCase
             $this->markTestSkipped('The PHP zip extension is required.');
         }
 
-        $path = tempnam(sys_get_temp_dir(), 'nila-invalid-') . '.xlsx';
+        $temporaryPath = tempnam(sys_get_temp_dir(), 'nila-invalid-');
+        $this->assertNotFalse($temporaryPath);
+        @unlink($temporaryPath);
+        $path = $temporaryPath . '.xlsx';
         $zip = new ZipArchive();
 
         try {
