@@ -125,7 +125,7 @@ class CartController extends Controller
 
             if ($request->expectsJson()) {
                 return response()->json(
-                    $this->payload($current, $cart)
+                    $this->payload($current, $cart, $request->user())
                 );
             }
 
@@ -167,7 +167,7 @@ class CartController extends Controller
 
             if ($request->expectsJson()) {
                 return response()->json(
-                    $this->payload($current, $cart)
+                    $this->payload($current, $cart, $request->user())
                 );
             }
 
