@@ -87,6 +87,21 @@ class NilaImportQueueOwnershipTest extends TestCase
             $batch->metadata['queue_token']
         );
 
+        // Laravel's second attempt receives the same lease and can re-enter
+        // the service after the first exception.
+        try {
+            app(NilaSpreadsheetImportService::class)->importNext(
+                $batch,
+                5,
+                'current-execution-token'
+            );
+            $this->fail('The retry should reach the same malformed preview.');
+        } catch (\\JsonException $exception) {
+            $this->assertNotEmpty($exception->getMessage());
+        }
+
+        $this->assertSame('queued', $batch->fresh()->status);
+
         (new RunNilaSpreadsheetImport(
             $batch->id,
             5,
