@@ -10,7 +10,7 @@ use RuntimeException;
 
 final class HeroService
 {
-    public const MAX_SLIDES = 30;
+    public const MAX_SLIDES = 36;
 
     // Cache only request-independent slide data. URLs are kept relative so a request
     // arriving through an old proxy/port can never poison the shared hero cache.
