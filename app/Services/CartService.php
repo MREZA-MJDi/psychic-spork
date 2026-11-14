@@ -167,6 +167,7 @@ final class CartService
                 'productVariant.product.category',
                 'productVariant.product.brand',
                 'productVariant.product.primaryGalleryMedia',
+                'productVariant.primaryGalleryMedia',
             ])
             ->get();
 
@@ -210,7 +211,7 @@ final class CartService
                     'quantity' => $quantity,
                     'unit_price' => $unitPrice,
                     'line_total' => $quantity * $unitPrice,
-                    'image' => $product->primaryGalleryMedia?->url,
+                    'image' => $product->primaryGalleryMedia?->url ?: $variant->primaryGalleryMedia?->url,
                 ];
             })
             ->filter()

@@ -122,7 +122,49 @@ class WholesaleFeatureTest extends TestCase
             ->assertOk()
             ->assertSee($pack->name)
             ->assertSee('ثبت سفارش')
-            ->assertDontSee('سبد خرید خالی است');
+            ->assertDontSee('سبد خرید خالی است')
+            ->assertViewHas('total', 2000000.0);
+    }
+
+    public function test_cart_uses_wholesale_total_for_mixed_pack_and_direct_items(): void
+    {
+        $customer = User::factory()->create(['is_admin' => false]);
+        [, $packVariant] = $this->makeProduct(stock: 20, wholesalePrice: 250000);
+        [, $directVariant] = $this->makeProduct(stock: 10, wholesalePrice: 70000);
+
+        $pack = WholesalePack::create([
+            'name' => 'پک ترکیبی تست',
+            'slug' => 'mixed-cart-pack-' . uniqid(),
+            'pack_price' => 200000,
+            'pack_quantity' => 1,
+            'is_active' => true,
+        ]);
+        $pack->items()->create([
+            'product_variant_id' => $packVariant->id,
+            'quantity' => 1,
+        ]);
+
+        $cart = Cart::create([
+            'user_id' => $customer->id,
+            'last_activity_at' => now(),
+        ]);
+        CartWholesalePack::create([
+            'cart_id' => $cart->id,
+            'wholesale_pack_id' => $pack->id,
+            'quantity' => 1,
+        ]);
+        CartItem::create([
+            'cart_id' => $cart->id,
+            'product_variant_id' => $directVariant->id,
+            'quantity' => 2,
+        ]);
+
+        $this->actingAs($customer)
+            ->get(route('cart'))
+            ->assertOk()
+            ->assertViewHas('retailTotal', 400000.0)
+            ->assertViewHas('wholesaleTotal', 340000.0)
+            ->assertViewHas('total', 340000.0);
     }
 
     public function test_wholesale_catalog_uses_variant_image_when_product_cover_is_missing(): void
