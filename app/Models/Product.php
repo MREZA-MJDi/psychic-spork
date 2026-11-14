@@ -125,15 +125,19 @@ class Product extends Model
             ->where('is_active', true)
             ->groupBy('product_id');
 
-        return $query
-            ->leftJoinSub($metrics, 'catalog_variant_metrics', function ($join): void {
-                $join->on(
-                    'catalog_variant_metrics.product_id',
-                    '=',
-                    'products.id'
-                );
-            })
-            ->addSelect([
+        $query->leftJoinSub($metrics, 'catalog_variant_metrics', function ($join): void {
+            $join->on(
+                'catalog_variant_metrics.product_id',
+                '=',
+                'products.id'
+            );
+        });
+
+        if ($query->getQuery()->columns === null) {
+            $query->select('products.*');
+        }
+
+        return $query->addSelect([
                 DB::raw('COALESCE(catalog_variant_metrics.active_variants_count, 0) as active_variants_count'),
                 DB::raw('COALESCE(catalog_variant_metrics.active_variant_colors_count, 0) as active_variant_colors_count'),
                 DB::raw('COALESCE(catalog_variant_metrics.active_variant_sizes_count, 0) as active_variant_sizes_count'),
