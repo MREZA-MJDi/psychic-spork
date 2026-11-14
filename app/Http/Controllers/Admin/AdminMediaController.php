@@ -64,8 +64,7 @@ class AdminMediaController extends Controller
         );
 
         DB::transaction(function () use ($media, $mediaService): void {
-            $mediaService->deleteMedia($media);
-            $media->delete();
+            $mediaService->remove($media);
         });
 
         return back()->with('success', 'رسانه حذف شد.');
