@@ -84,7 +84,9 @@ class WholesaleFeatureTest extends TestCase
         $this->get(route('wholesale.show'))
             ->assertOk()
             ->assertSee(Storage::disk('public')->url($pack->image_path), false)
-            ->assertSee('پک ۱۲ عددی ایزابلا');
+            ->assertSee('پک ۱۲ عددی ایزابلا')
+            ->assertSee('افزودن پک به سبد خرید')
+            ->assertDontSee('موجودی کافی نیست');
     }
 
     public function test_wholesale_page_is_public_and_explains_cheque_access(): void

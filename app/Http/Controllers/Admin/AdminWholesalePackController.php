@@ -124,7 +124,7 @@ class AdminWholesalePackController extends Controller
             'pack_price' => ['required', 'numeric', 'min:1'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
             'is_active' => ['nullable', 'boolean'],
-            'items' => ['required', 'array', 'min:1'],
+            'items' => ['required', 'array', 'min:1', 'max:60'],
             'items.*.variant_id' => ['required', 'integer', 'distinct', 'exists:product_variants,id'],
             'items.*.quantity' => ['required', 'integer', 'min:1', 'max:100000'],
         ]);

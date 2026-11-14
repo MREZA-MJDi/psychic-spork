@@ -35,9 +35,11 @@ class WholesaleController extends Controller
                     'color',
                     'stock',
                     'sort_order',
+                    'wholesale_price',
+                    'is_active',
                 ]),
                 'items.variant.primaryGalleryMedia',
-                'items.variant.product:id,name,slug,brand_id',
+                'items.variant.product:id,name,slug,brand_id,is_active',
                 'items.variant.product.brand:id,name',
                 'items.variant.product.primaryGalleryMedia',
             ])
