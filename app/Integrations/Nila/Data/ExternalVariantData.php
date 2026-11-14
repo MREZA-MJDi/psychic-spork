@@ -13,8 +13,8 @@ final readonly class ExternalVariantData
         public ?string $size = null,
         public ?string $color = null,
         public ?string $colorCode = null,
-        public bool $isActive = true,
-        public int $sortOrder = 0,
+        public ?bool $isActive = null,
+        public ?int $sortOrder = null,
         public array $metadata = [],
     ) {
         if ($externalId === '') {
