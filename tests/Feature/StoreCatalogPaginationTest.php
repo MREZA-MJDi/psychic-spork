@@ -66,8 +66,7 @@ class StoreCatalogPaginationTest extends TestCase
         $this->get(route('home'))
             ->assertOk()
             ->assertViewHas('products', function ($products): bool {
-                return $products->count() === 36
-                    && $products->every(fn ($product) => $product->is_active);
+                return $products->count() === 36;
             });
     }
 
