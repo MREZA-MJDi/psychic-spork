@@ -9,6 +9,10 @@ $apiBaseUrl = $sandbox
     ? 'https://sandbox.zarinpal.com'
     : 'https://payment.zarinpal.com';
 
+$startPayBaseUrl = $sandbox
+    ? 'https://sandbox.zarinpal.com'
+    : 'https://www.zarinpal.com';
+
 return [
     'driver' => env('PAYMENT_GATEWAY', 'zarinpal'),
 
@@ -32,7 +36,7 @@ return [
         ),
         'startpay_url' => env(
             'ZARINPAL_STARTPAY_URL',
-            $apiBaseUrl . '/pg/StartPay'
+            $startPayBaseUrl . '/pg/StartPay'
         ),
     ],
 ];
