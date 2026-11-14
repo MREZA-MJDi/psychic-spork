@@ -58,7 +58,7 @@ class AccessAndCheckoutTest extends TestCase
         );
 
         Http::fake([
-            'https://api.zarinpal.com/pg/v4/payment/request.json' =>
+            config('payment.zarinpal.request_url') =>
                 Http::response([
                     'data' => [
                         'code' => 100,
@@ -95,7 +95,7 @@ class AccessAndCheckoutTest extends TestCase
             ]);
 
         $response->assertRedirect(
-            'https://www.zarinpal.com/pg/StartPay/A000000000000000000000000001'
+            rtrim(config('payment.zarinpal.startpay_url'), '/') . '/A000000000000000000000000001'
         );
 
         $order = Order::query()->firstOrFail();
@@ -122,7 +122,7 @@ class AccessAndCheckoutTest extends TestCase
         );
 
         Http::fake([
-            'https://api.zarinpal.com/pg/v4/payment/request.json' =>
+            config('payment.zarinpal.request_url') =>
                 Http::response([
                     'data' => [],
                     'errors' => [
@@ -258,7 +258,7 @@ class AccessAndCheckoutTest extends TestCase
         Config::set('payment.zarinpal.merchant_id', 'test-merchant');
 
         Http::fake([
-            'https://api.zarinpal.com/pg/v4/payment/request.json' =>
+            config('payment.zarinpal.request_url') =>
                 Http::response([
                     'data' => [
                         'code' => 100,
