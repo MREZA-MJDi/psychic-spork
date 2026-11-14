@@ -18,12 +18,14 @@ class CheckoutController extends Controller
 {
     public function create(
         Request $request,
-        CartService $cart
+        CartService $cart,
+        WholesalePricingService $wholesalePricing
     ): View|RedirectResponse {
         $current = $cart->current($request);
         $items = $cart->items($current);
         $packLines = $current->wholesalePacks()
             ->with(['pack.items.variant.product'])
+            ->orderBy('id')
             ->get();
         $hasWholesalePacks = $packLines->isNotEmpty();
 
@@ -38,7 +40,46 @@ class CheckoutController extends Controller
 
         $user = $request->user();
         $chequePermission = $user?->chequePermission()->first();
-        $canSelectWholesale = ! $user || $user->isCustomer();
+        $retailTotal = (float) $items->sum('line_total') + (float) $packLines->sum(
+            fn ($line) => (float) ($line->pack?->pack_price ?? 0) * (int) $line->quantity
+        );
+
+        $wholesaleQuote = null;
+        $wholesaleUnavailableReason = null;
+
+        try {
+            $wholesaleQuote = $wholesalePricing->quote($current, $user);
+        } catch (\\Symfony\\Component\\HttpKernel\\Exception\\HttpExceptionInterface $exception) {
+            $wholesaleUnavailableReason = $exception->getMessage();
+        }
+
+        $wholesaleAvailable = is_array($wholesaleQuote);
+        $wholesaleTotal = $wholesaleAvailable
+            ? (float) $wholesaleQuote['subtotal']
+            : null;
+
+        if ($hasWholesalePacks && ! $wholesaleAvailable) {
+            return redirect()
+                ->route('cart')
+                ->with(
+                    'error',
+                    $wholesaleUnavailableReason ?: 'این سبد شرایط ثبت سفارش عمده را ندارد.'
+                );
+        }
+
+        $selectedOrderType = $hasWholesalePacks
+            ? 'wholesale'
+            : (old('order_type', 'retail') === 'wholesale' && $wholesaleAvailable
+                ? 'wholesale'
+                : 'retail');
+
+        $total = $selectedOrderType === 'wholesale'
+            ? (float) $wholesaleTotal
+            : $retailTotal;
+
+        $canSelectWholesale = (! $user || $user->isCustomer())
+            && $wholesaleAvailable
+            && ! $hasWholesalePacks;
 
         $chequeEnabled = (bool) (
             $user?->isCustomer()
@@ -47,9 +88,11 @@ class CheckoutController extends Controller
 
         return view('pages.checkout', [
             'items' => $items,
-            'total' => (float) $items->sum('line_total') + (float) $packLines->sum(
-                fn ($line) => (float) ($line->pack?->pack_price ?? 0) * (int) $line->quantity
-            ),
+            'total' => $total,
+            'retailTotal' => $retailTotal,
+            'wholesaleTotal' => $wholesaleTotal,
+            'wholesaleUnavailableReason' => $wholesaleUnavailableReason,
+            'selectedOrderType' => $selectedOrderType,
             'packLines' => $packLines,
             'hasWholesalePacks' => $hasWholesalePacks,
             'chequeEnabled' => $chequeEnabled,
