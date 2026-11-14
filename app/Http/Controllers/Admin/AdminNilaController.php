@@ -4,14 +4,17 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Integrations\Nila\NilaSpreadsheetParser;
-use App\Integrations\Nila\NilaSpreadsheetImportService;
+use App\Jobs\RunNilaSpreadsheetImport;
 use App\Models\IntegrationMapping;
 use App\Models\NilaImportBatch;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 use RuntimeException;
 use Throwable;
@@ -101,6 +104,29 @@ class AdminNilaController extends Controller
             ],
         ]);
 
+        $previewPath = 'nila/previews/' . $batch->id . '.json';
+
+        try {
+            $previewJson = json_encode(
+                $parsed,
+                JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR
+            );
+
+            if (! Storage::disk('local')->put($previewPath, $previewJson)) {
+                throw new RuntimeException('ذخیره پیش‌نمایش فایل انجام نشد.');
+            }
+
+            $metadata = $batch->metadata ?? [];
+            $metadata['preview_path'] = $previewPath;
+            $batch->update(['metadata' => $metadata]);
+        } catch (Throwable $exception) {
+            Storage::disk('local')->delete([$path, $previewPath]);
+            $batch->delete();
+            report($exception);
+
+            return back()->with('error', 'ذخیره نسخه امن پیش‌نمایش فایل انجام نشد.');
+        }
+
         return redirect()
             ->route('admin.nila.imports.show', $batch)
             ->with('success', 'فایل با موفقیت بررسی اولیه شد؛ هنوز هیچ محصولی وارد دیتابیس نشده است.');
@@ -108,35 +134,80 @@ class AdminNilaController extends Controller
 
     public function importNext(
         Request $request,
-        NilaImportBatch $batch,
-        NilaSpreadsheetImportService $service
+        NilaImportBatch $batch
     ): RedirectResponse {
         $validated = $request->validate([
             'batch_size' => ['nullable', 'integer', 'min:1', 'max:50'],
         ]);
 
+        $limit = (int) ($validated['batch_size'] ?? 5);
+        $token = (string) Str::uuid();
+
         try {
-            $result = $service->importNext($batch, (int) ($validated['batch_size'] ?? 5));
+            DB::transaction(function () use ($batch, $token): void {
+                $locked = NilaImportBatch::query()
+                    ->lockForUpdate()
+                    ->findOrFail($batch->id);
+
+                if ($locked->status === 'completed') {
+                    throw new RuntimeException('این فایل قبلاً به پایان رسیده است.');
+                }
+
+                if (
+                    in_array($locked->status, ['queued', 'processing'], true)
+                    && $locked->updated_at?->greaterThan(now()->subMinutes(15))
+                ) {
+                    throw new RuntimeException('این فایل در حال اجرا یا انتظار صف است؛ اجرای تکراری مجاز نیست.');
+                }
+
+                $metadata = $locked->metadata ?? [];
+                $metadata['queue_token'] = $token;
+
+                $locked->update([
+                    'status' => 'queued',
+                    'metadata' => $metadata,
+                ]);
+            });
+
+            RunNilaSpreadsheetImport::dispatch($batch->id, $limit, $token);
         } catch (RuntimeException $exception) {
             return back()->with('error', $exception->getMessage());
         } catch (Throwable $exception) {
+            DB::transaction(function () use ($batch, $token): void {
+                $locked = NilaImportBatch::query()
+                    ->lockForUpdate()
+                    ->find($batch->id);
+
+                if (! $locked) {
+                    return;
+                }
+
+                $metadata = $locked->metadata ?? [];
+                if (($metadata['queue_token'] ?? null) !== $token) {
+                    return;
+                }
+
+                unset($metadata['queue_token']);
+
+                $locked->update([
+                    'status' => 'ready',
+                    'metadata' => $metadata,
+                ]);
+            });
+
             report($exception);
 
-            return back()->with('error', 'اجرای این مرحله کامل نشد؛ وضعیت فایل برای تلاش دوباره حفظ شد.');
+            return back()->with('error', 'قرار دادن مرحله Import در صف انجام نشد؛ فایل برای تلاش دوباره آماده شد.');
         }
 
         return back()->with(
             'success',
-            sprintf(
-                'این مرحله تمام شد: %d گروه بررسی شد، %d گروه ثبت شد و %d گروه به‌دلیل خطا کنار گذاشته شد.',
-                $result['processed'],
-                $result['imported'],
-                $result['failed']
-            )
+            'مرحله Import در صف اجرا قرار گرفت. نتیجه در همین گزارش قابل پیگیری است.'
         );
     }
 
     public function showImport(
+        Request $request,
         NilaImportBatch $batch,
         NilaSpreadsheetParser $parser
     ): View {
@@ -145,16 +216,75 @@ class AdminNilaController extends Controller
             404
         );
 
-        $parsed = $parser->parse(
-            Storage::disk($batch->disk)->path($batch->file_path)
+        $metadata = $batch->metadata ?? [];
+        $previewPath = $metadata['preview_path'] ?? null;
+        $parsed = null;
+
+        if (
+            is_string($previewPath)
+            && $previewPath !== ''
+            && Storage::disk('local')->exists($previewPath)
+        ) {
+            $parsed = json_decode(
+                Storage::disk('local')->get($previewPath),
+                true,
+                512,
+                JSON_THROW_ON_ERROR
+            );
+        } else {
+            $parsed = $parser->parse(
+                Storage::disk($batch->disk)->path($batch->file_path)
+            );
+
+            $previewPath = 'nila/previews/' . $batch->id . '.json';
+            $previewJson = json_encode(
+                $parsed,
+                JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR
+            );
+
+            if (Storage::disk('local')->put($previewPath, $previewJson)) {
+                $metadata['preview_path'] = $previewPath;
+                $batch->update(['metadata' => $metadata]);
+            }
+        }
+
+        abort_unless(
+            is_array($parsed)
+            && isset($parsed['groups'], $parsed['rows'])
+            && is_array($parsed['groups'])
+            && is_array($parsed['rows']),
+            500,
+            'نسخه ذخیره‌شده پیش‌نمایش معتبر نیست.'
         );
 
         return view('admin.nila.preview', [
             'batch' => $batch,
-            'groups' => $parsed['groups'],
-            'rows' => array_slice($parsed['rows'], 0, 100),
-            'hasMoreRows' => count($parsed['rows']) > 100,
+            'groups' => $this->paginateArray($parsed['groups'], 50, 'groups_page', $request),
+            'rows' => $this->paginateArray($parsed['rows'], 100, 'rows_page', $request),
             'failedProducts' => $batch->metadata['failed_products'] ?? [],
         ]);
     }
+
+    private function paginateArray(
+        array $items,
+        int $perPage,
+        string $pageName,
+        Request $request
+    ): LengthAwarePaginator {
+        $page = LengthAwarePaginator::resolveCurrentPage($pageName);
+        $page = max(1, $page);
+
+        return new LengthAwarePaginator(
+            array_values(array_slice($items, ($page - 1) * $perPage, $perPage)),
+            count($items),
+            $perPage,
+            $page,
+            [
+                'path' => $request->url(),
+                'query' => $request->except($pageName),
+                'pageName' => $pageName,
+            ]
+        );
+    }
+
 }

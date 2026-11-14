@@ -49,7 +49,7 @@
         <span style="width: {{ $pilotProgress }}%"></span>
     </div>
     <p class="admin-card-description">
-        وضعیت: {{ $batch->status === 'completed' ? 'تکمیل‌شده' : ($batch->status === 'processing' ? 'در حال پردازش' : ($batch->status === 'ready' ? 'آماده ادامه' : 'آماده شروع')) }}
+        وضعیت: {{ $batch->status === 'completed' ? 'تکمیل‌شده' : ($batch->status === 'queued' ? 'در صف اجرا' : ($batch->status === 'processing' ? 'در حال پردازش' : ($batch->status === 'ready' ? 'آماده ادامه' : 'آماده شروع'))) }}
         — پیشرفت گروه‌ها: {{ number_format($batch->next_group_offset) }} از {{ number_format($batch->product_groups) }}
         — ثبت موفق: {{ number_format($batch->imported_groups) }}
         — کنار گذاشته‌شده: {{ number_format($batch->failed_groups) }}
@@ -59,6 +59,8 @@
         <div class="alert success">پردازش این فایل به پایان رسیده است. برای اصلاح داده‌های نامعتبر، فایل اصلاح‌شده را دوباره بارگذاری کنید.</div>
     @elseif($batch->status === 'processing')
         <div class="alert">این فایل در حال پردازش است. از اجرای هم‌زمان درخواست دیگر خودداری کنید.</div>
+    @elseif($batch->status === 'queued')
+        <div class="alert">این مرحله در صف اجرا قرار دارد؛ از ارسال مجدد درخواست خودداری کنید.</div>
     @else
         <form method="POST" action="{{ route('admin.nila.imports.import', $batch) }}">
             @csrf
@@ -116,12 +118,15 @@
             </tbody>
         </table>
     </div>
+    @if($groups->hasPages())
+        <div class="admin-pagination">{{ $groups->links() }}</div>
+    @endif
 </div>
 
 <div class="admin-card nila-panel nila-panel--rows">
     <span class="nila-step-label">جزئیات داده‌های ورودی</span>
     <h2 class="admin-card-title">نمونه ردیف‌های فایل</h2>
-    <p class="admin-card-description">حداکثر ۱۰۰ ردیف اول نمایش داده می‌شود. قیمت خالی خطا محسوب می‌شود و هرگز به صفر تبدیل نمی‌شود.</p>
+    <p class="admin-card-description">ردیف‌ها به‌صورت صفحه‌بندی‌شده نمایش داده می‌شوند. قیمت خالی خطا محسوب می‌شود و هرگز به صفر تبدیل نمی‌شود.</p>
     @if($batch->imported_groups > 0)
         <p class="admin-muted">نتیجه Import در این گزارش نگهداری می‌شود و گروه‌های موفق در جدول‌های اصلی کاتالوگ ثبت شده‌اند.</p>
     @elseif($batch->failed_groups > 0)
@@ -169,8 +174,8 @@
             </tbody>
         </table>
     </div>
-    @if($hasMoreRows)
-        <p class="admin-muted">برای جلوگیری از بارگذاری سنگین، فقط ۱۰۰ ردیف اول در این گزارش نمایش داده شده است.</p>
+    @if($rows->hasPages())
+        <div class="admin-pagination">{{ $rows->links() }}</div>
     @endif
 </div>
 
