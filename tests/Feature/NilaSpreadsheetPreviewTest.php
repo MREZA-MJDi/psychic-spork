@@ -209,7 +209,7 @@ class NilaSpreadsheetPreviewTest extends TestCase
 
         $this->actingAs($admin)->post(
             route('admin.nila.imports.import', $batch),
-            ['batch_size' => 5]
+            ['batch_size' => 5, 'confirm_stock_snapshot' => 1]
         )->assertRedirect();
 
         $batch->refresh();
@@ -266,7 +266,7 @@ class NilaSpreadsheetPreviewTest extends TestCase
 
         $this->actingAs($admin)->post(
             route('admin.nila.imports.import', $batch),
-            ['batch_size' => 5]
+            ['batch_size' => 5, 'confirm_stock_snapshot' => 1]
         )->assertRedirect();
 
         $batch->refresh();
