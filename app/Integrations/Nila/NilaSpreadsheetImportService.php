@@ -110,7 +110,6 @@ final class NilaSpreadsheetImportService
                             price: (float) $row['price'],
                             stock: (int) $row['stock'],
                             color: $row['color_candidate'],
-                            isActive: false,
                             metadata: [
                                 'holoo_customer_code' => $row['customer_code'],
                                 'source_row' => $row['row_number'],
@@ -124,7 +123,6 @@ final class NilaSpreadsheetImportService
                         externalId: $group['product_code'],
                         name: $group['product_name_candidate'],
                         variants: $variants,
-                        isActive: false,
                         metadata: [
                             'source' => 'holoo_spreadsheet',
                             'import_batch_id' => $batch->id,
