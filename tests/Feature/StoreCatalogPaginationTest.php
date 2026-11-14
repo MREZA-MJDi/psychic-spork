@@ -56,6 +56,21 @@ class StoreCatalogPaginationTest extends TestCase
             });
     }
 
+    public function test_homepage_featured_carousel_receives_up_to_thirty_six_active_products(): void
+    {
+        Product::factory()->count(40)->create([
+            'is_active' => true,
+            'is_featured' => true,
+        ]);
+
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertViewHas('products', function ($products): bool {
+                return $products->count() === 36
+                    && $products->every(fn ($product) => $product->is_active);
+            });
+    }
+
     public function test_category_and_brand_product_pages_are_database_paginated(): void
     {
         $category = Category::factory()->create();
