@@ -97,6 +97,11 @@ class Order extends Model
         return $this->hasMany(Payment::class);
     }
 
+    public function wholesalePacks(): HasMany
+    {
+        return $this->hasMany(OrderWholesalePack::class);
+    }
+
     public function chequePayment(): HasOne
     {
         return $this->hasOne(ChequePayment::class);
