@@ -70,7 +70,7 @@ class ZarinPalSandboxConfigTest extends TestCase
                 $config['zarinpal']['request_url']
             );
             $this->assertSame(
-                'https://www.zarinpal.com/pg/StartPay',
+                'https://payment.zarinpal.com/pg/StartPay',
                 $config['zarinpal']['startpay_url']
             );
         } finally {
