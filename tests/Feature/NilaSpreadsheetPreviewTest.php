@@ -155,6 +155,38 @@ class NilaSpreadsheetPreviewTest extends TestCase
         $this->assertDatabaseCount('product_variants', 6);
     }
 
+    public function test_import_skips_the_entire_product_group_when_one_variant_is_invalid(): void
+    {
+        Storage::fake('local');
+
+        $admin = User::factory()->create(['is_admin' => true]);
+        $csv = implode("\n", [
+            'holooCode,holooName,holooRegularPrice,holooStockQuantity,holooCustomerCode',
+            '0102001*1,80 کش پهن دانتل 5 سانتی-بادمجونی,2150000,4,1',
+            '0102001*2,80 کش پهن دانتل 5 سانتی-طوسی,,0,1',
+        ]);
+
+        $this->actingAs($admin)->post(
+            route('admin.nila.imports.store'),
+            ['file' => UploadedFile::fake()->createWithContent('partial-group.csv', $csv)]
+        )->assertRedirect();
+
+        $batch = NilaImportBatch::query()->firstOrFail();
+
+        $this->actingAs($admin)->post(
+            route('admin.nila.imports.import', $batch),
+            ['batch_size' => 5]
+        )->assertRedirect();
+
+        $batch->refresh();
+
+        $this->assertSame('completed', $batch->status);
+        $this->assertSame(0, $batch->imported_groups);
+        $this->assertSame(1, $batch->failed_groups);
+        $this->assertDatabaseCount('products', 0);
+        $this->assertDatabaseCount('product_variants', 0);
+    }
+
     public function test_blank_price_is_reported_as_invalid_and_is_not_converted_to_zero(): void
     {
         Storage::fake('local');
