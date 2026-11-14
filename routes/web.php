@@ -50,6 +50,10 @@ Route::get('/robots.txt', [SeoController::class, 'robots'])
 
 Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])
     ->name('seo.sitemap');
+Route::get('/sitemap/{type}/{page}.xml', [SeoController::class, 'sitemapSegment'])
+    ->whereIn('type', ['pages', 'products', 'categories', 'brands'])
+    ->whereNumber('page')
+    ->name('seo.sitemap.segment');
 
 /*
 |--------------------------------------------------------------------------
