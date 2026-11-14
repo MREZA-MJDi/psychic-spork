@@ -96,8 +96,8 @@ final class NilaSpreadsheetParser
         }
 
         try {
-            $workbookXml = $zip->getFromName('xl/workbook.xml');
-            $relationsXml = $zip->getFromName('xl/_rels/workbook.xml.rels');
+            $workbookXml = $this->readZipEntry($zip, 'xl/workbook.xml', 1_000_000);
+            $relationsXml = $this->readZipEntry($zip, 'xl/_rels/workbook.xml.rels', 1_000_000);
 
             if ($workbookXml === false || $relationsXml === false) {
                 throw new RuntimeException('ساختار داخلی فایل XLSX ناقص است.');
@@ -135,7 +135,7 @@ final class NilaSpreadsheetParser
                 ? ltrim($target, '/')
                 : 'xl/' . ltrim($target, '/');
 
-            $sheetXml = $zip->getFromName($sheetPath);
+            $sheetXml = $this->readZipEntry($zip, $sheetPath, 25_000_000);
 
             if ($sheetXml === false) {
                 throw new RuntimeException('محتوای Worksheet قابل خواندن نیست.');
@@ -189,9 +189,24 @@ final class NilaSpreadsheetParser
         }
     }
 
+    private function readZipEntry(ZipArchive $zip, string $name, int $maxBytes): ?string
+    {
+        $stat = $zip->statName($name);
+
+        if ($stat === false) {
+            return null;
+        }
+
+        if ((int) ($stat['size'] ?? 0) > $maxBytes) {
+            throw new RuntimeException('یکی از بخش‌های داخلی فایل اکسل بیش از حد بزرگ است.');
+        }
+
+        return $zip->getFromName($name) ?: '';
+    }
+
     private function readSharedStrings(ZipArchive $zip, string $namespace): array
     {
-        $xml = $zip->getFromName('xl/sharedStrings.xml');
+        $xml = $this->readZipEntry($zip, 'xl/sharedStrings.xml', 10_000_000);
 
         if ($xml === false) {
             return [];
