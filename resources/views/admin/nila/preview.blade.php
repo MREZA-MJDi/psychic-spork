@@ -4,8 +4,14 @@
 @section('page-title', 'گزارش بررسی فایل هولو')
 
 @section('content')
-<div class="admin-page-head">
+@php
+    $pilotProgress = $batch->product_groups > 0
+        ? min(100, (int) round(($batch->next_group_offset / $batch->product_groups) * 100))
+        : 0;
+@endphp
+<div class="admin-page-head nila-preview-head">
     <div>
+        <span class="nila-step-label">گزارش و کنترل پایلوت</span>
         <h1 class="admin-page-head__title">گزارش بررسی فایل</h1>
         <p class="admin-page-head__text">{{ $batch->original_name }}</p>
     </div>
@@ -31,8 +37,17 @@
     </div>
 </div>
 
-<div class="admin-card">
-    <h2 class="admin-card-title">وضعیت اجرای Import</h2>
+<div class="admin-card nila-panel nila-panel--progress">
+    <div class="nila-progress-heading">
+        <div>
+            <span class="nila-step-label">مرحله ۳ · اجرای کنترل‌شده</span>
+            <h2 class="admin-card-title">وضعیت اجرای Import</h2>
+        </div>
+        <strong class="nila-progress-value">{{ number_format($pilotProgress) }}٪</strong>
+    </div>
+    <div class="nila-progress-track" role="progressbar" aria-label="پیشرفت Import" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ $pilotProgress }}">
+        <span style="width: {{ $pilotProgress }}%"></span>
+    </div>
     <p class="admin-card-description">
         وضعیت: {{ $batch->status === 'completed' ? 'تکمیل‌شده' : ($batch->status === 'processing' ? 'در حال پردازش' : ($batch->status === 'ready' ? 'آماده ادامه' : 'آماده شروع')) }}
         — پیشرفت گروه‌ها: {{ number_format($batch->next_group_offset) }} از {{ number_format($batch->product_groups) }}
@@ -51,15 +66,13 @@
                 <div class="admin-field">
                     <label for="batch_size">تعداد محصول اصلی در این مرحله</label>
                     <select id="batch_size" name="batch_size">
-                        <option value="5" selected>۵ گروه محصول (مرحله آزمایشی)</option>
-                        <option value="10">۱۰ گروه محصول</option>
-                        <option value="25">۲۵ گروه محصول</option>
-                        <option value="50">۵۰ گروه محصول</option>
+                        <option value="5" selected>۵ گروه محصول (پایلوت اولیه)</option>
                     </select>
-                    <small class="admin-help">هر گروه شامل تمام تنوع‌های همان کد پایه است. سقف هر مرحله ۵۰ محصول اصلی است.</small>
+                    <small class="admin-help">در این مرحله فقط ۵ گروه اول وارد می‌شوند. هر گروه شامل تمام تنوع‌های همان کد پایه است. قبل از هر Import بزرگ‌تر باید نتیجه این پایلوت بررسی و تأیید شود.</small>
                 </div>
             </div>
-            <div class="admin-form-actions">
+            <div class="admin-form-actions nila-pilot-actions">
+                <span class="nila-safe-note">محصولات جدید غیرفعال می‌مانند و دسته/برند به‌صورت حدسی ساخته نمی‌شود.</span>
                 <button type="submit" class="admin-btn admin-btn--secondary">
                     {{ $batch->next_group_offset > 0 ? 'ادامه Import' : 'شروع Import مرحله‌ای' }}
                 </button>
@@ -68,7 +81,8 @@
     @endif
 </div>
 
-<div class="admin-card">
+<div class="admin-card nila-panel nila-panel--groups">
+    <span class="nila-step-label">مرحله ۲ · کنترل گروه‌ها</span>
     <h2 class="admin-card-title">گروه‌بندی محصولات</h2>
     <p class="admin-card-description">کد قبل از ستاره، گروه محصول را مشخص می‌کند. کد کامل هر ردیف برای SKU تنوع نگهداری می‌شود.</p>
     <div class="admin-table-wrap">
@@ -101,7 +115,8 @@
     </div>
 </div>
 
-<div class="admin-card">
+<div class="admin-card nila-panel nila-panel--rows">
+    <span class="nila-step-label">جزئیات داده‌های ورودی</span>
     <h2 class="admin-card-title">نمونه ردیف‌های فایل</h2>
     <p class="admin-card-description">حداکثر ۱۰۰ ردیف اول نمایش داده می‌شود. قیمت خالی خطا محسوب می‌شود و هرگز به صفر تبدیل نمی‌شود.</p>
     @if($batch->imported_groups > 0)
@@ -156,7 +171,7 @@
     @endif
 </div>
 
-<div class="admin-card">
+<div class="admin-card nila-panel nila-panel--rules">
     <h2 class="admin-card-title">محدودیت‌های این مرحله</h2>
     <ul>
         <li>این گزارش فقط پیش‌نمایش است و هیچ تغییری در محصولات، تنوع‌ها، موجودی یا قیمت‌ها ایجاد نکرده است.</li>
