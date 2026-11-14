@@ -8,24 +8,24 @@
     <div>
         <h1 class="admin-page-head__title">مرکز کنترل نیلا / Holoo</h1>
         <p class="admin-page-head__text">
-            وضعیت واردسازی کاتالوگ نیلا / هلو. این صفحه فعلاً اتصال زنده یا بارگذاری فایل ندارد؛ فقط نگاشت‌هایی را نشان می‌دهد که Importer داخلی ساخته است.
+            دریافت امن فایل کاتالوگ، بررسی ساختار و آماده‌سازی ورود مرحله‌ای محصولات.
         </p>
     </div>
 </div>
 
 <div class="admin-dashboard-stats">
     <div class="admin-stat-card">
-        <div class="admin-stat-card__label">محصولات Mapping شده</div>
+        <div class="admin-stat-card__label">محصولات متصل به نیلا</div>
         <div class="admin-stat-card__value">{{ number_format($products) }}</div>
-        <div class="admin-stat-card__meta">Product</div>
+        <div class="admin-stat-card__meta">Product mappings</div>
     </div>
     <div class="admin-stat-card">
-        <div class="admin-stat-card__label">واریانت‌های Mapping شده</div>
+        <div class="admin-stat-card__label">تنوع‌های متصل به نیلا</div>
         <div class="admin-stat-card__value">{{ number_format($variants) }}</div>
-        <div class="admin-stat-card__meta">Product Variant</div>
+        <div class="admin-stat-card__meta">Variant mappings</div>
     </div>
     <div class="admin-stat-card">
-        <div class="admin-stat-card__label">آخرین تغییر Mapping</div>
+        <div class="admin-stat-card__label">آخرین تغییر اتصال</div>
         <div class="admin-stat-card__value" style="font-size:1.15rem;">
             {{ $latestSyncAt?->format('Y/m/d H:i') ?? '—' }}
         </div>
@@ -36,22 +36,105 @@
 <div class="admin-card">
     <div class="admin-card-header">
         <div>
-            <h2 class="admin-card-title">مرز مالکیت داده</h2>
+            <h2 class="admin-card-title">۱. بررسی فایل اکسل هولو</h2>
             <p class="admin-card-description">
-                Nila منبع داده‌های کاتالوگ است؛ Janan مالک Media و نحوه نمایش Store است.
+                فایل در فضای خصوصی سرور ذخیره می‌شود. در این مرحله فقط ساختار و داده‌ها خوانده می‌شوند و هیچ محصول، تنوع، دسته یا برندی در کاتالوگ ساخته یا ویرایش نمی‌شود.
             </p>
-            <p class="admin-card-description">برای اجرای واردسازی ۲۰۰۰ محصول، ابتدا باید خروجی واقعی نیلا یا هلو و قالب فایل/فیلدهای آن مشخص شود. در این ریپو Adapter متصل به سرویس بیرونی یا ابزار بارگذاری CSV/XLSX وجود ندارد.</p>
         </div>
     </div>
 
+    <form method="POST" action="{{ route('admin.nila.imports.store') }}" enctype="multipart/form-data">
+        @csrf
+        <div class="admin-form-grid">
+            <div>
+                <label class="admin-label" for="nila-import-file">فایل خروجی نیلا / هلو</label>
+                <input
+                    id="nila-import-file"
+                    class="admin-input"
+                    type="file"
+                    name="file"
+                    accept=".xlsx,.csv,.txt"
+                    required
+                >
+                <p class="admin-muted">فرمت مجاز: XLSX یا CSV، حداکثر ۱۰ مگابایت. فقط شیت اول فایل XLSX بررسی می‌شود.</p>
+                @error('file')
+                    <p class="admin-field-error">{{ $message }}</p>
+                @enderror
+            </div>
+        </div>
+        <div class="admin-form-actions">
+            <button type="submit" class="admin-button admin-button--primary">بارگذاری و بررسی فایل</button>
+        </div>
+    </form>
+</div>
+
+<div class="admin-card">
+    <div class="admin-card-header">
+        <div>
+            <h2 class="admin-card-title">۲. تاریخچه بررسی فایل‌ها</h2>
+            <p class="admin-card-description">هر فایل یک شناسه مستقل دارد تا بررسی‌ها قابل پیگیری باشند.</p>
+        </div>
+    </div>
+
+    @if($batches->isNotEmpty())
+        <div class="admin-table-wrap">
+            <table class="admin-table">
+                <thead>
+                <tr>
+                    <th>نام فایل</th>
+                    <th>ردیف‌ها</th>
+                    <th>قابل بررسی</th>
+                    <th>دارای خطا</th>
+                    <th>گروه محصول</th>
+                    <th>وضعیت</th>
+                    <th>تاریخ</th>
+                    <th>جزئیات</th>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach($batches as $batch)
+                    <tr>
+                        <td>{{ $batch->original_name }}</td>
+                        <td>{{ number_format($batch->total_rows) }}</td>
+                        <td>{{ number_format($batch->valid_rows) }}</td>
+                        <td>{{ number_format($batch->invalid_rows) }}</td>
+                        <td>{{ number_format($batch->product_groups) }}</td>
+                        <td>بررسی اولیه</td>
+                        <td>{{ $batch->created_at?->format('Y/m/d H:i') }}</td>
+                        <td>
+                            <a href="{{ route('admin.nila.imports.show', $batch) }}">مشاهده گزارش</a>
+                        </td>
+                    </tr>
+                @endforeach
+                </tbody>
+            </table>
+        </div>
+        <div class="admin-pagination">{{ $batches->links() }}</div>
+    @else
+        <div class="admin-empty">
+            <h3 class="admin-empty__title">هنوز فایلی بررسی نشده است</h3>
+            <p class="admin-empty__text">بعد از بارگذاری اولین فایل، نتیجه بررسی در همین بخش ثبت می‌شود.</p>
+        </div>
+    @endif
+</div>
+
+<div class="admin-card">
+    <div class="admin-card-header">
+        <div>
+            <h2 class="admin-card-title">مرز مالکیت اطلاعات</h2>
+            <p class="admin-card-description">
+                اطلاعات کاتالوگ و موجودی از نیلا / هلو می‌آیند؛ تصاویر، محتوای نمایشی، توضیحات تکمیلی و انتشار محصول در جانان مدیریت می‌شوند.
+            </p>
+        </div>
+    </div>
     <div class="admin-form-grid">
         <div class="admin-card">
-            <strong>Nila / Holoo</strong>
-            <p class="admin-muted">Importer داخلی داده نرمال‌شده را می‌پذیرد و نام، SKU، قیمت و موجودی را نگاشت می‌کند؛ قرارداد API و Adapter سرویس بیرونی هنوز متصل نیستند.</p>
+            <strong>ساختار کاتالوگ</strong>
+            <p class="admin-muted">ورود نهایی فقط از جدول‌های فعلی products و product_variants استفاده می‌کند. کد کامل هولو شناسه تنوع و SKU خواهد بود و کد پایه برای گروه‌بندی محصول به کار می‌رود.</p>
         </div>
         <div class="admin-card">
-            <strong>Janan</strong>
-            <p class="admin-muted">تصاویر، ویدئو، ترتیب گالری، Alt و ارائه فروشگاه در جانان مدیریت می‌شوند. فعلاً تصاویر محصول باید در پنل جانان بارگذاری شوند.</p>
+            <strong>اطلاعاتی که از فایل فعلی قابل استخراج نیست</strong>
+            <p class="admin-muted">فایل فعلی ستون دسته‌بندی و برند ندارد؛ بنابراین هیچ دسته یا برندی از روی حدس ساخته نمی‌شود. holooCustomerCode نیز فعلاً فقط به‌عنوان داده مرجع نگهداری می‌شود.</p>
         </div>
     </div>
 </div>
@@ -59,8 +142,8 @@
 <div class="admin-card">
     <div class="admin-card-header">
         <div>
-            <h2 class="admin-card-title">آخرین Mappingها</h2>
-            <p class="admin-card-description">این جدول وضعیت Catalog داخلی را نشان می‌دهد، نه اتصال زنده به API.</p>
+            <h2 class="admin-card-title">آخرین Mappingهای ثبت‌شده</h2>
+            <p class="admin-card-description">این جدول ارتباط شناسه‌های خارجی با رکوردهای فعلی کاتالوگ را نشان می‌دهد.</p>
         </div>
     </div>
 
@@ -92,7 +175,7 @@
     @else
         <div class="admin-empty">
             <h3 class="admin-empty__title">هنوز Mapping ثبت نشده</h3>
-            <p class="admin-empty__text">Importer بعد از دریافت داده نرمال‌شده از Adapter، Mapping را ایجاد می‌کند.</p>
+            <p class="admin-empty__text">پس از اجرای Import تأییدشده، ارتباط محصول و تنوع با شناسه‌های هولو اینجا نمایش داده می‌شود.</p>
         </div>
     @endif
 </div>
