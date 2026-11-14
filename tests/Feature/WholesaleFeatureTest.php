@@ -11,7 +11,6 @@ use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\User;
 use App\Models\WholesaleProfile;
-use App\Models\WholesalePack;
 use App\Models\ChequePermission;
 use App\Models\ChequePayment;
 use App\Models\WholesalePack;
