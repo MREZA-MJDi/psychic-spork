@@ -16,6 +16,9 @@ class NilaImportBatch extends Model
         'valid_rows',
         'invalid_rows',
         'product_groups',
+        'next_group_offset',
+        'imported_groups',
+        'failed_groups',
         'created_by',
         'metadata',
     ];
@@ -27,6 +30,9 @@ class NilaImportBatch extends Model
             'valid_rows' => 'integer',
             'invalid_rows' => 'integer',
             'product_groups' => 'integer',
+            'next_group_offset' => 'integer',
+            'imported_groups' => 'integer',
+            'failed_groups' => 'integer',
             'metadata' => 'array',
         ];
     }
