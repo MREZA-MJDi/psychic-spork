@@ -40,7 +40,7 @@ class AdminHeroTest extends TestCase
             ->assertSee($product->name);
     }
 
-    public function test_product_hero_selection_is_capped_at_thirty_six_products(): void
+    public function test_product_hero_selection_is_capped_at_thirty_six_active_products(): void
     {
         $admin = User::factory()->create(['is_admin' => true]);
 
@@ -67,8 +67,9 @@ class AdminHeroTest extends TestCase
 
         $this->assertSame(
             36,
-            Product::query()->where('is_hero', true)->count()
+            Product::query()->where('is_active', true)->where('is_hero', true)->count()
         );
+    }
 
     public function test_inactive_product_cannot_be_added_to_homepage_hero(): void
     {
@@ -103,6 +104,5 @@ class AdminHeroTest extends TestCase
                 && $slides[0]['number'] === '01'
                 && $slides[35]['number'] === '36';
         });
-    }
     }
 }
