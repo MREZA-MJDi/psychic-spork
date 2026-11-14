@@ -200,6 +200,8 @@ final class NilaSpreadsheetImportService
                 array_merge($existingFailures, $failures),
                 -100
             );
+            $metadata['preview_only'] = false;
+            $metadata['last_imported_at'] = now()->toISOString();
 
             $batch->update([
                 'status' => ($completed ?? ($nextOffset >= $totalGroups))
