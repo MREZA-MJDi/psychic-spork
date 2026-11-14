@@ -18,7 +18,9 @@ class AdminChequeController extends Controller
         $statusNames = [
             'submitted' => 'ثبت‌شده',
             'under_review' => 'در حال بررسی',
-            'accepted' => 'تأیید شده',
+            'awaiting_original' => 'در انتظار ارسال اصل چک',
+            'original_received' => 'اصل چک دریافت شد؛ منتظر تأیید',
+            'accepted' => 'تأیید شده؛ سفارش آزاد است',
             'deposited' => 'واریز شده',
             'cleared' => 'تسویه شده',
             'rejected' => 'رد شده',
@@ -88,6 +90,31 @@ class AdminChequeController extends Controller
         $cheques->moveToReview($chequePayment, $request->user());
 
         return back()->with('success', 'چک وارد مرحله بررسی شد.');
+    }
+
+    public function requestOriginal(
+        ChequePayment $chequePayment,
+        Request $request,
+        ChequePaymentService $cheques
+    ): RedirectResponse {
+        $data = $request->validate([
+            'note' => ['required', 'string', 'min:5', 'max:2000'],
+        ]);
+        $cheques->requestOriginal($chequePayment, $request->user(), $data['note']);
+        return back()->with('success', 'درخواست ارسال اصل چک برای مشتری ثبت شد.');
+    }
+
+    public function originalReceived(
+        ChequePayment $chequePayment,
+        Request $request,
+        ChequePaymentService $cheques
+    ): RedirectResponse {
+        $cheques->markOriginalReceived(
+            $chequePayment,
+            $request->user(),
+            $this->note($request)
+        );
+        return back()->with('success', 'دریافت اصل چک ثبت شد؛ اکنون می‌توانی چک را تأیید و سفارش را آزاد کنی.');
     }
 
     public function accept(

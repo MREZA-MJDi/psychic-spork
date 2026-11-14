@@ -359,6 +359,16 @@ Route::prefix('admin')
         )->name('cheques.review');
 
         Route::patch(
+            'cheques/{chequePayment}/request-original',
+            [AdminChequeController::class, 'requestOriginal']
+        )->name('cheques.request-original');
+
+        Route::patch(
+            'cheques/{chequePayment}/original-received',
+            [AdminChequeController::class, 'originalReceived']
+        )->name('cheques.original-received');
+
+        Route::patch(
             'cheques/{chequePayment}/accept',
             [AdminChequeController::class, 'accept']
         )->name('cheques.accept');

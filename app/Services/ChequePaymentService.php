@@ -147,6 +147,60 @@ final class ChequePaymentService
         return $this->transition($cheque, $admin, 'under_review');
     }
 
+    public function requestOriginal(
+        ChequePayment $cheque,
+        User $admin,
+        string $instruction
+    ): ChequePayment {
+        $this->assertAdmin($admin);
+        $instruction = trim($instruction);
+        abort_if($instruction === '', 422, 'دستور ارسال اصل چک را وارد کنید.');
+
+        return DB::transaction(function () use ($cheque, $admin, $instruction): ChequePayment {
+            $cheque = $this->lockChequeFlow($cheque);
+            abort_unless(
+                $cheque->canTransitionTo('awaiting_original'),
+                422,
+                'برای این چک امکان درخواست ارسال اصل وجود ندارد.'
+            );
+            $cheque->update([
+                'status' => 'awaiting_original',
+                'reviewed_by' => $admin->id,
+                'reviewed_at' => now(),
+                'review_note' => $instruction,
+                'original_received_at' => null,
+                'original_received_by' => null,
+            ]);
+            return $cheque->fresh(['order', 'payment', 'reviewedBy']);
+        });
+    }
+
+    public function markOriginalReceived(
+        ChequePayment $cheque,
+        User $admin,
+        ?string $note = null
+    ): ChequePayment {
+        $this->assertAdmin($admin);
+        return DB::transaction(function () use ($cheque, $admin, $note): ChequePayment {
+            $cheque = $this->lockChequeFlow($cheque);
+            if ($cheque->status === 'original_received') {
+                return $cheque;
+            }
+            abort_unless(
+                $cheque->canTransitionTo('original_received'),
+                422,
+                'این چک در انتظار دریافت اصل چک نیست.'
+            );
+            $cheque->update([
+                'status' => 'original_received',
+                'original_received_at' => now(),
+                'original_received_by' => $admin->id,
+                'review_note' => filled($note) ? trim($note) : $cheque->review_note,
+            ]);
+            return $cheque->fresh(['order', 'payment', 'originalReceivedBy']);
+        });
+    }
+
     public function accept(
         ChequePayment $cheque,
         User $admin,

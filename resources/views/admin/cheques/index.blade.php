@@ -8,7 +8,7 @@
         <div>
             <span class="eyebrow">PAYMENTS / CHEQUES</span>
             <h1>مدیریت چک‌ها</h1>
-            <p>وضعیت چک‌های ثبت‌شده را بررسی و فقط transitionهای مجاز را انجام بده.</p>
+            <p>تصویر و مشخصات چک را بررسی کن؛ اگر اصل چک لازم است، قبل از آزاد کردن سفارش از مشتری بخواه آن را ارسال کند.</p>
         </div>
     </div>
 
@@ -49,8 +49,11 @@
                         @if($cheque->image_path)
                             <a href="{{ route('admin.cheques.image', $cheque) }}" target="_blank" rel="noopener">مشاهده تصویر چک</a>
                         @endif
+                        @if($cheque->original_received_at)
+                            <small>اصل چک دریافت شد: {{ $cheque->original_received_at->format('Y/m/d H:i') }}</small>
+                        @endif
                         @if($cheque->review_note)
-                            <small>یادداشت: {{ $cheque->review_note }}</small>
+                            <small>یادداشت / دستور مشتری: {{ $cheque->review_note }}</small>
                         @endif
                     </td>
                     <td>
@@ -64,12 +67,25 @@
                         <div class="admin-actions">
                             @if($cheque->status === 'submitted')
                                 <form method="POST" action="{{ route('admin.cheques.review', $cheque) }}">@csrf @method('PATCH')<button type="submit">بررسی</button></form>
-                            @elseif($cheque->status === 'under_review')
-                                <form method="POST" action="{{ route('admin.cheques.accept', $cheque) }}">@csrf @method('PATCH')<button type="submit">پذیرش</button></form>
+                            @elseif(in_array($cheque->status, ['under_review', 'original_received'], true))
+                                <form method="POST" action="{{ route('admin.cheques.accept', $cheque) }}">@csrf @method('PATCH')<button type="submit">تأیید و آزادسازی سفارش</button></form>
+                                @if($cheque->status === 'under_review')
+                                    <form method="POST" action="{{ route('admin.cheques.request-original', $cheque) }}">
+                                        @csrf @method('PATCH')
+                                        <input name="note" maxlength="2000" required placeholder="آدرس یا دستور ارسال اصل چک" aria-label="دستور ارسال اصل چک">
+                                        <button type="submit">درخواست ارسال اصل چک</button>
+                                    </form>
+                                @endif
                                 <form method="POST" action="{{ route('admin.cheques.reject', $cheque) }}">
                                     @csrf @method('PATCH')
                                     <input name="note" maxlength="2000" placeholder="دلیل رد (اختیاری)" aria-label="دلیل رد چک">
                                     <button type="submit">رد</button>
+                                </form>
+                            @elseif($cheque->status === 'awaiting_original')
+                                <form method="POST" action="{{ route('admin.cheques.original-received', $cheque) }}">
+                                    @csrf @method('PATCH')
+                                    <input name="note" maxlength="2000" placeholder="یادداشت دریافت اصل چک (اختیاری)" aria-label="یادداشت دریافت اصل چک">
+                                    <button type="submit">اصل چک دریافت شد</button>
                                 </form>
                             @elseif($cheque->status === 'accepted')
                                 <form method="POST" action="{{ route('admin.cheques.deposit', $cheque) }}">@csrf @method('PATCH')<button type="submit">واریز</button></form>
