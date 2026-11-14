@@ -98,7 +98,17 @@
                         <td>{{ number_format($batch->valid_rows) }}</td>
                         <td>{{ number_format($batch->invalid_rows) }}</td>
                         <td>{{ number_format($batch->product_groups) }}</td>
-                        <td>بررسی اولیه</td>
+                        <td>
+                            @if($batch->status === 'completed')
+                                تکمیل‌شده
+                            @elseif($batch->status === 'processing')
+                                در حال پردازش
+                            @elseif($batch->status === 'ready')
+                                آماده ادامه
+                            @else
+                                آماده شروع
+                            @endif
+                        </td>
                         <td>{{ $batch->created_at?->format('Y/m/d H:i') }}</td>
                         <td>
                             <a href="{{ route('admin.nila.imports.show', $batch) }}">مشاهده گزارش</a>
