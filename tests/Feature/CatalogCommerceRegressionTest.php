@@ -16,7 +16,7 @@ use App\Services\CartService;
 use App\Services\InventoryService;
 use App\Services\MediaService;
 use App\Services\ZarinPalPaymentGateway;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
@@ -29,7 +29,7 @@ use Tests\TestCase;
 
 class CatalogCommerceRegressionTest extends TestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     public function test_inventory_movements_keep_stock_and_ledger_in_sync(): void
     {
