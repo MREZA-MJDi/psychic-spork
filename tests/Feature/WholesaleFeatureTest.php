@@ -11,6 +11,7 @@ use App\Models\ProductVariant;
 use App\Models\User;
 use App\Models\WholesaleProfile;
 use App\Models\ChequePermission;
+use App\Models\ChequePayment;
 use App\Models\WholesalePack;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Config;
@@ -518,6 +519,75 @@ class WholesaleFeatureTest extends TestCase
             'user_id' => $customer->id,
             'enabled' => false,
         ]);
+    }
+
+    public function test_cheque_checkout_normalizes_sayad_digits_and_rejects_duplicate_ids_without_serial_number(): void
+    {
+        Storage::fake('local');
+
+        $customer = User::factory()->create(['is_admin' => false]);
+        ChequePermission::create([
+            'user_id' => $customer->id,
+            'enabled' => true,
+            'approved_at' => now(),
+        ]);
+
+        [, $firstVariant] = $this->makeProduct(stock: 10, wholesalePrice: 70000);
+        $cart = Cart::create([
+            'user_id' => $customer->id,
+            'last_activity_at' => now(),
+        ]);
+        CartItem::create([
+            'cart_id' => $cart->id,
+            'product_variant_id' => $firstVariant->id,
+            'quantity' => 1,
+        ]);
+
+        $sayadId = '۱۲۳۴۵۶۷۸۹۰۱۲۳۴۵۶';
+        $payload = $this->checkoutData([
+            'order_type' => 'wholesale',
+            'payment_method' => 'cheque',
+            'sayad_id' => $sayadId,
+            'bank_name' => 'بانک تست',
+            'due_date' => now()->addDays(15)->toDateString(),
+        ]);
+        $payload['cheque_image'] = UploadedFile::fake()->image('cheque.jpg');
+
+        $this->actingAs($customer)
+            ->post('/checkout', $payload)
+            ->assertRedirect(route('checkout.success'));
+
+        $cheque = ChequePayment::query()->firstOrFail();
+
+        $this->assertSame('1234567890123456', $cheque->sayad_id);
+        $this->assertNull($cheque->cheque_number);
+        $this->assertNotEmpty($cheque->image_path);
+        Storage::disk('local')->assertExists($cheque->image_path);
+
+        [, $secondVariant] = $this->makeProduct(stock: 10, wholesalePrice: 70000);
+        CartItem::create([
+            'cart_id' => $cart->fresh()->id,
+            'product_variant_id' => $secondVariant->id,
+            'quantity' => 1,
+        ]);
+
+        $duplicatePayload = $this->checkoutData([
+            'order_type' => 'wholesale',
+            'payment_method' => 'cheque',
+            'sayad_id' => '1234567890123456',
+            'bank_name' => 'بانک تست',
+            'due_date' => now()->addDays(15)->toDateString(),
+        ]);
+        $duplicatePayload['cheque_image'] = UploadedFile::fake()->image('duplicate-cheque.jpg');
+
+        $this->actingAs($customer)
+            ->from(route('checkout'))
+            ->post('/checkout', $duplicatePayload)
+            ->assertRedirect(route('checkout'))
+            ->assertSessionHasErrors('sayad_id');
+
+        $this->assertDatabaseCount('cheque_payments', 1);
+        $this->assertDatabaseCount('orders', 1);
     }
 
     public function test_wholesale_cheque_requires_admin_granted_permission(): void

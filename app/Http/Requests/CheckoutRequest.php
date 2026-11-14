@@ -81,8 +81,9 @@ class CheckoutRequest extends FormRequest
 
             'sayad_id' => $sayadIdRules,
 
+            // The 16-digit Sayad identifier is the unique cheque registry key.
+            // Physical cheque serial is optional to avoid asking for duplicate data.
             'cheque_number' => [
-                'required_if:payment_method,cheque',
                 'nullable',
                 'string',
                 'max:100',
