@@ -66,9 +66,12 @@
                 <div class="admin-field">
                     <label for="batch_size">تعداد محصول اصلی در این مرحله</label>
                     <select id="batch_size" name="batch_size">
-                        <option value="5" selected>۵ گروه محصول (پایلوت اولیه)</option>
+                        <option value="5" selected>۵ گروه محصول (شروع پایلوت)</option>
+                        <option value="10">۱۰ گروه محصول</option>
+                        <option value="25">۲۵ گروه محصول</option>
+                        <option value="50">۵۰ گروه محصول (حداکثر هر مرحله)</option>
                     </select>
-                    <small class="admin-help">در این مرحله فقط ۵ گروه اول وارد می‌شوند. هر گروه شامل تمام تنوع‌های همان کد پایه است. قبل از هر Import بزرگ‌تر باید نتیجه این پایلوت بررسی و تأیید شود.</small>
+                    <small class="admin-help">پیشنهاد شروع با ۵ گروه اول است. پس از بررسی نتیجه پایلوت می‌توانی مرحله‌های بعدی را با ۱۰، ۲۵ یا حداکثر ۵۰ گروه ادامه بدهی. هر گروه شامل تمام تنوع‌های همان کد پایه است.</small>
                 </div>
             </div>
             <div class="admin-form-actions nila-pilot-actions">
