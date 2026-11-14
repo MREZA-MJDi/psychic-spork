@@ -40,7 +40,9 @@ class StoreCategoryController extends Controller
             ])
             ->orderBy('sort_order')
             ->orderBy('name')
-            ->get();
+            ->orderBy('id')
+            ->paginate(24)
+            ->withQueryString();
 
         return view('categories.index', [
             'seo' => $seo->page(
