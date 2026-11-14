@@ -42,6 +42,12 @@ final class ValidProductAttributes implements ValidationRule
             }
 
             if (is_array($item)) {
+                if (! array_is_list($item)) {
+                    $fail('هر ویژگی فقط می‌تواند یک مقدار ساده یا فهرستی از مقادیر باشد.');
+
+                    return;
+                }
+
                 if (count($item) > 20) {
                     $fail('برای هر ویژگی حداکثر ۲۰ مقدار قابل ثبت است.');
 
