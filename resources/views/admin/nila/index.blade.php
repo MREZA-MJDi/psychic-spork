@@ -76,7 +76,7 @@
         </div>
     </div>
 
-    @if($batches->isNotEmpty())
+    @if($batches->count() > 0)
         <div class="admin-table-wrap">
             <table class="admin-table">
                 <thead>
