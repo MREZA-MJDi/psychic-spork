@@ -6,6 +6,7 @@ use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;
 
 class AdminHeroTest extends TestCase
@@ -92,6 +93,8 @@ class AdminHeroTest extends TestCase
 
     public function test_homepage_can_render_thirty_six_hero_products(): void
     {
+        Cache::flush();
+
         Product::factory()->count(36)->create([
             'is_active' => true,
             'is_hero' => true,
