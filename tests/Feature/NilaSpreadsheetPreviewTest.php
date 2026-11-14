@@ -49,7 +49,10 @@ class NilaSpreadsheetPreviewTest extends TestCase
             ->assertOk()
             ->assertSee('0102001*1')
             ->assertSee('بادمجونی')
-            ->assertSee('هنوز هیچ محصولی وارد دیتابیس نشده');
+            ->assertSee('هنوز هیچ محصولی وارد دیتابیس نشده')
+            ->assertSee('۵ گروه محصول (پایلوت اولیه)')
+            ->assertSee('قبل از هر Import بزرگ‌تر باید نتیجه این پایلوت بررسی و تأیید شود')
+            ->assertDontSee('۵۰ گروه محصول');
     }
 
     public function test_admin_can_import_one_complete_product_group_without_publishing_it(): void
