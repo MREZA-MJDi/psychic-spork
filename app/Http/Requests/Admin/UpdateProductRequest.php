@@ -6,6 +6,7 @@ use App\Models\Product;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use App\Support\NumericInput;
+use App\Rules\ValidProductAttributes;
 
 class UpdateProductRequest extends FormRequest
 {
@@ -128,6 +129,7 @@ class UpdateProductRequest extends FormRequest
             'attributes_json' => [
                 'nullable',
                 'string',
+                new ValidProductAttributes(),
             ],
 
             'is_active' => [
