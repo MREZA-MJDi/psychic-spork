@@ -81,6 +81,15 @@ class WholesaleController extends Controller
         $sort = $filters['sort'] ?? 'featured';
         $perPage = (int) ($filters['per_page'] ?? 12);
 
+        $categoryIds = null;
+        if (isset($filters['category_id'])) {
+            $selectedCategory = Category::query()
+                ->active()
+                ->find((int) $filters['category_id']);
+
+            $categoryIds = $selectedCategory?->subtreeIds() ?? [];
+        }
+
         $products = Product::query()
             ->select([
                 'id',
@@ -146,8 +155,8 @@ class WholesaleController extends Controller
                 });
             })
             ->when(
-                $filters['category_id'] ?? null,
-                fn ($query, int $categoryId) => $query->where('category_id', $categoryId)
+                $categoryIds !== null,
+                fn ($query) => $query->whereIn('category_id', $categoryIds)
             )
             ->when(
                 $filters['brand_id'] ?? null,

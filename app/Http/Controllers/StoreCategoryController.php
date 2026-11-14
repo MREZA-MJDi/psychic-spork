@@ -64,6 +64,8 @@ class StoreCategoryController extends Controller
             ? (int) $request->query('per_page', 6)
             : 6;
 
+        $categoryIds = $category->subtreeIds();
+
         $products = Product::query()
             ->select(['id','category_id','brand_id','name','slug','short_description','updated_at'])
             ->active()
@@ -71,7 +73,7 @@ class StoreCategoryController extends Controller
             ->withCatalogMetrics()
 
             ->with($this->catalogRelations())
-            ->where('category_id', $category->id)
+            ->whereIn('category_id', $categoryIds)
             ->when($sort === 'oldest', fn ($query) => $query->orderBy('updated_at')->orderBy('id'))
             ->when($sort === 'price_asc', fn ($query) => $query->orderByEffectivePrice('asc'))
             ->when($sort === 'price_desc', fn ($query) => $query->orderByEffectivePrice('desc'))

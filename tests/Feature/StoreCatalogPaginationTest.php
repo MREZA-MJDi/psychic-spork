@@ -56,6 +56,34 @@ class StoreCatalogPaginationTest extends TestCase
             });
     }
 
+    public function test_parent_category_pages_and_shop_filters_include_active_descendants(): void
+    {
+        $parent = Category::factory()->create([
+            'parent_id' => null,
+            'is_active' => true,
+        ]);
+        $child = Category::factory()->create([
+            'parent_id' => $parent->id,
+            'is_active' => true,
+        ]);
+        $grandchild = Category::factory()->create([
+            'parent_id' => $child->id,
+            'is_active' => true,
+        ]);
+
+        Product::factory()->count(2)->create(['category_id' => $parent->id]);
+        Product::factory()->count(3)->create(['category_id' => $child->id]);
+        Product::factory()->count(4)->create(['category_id' => $grandchild->id]);
+
+        $this->get(route('categories.show', $parent))
+            ->assertOk()
+            ->assertViewHas('products', fn ($products): bool => $products->total() === 9);
+
+        $this->get(route('products.index', ['category' => $parent->slug]))
+            ->assertOk()
+            ->assertViewHas('products', fn ($products): bool => $products->total() === 9);
+    }
+
     public function test_homepage_featured_carousel_receives_up_to_thirty_six_active_products(): void
     {
         $active = Product::factory()->count(40)->create([

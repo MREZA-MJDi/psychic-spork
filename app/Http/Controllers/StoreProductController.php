@@ -50,6 +50,16 @@ class StoreProductController extends Controller
         $sort = $filters['sort'] ?? 'newest';
         $perPage = (int) ($filters['per_page'] ?? 6);
 
+        $categoryIds = null;
+        if (! empty($filters['category'])) {
+            $selectedCategory = Category::query()
+                ->active()
+                ->where('slug', $filters['category'])
+                ->first();
+
+            $categoryIds = $selectedCategory?->subtreeIds() ?? [];
+        }
+
         $products = Product::query()
             ->select([
                 'id',
@@ -93,13 +103,8 @@ class StoreProductController extends Controller
                 })
             )
             ->when(
-                ! empty($filters['category']),
-                fn ($query) => $query->whereHas(
-                    'category',
-                    fn ($category) => $category
-                        ->where('slug', $filters['category'])
-                        ->where('is_active', true)
-                )
+                $categoryIds !== null,
+                fn ($query) => $query->whereIn('category_id', $categoryIds)
             )
             ->when(
                 ! empty($filters['brand']),
