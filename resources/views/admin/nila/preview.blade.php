@@ -32,6 +32,43 @@
 </div>
 
 <div class="admin-card">
+    <h2 class="admin-card-title">وضعیت اجرای Import</h2>
+    <p class="admin-card-description">
+        وضعیت: {{ $batch->status === 'completed' ? 'تکمیل‌شده' : ($batch->status === 'processing' ? 'در حال پردازش' : ($batch->status === 'ready' ? 'آماده ادامه' : 'آماده شروع')) }}
+        — پیشرفت گروه‌ها: {{ number_format($batch->next_group_offset) }} از {{ number_format($batch->product_groups) }}
+        — ثبت موفق: {{ number_format($batch->imported_groups) }}
+        — کنار گذاشته‌شده: {{ number_format($batch->failed_groups) }}
+    </p>
+
+    @if($batch->status === 'completed')
+        <div class="alert success">پردازش این فایل به پایان رسیده است. برای اصلاح داده‌های نامعتبر، فایل اصلاح‌شده را دوباره بارگذاری کنید.</div>
+    @elseif($batch->status === 'processing')
+        <div class="alert">این فایل در حال پردازش است. از اجرای هم‌زمان درخواست دیگر خودداری کنید.</div>
+    @else
+        <form method="POST" action="{{ route('admin.nila.imports.import', $batch) }}">
+            @csrf
+            <div class="admin-form-grid">
+                <div class="admin-field">
+                    <label for="batch_size">تعداد محصول اصلی در این مرحله</label>
+                    <select id="batch_size" name="batch_size">
+                        <option value="5" selected>۵ گروه محصول (مرحله آزمایشی)</option>
+                        <option value="10">۱۰ گروه محصول</option>
+                        <option value="25">۲۵ گروه محصول</option>
+                        <option value="50">۵۰ گروه محصول</option>
+                    </select>
+                    <small class="admin-help">هر گروه شامل تمام تنوع‌های همان کد پایه است. سقف هر مرحله ۵۰ محصول اصلی است.</small>
+                </div>
+            </div>
+            <div class="admin-form-actions">
+                <button type="submit" class="admin-btn admin-btn--secondary">
+                    {{ $batch->next_group_offset > 0 ? 'ادامه Import' : 'شروع Import مرحله‌ای' }}
+                </button>
+            </div>
+        </form>
+    @endif
+</div>
+
+<div class="admin-card">
     <h2 class="admin-card-title">گروه‌بندی محصولات</h2>
     <p class="admin-card-description">کد قبل از ستاره، گروه محصول را مشخص می‌کند. کد کامل هر ردیف برای SKU تنوع نگهداری می‌شود.</p>
     <div class="admin-table-wrap">
