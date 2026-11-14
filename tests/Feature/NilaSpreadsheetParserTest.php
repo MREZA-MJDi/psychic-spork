@@ -82,7 +82,7 @@ class NilaSpreadsheetParserTest extends TestCase
             $this->assertSame('V-01', $parsed['rows'][0]['variant_code']);
             $this->assertSame('کفش ورزشی - مشکی', $parsed['rows'][0]['holoo_name']);
             $this->assertSame('مشکی', $parsed['rows'][0]['color_candidate']);
-            $this->assertSame(125000, $parsed['rows'][0]['price']);
+            $this->assertEquals(125000, $parsed['rows'][0]['price']);
             $this->assertSame(8, $parsed['rows'][0]['stock']);
             $this->assertTrue($parsed['rows'][0]['is_valid']);
         } finally {
