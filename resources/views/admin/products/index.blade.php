@@ -221,6 +221,29 @@
                     </div>
 
                     <div class="admin-field">
+                        <label for="sort">مرتب‌سازی</label>
+                        <select id="sort" name="sort">
+                            <option value="newest" @selected(($sort ?? 'newest') === 'newest')>آخرین تغییر</option>
+                            <option value="oldest" @selected(($sort ?? '') === 'oldest')>قدیمی‌ترین</option>
+                            <option value="name_asc" @selected(($sort ?? '') === 'name_asc')>نام: الف تا ی</option>
+                            <option value="name_desc" @selected(($sort ?? '') === 'name_desc')>نام: ی تا الف</option>
+                            <option value="price_asc" @selected(($sort ?? '') === 'price_asc')>قیمت: کم به زیاد</option>
+                            <option value="price_desc" @selected(($sort ?? '') === 'price_desc')>قیمت: زیاد به کم</option>
+                            <option value="stock_asc" @selected(($sort ?? '') === 'stock_asc')>موجودی: کم به زیاد</option>
+                            <option value="stock_desc" @selected(($sort ?? '') === 'stock_desc')>موجودی: زیاد به کم</option>
+                        </select>
+                    </div>
+
+                    <div class="admin-field">
+                        <label for="per_page">تعداد در هر صفحه</label>
+                        <select id="per_page" name="per_page">
+                            <option value="15" @selected(($perPage ?? 15) === 15)>۱۵</option>
+                            <option value="30" @selected(($perPage ?? 15) === 30)>۳۰</option>
+                            <option value="50" @selected(($perPage ?? 15) === 50)>۵۰</option>
+                        </select>
+                    </div>
+
+                    <div class="admin-field">
                         <label for="quality">آمادگی کاتالوگ و SEO</label>
                         <select id="quality" name="quality">
                             <option value="">همه محصولات</option>
