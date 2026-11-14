@@ -21,7 +21,7 @@
             <div><strong>پرداخت</strong><span>تأیید نهایی</span></div>
         </div>
     </div>
-@if($items->isEmpty())
+@if($items->isEmpty() && $packLines->isEmpty())
     <div class="cart-empty reveal-up"><div class="cart-empty__ring">۰</div><span class="eyebrow">YOUR BAG / 00 ITEMS</span><h2>سبد خرید خالی است.</h2><a class="button button--primary" href="{{ route('products.index') }}">مشاهده کالکشن</a></div>
 @else
 <div class="cart-layout">

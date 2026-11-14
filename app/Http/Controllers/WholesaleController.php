@@ -122,6 +122,13 @@ class WholesaleController extends Controller
                     'media.path',
                     'media.sort_order',
                 ]),
+                'primaryActiveVariant' => fn ($query) => $query->select([
+                    'product_variants.id',
+                    'product_variants.product_id',
+                    'product_variants.is_active',
+                    'product_variants.sort_order',
+                ]),
+                'primaryActiveVariant.primaryGalleryMedia',
             ])
             ->when($filters['q'] ?? null, function ($query, string $term): void {
                 $like = '%' . trim($term) . '%';

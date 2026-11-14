@@ -62,7 +62,7 @@
                         <article class="wholesale-product-card">
                             <a href="{{ route('products.show', $product) }}" class="wholesale-product-card__media">
                                 <x-store.image
-                                    :src="$product->primaryGalleryMedia?->url"
+                                    :src="$product->primaryGalleryMedia?->url ?: $product->primaryActiveVariant?->primaryGalleryMedia?->url"
                                     :alt="$product->name"
                                     fallback-tag="span"
                                     fallback-class=""

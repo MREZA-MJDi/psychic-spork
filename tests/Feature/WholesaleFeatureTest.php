@@ -4,12 +4,14 @@ namespace Tests\Feature;
 
 use App\Models\Cart;
 use App\Models\CartItem;
+use App\Models\CartWholesalePack;
 use App\Models\Category;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\User;
 use App\Models\WholesaleProfile;
+use App\Models\WholesalePack;
 use App\Models\ChequePermission;
 use App\Models\ChequePayment;
 use App\Models\WholesalePack;
@@ -87,6 +89,78 @@ class WholesaleFeatureTest extends TestCase
             ->assertSee('پک ۱۲ عددی ایزابلا')
             ->assertSee('افزودن پک به سبد خرید')
             ->assertDontSee('موجودی کافی نیست');
+    }
+
+    public function test_cart_with_only_wholesale_packs_is_not_rendered_as_empty(): void
+    {
+        $customer = User::factory()->create(['is_admin' => false]);
+        [, $variant] = $this->makeProduct(stock: 20, wholesalePrice: 250000);
+
+        $pack = WholesalePack::create([
+            'name' => 'پک فقط برای تست سبد',
+            'slug' => 'cart-only-pack-' . uniqid(),
+            'pack_price' => 2000000,
+            'pack_quantity' => 12,
+            'is_active' => true,
+        ]);
+        $pack->items()->create([
+            'product_variant_id' => $variant->id,
+            'quantity' => 12,
+        ]);
+
+        $cart = Cart::create([
+            'user_id' => $customer->id,
+            'last_activity_at' => now(),
+        ]);
+        CartWholesalePack::create([
+            'cart_id' => $cart->id,
+            'wholesale_pack_id' => $pack->id,
+            'quantity' => 1,
+        ]);
+
+        $this->actingAs($customer)
+            ->get(route('cart'))
+            ->assertOk()
+            ->assertSee($pack->name)
+            ->assertSee('ثبت سفارش')
+            ->assertDontSee('سبد خرید خالی است');
+    }
+
+    public function test_wholesale_catalog_uses_variant_image_when_product_cover_is_missing(): void
+    {
+        $category = Category::create([
+            'name' => 'تصویر کاتالوگ عمده',
+            'slug' => 'wholesale-card-image-' . uniqid(),
+            'is_active' => true,
+        ]);
+        $product = Product::create([
+            'category_id' => $category->id,
+            'name' => 'محصول تصویر عمده',
+            'slug' => 'wholesale-image-product-' . uniqid(),
+            'is_active' => true,
+        ]);
+        $variant = ProductVariant::create([
+            'product_id' => $product->id,
+            'sku' => 'WHOLE-IMAGE-' . strtoupper(uniqid()),
+            'price' => 100000,
+            'wholesale_price' => 70000,
+            'stock' => 8,
+            'is_active' => true,
+        ]);
+        \App\Models\Media::create([
+            'mediable_type' => $variant->getMorphClass(),
+            'mediable_id' => $variant->id,
+            'collection' => 'gallery',
+            'disk' => 'public',
+            'path' => 'variants/wholesale-card.webp',
+            'original_name' => 'wholesale-card.webp',
+            'mime_type' => 'image/webp',
+            'sort_order' => 0,
+        ]);
+
+        $this->get(route('wholesale.catalog'))
+            ->assertOk()
+            ->assertSee(route('store.media', ['path' => 'variants/wholesale-card.webp']), false);
     }
 
     public function test_wholesale_page_is_public_and_explains_cheque_access(): void
