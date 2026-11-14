@@ -396,6 +396,11 @@ Route::prefix('admin')
             ->whereNumber('batch')
             ->name('nila.imports.show');
 
+        Route::post('nila/imports/{batch}/import', [AdminNilaController::class, 'importNext'])
+            ->whereNumber('batch')
+            ->middleware('throttle:10,1')
+            ->name('nila.imports.import');
+
         Route::post('inventory', [AdminInventoryController::class, 'store'])
             ->name('inventory.store');
 
