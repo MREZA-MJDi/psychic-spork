@@ -13,6 +13,9 @@ use Illuminate\Support\Facades\DB;
 
 final class CartService
 {
+    public const MAX_ITEMS = 100;
+    public const MAX_QUANTITY_PER_ITEM = 99;
+
     public function current(Request $request): Cart
     {
         if ($request->user()) {
