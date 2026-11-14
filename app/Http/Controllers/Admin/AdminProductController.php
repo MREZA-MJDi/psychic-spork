@@ -141,6 +141,8 @@ class AdminProductController extends Controller
             'quality' => $quality,
             'sort' => $sort,
             'perPage' => $perPage,
+            'heroCount' => Product::query()->where('is_hero', true)->count(),
+            'heroLimit' => HeroService::MAX_SLIDES,
             'categories' => $this->categories(),
             'brands' => $this->brands(),
         ]);
