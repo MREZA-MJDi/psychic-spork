@@ -9,7 +9,7 @@
         <h1 class="admin-page-head__title">گزارش بررسی فایل</h1>
         <p class="admin-page-head__text">{{ $batch->original_name }}</p>
     </div>
-    <a class="admin-button" href="{{ route('admin.nila.index') }}">بازگشت به نیلا</a>
+    <a class="admin-btn admin-btn--ghost" href="{{ route('admin.nila.index') }}">بازگشت به نیلا</a>
 </div>
 
 <div class="admin-dashboard-stats">
