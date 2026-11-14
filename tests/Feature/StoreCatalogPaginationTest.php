@@ -58,15 +58,22 @@ class StoreCatalogPaginationTest extends TestCase
 
     public function test_homepage_featured_carousel_receives_up_to_thirty_six_active_products(): void
     {
-        Product::factory()->count(40)->create([
+        $active = Product::factory()->count(40)->create([
             'is_active' => true,
             'is_featured' => true,
         ]);
+        Product::factory()->count(5)->create([
+            'is_active' => false,
+            'is_featured' => true,
+        ]);
+
+        $activeIds = $active->pluck('id');
 
         $this->get(route('home'))
             ->assertOk()
-            ->assertViewHas('products', function ($products): bool {
-                return $products->count() === 36;
+            ->assertViewHas('products', function ($products) use ($activeIds): bool {
+                return $products->count() === 36
+                    && $products->pluck('id')->diff($activeIds)->isEmpty();
             });
     }
 
