@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Integrations\Nila\NilaSpreadsheetParser;
+use App\Integrations\Nila\NilaImportPreviewService;
 use App\Jobs\RunNilaSpreadsheetImport;
 use App\Models\IntegrationMapping;
 use App\Models\NilaImportBatch;
@@ -138,9 +139,10 @@ class AdminNilaController extends Controller
     ): RedirectResponse {
         $validated = $request->validate([
             'batch_size' => ['nullable', 'integer', 'min:1', 'max:50'],
+            'confirm_stock_snapshot' => ['required', 'accepted'],
         ]);
 
-        $limit = (int) ($validated['batch_size'] ?? 5);
+        $limit = (int) ($validated['batch_size'] ?? 25);
         $token = (string) Str::uuid();
 
         try {
@@ -214,7 +216,8 @@ class AdminNilaController extends Controller
     public function showImport(
         Request $request,
         NilaImportBatch $batch,
-        NilaSpreadsheetParser $parser
+        NilaSpreadsheetParser $parser,
+        NilaImportPreviewService $comparisonService
     ): View {
         abort_unless(
             Storage::disk($batch->disk)->exists($batch->file_path),
@@ -267,6 +270,7 @@ class AdminNilaController extends Controller
             'groups' => $this->paginateArray($parsed['groups'], 50, 'groups_page', $request),
             'rows' => $this->paginateArray($parsed['rows'], 100, 'rows_page', $request),
             'failedProducts' => $batch->metadata['failed_products'] ?? [],
+            'comparison' => $comparisonService->summarize($parsed),
         ]);
     }
 

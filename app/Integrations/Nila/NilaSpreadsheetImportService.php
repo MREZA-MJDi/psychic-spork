@@ -27,7 +27,7 @@ final class NilaSpreadsheetImportService
      *
      * @return array{processed: int, imported: int, failed: int, next_offset: int, completed: bool}
      */
-    public function importNext(NilaImportBatch $batch, int $limit = 5, ?string $queueToken = null): array
+    public function importNext(NilaImportBatch $batch, int $limit = 25, ?string $queueToken = null): array
     {
         $limit = max(1, min(50, $limit));
 
@@ -163,6 +163,7 @@ final class NilaSpreadsheetImportService
                                 'holoo_customer_code' => $row['customer_code'],
                                 'source_row' => $row['row_number'],
                                 'holoo_name' => $row['holoo_name'],
+                                'import_batch_id' => $batch->id,
                             ],
                         ),
                         $productRows
