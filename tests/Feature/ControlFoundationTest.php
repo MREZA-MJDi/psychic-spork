@@ -95,6 +95,7 @@ class ControlFoundationTest extends TestCase
             ->get(route('admin.nila.index'))
             ->assertOk()
             ->assertSee('Mapping')
-            ->assertSee('Adapter متصل به سرویس بیرونی یا ابزار بارگذاری CSV/XLSX وجود ندارد');
+            ->assertSee('دریافت امن فایل کاتالوگ')
+            ->assertSee('هیچ محصول، تنوع، دسته یا برندی در کاتالوگ ساخته یا ویرایش نمی‌شود');
     }
 }
