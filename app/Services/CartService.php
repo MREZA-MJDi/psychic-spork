@@ -73,6 +73,8 @@ final class CartService
             }
 
             $cartItemCount = (int) $cart->items()->count();
+            $cartPackCount = (int) $cart->wholesalePacks()->count();
+            $cartPackCount = (int) $cart->wholesalePacks()->count();
 
             foreach ($guest->items as $guestItem) {
                 $variant = ProductVariant::query()
@@ -113,7 +115,7 @@ final class CartService
                         'quantity' => $quantity,
                     ]);
                 } else {
-                    if ($cartItemCount >= self::MAX_ITEMS) {
+                    if ($cartItemCount + $cartPackCount >= self::MAX_ITEMS) {
                         continue;
                     }
 
@@ -277,7 +279,7 @@ final class CartService
                 $existing->update(['quantity' => $newQuantity]);
             } else {
                 abort_if(
-                    $lockedCart->items()->count() >= self::MAX_ITEMS,
+                    ($lockedCart->items()->count() + $lockedCart->wholesalePacks()->count()) >= self::MAX_ITEMS,
                     422,
                     'سبد خرید نمی‌تواند بیشتر از ' . self::MAX_ITEMS . ' تنوع متفاوت داشته باشد.'
                 );
@@ -430,7 +432,7 @@ final class CartService
                 if ($existing) {
                     $existing->update(['quantity' => $quantity]);
                 } else {
-                    if ($cartItemCount >= self::MAX_ITEMS) {
+                    if ($cartItemCount + $cartPackCount >= self::MAX_ITEMS) {
                         continue;
                     }
 

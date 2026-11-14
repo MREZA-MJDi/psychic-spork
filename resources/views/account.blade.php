@@ -85,6 +85,11 @@
                                 <span>{{ number_format($order->items_count) }} قلم ·
                                     {{ $statusNames[$order->status] ?? $order->status }}
                                 </span>
+                                @if($order->wholesalePacks->isNotEmpty())
+                                    <small>پک عمده:
+                                        {{ $order->wholesalePacks->map(fn ($pack) => $pack->pack_name . ' × ' . $pack->quantity)->implode('، ') }}
+                                    </small>
+                                @endif
                                 @if($order->chequePayment)
                                     <small class="account-order__cheque-status">
                                         {{ $chequeStatusNames[$order->chequePayment->status] ?? $order->chequePayment->status }}

@@ -102,8 +102,8 @@
 </div>
 <aside class="cart-summary reveal-up">
 <span class="eyebrow">ORDER SUMMARY</span><h2>جمع سبد</h2>
-<div class="cart-summary__row"><span>تعداد اقلام</span><strong>{{ number_format($items->sum('quantity')) }}</strong></div>
-<div class="cart-summary__row"><span>مبلغ قابل پرداخت</span><strong>{{ number_format($total) }} تومان</strong></div>
+<div class="cart-summary__row"><span>تعداد اقلام</span><strong>{{ number_format($items->sum('quantity') + $packLines->sum(fn ($line) => (int) ($line->pack?->pack_quantity ?? 0) * (int) $line->quantity)) }}</strong></div>
+<div class="cart-summary__row"><span>مبلغ قابل پرداخت (با احتساب پک‌ها)</span><strong>{{ number_format($total) }} تومان</strong></div>
 <div class="cart-summary__actions">
     <a class="button button--ghost" href="{{ route('products.index') }}">ادامه خرید <span aria-hidden="true">↗</span></a>
     <a class="button button--primary" href="{{ route('checkout') }}">ثبت سفارش <span aria-hidden="true">←</span></a>

@@ -149,6 +149,13 @@ final class WholesalePackCartService
                 );
             }
 
+            abort_if(
+                ! $lockedLine
+                && ($lockedCart->items()->count() + $packLines->count()) >= CartService::MAX_ITEMS,
+                422,
+                'سبد خرید نمی‌تواند بیشتر از ' . CartService::MAX_ITEMS . ' نوع قلم متفاوت داشته باشد.'
+            );
+
             $line = $lockedLine ?? new CartWholesalePack([
                 'cart_id' => $lockedCart->id,
                 'wholesale_pack_id' => $lockedPack->id,

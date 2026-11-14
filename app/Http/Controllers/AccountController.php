@@ -13,7 +13,7 @@ class AccountController extends Controller
 
         $orders = $user
             ->orders()
-            ->with(['chequePayment'])
+            ->with(['chequePayment', 'wholesalePacks'])
             ->withCount('items')
             ->latest('placed_at')
             ->latest('id')
