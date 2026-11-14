@@ -231,10 +231,15 @@ final class NilaSpreadsheetImportService
                     return;
                 }
 
-                unset($metadata['queue_token']);
+                // A queued Job keeps its lease while Laravel retries it.
+                // The final failed() callback releases the lease after the
+                // configured retry budget has been exhausted.
+                if ($queueToken === null) {
+                    unset($metadata['queue_token']);
+                }
 
                 $locked->update([
-                    'status' => 'ready',
+                    'status' => $queueToken !== null ? 'queued' : 'ready',
                     'metadata' => $metadata,
                 ]);
             });
