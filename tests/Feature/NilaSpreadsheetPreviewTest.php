@@ -50,9 +50,9 @@ class NilaSpreadsheetPreviewTest extends TestCase
             ->assertSee('0102001*1')
             ->assertSee('بادمجونی')
             ->assertSee('هنوز هیچ محصولی وارد دیتابیس نشده')
-            ->assertSee('۵ گروه محصول (پایلوت اولیه)')
+            ->assertSee('۵ گروه محصول (شروع پایلوت)')
+            ->assertSee('۵۰ گروه محصول (حداکثر هر مرحله)')
             ->assertSee('قبل از هر Import بزرگ‌تر باید نتیجه این پایلوت بررسی و تأیید شود')
-            ->assertDontSee('۵۰ گروه محصول');
     }
 
     public function test_admin_can_import_one_complete_product_group_without_publishing_it(): void
@@ -158,7 +158,7 @@ class NilaSpreadsheetPreviewTest extends TestCase
         $this->assertDatabaseCount('product_variants', 6);
     }
 
-    public function test_import_rejects_batches_larger_than_the_five_product_pilot(): void
+    public function test_import_rejects_batches_larger_than_fifty_product_groups(): void
     {
         Storage::fake('local');
 
@@ -177,7 +177,7 @@ class NilaSpreadsheetPreviewTest extends TestCase
 
         $this->actingAs($admin)->from(route('admin.nila.imports.show', $batch))->post(
             route('admin.nila.imports.import', $batch),
-            ['batch_size' => 6]
+            ['batch_size' => 51]
         )->assertSessionHasErrors('batch_size');
 
         $this->assertDatabaseCount('products', 0);
