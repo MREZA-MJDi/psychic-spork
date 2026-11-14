@@ -52,6 +52,64 @@ class NilaSpreadsheetPreviewTest extends TestCase
             ->assertSee('هنوز هیچ محصولی وارد دیتابیس نشده');
     }
 
+    public function test_admin_can_import_one_complete_product_group_without_publishing_it(): void
+    {
+        Storage::fake('local');
+
+        $admin = User::factory()->create(['is_admin' => true]);
+        $csv = implode("\n", [
+            'holooCode,holooName,holooRegularPrice,holooStockQuantity,holooCustomerCode',
+            '0102001*1,80 کش پهن دانتل 5 سانتی-بادمجونی,2150000,4,1',
+            '0102001*2,80 کش پهن دانتل 5 سانتی-طوسی,2150000,0,1',
+        ]);
+
+        $this->actingAs($admin)->post(
+            route('admin.nila.imports.store'),
+            ['file' => UploadedFile::fake()->createWithContent('holoo.csv', $csv)]
+        )->assertRedirect();
+
+        $batch = NilaImportBatch::query()->firstOrFail();
+
+        $this->actingAs($admin)->post(
+            route('admin.nila.imports.import', $batch),
+            ['batch_size' => 5]
+        )->assertRedirect();
+
+        $this->assertDatabaseCount('products', 1);
+        $this->assertDatabaseCount('product_variants', 2);
+        $this->assertDatabaseCount('integration_mappings', 3);
+
+        $product = Product::query()->firstOrFail();
+
+        $this->assertSame('80 کش پهن دانتل 5 سانتی', $product->name);
+        $this->assertNull($product->category_id);
+        $this->assertNull($product->brand_id);
+        $this->assertFalse($product->is_active);
+
+        $this->assertDatabaseHas('product_variants', [
+            'product_id' => $product->id,
+            'sku' => '0102001*1',
+            'color' => 'بادمجونی',
+            'price' => 2150000,
+            'stock' => 4,
+            'is_active' => false,
+        ]);
+
+        $this->assertDatabaseHas('product_variants', [
+            'product_id' => $product->id,
+            'sku' => '0102001*2',
+            'color' => 'طوسی',
+            'price' => 2150000,
+            'stock' => 0,
+            'is_active' => false,
+        ]);
+
+        $batch->refresh();
+        $this->assertSame('completed', $batch->status);
+        $this->assertSame(1, $batch->imported_groups);
+        $this->assertSame(0, $batch->failed_groups);
+    }
+
     public function test_blank_price_is_reported_as_invalid_and_is_not_converted_to_zero(): void
     {
         Storage::fake('local');
