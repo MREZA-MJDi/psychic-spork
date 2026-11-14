@@ -96,7 +96,7 @@ class NilaImportQueueOwnershipTest extends TestCase
                 'current-execution-token'
             );
             $this->fail('The retry should reach the same malformed preview.');
-        } catch (\\JsonException $exception) {
+        } catch (\JsonException $exception) {
             $this->assertNotEmpty($exception->getMessage());
         }
 
