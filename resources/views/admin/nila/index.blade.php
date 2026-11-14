@@ -85,6 +85,8 @@
                     <th>قابل بررسی</th>
                     <th>دارای خطا</th>
                     <th>گروه محصول</th>
+                    <th>ثبت‌شده</th>
+                    <th>ناموفق</th>
                     <th>وضعیت</th>
                     <th>تاریخ</th>
                     <th>جزئیات</th>
@@ -98,6 +100,8 @@
                         <td>{{ number_format($batch->valid_rows) }}</td>
                         <td>{{ number_format($batch->invalid_rows) }}</td>
                         <td>{{ number_format($batch->product_groups) }}</td>
+                        <td>{{ number_format($batch->imported_groups) }}</td>
+                        <td>{{ number_format($batch->failed_groups) }}</td>
                         <td>
                             @if($batch->status === 'completed')
                                 تکمیل‌شده
