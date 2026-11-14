@@ -42,7 +42,7 @@ class WholesaleController extends Controller
             ])
             ->orderBy('sort_order')
             ->orderByDesc('id')
-            ->paginate(6)
+            ->paginate(6, ['*'], 'packs_page')
             ->withQueryString();
 
         return view('pages.wholesale', [
@@ -126,7 +126,7 @@ class WholesaleController extends Controller
             ->orderByDesc('is_featured')
             ->orderBy('sort_order')
             ->orderBy('id')
-            ->paginate(12)
+            ->paginate(12, ['*'], 'products_page')
             ->withQueryString();
 
         return view('pages.wholesale-catalog', [
