@@ -147,7 +147,7 @@ class NilaSpreadsheetPreviewTest extends TestCase
 
         $this->actingAs($admin)->post(
             route('admin.nila.imports.import', $batch),
-            ['batch_size' => 50]
+            ['batch_size' => 5]
         )->assertRedirect();
 
         $batch->refresh();
@@ -156,6 +156,32 @@ class NilaSpreadsheetPreviewTest extends TestCase
         $this->assertSame(6, $batch->imported_groups);
         $this->assertDatabaseCount('products', 6);
         $this->assertDatabaseCount('product_variants', 6);
+    }
+
+    public function test_import_rejects_batches_larger_than_the_five_product_pilot(): void
+    {
+        Storage::fake('local');
+
+        $admin = User::factory()->create(['is_admin' => true]);
+        $csv = implode("\n", [
+            'holooCode,holooName,holooRegularPrice,holooStockQuantity,holooCustomerCode',
+            '0102001*1,محصول آزمایشی-مشکی,100000,2,1',
+        ]);
+
+        $this->actingAs($admin)->post(
+            route('admin.nila.imports.store'),
+            ['file' => UploadedFile::fake()->createWithContent('pilot.csv', $csv)]
+        )->assertRedirect();
+
+        $batch = NilaImportBatch::query()->firstOrFail();
+
+        $this->actingAs($admin)->from(route('admin.nila.imports.show', $batch))->post(
+            route('admin.nila.imports.import', $batch),
+            ['batch_size' => 6]
+        )->assertSessionHasErrors('batch_size');
+
+        $this->assertDatabaseCount('products', 0);
+        $this->assertDatabaseCount('product_variants', 0);
     }
 
     public function test_import_skips_the_entire_product_group_when_one_variant_is_invalid(): void
