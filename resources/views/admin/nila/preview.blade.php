@@ -164,5 +164,25 @@
         <li>دسته‌بندی و برند از فایل فعلی قابل تعیین نیستند و باید با داده‌های تأییدشده جانان تطبیق داده شوند.</li>
         <li>ردیف بدون قیمت قابل Import نیست؛ مقدار خالی به قیمت صفر تبدیل نمی‌شود.</li>
     </ul>
+@if(!empty($failedProducts))
+<div class="admin-card">
+    <h2 class="admin-card-title">گروه‌های ناموفق در Import</h2>
+    <p class="admin-card-description">برای جلوگیری از ثبت ناقص، هر گروهی که یکی از تنوع‌هایش خطا داشته باشد به‌صورت کامل کنار گذاشته می‌شود.</p>
+    <div class="admin-table-wrap">
+        <table class="admin-table">
+            <thead><tr><th>کد پایه هولو</th><th>دلیل</th></tr></thead>
+            <tbody>
+            @foreach($failedProducts as $failure)
+                <tr>
+                    <td>{{ $failure['product_code'] ?? '—' }}</td>
+                    <td>{{ $failure['reason'] ?? 'نیازمند بررسی' }}</td>
+                </tr>
+            @endforeach
+            </tbody>
+        </table>
+    </div>
+</div>
+@endif
+
 </div>
 @endsection
