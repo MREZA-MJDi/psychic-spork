@@ -18,6 +18,7 @@ use App\Services\MediaService;
 use App\Services\ZarinPalPaymentGateway;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
@@ -160,34 +161,55 @@ class CatalogCommerceRegressionTest extends TestCase
         Storage::fake('public');
 
         $product = Product::factory()->create();
-        $media = app(MediaService::class);
+        $categoryId = $product->category_id;
+        $brandId = $product->brand_id;
 
-        $old = $media->attach(
-            $product,
-            'gallery',
-            UploadedFile::fake()->create('old.png', 10, 'image/png'),
-            'products',
-            'Old image'
-        );
+        // Close RefreshDatabase's outer test transaction so the service's
+        // afterCommit file cleanup runs at the same boundary as production.
+        DB::commit();
 
-        Storage::disk('public')->assertExists($old->path);
+        try {
+            $media = app(MediaService::class);
 
-        $new = $media->replace(
-            $product,
-            'gallery',
-            UploadedFile::fake()->create('new.png', 12, 'image/png'),
-            'products',
-            'New image'
-        );
+            $old = $media->attach(
+                $product,
+                'gallery',
+                UploadedFile::fake()->create('old.png', 10, 'image/png'),
+                'products',
+                'Old image'
+            );
 
-        $this->assertDatabaseMissing('media', ['id' => $old->id]);
-        Storage::disk('public')->assertMissing($old->path);
-        Storage::disk('public')->assertExists($new->path);
+            Storage::disk('public')->assertExists($old->path);
 
-        $media->remove($new);
+            $new = $media->replace(
+                $product,
+                'gallery',
+                UploadedFile::fake()->create('new.png', 12, 'image/png'),
+                'products',
+                'New image'
+            );
 
-        $this->assertDatabaseMissing('media', ['id' => $new->id]);
-        Storage::disk('public')->assertMissing($new->path);
+            $this->assertDatabaseMissing('media', ['id' => $old->id]);
+            Storage::disk('public')->assertMissing($old->path);
+            Storage::disk('public')->assertExists($new->path);
+
+            $media->remove($new);
+
+            $this->assertDatabaseMissing('media', ['id' => $new->id]);
+            Storage::disk('public')->assertMissing($new->path);
+        } finally {
+            DB::transaction(function () use ($product, $categoryId, $brandId): void {
+                DB::table('media')
+                    ->where('mediable_type', $product->getMorphClass())
+                    ->where('mediable_id', $product->id)
+                    ->delete();
+                DB::table('products')->where('id', $product->id)->delete();
+                DB::table('categories')->where('id', $categoryId)->delete();
+                DB::table('brands')->where('id', $brandId)->delete();
+            });
+
+            DB::beginTransaction();
+        }
     }
 
     public function test_price_sort_uses_the_same_minimum_active_variant_price_as_the_catalog_card(): void
