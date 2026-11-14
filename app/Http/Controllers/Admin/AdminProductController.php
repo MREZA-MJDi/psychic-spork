@@ -109,6 +109,7 @@ class AdminProductController extends Controller
                 }
             )
             ->latest('updated_at')
+            ->latest('id')
             ->paginate(15)
             ->withQueryString();
 
