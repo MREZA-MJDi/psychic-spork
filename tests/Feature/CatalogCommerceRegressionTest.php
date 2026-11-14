@@ -54,6 +54,72 @@ class CatalogCommerceRegressionTest extends TestCase
             ->count());
     }
 
+    public function test_cancelled_order_restores_stock_through_the_inventory_ledger(): void
+    {
+        $product = Product::factory()->create();
+        $variant = ProductVariant::factory()->create([
+            'product_id' => $product->id,
+            'stock' => 8,
+        ]);
+
+        $order = Order::query()->create([
+            'order_number' => 'INV-REG-' . strtoupper(Str::random(8)),
+            'customer_name' => 'Inventory Regression',
+            'customer_phone' => '09120000000',
+            'shipping_address' => 'Test address',
+            'status' => 'pending',
+            'payment_status' => 'pending',
+            'payment_method' => 'online',
+            'order_type' => 'retail',
+            'subtotal' => 200000,
+            'discount' => 0,
+            'shipping_cost' => 0,
+            'total' => 200000,
+            'placed_at' => now(),
+        ]);
+
+        $order->items()->create([
+            'product_id' => $product->id,
+            'product_variant_id' => $variant->id,
+            'product_name' => $product->name,
+            'variant_name' => 'M / Black',
+            'sku' => $variant->sku,
+            'unit_price' => 100000,
+            'quantity' => 2,
+            'line_total' => 200000,
+        ]);
+
+        InventoryMovement::query()->create([
+            'product_variant_id' => $variant->id,
+            'type' => 'sale',
+            'quantity' => -2,
+            'stock_after' => 8,
+            'reference_type' => Order::class,
+            'reference_id' => $order->id,
+            'note' => 'Stock reserved for regression order',
+        ]);
+
+        app(\App\Services\OrderService::class)->updateStatus(
+            $order,
+            'cancelled',
+            'pending',
+            'Cancelled by regression test'
+        );
+
+        $this->assertSame(10, $variant->fresh()->stock);
+        $this->assertDatabaseHas('inventory_movements', [
+            'product_variant_id' => $variant->id,
+            'type' => 'return',
+            'quantity' => 2,
+            'stock_after' => 10,
+            'reference_type' => Order::class,
+            'reference_id' => $order->id,
+        ]);
+        $this->assertSame(2, InventoryMovement::query()
+            ->where('product_variant_id', $variant->id)
+            ->count());
+    }
+
     public function test_cart_enforces_distinct_line_and_per_variant_quantity_limits(): void
     {
         $product = Product::factory()->create();
