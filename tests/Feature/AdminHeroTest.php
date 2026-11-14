@@ -70,6 +70,25 @@ class AdminHeroTest extends TestCase
             Product::query()->where('is_hero', true)->count()
         );
 
+    public function test_inactive_product_cannot_be_added_to_homepage_hero(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        $product = Product::factory()->create([
+            'is_active' => false,
+            'is_hero' => false,
+        ]);
+
+        $this->actingAs($admin)
+            ->patch(route('admin.products.hero.toggle', $product))
+            ->assertRedirect()
+            ->assertSessionHas('error');
+
+        $this->assertDatabaseHas('products', [
+            'id' => $product->id,
+            'is_hero' => false,
+        ]);
+    }
+
     public function test_homepage_can_render_thirty_six_hero_products(): void
     {
         Product::factory()->count(36)->create([
