@@ -111,6 +111,9 @@ class WholesaleFeatureTest extends TestCase
         [$wholesaleProduct] = $this->makeProduct(stock: 8, wholesalePrice: 70000);
         [$retailOnlyProduct] = $this->makeProduct(stock: 8, wholesalePrice: null);
 
+        $wholesaleProduct->update(['name' => 'محصول عمده قابل فروش']);
+        $retailOnlyProduct->update(['name' => 'محصول بدون قیمت عمده']);
+
         $this->get(route('wholesale.catalog'))
             ->assertOk()
             ->assertSee($wholesaleProduct->name)
