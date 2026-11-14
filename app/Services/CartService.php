@@ -13,6 +13,10 @@ use Illuminate\Support\Facades\DB;
 
 final class CartService
 {
+    public const MAX_ITEMS = 100;
+
+    public const MAX_QUANTITY_PER_ITEM = 99;
+
     public function current(Request $request): Cart
     {
         if ($request->user()) {
@@ -196,11 +200,23 @@ final class CartService
             'تعداد محصول باید حداقل یک عدد باشد.'
         );
 
+        abort_if(
+            $quantity > self::MAX_QUANTITY_PER_ITEM,
+            422,
+            'تعداد هر تنوع نمی‌تواند بیشتر از ' . self::MAX_QUANTITY_PER_ITEM . ' عدد باشد.'
+        );
+
         DB::transaction(function () use (
             $cart,
             $variant,
             $quantity
         ): void {
+            // Serialize writes per cart so parallel requests cannot exceed
+            // the maximum number of distinct cart lines.
+            $lockedCart = Cart::query()
+                ->lockForUpdate()
+                ->findOrFail($cart->id);
+
             $variant = ProductVariant::query()
                 ->with('product')
                 ->lockForUpdate()
@@ -208,16 +224,18 @@ final class CartService
 
             $this->assertPurchasable($variant);
 
-            $existing = $cart->items()
-                ->where(
-                    'product_variant_id',
-                    $variant->id
-                )
+            $existing = $lockedCart->items()
+                ->where('product_variant_id', $variant->id)
                 ->lockForUpdate()
                 ->first();
 
-            $newQuantity = (int) ($existing?->quantity ?? 0)
-                + $quantity;
+            $newQuantity = (int) ($existing?->quantity ?? 0) + $quantity;
+
+            abort_if(
+                $newQuantity > self::MAX_QUANTITY_PER_ITEM,
+                422,
+                'تعداد هر تنوع نمی‌تواند بیشتر از ' . self::MAX_QUANTITY_PER_ITEM . ' عدد باشد.'
+            );
 
             abort_if(
                 $newQuantity > $variant->stock,
@@ -226,19 +244,21 @@ final class CartService
             );
 
             if ($existing) {
-                $existing->update([
-                    'quantity' => $newQuantity,
-                ]);
+                $existing->update(['quantity' => $newQuantity]);
             } else {
-                $cart->items()->create([
+                abort_if(
+                    $lockedCart->items()->count() >= self::MAX_ITEMS,
+                    422,
+                    'سبد خرید نمی‌تواند بیشتر از ' . self::MAX_ITEMS . ' تنوع متفاوت داشته باشد.'
+                );
+
+                $lockedCart->items()->create([
                     'product_variant_id' => $variant->id,
                     'quantity' => $quantity,
                 ]);
             }
 
-            $cart->update([
-                'last_activity_at' => now(),
-            ]);
+            $lockedCart->update(['last_activity_at' => now()]);
         });
     }
 
@@ -255,12 +275,22 @@ final class CartService
             return;
         }
 
+        abort_if(
+            $quantity < 1 || $quantity > self::MAX_QUANTITY_PER_ITEM,
+            422,
+            'تعداد هر تنوع باید بین ۱ تا ' . self::MAX_QUANTITY_PER_ITEM . ' عدد باشد.'
+        );
+
         DB::transaction(function () use (
             $cart,
             $item,
             $quantity
         ): void {
-            $lockedItem = $cart->items()
+            $lockedCart = Cart::query()
+                ->lockForUpdate()
+                ->findOrFail($cart->id);
+
+            $lockedItem = $lockedCart->items()
                 ->whereKey($item->id)
                 ->lockForUpdate()
                 ->firstOrFail();
@@ -278,13 +308,8 @@ final class CartService
                 "حداکثر تعداد قابل سفارش از «{$variant->product->name}» {$variant->stock} عدد است."
             );
 
-            $lockedItem->update([
-                'quantity' => $quantity,
-            ]);
-
-            $cart->update([
-                'last_activity_at' => now(),
-            ]);
+            $lockedItem->update(['quantity' => $quantity]);
+            $lockedCart->update(['last_activity_at' => now()]);
         });
     }
 
@@ -318,11 +343,12 @@ final class CartService
     public function clear(Cart $cart): void
     {
         DB::transaction(function () use ($cart): void {
-            $cart->items()->delete();
+            $lockedCart = Cart::query()
+                ->lockForUpdate()
+                ->findOrFail($cart->id);
 
-            $cart->update([
-                'last_activity_at' => now(),
-            ]);
+            $lockedCart->items()->delete();
+            $lockedCart->update(['last_activity_at' => now()]);
         });
     }
 
