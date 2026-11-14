@@ -297,7 +297,7 @@ final class OrderService
                     'سفارش دارای چک واریزشده را تا تعیین تکلیف چک نمی‌توان لغو کرد.'
                 );
 
-                if ($cheque && in_array($cheque->status, ['submitted', 'under_review', 'accepted'], true)) {
+                if ($cheque && in_array($cheque->status, ['submitted', 'under_review', 'awaiting_original', 'original_received', 'accepted'], true)) {
                     $cheque->update(['status' => 'cancelled']);
                 }
 

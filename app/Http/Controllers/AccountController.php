@@ -13,6 +13,7 @@ class AccountController extends Controller
 
         $orders = $user
             ->orders()
+            ->with(['chequePayment'])
             ->withCount('items')
             ->latest('placed_at')
             ->latest('id')
@@ -25,6 +26,18 @@ class AccountController extends Controller
             'user' => $user,
             'orders' => $orders,
             'chequePermission' => $chequePermission,
+            'chequeStatusNames' => [
+                'submitted' => 'اطلاعات چک ثبت شده و در صف بررسی است',
+                'under_review' => 'مدیر در حال بررسی چک است',
+                'awaiting_original' => 'برای این سفارش، ارسال اصل چک درخواست شده است',
+                'original_received' => 'اصل چک دریافت شده و در انتظار تأیید نهایی است',
+                'accepted' => 'چک پذیرفته شده و سفارش آزاد است؛ تسویه هنوز انجام نشده',
+                'deposited' => 'چک به بانک واگذار شده و منتظر نتیجه است',
+                'cleared' => 'چک پاس شده و پرداخت تسویه شده است',
+                'rejected' => 'درخواست چک رد شده است',
+                'bounced' => 'چک برگشت خورده است',
+                'cancelled' => 'فرآیند چک لغو شده است',
+            ],
             'statusNames' => [
                 'pending' => 'در انتظار',
                 'confirmed' => 'تأیید شده',

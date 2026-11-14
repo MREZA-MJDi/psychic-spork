@@ -7,7 +7,7 @@
     <div class="container">
         <span class="eyebrow">MY JANAN</span>
         <h1>حساب کاربری</h1>
-        <p>{{ $user->name }} عزیز، خوش آمدی. سفارش‌ها و درخواست اعتبار چکی‌ات را از همین‌جا پیگیری کن.</p>
+        <p>{{ $user->name }} عزیز، خوش آمدی. سفارش‌ها، وضعیت چک و درخواست اعتبارت را از همین‌جا پیگیری کن.</p>
     </div>
 </section>
 
@@ -85,6 +85,14 @@
                                 <span>{{ number_format($order->items_count) }} قلم ·
                                     {{ $statusNames[$order->status] ?? $order->status }}
                                 </span>
+                                @if($order->chequePayment)
+                                    <small class="account-order__cheque-status">
+                                        {{ $chequeStatusNames[$order->chequePayment->status] ?? $order->chequePayment->status }}
+                                    </small>
+                                    @if(in_array($order->chequePayment->status, ['awaiting_original', 'rejected'], true) && $order->chequePayment->review_note)
+                                        <small>{{ $order->chequePayment->review_note }}</small>
+                                    @endif
+                                @endif
                             </div>
                         </article>
                     @endforeach
