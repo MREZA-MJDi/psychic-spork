@@ -49,7 +49,8 @@
                         @foreach($recentProducts as $product)
                             @php
                                 $variant = $product->primaryActiveVariant;
-                                $image = $product->primaryGalleryMedia?->url;
+                                $image = $product->primaryGalleryMedia?->url
+                                    ?: $variant?->primaryGalleryMedia?->url;
                             @endphp
 
                             <a
@@ -101,7 +102,8 @@
                         @foreach($popularProducts as $product)
                             @php
                                 $variant = $product->primaryActiveVariant;
-                                $image = $product->primaryGalleryMedia?->url;
+                                $image = $product->primaryGalleryMedia?->url
+                                    ?: $variant?->primaryGalleryMedia?->url;
                                 $sales = (int) ($product->sales_quantity ?? 0);
                             @endphp
 

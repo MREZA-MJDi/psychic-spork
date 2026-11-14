@@ -22,6 +22,7 @@ class StoreCategoryController extends Controller
             'primaryGalleryMedia' => fn ($query) => $query->select([
                 'media.id','media.mediable_id','media.mediable_type','media.collection','media.path','media.sort_order',
             ]),
+            'primaryActiveVariant.primaryGalleryMedia',
         ];
     }
 

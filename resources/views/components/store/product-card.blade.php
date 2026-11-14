@@ -5,7 +5,8 @@
 
 @php
     $productVariant = $product->primaryActiveVariant;
-    $image = $product->primaryGalleryMedia?->url;
+    $image = $product->primaryGalleryMedia?->url
+        ?: $productVariant?->primaryGalleryMedia?->url;
     $activeVariants = $product->relationLoaded('activeVariants')
         ? $product->activeVariants
         : collect();

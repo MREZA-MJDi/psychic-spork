@@ -37,6 +37,7 @@ class StoreProductController extends Controller
                 'media.path',
                 'media.sort_order',
             ]),
+            'primaryActiveVariant.primaryGalleryMedia',
         ];
     }
 
@@ -199,6 +200,7 @@ class StoreProductController extends Controller
                     'product_variants.is_active',
                     'product_variants.sort_order',
                 ]),
+                'primaryActiveVariant.primaryGalleryMedia',
             ])
             ->where(function ($query) use ($like) {
                 $query
@@ -232,7 +234,7 @@ class StoreProductController extends Controller
                     'name' => $product->name,
                     'brand' => $product->brand?->name,
                     'category' => $product->category?->name,
-                    'image' => $product->primaryGalleryMedia?->url,
+                    'image' => $product->primaryGalleryMedia?->url ?: $variant?->primaryGalleryMedia?->url,
                     'price' => $variant?->effective_price,
                     'url' => route('products.show', $product),
                 ];
