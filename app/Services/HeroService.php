@@ -14,8 +14,8 @@ final class HeroService
 
     // Cache only request-independent slide data. URLs are kept relative so a request
     // arriving through an old proxy/port can never poison the shared hero cache.
-    private const VERSION_KEY = 'store:home:hero:products:version:v2';
-    private const CACHE_PREFIX = 'store:home:hero:products:v2:';
+    private const VERSION_KEY = 'store:home:hero:products:version:v3';
+    private const CACHE_PREFIX = 'store:home:hero:products:v3:';
     private const CACHE_TTL_MINUTES = 30;
 
     public function slides(): array
@@ -45,7 +45,12 @@ final class HeroService
                         ->firstOrFail();
 
                     if (! $current->is_hero) {
+                        if (! $current->is_active) {
+                            throw new RuntimeException('hero_requires_active');
+                        }
+
                         $heroCount = Product::query()
+                            ->where('is_active', true)
                             ->where('is_hero', true)
                             ->lockForUpdate()
                             ->count();
