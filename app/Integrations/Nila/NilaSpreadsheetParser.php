@@ -254,6 +254,10 @@ final class NilaSpreadsheetParser
 
     private function normalizeRows(array $rawRows): array
     {
+        if (count($rawRows) > 20001) {
+            throw new RuntimeException('فایل بیش از ۲۰٬۰۰۰ ردیف دارد؛ آن را به چند فایل کوچک‌تر تقسیم کنید.');
+        }
+
         $headerIndex = null;
         $headerMap = [];
 
@@ -376,33 +380,37 @@ final class NilaSpreadsheetParser
             }
         }
 
-        foreach ($rows as &$record) {
-            $group = $groups[$record['product_code']] ?? null;
+        $conflictingCodes = [];
 
-            if ($group && $group['name_conflict']) {
-                $record['is_valid'] = false;
-                $record['errors'][] = 'نام پایه در ردیف‌های این کد محصول یکسان نیست.';
+        foreach ($groups as $code => $group) {
+            if ($group['name_conflict']) {
+                $conflictingCodes[$code] = true;
             }
         }
-        unset($record);
 
         foreach ($groups as &$group) {
             $group['valid_rows'] = 0;
             $group['invalid_rows'] = 0;
+        }
+        unset($group);
 
-            foreach ($rows as $record) {
-                if ($record['product_code'] !== $group['product_code']) {
-                    continue;
-                }
+        foreach ($rows as &$record) {
+            $code = $record['product_code'];
 
+            if (isset($conflictingCodes[$code])) {
+                $record['is_valid'] = false;
+                $record['errors'][] = 'نام پایه در ردیف‌های این کد محصول یکسان نیست.';
+            }
+
+            if (isset($groups[$code])) {
                 if ($record['is_valid']) {
-                    $group['valid_rows']++;
+                    $groups[$code]['valid_rows']++;
                 } else {
-                    $group['invalid_rows']++;
+                    $groups[$code]['invalid_rows']++;
                 }
             }
         }
-        unset($group);
+        unset($record);
 
         return [
             'rows' => $rows,
