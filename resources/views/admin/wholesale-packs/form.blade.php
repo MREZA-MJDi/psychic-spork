@@ -117,6 +117,11 @@
             </header>
 
             <div class="admin-card-body">
+                <div class="wholesale-pack-price-summary" aria-live="polite">
+                    <div><span>جمع قیمت عمده اقلام</span><strong><b data-pack-base-price>۰</b> تومان</strong></div>
+                    <div><span>تخفیف نسبت به خرید جداگانه</span><strong><b data-pack-discount>۰</b> تومان</strong></div>
+                    <p data-pack-price-status>بعد از انتخاب اقلام، جمع قیمت و تخفیف اینجا نمایش داده می‌شود.</p>
+                </div>
                 <div class="wholesale-pack-editor__selection-summary" aria-live="polite" data-pack-selection-summary>
                     <div><strong data-pack-selected-count>۰</strong><span>واریانت انتخاب‌شده</span></div>
                     <div><strong data-pack-unit-count>۰</strong><span>تعداد کل داخل پک</span></div>
@@ -145,7 +150,7 @@
                         @endphp
                         <article class="wholesale-pack-variant" data-variant-row data-search="{{ \Illuminate\Support\Str::lower(($variant->product?->name ?? '') . ' ' . ($variant->product?->brand?->name ?? '') . ' ' . ($variant->sku ?? '') . ' ' . ($variant->size ?? '') . ' ' . ($variant->color ?? '')) }}">
                             <label class="wholesale-pack-variant__pick">
-                                <input type="checkbox" value="{{ $variant->id }}" data-pack-variant-toggle @checked($isSelected) @disabled($variant->wholesale_price === null && !$isSelected)>
+                                <input type="checkbox" value="{{ $variant->id }}" data-pack-variant-toggle data-wholesale-price="{{ $variant->wholesale_price ?? '' }}" @checked($isSelected) @disabled($variant->wholesale_price === null && !$isSelected)>
                                 <span class="wholesale-pack-variant__copy">
                                     <strong>{{ $variant->product?->name ?? 'محصول بدون نام' }}</strong>
                                     <span class="wholesale-pack-variant__meta">
