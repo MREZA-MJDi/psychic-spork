@@ -112,7 +112,7 @@ class AdminNilaController extends Controller
         NilaSpreadsheetImportService $service
     ): RedirectResponse {
         $validated = $request->validate([
-            'batch_size' => ['nullable', 'integer', 'min:1', 'max:5'],
+            'batch_size' => ['nullable', 'integer', 'min:1', 'max:50'],
         ]);
 
         try {
