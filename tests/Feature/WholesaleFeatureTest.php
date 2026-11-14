@@ -172,6 +172,55 @@ class WholesaleFeatureTest extends TestCase
         ]);
     }
 
+    public function test_checkout_preview_returns_correct_retail_and_wholesale_totals(): void
+    {
+        $customer = User::factory()->create(['is_admin' => false]);
+        [, $variant] = $this->makeProduct(stock: 8, wholesalePrice: 70000);
+
+        $cart = Cart::create([
+            'user_id' => $customer->id,
+            'last_activity_at' => now(),
+        ]);
+        CartItem::create([
+            'cart_id' => $cart->id,
+            'product_variant_id' => $variant->id,
+            'quantity' => 2,
+        ]);
+
+        $this->actingAs($customer)
+            ->get(route('checkout'))
+            ->assertOk()
+            ->assertViewHas('retailTotal', 200000.0)
+            ->assertViewHas('wholesaleTotal', 140000.0)
+            ->assertViewHas('selectedOrderType', 'retail')
+            ->assertViewHas('canSelectWholesale', true)
+            ->assertViewHas('total', 200000.0);
+    }
+
+    public function test_checkout_preview_disables_wholesale_when_any_cart_item_has_no_wholesale_price(): void
+    {
+        $customer = User::factory()->create(['is_admin' => false]);
+        [, $variant] = $this->makeProduct(stock: 8, wholesalePrice: null);
+
+        $cart = Cart::create([
+            'user_id' => $customer->id,
+            'last_activity_at' => now(),
+        ]);
+        CartItem::create([
+            'cart_id' => $cart->id,
+            'product_variant_id' => $variant->id,
+            'quantity' => 1,
+        ]);
+
+        $this->actingAs($customer)
+            ->get(route('checkout'))
+            ->assertOk()
+            ->assertViewHas('wholesaleTotal', null)
+            ->assertViewHas('wholesaleUnavailableReason', 'قیمت عمده این واریانت تعیین نشده است.')
+            ->assertViewHas('canSelectWholesale', false)
+            ->assertViewHas('total', 100000.0);
+    }
+
     public function test_checkout_renders_cheque_request_for_approved_wholesale_customer(): void
     {
         $customer = User::factory()->create(['is_admin' => false]);
