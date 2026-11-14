@@ -22,8 +22,12 @@ class CheckoutController extends Controller
     ): View|RedirectResponse {
         $current = $cart->current($request);
         $items = $cart->items($current);
+        $packLines = $current->wholesalePacks()
+            ->with(['pack.items.variant.product'])
+            ->get();
+        $hasWholesalePacks = $packLines->isNotEmpty();
 
-        if ($items->isEmpty()) {
+        if ($items->isEmpty() && ! $hasWholesalePacks) {
             return redirect()
                 ->route('cart')
                 ->with(
@@ -43,7 +47,11 @@ class CheckoutController extends Controller
 
         return view('pages.checkout', [
             'items' => $items,
-            'total' => (float) $items->sum('line_total'),
+            'total' => (float) $items->sum('line_total') + (float) $packLines->sum(
+                fn ($line) => (float) ($line->pack?->pack_price ?? 0) * (int) $line->quantity
+            ),
+            'packLines' => $packLines,
+            'hasWholesalePacks' => $hasWholesalePacks,
             'chequeEnabled' => $chequeEnabled,
             'canSelectWholesale' => $canSelectWholesale,
             'chequeMaxOrderAmount' => $chequePermission?->max_order_amount,
@@ -76,6 +84,11 @@ class CheckoutController extends Controller
                     try {
                         $checkoutData = $request->validated();
                         $currentCart = $cart->current($request);
+                        $hasWholesalePacks = $currentCart->wholesalePacks()->exists();
+
+                        if ($hasWholesalePacks) {
+                            $checkoutData['order_type'] = 'wholesale';
+                        }
 
                         if ($checkoutData['order_type'] === 'wholesale') {
                             $quote = $wholesalePricing->quote(
