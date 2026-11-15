@@ -105,4 +105,54 @@ class StoreCatalogPaginationTest extends TestCase
                     && $products->perPage() === 6;
             });
     }
+
+    public function test_shop_can_filter_brands_by_a_customer_typed_name(): void
+    {
+        $brand = Brand::factory()->create([
+            'name' => 'North Star',
+            'slug' => 'north-star',
+            'is_active' => true,
+        ]);
+        $otherBrand = Brand::factory()->create([
+            'name' => 'South Moon',
+            'slug' => 'south-moon',
+            'is_active' => true,
+        ]);
+
+        Product::factory()->count(2)->create([
+            'brand_id' => $brand->id,
+            'is_active' => true,
+        ]);
+        Product::factory()->create([
+            'brand_id' => $otherBrand->id,
+            'is_active' => true,
+        ]);
+
+        $this->get(route('products.index', ['brand' => 'North']))
+            ->assertOk()
+            ->assertViewHas('products', function ($products): bool {
+                return $products->total() === 2;
+            });
+    }
+
+    public function test_shop_discovery_renders_the_admin_selected_hero_product_banner(): void
+    {
+        Product::factory()->create([
+            'name' => 'Curated Catalog Banner Product',
+            'slug' => 'curated-catalog-banner-product',
+            'is_active' => true,
+            'is_hero' => true,
+        ]);
+
+        $this->get(route('products.index'))
+            ->assertOk()
+            ->assertSee('catalog-category-sidebar')
+            ->assertSee('catalog-brand-filter')
+            ->assertSee('Curated Catalog Banner Product')
+            ->assertViewHas('featuredBanner', function ($banner): bool {
+                return is_array($banner)
+                    && ($banner['title'] ?? null) === 'Curated Catalog Banner Product';
+            });
+    }
+
 }
