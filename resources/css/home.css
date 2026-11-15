@@ -412,26 +412,6 @@ overflow:
         ellipsis;
 }
 
-.janan-trust__arrow {
-color:
-        rgba(255, 255, 255, .24);
-
-    font-size:
-        15px;
-
-    transition:
-        color .25s ease,
-        transform .30s var(--janan-ease);
-}
-
-.janan-trust__item:hover .janan-trust__arrow {
-color:
-        #9fd4ea;
-
-    transform:
-        translate(-3px, -2px);
-}
-
 /* Compact, legible home product section with useful choices at a glance. */
 .home-page .home-product-section {
     padding-block: clamp(38px, 4.4vw, 58px);
@@ -2308,17 +2288,6 @@ outline:
     line-height: 1.7;
 }
 
-.janan-trust__arrow {
-    color: rgba(255,255,255,.28);
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-    font-size: 14px;
-}
-
-.janan-trust__item:hover .janan-trust__arrow {
-    color: #fff;
-    transform: translate(-3px,-2px);
-}
-
 /* =========================================================
    JANAN / TRUST 02 — HERO TRANSITION
    Independent editorial band; no full-width dark card.
@@ -2498,14 +2467,3 @@ outline:
     line-height: 1.7;
 }
 
-.janan-trust__arrow {
-    color: rgba(23,23,23,.34);
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-    font-size: 13px;
-    transition: color .25s ease, transform .3s ease;
-}
-
-.janan-trust__item:hover .janan-trust__arrow {
-    color: #171717;
-    transform: translate(-2px,-2px);
-}
