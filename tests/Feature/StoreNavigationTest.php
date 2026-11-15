@@ -37,4 +37,12 @@ class StoreNavigationTest extends TestCase
         $response->assertSee('aria-label="باشگاه مشتریان DrClubz"', false);
         $response->assertDontSee('aria-label="خرید عمده"', false);
     }
+    public function test_brand_names_filter_products_instead_of_opening_a_standalone_brand_directory(): void
+    {
+        $response = $this->get(route('home'));
+
+        $response->assertOk()
+            ->assertDontSee('href="' . route('brands.index') . '"', false);
+    }
+
 }
