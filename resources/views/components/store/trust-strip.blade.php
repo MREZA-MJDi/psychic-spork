@@ -28,7 +28,7 @@
                 <span>محصولات ثبت‌شده در فروشگاه</span>
             </div>
 
-            <span class="janan-trust__arrow">↗</span>
+            
         </div>
 
 
@@ -47,7 +47,7 @@
                 <span>قیمت و موجودی به‌روز</span>
             </div>
 
-            <span class="janan-trust__arrow">↗</span>
+            
         </div>
 
 
@@ -66,7 +66,7 @@
                 <span>مسیر ساده برای پشتیبانی</span>
             </div>
 
-            <span class="janan-trust__arrow">↗</span>
+            
         </div>
 
 
@@ -86,7 +86,7 @@
                 <span>شرایط، مرجوعی و سیاست‌ها</span>
             </div>
 
-            <span class="janan-trust__arrow">↗</span>
+            
         </div>
 
     </div>
