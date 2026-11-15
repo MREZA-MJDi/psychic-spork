@@ -61,6 +61,7 @@ class ZarinPalSandboxConfigTest extends TestCase
 
     public function test_sandbox_string_false_does_not_enable_sandbox(): void
     {
+        $originalProcessEnv = getenv('ZARINPAL_SANDBOX');
         $originalEnv = $_ENV['ZARINPAL_SANDBOX'] ?? null;
         $originalServer = $_SERVER['ZARINPAL_SANDBOX'] ?? null;
         $hadEnv = array_key_exists('ZARINPAL_SANDBOX', $_ENV);
