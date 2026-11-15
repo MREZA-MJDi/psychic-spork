@@ -201,7 +201,7 @@ class WholesaleFeatureTest extends TestCase
 
         $this->get(route('wholesale.catalog'))
             ->assertOk()
-            ->assertSee(route('store.media', ['path' => 'variants/wholesale-card.webp']), false);
+            ->assertSee(route('store.media', ['path' => 'variants/wholesale-card.webp'], false), false);
     }
 
     public function test_wholesale_page_is_public_and_explains_cheque_access(): void
