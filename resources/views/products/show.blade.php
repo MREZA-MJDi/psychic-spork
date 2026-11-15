@@ -4,7 +4,9 @@
 
 @section('content')
 @php
-    $gallery = $product->galleryMedia->values();
+    $gallery = $product->relationLoaded('galleryMedia')
+        ? $product->getRelation('galleryMedia')->values()
+        : collect();
     $variants = $product->activeVariants->values();
 
     $variant = $variants->first(
