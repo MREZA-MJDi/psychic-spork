@@ -55,7 +55,7 @@
                 <nav class="catalog-category-list">
                     <a href="{{ route('products.index', request()->except(['category', 'page'])) }}"
                        class="{{ request()->filled('category') ? '' : 'is-active' }}">
-                        <span>همه محصولات</span><small>{{ number_format($products->total()) }}</small>
+                        <span>همه محصولات</span>
                     </a>
                     @foreach($categories as $category)
                         <a href="{{ route('products.index', array_merge(request()->except('page'), ['category' => $category->slug])) }}"
