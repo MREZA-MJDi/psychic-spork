@@ -2843,6 +2843,10 @@ animation-duration:
         padding: 7px;
     }
 
+    .home-signal-panel--popular .home-signal-item {
+        grid-template-columns: 54px minmax(0, 1fr) 30px;
+    }
+
     .home-signal-item__media {
         width: 54px;
         height: 64px;
