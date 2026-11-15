@@ -155,4 +155,33 @@ class StoreCatalogPaginationTest extends TestCase
             });
     }
 
+
+    public function test_shop_displays_twelve_products_per_page_and_renders_next_page(): void
+    {
+        Product::factory()->count(13)->create([
+            'is_active' => true,
+        ]);
+
+        $firstPage = $this->get(route('products.index'));
+
+        $firstPage->assertOk()
+            ->assertSee('store-pagination')
+            ->assertSee('صفحه 1 از 2')
+            ->assertViewHas('products', function ($products): bool {
+                return $products->total() === 13
+                    && $products->count() === 12
+                    && $products->perPage() === 12
+                    && $products->currentPage() === 1;
+            });
+
+        $this->get(route('products.index', ['page' => 2]))
+            ->assertOk()
+            ->assertViewHas('products', function ($products): bool {
+                return $products->total() === 13
+                    && $products->count() === 1
+                    && $products->perPage() === 12
+                    && $products->currentPage() === 2;
+            });
+    }
+
 }
