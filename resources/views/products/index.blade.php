@@ -21,7 +21,6 @@
                 <nav class="catalog-local-nav" aria-label="بخش‌های فروشگاه">
                     <a href="{{ route('products.index') }}" aria-current="page">محصولات</a>
                     <a href="{{ route('categories.index') }}">دسته‌بندی‌ها</a>
-                    <a href="{{ route('brands.index') }}">برندها</a>
                 </nav>
             </div>
         </div>
