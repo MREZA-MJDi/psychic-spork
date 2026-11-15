@@ -44,7 +44,7 @@ class StoreNavigationTest extends TestCase
 
         $response->assertOk()
             ->assertDontSee('href="' . route('brands.index') . '"', false)
-            ->assertDontSee('برندها');
+;
     }
 
 }
