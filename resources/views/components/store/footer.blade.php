@@ -81,9 +81,6 @@
                     دسته‌بندی‌ها
                 </a>
 
-                <a href="{{ route('brands.index') }}">
-                    برندها
-                </a>
 
             </nav>
 
