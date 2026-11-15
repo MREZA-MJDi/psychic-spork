@@ -3,27 +3,21 @@
 @section('title', 'محصولات — '.($siteBrandNameLatin ?? 'Janan'))
 
 @section('content')
-<div class="catalog-page catalog-page--products">
-
+<div class="catalog-page catalog-page--products catalog-discovery-layout">
     <section class="catalog-masthead catalog-masthead--products">
         <div class="container">
             <div class="catalog-masthead__top">
-                <span class="eyebrow">{{ $siteBrandNameLatin }} / CATALOG / 01</span>
-
+                <span class="eyebrow">{{ $siteBrandNameLatin }} / CATALOG</span>
                 <div class="catalog-masthead__stat">
                     <strong>{{ number_format($products->total()) }}</strong>
                     <span>محصول فعال</span>
                 </div>
             </div>
-
             <div class="catalog-masthead__content">
                 <div>
-                    <h1>محصولی که می‌خواهی را پیدا کن.</h1>
-                    <p>
-                        دسته‌ها، برندها و جستجو را ترکیب کن تا سریع به انتخابت برسی.
-                    </p>
+                    <h1>انتخابت را ساده‌تر پیدا کن.</h1>
+                    <p>دسته‌بندی را انتخاب کن، برند را جستجو کن و محصولات را مقایسه کن.</p>
                 </div>
-
                 <nav class="catalog-local-nav" aria-label="بخش‌های فروشگاه">
                     <a href="{{ route('products.index') }}" aria-current="page">محصولات</a>
                     <a href="{{ route('categories.index') }}">دسته‌بندی‌ها</a>
@@ -33,188 +27,138 @@
         </div>
     </section>
 
-    <section class="catalog-discovery">
+    <section class="catalog-discovery catalog-discovery--compact">
         <div class="container">
-
-            <div class="catalog-search-box">
-                <div class="catalog-search-box__copy">
-                    <span class="eyebrow">SEARCH</span>
-                    <strong>هر چیزی را که در ذهن داری، بنویس.</strong>
-                </div>
-
-                <form
-                    class="catalog-search"
-                    data-store-search
-                    data-suggestions-url="{{ route('search.suggestions') }}"
-                    method="GET"
-                    action="{{ route('products.index') }}"
-                    role="search"
-                >
-                    <label class="catalog-search__field">
-                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                            <circle cx="11" cy="11" r="6.5"/>
-                            <path d="m16 16 4.5 4.5"/>
-                        </svg>
-
-                        <span class="sr-only">جستجوی محصولات</span>
-
-                        <input
-                            type="search"
-                            name="q"
-                            value="{{ request('q') }}"
-                            placeholder="نام محصول، برند یا SKU…"
-                            autocomplete="off"
-                            data-search-input
-                            minlength="2"
-                        >
-
-                        <button
-                            type="button"
-                            class="catalog-search__clear"
-                            data-search-clear
-                            aria-label="پاک کردن"
-                            @if(!request('q')) hidden @endif
-                        >
-                            ×
-                        </button>
-                    </label>
-
-                    <button class="button button--primary" type="submit">
-                        جستجو
-                        <span aria-hidden="true">↵</span>
-                    </button>
-                </form>
-            </div>
-
-            <form
-                class="catalog-filter-bar"
-                method="GET"
-                action="{{ route('products.index') }}"
-            >
-                <input type="hidden" name="q" value="{{ request('q') }}">
-
-                <div class="catalog-filter-bar__field">
-                    <span>دسته‌بندی</span>
-                    <select name="category">
-                        <option value="">همه دسته‌ها</option>
-                        @foreach($categories as $category)
-                            <option
-                                value="{{ $category->slug }}"
-                                @selected(request('category') === $category->slug)
-                            >
-                                {{ $category->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div class="catalog-filter-bar__field">
-                    <span>مرتب‌سازی</span>
-                    <select name="sort" aria-label="مرتب‌سازی محصولات">
-                        <option value="newest" @selected(request('sort', 'newest') === 'newest')>جدیدترین</option>
-                        <option value="price_asc" @selected(request('sort') === 'price_asc')>ارزان‌ترین</option>
-                        <option value="price_desc" @selected(request('sort') === 'price_desc')>گران‌ترین</option>
-                        <option value="name_asc" @selected(request('sort') === 'name_asc')>الفبایی</option>
-                    </select>
-                </div>
-
-                <div class="catalog-filter-bar__field">
-                    <span>برند</span>
-                    <select name="brand">
-                        <option value="">همه برندها</option>
-                        @foreach($brands as $brand)
-                            <option
-                                value="{{ $brand->slug }}"
-                                @selected(request('brand') === $brand->slug)
-                            >
-                                {{ $brand->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div class="catalog-filter-bar__field">
-                    <span>تعداد نمایش</span>
-                    <select name="per_page" aria-label="تعداد نمایش در هر صفحه">
-                        <option value="6" @selected((int) request('per_page', $perPage) === 6)>۶</option>
-                        <option value="12" @selected((int) request('per_page', $perPage) === 12)>۱۲</option>
-                        <option value="24" @selected((int) request('per_page', $perPage) === 24)>۲۴</option>
-                        <option value="36" @selected((int) request('per_page', $perPage) === 36)>۳۶</option>
-                    </select>
-                </div>
-
-                <div class="catalog-filter-bar__actions">
-                    <button class="button button--primary" type="submit">
-                        اعمال فیلتر
-                    </button>
-
-                    @if(request()->hasAny(['q', 'category', 'brand', 'sort', 'per_page']))
-                        <a
-                            class="button button--ghost"
-                            href="{{ route('products.index') }}"
-                        >
-                            پاک کردن
-                        </a>
-                    @endif
-                </div>
-
-                <span class="catalog-filter-bar__count">
-                    {{ number_format($products->total()) }} نتیجه
-                </span>
+            <form class="catalog-search catalog-search--product" method="GET" action="{{ route('products.index') }}" role="search">
+                <label class="catalog-search__field">
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/>
+                    </svg>
+                    <span class="sr-only">جستجوی محصولات</span>
+                    <input type="search" name="q" value="{{ request('q') }}" placeholder="نام محصول، مدل یا کد کالا…" autocomplete="off" minlength="2">
+                </label>
+                @if(request('category'))<input type="hidden" name="category" value="{{ request('category') }}">@endif
+                @if(request('brand'))<input type="hidden" name="brand" value="{{ request('brand') }}">@endif
+                @if(request('sort'))<input type="hidden" name="sort" value="{{ request('sort') }}">@endif
+                <button class="button button--primary" type="submit">جستجوی محصول</button>
             </form>
-
         </div>
     </section>
 
-    <section class="catalog-results">
-        <div class="container">
-
-            @if($products->isNotEmpty())
-                <header class="catalog-results__head">
-                    <div class="catalog-results__title">
-                        <span class="eyebrow">{{ $siteBrandNameLatin }} / CATALOG</span>
-                        <h2>
-                            {{ request('q') ? 'نتیجه جستجوی «'.request('q').'»' : 'محصولات جانه جانان' }}
-                        </h2>
-                        <p>محصولات را بر اساس دسته، برند و قیمت مرتب کن و جزئیات هر گزینه را ببین.</p>
-                    </div>
-
-                    <div class="catalog-results__meta" aria-live="polite">
-                        <span>
-                            نمایش {{ number_format($products->firstItem()) }} تا {{ number_format($products->lastItem()) }}
-                            از {{ number_format($products->total()) }} محصول
-                        </span>
-                        <span>صفحه {{ number_format($products->currentPage()) }} از {{ number_format($products->lastPage()) }}</span>
-                    </div>
-                </header>
-
-                <div class="product-grid">
-                    @foreach($products as $product)
-                        <x-store.product-card :product="$product" />
-                    @endforeach
+    <section class="catalog-results catalog-results--discovery">
+        <div class="container catalog-discovery-shell">
+            <aside class="catalog-category-sidebar" aria-label="فیلتر دسته‌بندی محصولات">
+                <div class="catalog-category-sidebar__head">
+                    <span class="eyebrow">CATEGORIES</span>
+                    <h2>دسته‌بندی</h2>
                 </div>
+                <nav class="catalog-category-list">
+                    <a href="{{ route('products.index', request()->except(['category', 'page'])) }}"
+                       class="{{ request()->filled('category') ? '' : 'is-active' }}">
+                        <span>همه محصولات</span><small>{{ number_format($products->total()) }}</small>
+                    </a>
+                    @foreach($categories as $category)
+                        <a href="{{ route('products.index', array_merge(request()->except('page'), ['category' => $category->slug])) }}"
+                           class="{{ request('category') === $category->slug ? 'is-active' : '' }}"
+                           @if(request('category') === $category->slug) aria-current="page" @endif>
+                            <span>{{ $category->name }}</span>
+                            <span class="catalog-category-list__arrow" aria-hidden="true">←</span>
+                        </a>
+                    @endforeach
+                </nav>
+            </aside>
 
-                @if($products->hasPages())
-                    <nav class="store-pagination" aria-label="صفحه‌بندی محصولات">
-                        {{ $products->onEachSide(1)->links('vendor.pagination.store') }}
-                    </nav>
+            <div class="catalog-main-column">
+                @if($featuredBanner)
+                    <article class="catalog-feature-banner">
+                        <a class="catalog-feature-banner__image" href="{{ $featuredBanner['url'] }}" aria-label="مشاهده {{ $featuredBanner['title'] }}">
+                            <x-store.image :src="$featuredBanner['image']" :alt="$featuredBanner['title']" fallback-class="product-image-placeholder" fallback="JANAN" />
+                        </a>
+                        <div class="catalog-feature-banner__content">
+                            <span class="eyebrow">منتخب جانان · {{ $featuredBanner['brand'] }}</span>
+                            <h2>{{ $featuredBanner['title'] }}</h2>
+                            <p>{{ $featuredBanner['description'] }}</p>
+                            <a class="button button--dark" href="{{ $featuredBanner['url'] }}">مشاهده جزئیات محصول <span aria-hidden="true">↗</span></a>
+                        </div>
+                    </article>
                 @endif
 
-            @else
-                <div class="empty-state empty-state--search catalog-empty">
-                    <span class="eyebrow">NO RESULT</span>
-                    <h2>چیزی با این مشخصات پیدا نشد.</h2>
-                    <p>
-                        عبارت کوتاه‌تری امتحان کن یا فیلترها را بردار تا گزینه‌های بیشتری ببینی.
-                    </p>
-                    <a class="button button--primary" href="{{ route('products.index') }}">
-                        بازگشت به همه محصولات
-                    </a>
-                </div>
-            @endif
+                <form class="catalog-brand-filter" method="GET" action="{{ route('products.index') }}">
+                    <div class="catalog-brand-filter__top">
+                        <div>
+                            <span class="eyebrow">FIND A BRAND</span>
+                            <h2>جستجو بر اساس برند</h2>
+                        </div>
+                        <label class="catalog-brand-filter__search">
+                            <span class="sr-only">نام برند</span>
+                            <input type="search" name="brand" value="{{ request('brand') }}" placeholder="نام برند را بنویس…" autocomplete="off">
+                            <button type="submit" aria-label="جستجوی برند">⌕</button>
+                        </label>
+                    </div>
+                    @foreach(request()->except(['brand', 'page']) as $key => $value)
+                        @if(is_scalar($value) && $value !== '')
+                            <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                        @endif
+                    @endforeach
+                    <div class="catalog-brand-rail" aria-label="انتخاب سریع برند">
+                        @foreach($brands as $brand)
+                            <a href="{{ route('products.index', array_merge(request()->except('page'), ['brand' => $brand->slug])) }}"
+                               class="catalog-brand-chip {{ request('brand') === $brand->slug ? 'is-active' : '' }}"
+                               title="فیلتر محصولات {{ $brand->name }}">
+                                <span class="catalog-brand-chip__shape" aria-hidden="true">{{ mb_substr($brand->name, 0, 1) }}</span>
+                                <span>{{ $brand->name }}</span>
+                            </a>
+                        @endforeach
+                    </div>
+                    @if(request()->filled('brand'))
+                        <a class="catalog-brand-filter__clear" href="{{ route('products.index', request()->except(['brand', 'page'])) }}">حذف فیلتر برند ×</a>
+                    @endif
+                </form>
 
+                <header class="catalog-results__head catalog-results__head--compact">
+                    <div class="catalog-results__title">
+                        <span class="eyebrow">{{ $siteBrandNameLatin }} / CATALOG</span>
+                        <h2>{{ request('q') ? 'نتیجه جستجوی «'.request('q').'»' : 'محصولات جانان' }}</h2>
+                        <p>{{ number_format($products->total()) }} محصول مطابق انتخاب‌های شما</p>
+                    </div>
+                    <form class="catalog-inline-sort" method="GET" action="{{ route('products.index') }}">
+                        @foreach(request()->except(['sort', 'page']) as $key => $value)
+                            @if(is_scalar($value) && $value !== '')
+                                <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                            @endif
+                        @endforeach
+                        <label><span>مرتب‌سازی</span>
+                            <select name="sort" onchange="this.form.submit()">
+                                <option value="newest" @selected(request('sort', 'newest') === 'newest')>جدیدترین</option>
+                                <option value="price_asc" @selected(request('sort') === 'price_asc')>ارزان‌ترین</option>
+                                <option value="price_desc" @selected(request('sort') === 'price_desc')>گران‌ترین</option>
+                                <option value="name_asc" @selected(request('sort') === 'name_asc')>الفبایی</option>
+                            </select>
+                        </label>
+                    </form>
+                </header>
+
+                @if($products->isNotEmpty())
+                    <div class="product-grid product-grid--compact">
+                        @foreach($products as $product)
+                            <x-store.product-card :product="$product" variant="compact" />
+                        @endforeach
+                    </div>
+                    @if($products->hasPages())
+                        <nav class="store-pagination" aria-label="صفحه‌بندی محصولات">
+                            {{ $products->onEachSide(1)->links('vendor.pagination.store') }}
+                        </nav>
+                    @endif
+                @else
+                    <div class="empty-state empty-state--search catalog-empty">
+                        <span class="eyebrow">NO RESULT</span>
+                        <h2>محصولی با این مشخصات پیدا نشد.</h2>
+                        <p>عبارت جستجو یا فیلترها را تغییر بده.</p>
+                        <a class="button button--primary" href="{{ route('products.index') }}">نمایش همه محصولات</a>
+                    </div>
+                @endif
+            </div>
         </div>
     </section>
-
 </div>
 @endsection
