@@ -137,6 +137,10 @@
                             </select>
                         </label>
                     </form>
+                    <div class="catalog-results__meta" aria-live="polite">
+                        <span>نمایش {{ number_format($products->firstItem() ?? 0) }} تا {{ number_format($products->lastItem() ?? 0) }} از {{ number_format($products->total()) }} محصول</span>
+                        <span>صفحه {{ number_format($products->currentPage()) }} از {{ number_format($products->lastPage()) }}</span>
+                    </div>
                 </header>
 
                 @if($products->isNotEmpty())
