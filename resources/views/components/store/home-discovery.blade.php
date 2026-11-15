@@ -109,10 +109,7 @@
                         </p>
                     </div>
 
-                    <span class="discovery-card__action">
-                        <span>ورود به جزئیات محصول</span>
-                        <b aria-hidden="true">↗</b>
-                    </span>
+                    <span class="discovery-card__action">ورود به جزئیات محصول</span>
                 </div>
             </a>
 
@@ -155,10 +152,7 @@
                         </p>
                     </div>
 
-                    <span class="discovery-card__action">
-                        <span>کشف انتخاب بعدی</span>
-                        <b aria-hidden="true">↗</b>
-                    </span>
+                    <span class="discovery-card__action">کشف انتخاب بعدی</span>
                 </div>
             </a>
 

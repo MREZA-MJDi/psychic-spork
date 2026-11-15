@@ -76,7 +76,6 @@
                                     @endif
                                 </span>
 
-                                <span class="home-signal-item__arrow" aria-hidden="true">↗</span>
                             </a>
                         @endforeach
                     </div>

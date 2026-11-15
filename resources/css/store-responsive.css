@@ -447,14 +447,6 @@ top:
             31px;
 }
 
-.home-category-card__arrow {
-width:
-            36px;
-
-        height:
-            36px;
-}
-
 .home-brand-tile,
 .home-brand-tile.is-featured {
 border-radius:
@@ -518,14 +510,6 @@ padding-top:
 .home-brand-tile.is-featured .home-brand-tile__name strong {
 font-size:
             17px;
-}
-
-.home-brand-tile__arrow {
-width:
-            34px;
-
-        height:
-            34px;
 }
 
 }
@@ -2826,11 +2810,6 @@ animation-duration:
         font-size: 15px;
     }
 
-    .home-category-card__arrow {
-        width: 34px;
-        height: 34px;
-    }
-
     .home-brand-rail {
         grid-template-rows: repeat(3, minmax(150px, auto));
     }
@@ -2859,9 +2838,13 @@ animation-duration:
     }
 
     .home-signal-item {
-        grid-template-columns: 54px minmax(0, 1fr) 30px;
+        grid-template-columns: 54px minmax(0, 1fr);
         gap: 9px;
         padding: 7px;
+    }
+
+    .home-signal-panel--popular .home-signal-item {
+        grid-template-columns: 54px minmax(0, 1fr) 30px;
     }
 
     .home-signal-item__media {
