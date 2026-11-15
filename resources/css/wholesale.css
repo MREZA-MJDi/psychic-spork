@@ -292,3 +292,175 @@
     .wholesale-pack-card__cover { aspect-ratio:4/3; }
     .wholesale-pack-card__top,.wholesale-pack-card__description,.wholesale-pack-card__items,.wholesale-pack-card__foot { margin-inline:14px; }
 }
+
+
+/* =========================================================
+   DRCLUBZ / WHOLESALE LANDING — shared Janan design tokens
+   Keep the storefront header, navigation and global palette
+   owned by the existing store layout.
+========================================================= */
+.club-landing {
+    padding-block: clamp(28px, 5vw, 64px) clamp(56px, 7vw, 88px);
+    background:
+        radial-gradient(circle at 92% 5%, color-mix(in srgb, var(--janan-sky-100) 72%, transparent), transparent 26rem),
+        radial-gradient(circle at 4% 32%, color-mix(in srgb, var(--janan-pink-100) 68%, transparent), transparent 24rem);
+}
+.club-landing__hero {
+    display:grid;
+    grid-template-columns:minmax(0,1.45fr) minmax(260px,.55fr);
+    gap:14px;
+}
+.club-landing__intro,.club-landing__member,.club-feature,.club-landing__rewards {
+    border:1px solid var(--janan-line);
+    background:var(--janan-surface, #fff);
+    box-shadow:var(--janan-shadow-xs);
+}
+.club-landing__intro {
+    min-height:350px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:flex-start;
+    padding:clamp(28px,5vw,68px);
+    border-radius:26px;
+    overflow:hidden;
+}
+.club-landing__intro h1 {
+    margin:16px 0 12px;
+    color:var(--janan-ink-strong);
+    font-size:clamp(38px,6vw,72px);
+    line-height:1.08;
+    letter-spacing:-.055em;
+}
+.club-landing__intro h1 em { color:var(--janan-pink-ink); font-style:normal; }
+.club-landing__intro p,.club-landing__rewards p {
+    max-width:62ch;
+    margin:0;
+    color:var(--janan-muted);
+    font-size:11px;
+    line-height:2.1;
+}
+.club-landing__actions { display:flex; flex-wrap:wrap; gap:9px; margin-top:24px; }
+.club-landing__member {
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    justify-content:center;
+    padding:clamp(22px,3vw,34px);
+    border-radius:26px;
+    background:linear-gradient(145deg,var(--janan-sky-100),var(--janan-pink-100));
+}
+.club-landing__member-kicker { color:var(--janan-muted); font-size:8px; font-weight:800; letter-spacing:.14em; }
+.club-landing__member-icon {
+    display:grid; place-items:center;
+    width:48px; height:48px; margin:20px 0 12px;
+    border-radius:50%;
+    color:var(--janan-blue-ink);
+    background:rgba(255,255,255,.72);
+    font-size:22px;
+}
+.club-landing__member strong { color:var(--janan-ink-strong); font-size:17px; }
+.club-landing__member p { margin:7px 0 18px; color:var(--janan-muted); font-size:10px; line-height:2; }
+.club-landing__member a { color:var(--janan-pink-ink); font-size:10px; font-weight:800; }
+.club-landing__features {
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:10px;
+    margin-top:12px;
+}
+.club-feature {
+    display:grid;
+    grid-template-columns:32px minmax(0,1fr);
+    gap:12px;
+    min-height:116px;
+    padding:20px;
+    border-radius:18px;
+}
+.club-feature>span { color:var(--janan-pink-ink); font:italic 17px var(--janan-display); }
+.club-feature strong { color:var(--janan-ink-strong); font-size:11px; }
+.club-feature p { margin:5px 0 0; color:var(--janan-muted); font-size:9px; line-height:1.9; }
+.club-landing__rewards {
+    display:grid;
+    grid-template-columns:minmax(0,1.2fr) minmax(250px,.8fr);
+    gap:24px;
+    align-items:center;
+    margin-top:clamp(30px,5vw,58px);
+    padding:clamp(22px,4vw,38px);
+    border-radius:24px;
+}
+.club-landing__rewards h2 { margin:9px 0; color:var(--janan-ink-strong); font-size:clamp(21px,3vw,32px); }
+.club-landing__rewards-status {
+    display:grid;
+    gap:8px;
+    padding:20px;
+    border:1px solid var(--janan-line);
+    border-radius:16px;
+    background:var(--janan-soft, #f7fafb);
+}
+.club-landing__rewards-status>span { color:var(--janan-pink-ink); font-size:24px; }
+.club-landing__rewards-status strong { color:var(--janan-ink-strong); font-size:11px; }
+.club-landing__rewards-status small { color:var(--janan-muted); font-size:9px; line-height:1.8; }
+
+.wholesale-page {
+    background:
+        radial-gradient(circle at 95% 2%, color-mix(in srgb, var(--janan-sky-100) 58%, transparent), transparent 27rem),
+        radial-gradient(circle at 3% 28%, color-mix(in srgb, var(--janan-pink-100) 48%, transparent), transparent 24rem),
+        var(--janan-page, #fff);
+}
+.wholesale-hero__main,.wholesale-hero__side,.wholesale-form-card,.wholesale-process {
+    background:var(--janan-surface, #fff);
+    border-color:var(--janan-line);
+    box-shadow:var(--janan-shadow-xs);
+}
+.wholesale-hero__main h1,.wholesale-status__state { color:var(--janan-ink-strong); }
+.wholesale-hero__main p,.wholesale-status__hint { color:var(--janan-muted); }
+.wholesale-catalog__head {
+    border-color:var(--janan-line);
+    background:linear-gradient(135deg,var(--janan-sky-100),var(--janan-pink-100),var(--janan-surface, #fff));
+}
+.wholesale-pack-card { background:var(--janan-surface, #fff); border-color:var(--janan-line); }
+.wholesale-pack-card__purchase {
+    display:grid;
+    grid-template-columns:minmax(90px,.35fr) minmax(0,1fr);
+    align-items:end;
+    gap:10px;
+    margin:0 22px 22px;
+    padding-top:16px;
+    border-top:1px solid var(--janan-line);
+}
+.wholesale-pack-card__purchase label { display:grid; gap:5px; color:var(--janan-muted); font-size:9px; }
+.wholesale-pack-card__purchase input {
+    width:100%; min-height:42px; padding:8px 10px;
+    border:1px solid var(--janan-line); border-radius:10px;
+    color:var(--janan-ink-strong); background:var(--janan-surface, #fff);
+}
+.wholesale-pack-card__purchase .button { min-height:42px; justify-content:center; }
+.wholesale-empty { border:1px solid var(--janan-line); border-radius:20px; background:var(--janan-surface, #fff); }
+.wholesale-content { align-items:stretch; }
+.wholesale-form-card .section-head h2 { color:var(--janan-ink-strong); }
+.wholesale-form-card .section-head p { color:var(--janan-muted); }
+.wholesale-process,.wholesale-form-card { color:var(--janan-ink); }
+
+@media (max-width: 900px) {
+    .wholesale-benefit-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .wholesale-content { grid-template-columns:1fr; }
+}
+@media (max-width: 700px) {
+    .club-landing__hero,.club-landing__rewards { grid-template-columns:1fr; }
+    .club-landing__intro { min-height:0; padding:28px 22px; }
+    .club-landing__member { border-radius:20px; }
+    .club-landing__features { grid-template-columns:1fr; }
+    .club-feature { min-height:0; }
+    .wholesale-hero { grid-template-columns:1fr; }
+    .wholesale-hero__main { min-height:0; padding:28px 22px; border-radius:22px; }
+    .wholesale-hero__main h1 { font-size:clamp(32px,10vw,48px); }
+    .customer-action-strip { align-items:stretch; flex-direction:column; }
+    .customer-action-strip__actions { display:grid; grid-template-columns:1fr; }
+    .wholesale-benefit-grid { grid-template-columns:1fr; }
+    .wholesale-catalog__head { padding:18px; }
+    .wholesale-pack-grid { grid-template-columns:1fr; }
+    .wholesale-pack-card__purchase { grid-template-columns:100px minmax(0,1fr); margin-inline:14px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .wholesale-pack-card,.wholesale-pack-item,.wholesale-product-card { transition:none!important; }
+}
