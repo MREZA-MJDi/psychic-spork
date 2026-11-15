@@ -101,7 +101,7 @@ class StoreFrontendTest extends TestCase
                 ->assertDontSee('رنگ نامشخص')
                 ->assertDontSee('سایز نامشخص');
 
-            $this->get(route('products.index'))
+            $this->get(route('products.index', ['per_page' => 6]))
                 ->assertOk()
                 ->assertSee('نمایش 1 تا 6', false)
                 ->assertSee('store-pagination__inner', false)
