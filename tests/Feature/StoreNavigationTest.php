@@ -45,4 +45,21 @@ class StoreNavigationTest extends TestCase
             ->assertDontSee('href="' . route('brands.index') . '"', false);
     }
 
+    public function test_no_blade_template_contains_decorative_arrow_spans(): void
+    {
+        $matches = [];
+
+        foreach (File::allFiles(resource_path('views')) as $file) {
+            $contents = File::get($file->getPathname());
+
+            if (preg_match_all('/<span\\b[^>]*\\bclass=(["\\\\\'])[^\"\\\\\']*arrow[^\"\\\\\']*\\1[^>]*>/i', $contents, $found)) {
+                foreach ($found[0] as $match) {
+                    $matches[] = $file->getRelativePathname() . ': ' . $match;
+                }
+            }
+        }
+
+        $this->assertSame([], $matches, "Decorative arrow spans remain:\\n" . implode("\\n", $matches));
+    }
+
 }
