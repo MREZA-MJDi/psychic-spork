@@ -82,12 +82,6 @@
                                 </span>
                             </div>
 
-                            <span
-                                class="home-brand-tile__arrow"
-                                aria-hidden="true"
-                            >
-                                ↗
-                            </span>
 
                         </div>
 

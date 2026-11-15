@@ -88,12 +88,6 @@
 
                             </div>
 
-                            <span
-                                class="home-category-card__arrow"
-                                aria-hidden="true"
-                            >
-                                ↗
-                            </span>
 
                         </div>
 
