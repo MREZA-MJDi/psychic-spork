@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
-@section('title', 'Nila / Holoo')
-@section('page-title', 'Nila / Holoo')
+@section('title', 'همگام‌سازی نیلا')
+@section('page-title', 'همگام‌سازی نیلا')
 
 @section('content')
 <div class="admin-page-head">
@@ -15,25 +15,25 @@
 
 <div class="admin-dashboard-stats">
     <div class="admin-stat-card">
-        <div class="admin-stat-card__label">محصولات Mapping شده</div>
+        <div class="admin-stat-card__label">محصولات شناسایی‌شده</div>
         <div class="admin-stat-card__value">{{ number_format($products) }}</div>
-        <div class="admin-stat-card__meta">Product</div>
+        <div class="admin-stat-card__meta">با کد اتصال نیلا</div>
     </div>
     <div class="admin-stat-card">
-        <div class="admin-stat-card__label">واریانت‌های Mapping شده</div>
+        <div class="admin-stat-card__label">تنوع‌های شناسایی‌شده</div>
         <div class="admin-stat-card__value">{{ number_format($variants) }}</div>
-        <div class="admin-stat-card__meta">Product Variant</div>
+        <div class="admin-stat-card__meta">SKUهای متصل به نیلا</div>
     </div>
     <div class="admin-stat-card">
-        <div class="admin-stat-card__label">آخرین تغییر Mapping</div>
-        <div class="admin-stat-card__value" style="font-size:1.15rem;">
-            {{ $latestSyncAt?->format('Y/m/d H:i') ?? '—' }}
+        <div class="admin-stat-card__label">آخرین همگام‌سازی</div>
+        <div class="admin-stat-card__value" style="font-size:1.1rem;">
+            {{ $latestSyncAt?->format('Y/m/d H:i') ?? 'هنوز انجام نشده' }}
         </div>
-        <div class="admin-stat-card__meta">زمان سرور</div>
+        <div class="admin-stat-card__meta">آخرین به‌روزرسانی اتصال‌ها</div>
     </div>
 </div>
 
-<div class="admin-card">
+<div class="admin-card nila-panel nila-panel--upload">
     <div class="admin-card-header">
         <div>
             <h2 class="admin-card-title">مرز مالکیت داده</h2>
@@ -59,7 +59,7 @@
     </div>
 </div>
 
-<div class="admin-card">
+<div class="admin-card nila-panel nila-panel--history">
     <div class="admin-card-header">
         <div>
             <h2 class="admin-card-title">آخرین Mappingها</h2>
@@ -67,31 +67,57 @@
         </div>
     </div>
 
-    @if($mappings->isNotEmpty())
+    @if($batches->count() > 0)
         <div class="admin-table-wrap">
-            <table class="admin-table">
+            <table class="admin-table nila-table">
                 <thead>
                 <tr>
-                    <th>نوع</th>
-                    <th>ID داخلی</th>
-                    <th>ID خارجی</th>
-                    <th>SKU خارجی</th>
-                    <th>آخرین تغییر</th>
+                    <th>فایل</th>
+                    <th>ردیف‌ها</th>
+                    <th>معتبر</th>
+                    <th>نیازمند اصلاح</th>
+                    <th>محصول‌ها</th>
+                    <th>ثبت موفق</th>
+                    <th>ناموفق</th>
+                    <th>وضعیت</th>
+                    <th>گزارش</th>
                 </tr>
                 </thead>
                 <tbody>
-                @foreach($mappings as $mapping)
+                @foreach($batches as $batch)
                     <tr>
-                        <td>{{ class_basename($mapping->entity_type) }}</td>
-                        <td>{{ $mapping->entity_id }}</td>
-                        <td>{{ $mapping->external_id }}</td>
-                        <td>{{ $mapping->external_sku ?: '—' }}</td>
-                        <td>{{ $mapping->updated_at?->format('Y/m/d H:i') ?? '—' }}</td>
+                        <td>
+                            <strong>{{ $batch->original_name }}</strong>
+                            <small class="admin-muted">{{ $batch->created_at?->format('Y/m/d H:i') }}</small>
+                        </td>
+                        <td>{{ number_format($batch->total_rows) }}</td>
+                        <td>{{ number_format($batch->valid_rows) }}</td>
+                        <td>{{ number_format($batch->invalid_rows) }}</td>
+                        <td>{{ number_format($batch->product_groups) }}</td>
+                        <td>{{ number_format($batch->imported_groups) }}</td>
+                        <td>{{ number_format($batch->failed_groups) }}</td>
+                        <td>
+                            @if($batch->status === 'completed')
+                                تکمیل‌شده
+                            @elseif($batch->status === 'queued')
+                                در صف
+                            @elseif($batch->status === 'processing')
+                                در حال اجرا
+                            @elseif($batch->status === 'ready')
+                                آماده ادامه
+                            @else
+                                آماده بررسی
+                            @endif
+                        </td>
+                        <td><a href="{{ route('admin.nila.imports.show', $batch) }}">مشاهده گزارش</a></td>
                     </tr>
                 @endforeach
                 </tbody>
             </table>
         </div>
+        @if($batches->hasPages())
+            <div>{{ $batches->links() }}</div>
+        @endif
     @else
         <div class="admin-empty">
             <h3 class="admin-empty__title">هنوز Mapping ثبت نشده</h3>

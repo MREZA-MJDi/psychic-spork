@@ -121,10 +121,10 @@ class AdminWholesalePackController extends Controller
             'description' => ['nullable', 'string', 'max:5000'],
             'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'remove_image' => ['nullable', 'boolean'],
-            'pack_price' => ['required', 'numeric', 'min:0'],
+            'pack_price' => ['required', 'numeric', 'min:1'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
             'is_active' => ['nullable', 'boolean'],
-            'items' => ['required', 'array', 'min:1'],
+            'items' => ['required', 'array', 'min:1', 'max:60'],
             'items.*.variant_id' => ['required', 'integer', 'distinct', 'exists:product_variants,id'],
             'items.*.quantity' => ['required', 'integer', 'min:1', 'max:100000'],
         ]);
@@ -145,6 +145,22 @@ class AdminWholesalePackController extends Controller
             ->exists();
 
         abort_unless(! $missingWholesalePrice, 422, 'تمام Variantهای داخل پک باید قیمت عمده داشته باشند.');
+
+        $variantPrices = ProductVariant::query()
+            ->whereIn('id', $variantIds)
+            ->get(['id', 'wholesale_price'])
+            ->keyBy('id');
+
+        $packBasePrice = collect($data['items'])->sum(
+            fn (array $item): float => (float) $variantPrices->get((int) $item['variant_id'])->wholesale_price
+                * (int) $item['quantity']
+        );
+
+        abort_if(
+            (float) $data['pack_price'] > $packBasePrice,
+            422,
+            'قیمت پک نباید از جمع قیمت عمده اقلام آن بیشتر باشد. برای قیمت بالاتر، قیمت عمده واریانت‌ها را اصلاح کن.'
+        );
 
         $data['slug'] = filled($data['slug'] ?? null)
             ? Str::slug($data['slug'])

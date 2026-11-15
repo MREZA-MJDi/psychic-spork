@@ -5,7 +5,7 @@ namespace App\Integrations\Nila;
 use App\Integrations\Nila\Data\ExternalProductData;
 use App\Integrations\Nila\Data\ExternalVariantData;
 use App\Models\IntegrationMapping;
-use App\Models\InventoryMovement;
+use App\Services\InventoryService;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use Illuminate\Support\Facades\DB;
@@ -14,6 +14,11 @@ use RuntimeException;
 
 final class NilaCatalogImporter
 {
+    public function __construct(
+        private readonly InventoryService $inventory
+    ) {
+    }
+
     public function import(ExternalProductData $data): Product
     {
         return DB::transaction(
@@ -211,22 +216,20 @@ final class NilaCatalogImporter
         );
 
         $targetStock = $data->stock;
-        $delta = $targetStock - $previousStock;
 
-        if ($delta !== 0) {
-            $variant->update(['stock' => $targetStock]);
+        $batchId = $data->metadata['import_batch_id'] ?? null;
+        $stockNote = $batchId
+            ? "تطبیق موجودی با فایل نیلا (Batch #{$batchId})"
+            : 'تطبیق موجودی با نیلا';
 
-            InventoryMovement::create([
-                'product_variant_id' => $variant->id,
-                'type' => 'adjustment',
-                'quantity' => $delta,
-                'stock_after' => $targetStock,
-                'reference_type' => IntegrationMapping::class,
-                'reference_id' => $mapping->id,
-                'note' => 'به‌روزرسانی موجودی از Nila',
-                'created_by' => null,
-            ]);
-        }
+        $this->inventory->setStock(
+            $variant,
+            $targetStock,
+            $stockNote,
+            null,
+            IntegrationMapping::class,
+            $mapping->id
+        );
 
         return $variant;
     }

@@ -38,9 +38,9 @@ class AdminControlCenterTest extends TestCase
         $this->actingAs($admin)
             ->get(route('admin.nila.index'))
             ->assertOk()
-            ->assertSee('مرکز کنترل نیلا')
-            ->assertSee('Adapter متصل به سرویس بیرونی یا ابزار بارگذاری CSV/XLSX وجود ندارد')
-            ->assertSee('مرز مالکیت داده');
+            ->assertSee('ورود ماهانه اطلاعات نیلا')
+            ->assertSee('فایل خروجی نیلا')
+            ->assertSee('جانان چه چیزی را تغییر می‌دهد؟');
     }
 
     public function test_admin_can_approve_a_pending_cheque_request_without_wholesale_approval(): void

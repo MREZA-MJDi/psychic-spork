@@ -6,6 +6,8 @@ use App\Integrations\Nila\Data\ExternalProductData;
 use App\Integrations\Nila\Data\ExternalVariantData;
 use App\Integrations\Nila\NilaCatalogImporter;
 use App\Models\IntegrationMapping;
+use App\Models\Category;
+use App\Models\Brand;
 use App\Models\Product;
 use App\Models\Media;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -115,6 +117,63 @@ class NilaCatalogImporterTest extends TestCase
                 ->where('external_id', 'nila-variant-001')
                 ->exists()
         );
+    }
+
+    public function test_nila_updates_do_not_overwrite_janan_managed_product_and_variant_fields(): void
+    {
+        $category = Category::query()->create([
+            'name' => 'دسته دستی',
+            'slug' => 'manual-category',
+            'is_active' => true,
+            'sort_order' => 0,
+        ]);
+
+        $brand = Brand::query()->create([
+            'name' => 'برند دستی',
+            'slug' => 'manual-brand',
+            'is_active' => true,
+        ]);
+
+        $importer = app(NilaCatalogImporter::class);
+        $product = $importer->import($this->productData());
+
+        $product->update([
+            'category_id' => $category->id,
+            'brand_id' => $brand->id,
+            'short_description' => 'توضیح دستی جانان',
+            'description' => 'متن دستی جانان',
+            'attributes' => ['fabric' => 'cotton'],
+            'is_active' => true,
+            'is_featured' => true,
+            'sort_order' => 42,
+        ]);
+
+        $variant = $product->variants()->firstOrFail();
+        $variant->update([
+            'sale_price' => 700000,
+            'is_active' => true,
+            'sort_order' => 9,
+        ]);
+
+        $importer->import($this->productData(stock: 3, price: 920000));
+
+        $product->refresh();
+        $variant->refresh();
+
+        $this->assertSame($category->id, $product->category_id);
+        $this->assertSame($brand->id, $product->brand_id);
+        $this->assertSame('توضیح دستی جانان', $product->short_description);
+        $this->assertSame('متن دستی جانان', $product->description);
+        $this->assertSame(['fabric' => 'cotton'], $product->attributes);
+        $this->assertTrue($product->is_active);
+        $this->assertTrue($product->is_featured);
+        $this->assertSame(42, $product->sort_order);
+
+        $this->assertSame('700000.00', $variant->sale_price);
+        $this->assertTrue($variant->is_active);
+        $this->assertSame(9, $variant->sort_order);
+        $this->assertSame(920000.0, (float) $variant->price);
+        $this->assertSame(3, $variant->stock);
     }
 
     private function productData(

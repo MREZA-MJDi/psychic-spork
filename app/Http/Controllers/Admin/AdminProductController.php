@@ -10,6 +10,7 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Services\HeroService;
+use App\Services\InventoryService;
 use App\Services\MediaService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -34,6 +35,23 @@ class AdminProductController extends Controller
             'missing-image',
             'missing-variant',
         ], true) ? $request->query('quality') : null;
+
+        $sort = in_array($request->query('sort'), [
+            'newest', 'oldest', 'name_asc', 'name_desc',
+            'price_asc', 'price_desc', 'stock_asc', 'stock_desc',
+        ], true) ? $request->query('sort') : 'newest';
+
+        $perPage = in_array((int) $request->query('per_page', 15), [15, 30, 50], true)
+            ? (int) $request->query('per_page', 15)
+            : 15;
+
+        $stockSubquery = ProductVariant::query()
+            ->selectRaw('COALESCE(stock, 0)')
+            ->whereColumn('product_id', 'products.id')
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->limit(1);
 
         $products = Product::query()
             ->with([
@@ -108,13 +126,24 @@ class AdminProductController extends Controller
                     };
                 }
             )
-            ->latest('updated_at')
-            ->paginate(15)
+            ->when($sort === 'oldest', fn ($query) => $query->orderBy('created_at')->orderBy('id'))
+            ->when($sort === 'name_asc', fn ($query) => $query->orderBy('name')->orderBy('id'))
+            ->when($sort === 'name_desc', fn ($query) => $query->orderByDesc('name')->orderBy('id'))
+            ->when($sort === 'price_asc', fn ($query) => $query->orderByEffectivePrice('asc'))
+            ->when($sort === 'price_desc', fn ($query) => $query->orderByEffectivePrice('desc'))
+            ->when($sort === 'stock_asc', fn ($query) => $query->orderBy($stockSubquery, 'asc')->orderBy('id'))
+            ->when($sort === 'stock_desc', fn ($query) => $query->orderBy($stockSubquery, 'desc')->orderBy('id'))
+            ->when($sort === 'newest', fn ($query) => $query->latest('updated_at')->latest('id'))
+            ->paginate($perPage)
             ->withQueryString();
 
         return view('admin.products.index', [
             'products' => $products,
             'quality' => $quality,
+            'sort' => $sort,
+            'perPage' => $perPage,
+            'heroCount' => Product::query()->where('is_active', true)->where('is_hero', true)->count(),
+            'heroLimit' => HeroService::MAX_SLIDES,
             'categories' => $this->categories(),
             'brands' => $this->brands(),
         ]);
@@ -137,7 +166,14 @@ class AdminProductController extends Controller
             if ($e->getMessage() === 'hero_limit') {
                 return back()->with(
                     'error',
-                    'حداکثر ' . HeroService::MAX_SLIDES . ' محصول می‌تواند همزمان در Hero صفحه اصلی باشد.'
+                    'حداکثر ' . HeroService::MAX_SLIDES . ' محصول فعال می‌تواند همزمان در Hero صفحه اصلی باشد.'
+                );
+            }
+
+            if ($e->getMessage() === 'hero_requires_active') {
+                return back()->with(
+                    'error',
+                    'برای نمایش محصول در Hero، ابتدا باید محصول را فعال و منتشر کنید.'
                 );
             }
 
@@ -169,7 +205,8 @@ class AdminProductController extends Controller
 
     public function store(
         StoreProductRequest $request,
-        MediaService $media
+        MediaService $media,
+        InventoryService $inventory
     ): RedirectResponse {
         try {
             $data = $request->validated();
@@ -177,13 +214,14 @@ class AdminProductController extends Controller
             $product = DB::transaction(function () use (
                 $data,
                 $request,
-                $media
+                $media,
+                $inventory
             ) {
                 $product = Product::create(
                     $this->productData($data)
                 );
 
-                $product->variants()->create([
+                $variant = $product->variants()->create([
                     'sku' => $data['sku'] ?? null,
                     'size' => $data['size'] ?? null,
                     'color' => $data['color'] ?? null,
@@ -191,7 +229,7 @@ class AdminProductController extends Controller
                     'price' => $data['price'],
                     'sale_price' => $data['sale_price'] ?? null,
                     'wholesale_price' => $data['wholesale_price'] ?? null,
-                    'stock' => (int) ($data['stock'] ?? 0),
+                    'stock' => 0,
                     'low_stock_threshold' => (int) (
                         $data['low_stock_threshold'] ?? 5
                     ),
@@ -199,6 +237,13 @@ class AdminProductController extends Controller
                         $data['is_active'] ?? true
                     ),
                 ]);
+
+                $inventory->setStock(
+                    $variant,
+                    (int) ($data['stock'] ?? 0),
+                    'ثبت موجودی اولیه هنگام ایجاد محصول',
+                    auth()->id()
+                );
 
                 if ($request->hasFile('image_file')) {
                     $media->attach(
@@ -262,7 +307,8 @@ class AdminProductController extends Controller
         UpdateProductRequest $request,
         Product $product,
         MediaService $media,
-        HeroService $hero
+        HeroService $hero,
+        InventoryService $inventory
     ): RedirectResponse {
         try {
             $data = $request->validated();
@@ -271,7 +317,8 @@ class AdminProductController extends Controller
                 $data,
                 $request,
                 $product,
-                $media
+                $media,
+                $inventory
             ) {
                 /*
                 |--------------------------------------------------------------------------
@@ -292,12 +339,23 @@ class AdminProductController extends Controller
                 |--------------------------------------------------------------------------
                 */
 
-                $variant = $product->variants()
-                    ->lockForUpdate()
-                    ->orderBy('id')
-                    ->first();
+                $variantId = (int) ($data['variant_id']
+                    ?? $product->variants()->orderBy('sort_order')->orderBy('id')->value('id'));
 
-                if (!$variant) {
+                $variant = $variantId > 0
+                    ? $product->variants()
+                        ->whereKey($variantId)
+                        ->lockForUpdate()
+                        ->first()
+                    : null;
+
+                abort_if(
+                    $variantId > 0 && ! $variant,
+                    422,
+                    'تنوع انتخاب‌شده متعلق به این محصول نیست.'
+                );
+
+                if (! $variant) {
                     $variant = $product->variants()->create([
                         'sku' => $data['sku'] ?? null,
                         'size' => $data['size'] ?? null,
@@ -306,7 +364,7 @@ class AdminProductController extends Controller
                         'price' => $data['price'],
                         'sale_price' => $data['sale_price'] ?? null,
                         'wholesale_price' => $data['wholesale_price'] ?? null,
-                        'stock' => (int) ($data['stock'] ?? 0),
+                        'stock' => 0,
                         'low_stock_threshold' => (int) (
                             $data['low_stock_threshold'] ?? 5
                         ),
@@ -322,7 +380,7 @@ class AdminProductController extends Controller
                         'color_code' => $data['color_code'] ?? null,
                         'price' => $data['price'],
                         'sale_price' => $data['sale_price'] ?? null,
-                        'stock' => (int) ($data['stock'] ?? 0),
+                        'wholesale_price' => $data['wholesale_price'] ?? null,
                         'low_stock_threshold' => (int) (
                             $data['low_stock_threshold'] ?? 5
                         ),
@@ -331,6 +389,13 @@ class AdminProductController extends Controller
                         ),
                     ]);
                 }
+
+                $inventory->setStock(
+                    $variant,
+                    (int) ($data['stock'] ?? 0),
+                    'به‌روزرسانی موجودی از فرم ویرایش محصول',
+                    auth()->id()
+                );
 
                 /*
                 |--------------------------------------------------------------------------
@@ -473,6 +538,9 @@ class AdminProductController extends Controller
 
             'description' =>
                 $data['description'] ?? null,
+
+            'meta_title' => $data['meta_title'] ?? null,
+            'meta_description' => $data['meta_description'] ?? null,
 
             'attributes' => $attributes,
 

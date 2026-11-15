@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\ProductVariant;
 
 final class SeoService
 {
@@ -31,7 +32,11 @@ final class SeoService
     public function product(Product $product): array
     {
         $brand = $this->brandName();
-        $variant = $product->defaultVariant();
+        $activeVariants = $product->relationLoaded('activeVariants')
+            ? $product->activeVariants
+            : $product->activeVariants()->get();
+        $variant = $activeVariants->first(fn (ProductVariant $item): bool => (int) $item->stock > 0)
+            ?? $activeVariants->first();
         $image = $product->galleryMedia->first()?->url;
         $description = filled($product->meta_description)
             ? trim($product->meta_description)

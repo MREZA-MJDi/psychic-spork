@@ -11,6 +11,8 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
+use App\Services\InventoryService;
 use Illuminate\View\View;
 
 class AdminProductVariantController extends Controller
@@ -86,7 +88,8 @@ class AdminProductVariantController extends Controller
 
     public function store(
         StoreProductVariantRequest $request,
-        Product $product
+        Product $product,
+        InventoryService $inventory
     ): RedirectResponse {
         $data = $request->validated();
 
@@ -109,7 +112,18 @@ class AdminProductVariantController extends Controller
             true
         );
 
-        ProductVariant::create($data);
+        $initialStock = (int) ($data['stock'] ?? 0);
+        $data['stock'] = 0;
+
+        DB::transaction(function () use ($data, $initialStock, $inventory): void {
+            $variant = ProductVariant::create($data);
+            $inventory->setStock(
+                $variant,
+                $initialStock,
+                'ثبت موجودی اولیه هنگام ایجاد تنوع',
+                auth()->id()
+            );
+        }, 3);
 
         return redirect()
             ->route('admin.products.variants.index', $product)

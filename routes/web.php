@@ -20,6 +20,7 @@ use App\Http\Controllers\Admin\AdminProfileController;
 use App\Http\Controllers\Admin\AdminSiteContentController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\WholesalePackCartController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PaymentController;
@@ -50,6 +51,10 @@ Route::get('/robots.txt', [SeoController::class, 'robots'])
 
 Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])
     ->name('seo.sitemap');
+Route::get('/sitemap/{type}/{page}.xml', [SeoController::class, 'sitemapSegment'])
+    ->whereIn('type', ['pages', 'products', 'categories'])
+    ->whereNumber('page')
+    ->name('seo.sitemap.segment');
 
 /*
 |--------------------------------------------------------------------------
@@ -139,6 +144,13 @@ Route::put('/cart/{item}', [CartController::class, 'update'])
 Route::delete('/cart/{item}', [CartController::class, 'remove'])
     ->name('cart.remove');
 
+Route::post('/cart/wholesale-packs/{wholesalePack}', [WholesalePackCartController::class, 'store'])
+    ->name('cart.wholesale-packs.store');
+Route::put('/cart/wholesale-packs/{cartWholesalePack}', [WholesalePackCartController::class, 'update'])
+    ->name('cart.wholesale-packs.update');
+Route::delete('/cart/wholesale-packs/{cartWholesalePack}', [WholesalePackCartController::class, 'destroy'])
+    ->name('cart.wholesale-packs.remove');
+
 /*
 |--------------------------------------------------------------------------
 | Checkout
@@ -162,6 +174,9 @@ Route::get('/checkout/success', [CheckoutController::class, 'success'])
 
 Route::get('/drclubz', [StorePageController::class, 'club'])
     ->name('club');
+
+Route::get('/wholesale/catalog', [WholesaleController::class, 'catalog'])
+    ->name('wholesale.catalog');
 
 Route::get('/wholesale', [WholesaleController::class, 'show'])
     ->name('wholesale.show');
@@ -352,6 +367,16 @@ Route::prefix('admin')
         )->name('cheques.review');
 
         Route::patch(
+            'cheques/{chequePayment}/request-original',
+            [AdminChequeController::class, 'requestOriginal']
+        )->name('cheques.request-original');
+
+        Route::patch(
+            'cheques/{chequePayment}/original-received',
+            [AdminChequeController::class, 'originalReceived']
+        )->name('cheques.original-received');
+
+        Route::patch(
             'cheques/{chequePayment}/accept',
             [AdminChequeController::class, 'accept']
         )->name('cheques.accept');
@@ -387,6 +412,19 @@ Route::prefix('admin')
 
         Route::get('nila', [AdminNilaController::class, 'index'])
             ->name('nila.index');
+
+        Route::post('nila/imports', [AdminNilaController::class, 'upload'])
+            ->middleware('throttle:10,1')
+            ->name('nila.imports.store');
+
+        Route::get('nila/imports/{batch}', [AdminNilaController::class, 'showImport'])
+            ->whereNumber('batch')
+            ->name('nila.imports.show');
+
+        Route::post('nila/imports/{batch}/import', [AdminNilaController::class, 'importNext'])
+            ->whereNumber('batch')
+            ->middleware('throttle:10,1')
+            ->name('nila.imports.import');
 
         Route::post('inventory', [AdminInventoryController::class, 'store'])
             ->name('inventory.store');

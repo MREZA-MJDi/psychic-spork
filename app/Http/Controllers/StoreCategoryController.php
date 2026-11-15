@@ -22,10 +22,7 @@ class StoreCategoryController extends Controller
             'primaryGalleryMedia' => fn ($query) => $query->select([
                 'media.id','media.mediable_id','media.mediable_type','media.collection','media.path','media.sort_order',
             ]),
-            'activeVariants' => fn ($query) => $query->select([
-                'id','product_id','sku','size','color','price','sale_price',
-                'stock','low_stock_threshold','is_active','sort_order',
-            ]),
+            'primaryActiveVariant.primaryGalleryMedia',
         ];
     }
 
@@ -40,7 +37,9 @@ class StoreCategoryController extends Controller
             ])
             ->orderBy('sort_order')
             ->orderBy('name')
-            ->get();
+            ->orderBy('id')
+            ->paginate(24)
+            ->withQueryString();
 
         return view('categories.index', [
             'seo' => $seo->page(
@@ -65,11 +64,16 @@ class StoreCategoryController extends Controller
             ? (int) $request->query('per_page', 6)
             : 6;
 
+        $categoryIds = $category->subtreeIds();
+
         $products = Product::query()
             ->select(['id','category_id','brand_id','name','slug','short_description','updated_at'])
             ->active()
+
+            ->withCatalogMetrics()
+
             ->with($this->catalogRelations())
-            ->where('category_id', $category->id)
+            ->whereIn('category_id', $categoryIds)
             ->when($sort === 'oldest', fn ($query) => $query->orderBy('updated_at')->orderBy('id'))
             ->when($sort === 'price_asc', fn ($query) => $query->orderByEffectivePrice('asc'))
             ->when($sort === 'price_desc', fn ($query) => $query->orderByEffectivePrice('desc'))

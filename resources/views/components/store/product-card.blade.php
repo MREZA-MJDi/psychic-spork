@@ -5,41 +5,58 @@
 
 @php
     $productVariant = $product->primaryActiveVariant;
-    $image = $product->primaryGalleryMedia?->url;
-    $stock = (int) ($productVariant?->stock ?? 0);
-    $isOnSale = (bool) ($productVariant?->is_on_sale ?? false);
+    $image = $product->primaryGalleryMedia?->url
+        ?: $productVariant?->primaryGalleryMedia?->url;
     $activeVariants = $product->relationLoaded('activeVariants')
         ? $product->activeVariants
         : collect();
-    $colorCount = $activeVariants->pluck('color')
-        ->filter(fn ($value) => filled(trim((string) $value)))
-        ->map(fn ($value) => mb_strtolower(trim((string) $value)))
-        ->unique()
-        ->count();
-    $sizeCount = $activeVariants->pluck('size')
-        ->filter(fn ($value) => filled(trim((string) $value)))
-        ->map(fn ($value) => mb_strtolower(trim((string) $value)))
-        ->unique()
-        ->count();
-    $variantPrices = $activeVariants
-        ->map(fn ($item) => (float) $item->effective_price)
-        ->filter(fn ($price) => $price > 0)
-        ->values();
-    $minimumPrice = $variantPrices->isNotEmpty()
-        ? $variantPrices->min()
-        : ($productVariant?->effective_price ?? null);
+
+    $variantCount = $product->getAttribute('active_variants_count');
+    $colorCount = $product->getAttribute('active_variant_colors_count');
+    $sizeCount = $product->getAttribute('active_variant_sizes_count');
+    $stockMetric = $product->getAttribute('active_stock_total');
+    $minimumMetric = $product->getAttribute('minimum_effective_price');
+    $maximumMetric = $product->getAttribute('maximum_effective_price');
+
+    $variantCount = $variantCount !== null
+        ? (int) $variantCount
+        : $activeVariants->count();
+    $colorCount = $colorCount !== null
+        ? (int) $colorCount
+        : $activeVariants->pluck('color')->filter(fn ($value) => filled(trim((string) $value)))->map(fn ($value) => mb_strtolower(trim((string) $value)))->unique()->count();
+    $sizeCount = $sizeCount !== null
+        ? (int) $sizeCount
+        : $activeVariants->pluck('size')->filter(fn ($value) => filled(trim((string) $value)))->map(fn ($value) => mb_strtolower(trim((string) $value)))->unique()->count();
+
+    $stock = $stockMetric !== null
+        ? (int) $stockMetric
+        : (int) ($productVariant?->stock ?? 0);
+    $minimumPrice = $minimumMetric !== null
+        ? (float) $minimumMetric
+        : ($activeVariants->isNotEmpty()
+            ? $activeVariants->min(fn ($item) => (float) $item->effective_price)
+            : ($productVariant?->effective_price ?? null));
     $minimumPrice = $minimumPrice !== null && (float) $minimumPrice > 0
         ? $minimumPrice
         : null;
-    $maximumPrice = $variantPrices->isNotEmpty()
-        ? $variantPrices->max()
-        : $minimumPrice;
+    $maximumPrice = $maximumMetric !== null
+        ? (float) $maximumMetric
+        : ($activeVariants->isNotEmpty()
+            ? $activeVariants->max(fn ($item) => (float) $item->effective_price)
+            : $minimumPrice);
     $priceVaries = $minimumPrice !== null && $maximumPrice !== null && $maximumPrice > $minimumPrice;
+
+    $isOnSale = $productVariant?->is_on_sale
+        && $minimumPrice !== null
+        && (float) $productVariant->effective_price === (float) $minimumPrice;
+    $isLowStock = $stock > 0
+        && $stock <= (int) ($productVariant?->low_stock_threshold ?? 0);
+
     $variantFacts = array_values(array_filter([
         $colorCount > 1 ? number_format($colorCount).' رنگ' : null,
         $sizeCount > 1 ? number_format($sizeCount).' سایز' : null,
-        $colorCount === 0 && $sizeCount === 0 && $activeVariants->count() > 1
-            ? number_format($activeVariants->count()).' گزینه'
+        $colorCount === 0 && $sizeCount === 0 && $variantCount > 1
+            ? number_format($variantCount).' گزینه'
             : null,
     ]));
 
@@ -129,12 +146,20 @@
                 <div class="product-card__stock is-out" role="status" aria-label="ناموجود">
                     ناموجود
                 </div>
-            @elseif($productVariant->is_low_stock)
+            @elseif($isLowStock)
                 <div class="product-card__stock is-low" role="status" aria-label="موجودی محدود">
                     موجودی محدود
                 </div>
             @endif
 
+            @if($variantCount > 1)
+                <a
+                    class="quick-add"
+                    href="{{ route('products.show', $product) }}"
+                >
+                    انتخاب مدل
+                </a>
+            @else
             <form
                 method="POST"
                 action="{{ route('cart.store', $productVariant) }}"
@@ -159,6 +184,7 @@
                     {{ $stock > 0 ? 'افزودن به سبد خرید' : 'ناموجود' }}
                 </button>
             </form>
+            @endif
 
         @else
 

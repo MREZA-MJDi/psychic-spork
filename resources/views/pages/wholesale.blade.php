@@ -22,8 +22,8 @@
                             <strong>خرید عمده آنلاین برای همه باز است.</strong>
                         </div>
                         <div class="customer-action-strip__actions">
-                            <a class="button button--ghost" href="{{ route('products.index') }}">دیدن کاتالوگ</a>
-                            <a class="button button--primary" href="{{ route('products.index') }}">شروع خرید عمده</a>
+                            <a class="button button--ghost" href="{{ route('wholesale.catalog') }}">دیدن کاتالوگ عمده</a>
+                            <a class="button button--primary" href="{{ route('wholesale.catalog') }}">شروع خرید عمده</a>
                             <a class="button button--ghost" href="#cheque-application">درخواست خرید چکی</a>
                         </div>
                     </div>
@@ -84,10 +84,10 @@
             <header class="wholesale-catalog__head">
                 <div>
                     <span class="eyebrow">JANAN / WHOLESALE CATALOG</span>
-                    <h2>محصولات و پک‌های عمده</h2>
-                    <p>هر محصول با Variantهای واقعی خودش و قیمت عمده نمایش داده می‌شود.</p>
+                    <h2>پک‌های آماده عمده</h2>
+                    <p>بسته‌های آماده را ببین؛ برای جستجو و انتخاب محصولات تکی، کاتالوگ عمده جداگانه در دسترس است.</p>
                 </div>
-                <a class="button button--ghost" href="{{ route('products.index') }}">کاتالوگ عادی</a>
+                <a class="button button--ghost" href="{{ route('wholesale.catalog') }}">مشاهده کاتالوگ محصولات عمده</a>
             </header>
 
             @if($packs->isNotEmpty())
@@ -147,85 +147,40 @@
                                 <span>قیمت پک عمده</span>
                                 <strong>{{ number_format($pack->display_price) }} تومان</strong>
                             </div>
+                            @php
+                                $packAvailable = $pack->items->isNotEmpty() && $pack->items->every(
+                                    fn ($item) => $item->variant
+                                        && $item->variant->is_active
+                                        && $item->variant->product?->is_active
+                                        && $item->variant->stock >= $item->quantity
+                                        && $item->variant->wholesale_price !== null
+                                );
+                            @endphp
+                            <form method="POST" action="{{ route('cart.wholesale-packs.store', $pack) }}" class="wholesale-pack-card__purchase">
+                                @csrf
+                                <label>
+                                    تعداد پک
+                                    <input type="number" name="quantity" min="1" max="99" value="1" @disabled(!$packAvailable) aria-label="تعداد پک {{ $pack->name }}">
+                                </label>
+                                <button class="button button--primary" type="submit" @disabled(!$packAvailable)>
+                                    {{ $packAvailable ? 'افزودن پک به سبد خرید' : 'موجودی کافی نیست' }}
+                                </button>
+                            </form>
                         </article>
                     @endforeach
                 </div>
-            @endif
-
-            <div class="wholesale-products-head">
-                <div>
-                    <span class="eyebrow">WHOLESALE PRODUCTS</span>
-                    <h3>محصولات دارای قیمت عمده</h3>
-                </div>
-                <span>{{ number_format($products->total()) }} محصول</span>
-            </div>
-
-            @if($products->count())
-                <div class="wholesale-product-grid">
-                    @foreach($products as $product)
-                        <article class="wholesale-product-card">
-                            <a href="{{ route('products.show', $product) }}" class="wholesale-product-card__media">
-                                <x-store.image
-                                    :src="$product->primaryGalleryMedia?->url"
-                                    :alt="$product->name"
-                                    fallback-tag="span"
-                                    fallback-class=""
-                                    fallback="JANAN"
-                                />
-                            </a>
-
-                            <div class="wholesale-product-card__body">
-                                <div class="wholesale-product-card__meta">
-                                    <span>{{ $product->brand?->name ?? 'Janan' }}</span>
-                                    <span>{{ $product->category?->name ?? 'محصول' }}</span>
-                                </div>
-                                @php
-                                    $wholesaleColorCount = $product->activeVariants
-                                        ->pluck('color')->filter(fn ($value) => filled(trim((string) $value)))
-                                        ->map(fn ($value) => mb_strtolower(trim((string) $value)))->unique()->count();
-                                    $wholesaleSizeCount = $product->activeVariants
-                                        ->pluck('size')->filter(fn ($value) => filled(trim((string) $value)))
-                                        ->map(fn ($value) => mb_strtolower(trim((string) $value)))->unique()->count();
-                                @endphp
-                                <div class="wholesale-product-card__facts" aria-label="{{ $wholesaleColorCount }} رنگ، {{ $wholesaleSizeCount }} سایز">
-                                    <span>{{ $wholesaleColorCount > 0 ? number_format($wholesaleColorCount).' رنگ' : 'رنگ نامشخص' }}</span>
-                                    <span>{{ $wholesaleSizeCount > 0 ? number_format($wholesaleSizeCount).' سایز' : 'سایز نامشخص' }}</span>
-                                </div>
-                                <a href="{{ route('products.show', $product) }}" class="wholesale-product-card__title">{{ $product->name }}</a>
-
-                                <div class="wholesale-variant-list">
-                                    @foreach($product->activeVariants as $variant)
-                                        <div class="wholesale-variant-row">
-                                            <div>
-                                                <strong>{{ $variant->display_name }}</strong>
-                                                <span>موجودی {{ number_format($variant->stock) }}</span>
-                                            </div>
-                                            <div class="wholesale-variant-price">
-                                                {{ number_format($variant->wholesale_price) }}
-                                                <small>تومان</small>
-                                            </div>
-                                        </div>
-                                    @endforeach
-                                </div>
-
-                                <a class="button button--ghost wholesale-product-card__action" href="{{ route('products.show', $product) }}">
-                                    انتخاب Variant
-                                    <span aria-hidden="true">↗</span>
-                                </a>
-                            </div>
-                        </article>
-                    @endforeach
-                </div>
-
-                @if($products->hasPages())
-                    <div class="store-pagination">{{ $products->links() }}</div>
-                @endif
             @else
                 <div class="customer-surface wholesale-empty">
-                    <strong>هنوز محصولی با قیمت عمده ثبت نشده است.</strong>
-                    <span>از مدیریت محصول، برای Variantهای قابل فروش قیمت عمده تعیین کن.</span>
+                    <strong>هنوز پک آماده‌ای برای خرید عمده ثبت نشده است.</strong>
+                    <span>می‌توانی محصولات دارای قیمت عمده را در کاتالوگ جداگانه ببینی.</span>
                 </div>
             @endif
+
+            <div class="customer-surface wholesale-empty">
+                <strong>دنبال محصول تکی یا تنوع خاصی هستی؟</strong>
+                <span>کاتالوگ محصولات عمده با جستجو، فیلتر و صفحه‌بندی مستقل در دسترس است.</span>
+                <a class="button button--primary" href="{{ route('wholesale.catalog') }}">رفتن به کاتالوگ عمده</a>
+            </div>
         </div>
     </section>
 

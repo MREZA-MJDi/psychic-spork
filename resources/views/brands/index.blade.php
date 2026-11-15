@@ -11,7 +11,7 @@
                 <span class="eyebrow">{{ $siteBrandNameLatin }} / BRANDS / 03</span>
 
                 <div class="catalog-masthead__stat">
-                    <strong>{{ number_format($brands->count()) }}</strong>
+                    <strong>{{ number_format($brands->total()) }}</strong>
                     <span>برند فعال</span>
                 </div>
             </div>
@@ -93,6 +93,12 @@
                         </a>
                     @endforeach
                 </div>
+
+                @if($brands->hasPages())
+                    <nav class="store-pagination" aria-label="صفحه‌بندی برندها">
+                        {{ $brands->onEachSide(1)->links('vendor.pagination.store') }}
+                    </nav>
+                @endif
             @else
                 <div class="empty-state">
                     <h2>هنوز برندی فعال نشده.</h2>

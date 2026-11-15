@@ -207,6 +207,59 @@ class PaymentArchitectureTest extends TestCase
         ]);
     }
 
+    public function test_admin_can_require_original_cheque_before_releasing_the_wholesale_order(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        $customer = User::factory()->create();
+
+        ChequePermission::create([
+            'user_id' => $customer->id,
+            'enabled' => true,
+            'max_order_amount' => 200000,
+            'approved_at' => now(),
+        ]);
+
+        $order = $this->orderFor($customer, 100000);
+        $service = app(ChequePaymentService::class);
+
+        $service->submit($order, $customer, [
+            'sayad_id' => '1234567890123456',
+            'bank_name' => 'Test Bank',
+            'due_date' => now()->addDays(10)->toDateString(),
+        ]);
+
+        $cheque = $order->fresh()->chequePayment;
+        $service->moveToReview($cheque, $admin);
+
+        $service->requestOriginal(
+            $cheque->fresh(),
+            $admin,
+            'اصل چک را با پست پیشتاز به نشانی اعلام‌شده فروشگاه ارسال کنید.'
+        );
+
+        $cheque->refresh();
+        $this->assertSame('awaiting_original', $cheque->status);
+        $this->assertSame('pending', $order->fresh()->status);
+        $this->assertSame('pending', $order->fresh()->payment_status);
+        $this->assertSame(
+            'اصل چک را با پست پیشتاز به نشانی اعلام‌شده فروشگاه ارسال کنید.',
+            $cheque->review_note
+        );
+
+        $service->markOriginalReceived($cheque, $admin, 'اصل چک در دفتر فروشگاه تحویل شد.');
+        $cheque->refresh();
+
+        $this->assertSame('original_received', $cheque->status);
+        $this->assertNotNull($cheque->original_received_at);
+        $this->assertSame($admin->id, $cheque->original_received_by);
+        $this->assertSame('pending', $order->fresh()->status);
+
+        $service->accept($cheque, $admin);
+        $this->assertSame('accepted', $cheque->fresh()->status);
+        $this->assertSame('confirmed', $order->fresh()->status);
+        $this->assertSame('pending', $order->fresh()->payment_status);
+    }
+
     public function test_rejecting_a_cheque_cancels_the_order_and_fails_its_payment(): void
     {
         $admin = User::factory()->create(['is_admin' => true]);
@@ -294,13 +347,13 @@ class PaymentArchitectureTest extends TestCase
     public function test_zarinpal_gateway_uses_request_and_verify_provider_contract(): void
     {
         Http::fake([
-            'https://api.zarinpal.com/pg/v4/payment/request.json' => Http::response([
+            config('payment.zarinpal.request_url') => Http::response([
                 'data' => [
                     'code' => 100,
                     'authority' => 'AUTHORITY-123',
                 ],
             ]),
-            'https://api.zarinpal.com/pg/v4/payment/verify.json' => Http::response([
+            config('payment.zarinpal.verify_url') => Http::response([
                 'data' => [
                     'code' => 100,
                     'ref_id' => 'REF-123',

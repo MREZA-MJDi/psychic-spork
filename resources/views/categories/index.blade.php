@@ -11,7 +11,7 @@
                 <span class="eyebrow">JANAN / COLLECTIONS / 02</span>
 
                 <div class="catalog-masthead__stat">
-                    <strong>{{ number_format($categories->count()) }}</strong>
+                    <strong>{{ number_format($categories->total()) }}</strong>
                     <span>دسته فعال</span>
                 </div>
             </div>
@@ -97,6 +97,12 @@
                         </a>
                     @endforeach
                 </div>
+
+                @if($categories->hasPages())
+                    <nav class="store-pagination" aria-label="صفحه‌بندی دسته‌بندی‌ها">
+                        {{ $categories->onEachSide(1)->links('vendor.pagination.store') }}
+                    </nav>
+                @endif
             @else
                 <div class="empty-state">
                     <h2>دسته‌بندی فعالی وجود ندارد.</h2>

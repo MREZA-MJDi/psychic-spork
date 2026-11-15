@@ -50,6 +50,9 @@ class HomeController extends Controller
                 'updated_at',
             ])
             ->active()
+
+            ->withCatalogMetrics()
+
             ->with([
                 'category:id,name,slug',
                 'brand:id,name,slug',
@@ -72,32 +75,20 @@ class HomeController extends Controller
                     'media.path',
                     'media.sort_order',
                 ]),
-                'activeVariants' => fn ($query) => $query->select([
-                    'id',
-                    'product_id',
-                    'sku',
-                    'size',
-                    'color',
-                    'price',
-                    'sale_price',
-                    'stock',
-                    'low_stock_threshold',
-                    'is_active',
-                    'sort_order',
-                ]),
+                'primaryActiveVariant.primaryGalleryMedia',
             ]);
 
         $featuredProducts = (clone $productsQuery)
             ->featured()
             ->latest('updated_at')
             ->latest('id')
-            ->take(12)
+            ->take(36)
             ->get();
 
         $products = $featuredProducts;
 
-        if ($products->count() < 12) {
-            $remaining = 12 - $products->count();
+        if ($products->count() < 36) {
+            $remaining = 36 - $products->count();
 
             $latestProducts = (clone $productsQuery)
                 ->when(
@@ -128,6 +119,9 @@ class HomeController extends Controller
                 'created_at',
             ])
             ->active()
+
+            ->withCatalogMetrics()
+
             ->with([
                 'category:id,name',
                 'brand:id,name',
@@ -139,6 +133,7 @@ class HomeController extends Controller
                     'media.path',
                     'media.sort_order',
                 ]),
+                'primaryActiveVariant.primaryGalleryMedia',
                 'primaryActiveVariant' => fn ($query) => $query->select([
                     'product_variants.id',
                     'product_variants.product_id',
@@ -183,6 +178,7 @@ class HomeController extends Controller
                 'updated_at',
             ])
             ->active()
+            ->withCatalogMetrics()
             ->whereHas('orderItems', $popularSalesFilter)
             ->with([
                 'category:id,name',
@@ -195,6 +191,7 @@ class HomeController extends Controller
                     'media.path',
                     'media.sort_order',
                 ]),
+                'primaryActiveVariant.primaryGalleryMedia',
                 'primaryActiveVariant' => fn ($query) => $query->select([
                     'product_variants.id',
                     'product_variants.product_id',

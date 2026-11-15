@@ -4,9 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\CartStoreRequest;
 use App\Http\Requests\CartUpdateRequest;
+use App\Models\Cart;
 use App\Models\CartItem;
+use App\Models\User;
 use App\Models\ProductVariant;
 use App\Services\CartService;
+use App\Services\WholesalePricingService;
+use Illuminate\Support\Collection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -15,16 +19,37 @@ use Throwable;
 
 class CartController extends Controller
 {
+    public function __construct(
+        private readonly WholesalePricingService $wholesalePricing
+    ) {
+    }
     public function index(
         Request $request,
         CartService $cart
     ): View {
         $current = $cart->current($request);
         $items = $cart->items($current);
+        $packLines = $current->wholesalePacks()
+            ->with(['pack.items.variant.product.primaryGalleryMedia', 'pack.items.variant.primaryGalleryMedia'])
+            ->latest('id')
+            ->get();
+
+        $pricing = $this->calculatePricing(
+            $current,
+            $items,
+            $packLines,
+            $request->user()
+        );
 
         return view('pages.cart', [
             'items' => $items,
-            'total' => (float) $items->sum('line_total'),
+            'packLines' => $packLines,
+            'packTotal' => $pricing['packTotal'],
+            'total' => $pricing['total'],
+            'retailTotal' => $pricing['retailTotal'],
+            'wholesaleTotal' => $pricing['wholesaleTotal'],
+            'wholesaleUnavailableReason' => $pricing['wholesaleUnavailableReason'],
+            'hasWholesalePacks' => $pricing['hasWholesalePacks'],
         ]);
     }
 
@@ -33,7 +58,7 @@ class CartController extends Controller
         CartService $cart
     ): JsonResponse {
         return response()->json(
-            $this->payload($cart->current($request), $cart)
+            $this->payload($cart->current($request), $cart, $request->user())
         );
     }
 
@@ -54,7 +79,7 @@ class CartController extends Controller
 
             if ($request->expectsJson()) {
                 return response()->json(
-                    $this->payload($current, $cart)
+                    $this->payload($current, $cart, $request->user())
                 );
             }
 
@@ -100,7 +125,7 @@ class CartController extends Controller
 
             if ($request->expectsJson()) {
                 return response()->json(
-                    $this->payload($current, $cart)
+                    $this->payload($current, $cart, $request->user())
                 );
             }
 
@@ -142,7 +167,7 @@ class CartController extends Controller
 
             if ($request->expectsJson()) {
                 return response()->json(
-                    $this->payload($current, $cart)
+                    $this->payload($current, $cart, $request->user())
                 );
             }
 
@@ -172,13 +197,33 @@ class CartController extends Controller
         }
     }
 
-    private function payload($cartModel, CartService $cart): array
+    private function payload(Cart $cartModel, CartService $cart, ?User $user): array
     {
         $items = $cart->items($cartModel);
+        $packLines = $cartModel->wholesalePacks()
+            ->with('pack')
+            ->get();
+
+        $pricing = $this->calculatePricing($cartModel, $items, $packLines, $user);
+        $packCount = (int) $packLines->sum(
+            fn ($line) => (int) ($line->pack?->pack_quantity ?? 0) * (int) $line->quantity
+        );
 
         return [
-            'count' => (int) $items->sum('quantity'),
-            'total' => (float) $items->sum('line_total'),
+            'count' => (int) $items->sum('quantity') + $packCount,
+            'total' => $pricing['total'],
+            'retail_total' => $pricing['retailTotal'],
+            'wholesale_total' => $pricing['wholesaleTotal'],
+            'wholesale_available' => $pricing['wholesaleTotal'] !== null,
+            'wholesale_unavailable_reason' => $pricing['wholesaleUnavailableReason'],
+            'packs' => $packLines->map(fn ($line): array => [
+                'id' => $line->id,
+                'name' => $line->pack?->name ?? 'پک عمده',
+                'quantity' => (int) $line->quantity,
+                'pack_quantity' => (int) ($line->pack?->pack_quantity ?? 0),
+                'unit_price' => (float) ($line->pack?->pack_price ?? 0),
+                'line_total' => (float) ($line->pack?->pack_price ?? 0) * (int) $line->quantity,
+            ])->values()->all(),
             'items' => $items->map(function (array $item): array {
                 return [
                     'id' => $item['id'],
@@ -195,6 +240,42 @@ class CartController extends Controller
                     ),
                 ];
             })->values()->all(),
+        ];
+    }
+
+    private function calculatePricing(
+        Cart $cart,
+        Collection $items,
+        Collection $packLines,
+        ?User $user
+    ): array {
+        $hasWholesalePacks = $packLines->isNotEmpty();
+        $packTotal = (float) $packLines->sum(
+            fn ($line) => (float) ($line->pack?->pack_price ?? 0) * (int) $line->quantity
+        );
+        $retailTotal = (float) $items->sum('line_total') + $packTotal;
+
+        $wholesaleTotal = null;
+        $wholesaleUnavailableReason = null;
+        $total = $retailTotal;
+
+        if ($hasWholesalePacks) {
+            try {
+                $quote = $this->wholesalePricing->quote($cart, $user);
+                $wholesaleTotal = (float) $quote['subtotal'];
+                $total = $wholesaleTotal;
+            } catch (\Symfony\Component\HttpKernel\Exception\HttpExceptionInterface $exception) {
+                $wholesaleUnavailableReason = $exception->getMessage();
+            }
+        }
+
+        return [
+            'hasWholesalePacks' => $hasWholesalePacks,
+            'packTotal' => $packTotal,
+            'retailTotal' => $retailTotal,
+            'wholesaleTotal' => $wholesaleTotal,
+            'wholesaleUnavailableReason' => $wholesaleUnavailableReason,
+            'total' => $total,
         ];
     }
 

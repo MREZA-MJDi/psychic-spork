@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use App\Support\NumericInput;
 
 class CheckoutRequest extends FormRequest
 {
@@ -39,10 +40,26 @@ class CheckoutRequest extends FormRequest
                 ]);
             }
         }
+
+        $sayadId = NumericInput::normalize($this->input('sayad_id'));
+        if (is_string($sayadId) && preg_match('/^[0-9\s-]+$/', $sayadId)) {
+            $sayadId = preg_replace('/[\s-]+/', '', $sayadId);
+        }
+        $this->merge(['sayad_id' => $sayadId]);
     }
 
     public function rules(): array
     {
+        $sayadIdRules = [
+            'required_if:payment_method,cheque',
+            'nullable',
+            'digits:16',
+        ];
+
+        if ($this->input('payment_method') === 'cheque') {
+            $sayadIdRules[] = Rule::unique('cheque_payments', 'sayad_id');
+        }
+
         $addressRule = Rule::exists('addresses', 'id')
             ->where(function ($query): void {
                 $query->where(
@@ -62,14 +79,11 @@ class CheckoutRequest extends FormRequest
                 Rule::in(['retail', 'wholesale']),
             ],
 
-            'sayad_id' => [
-                'required_if:payment_method,cheque',
-                'nullable',
-                'digits:16',
-            ],
+            'sayad_id' => $sayadIdRules,
 
+            // The 16-digit Sayad identifier is the unique cheque registry key.
+            // Physical cheque serial is optional to avoid asking for duplicate data.
             'cheque_number' => [
-                'required_if:payment_method,cheque',
                 'nullable',
                 'string',
                 'max:100',

@@ -13,6 +13,8 @@ class ChequePayment extends Model
     public const STATUSES = [
         'submitted',
         'under_review',
+        'awaiting_original',
+        'original_received',
         'accepted',
         'deposited',
         'cleared',
@@ -35,6 +37,8 @@ class ChequePayment extends Model
         'reviewed_by',
         'reviewed_at',
         'review_note',
+        'original_received_at',
+        'original_received_by',
         'deposited_at',
         'cleared_at',
         'bounced_at',
@@ -46,6 +50,7 @@ class ChequePayment extends Model
             'amount' => 'decimal:2',
             'due_date' => 'date',
             'reviewed_at' => 'datetime',
+            'original_received_at' => 'datetime',
             'deposited_at' => 'datetime',
             'cleared_at' => 'datetime',
             'bounced_at' => 'datetime',
@@ -67,6 +72,11 @@ class ChequePayment extends Model
         return $this->belongsTo(User::class, 'reviewed_by');
     }
 
+    public function originalReceivedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'original_received_by');
+    }
+
     public function canTransitionTo(string $next): bool
     {
         if ($next === $this->status) {
@@ -75,7 +85,9 @@ class ChequePayment extends Model
 
         $allowed = match ($this->status) {
             'submitted' => ['under_review', 'rejected', 'cancelled'],
-            'under_review' => ['accepted', 'rejected', 'cancelled'],
+            'under_review' => ['awaiting_original', 'accepted', 'rejected', 'cancelled'],
+            'awaiting_original' => ['original_received', 'rejected', 'cancelled'],
+            'original_received' => ['accepted', 'rejected', 'cancelled'],
             'accepted' => ['deposited', 'cancelled'],
             'deposited' => ['cleared', 'bounced'],
             'cleared', 'rejected', 'bounced', 'cancelled' => [],

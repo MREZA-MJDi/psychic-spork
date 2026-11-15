@@ -94,7 +94,8 @@ class ControlFoundationTest extends TestCase
         $this->actingAs($admin)
             ->get(route('admin.nila.index'))
             ->assertOk()
-            ->assertSee('Mapping')
-            ->assertSee('Adapter متصل به سرویس بیرونی یا ابزار بارگذاری CSV/XLSX وجود ندارد');
+            ->assertSee('ورود ماهانه اطلاعات نیلا')
+            ->assertSee('جانان چه چیزی را تغییر می‌دهد؟')
+            ->assertSee('بارگذاری فایل فقط گزارش می‌سازد');
     }
 }

@@ -1163,6 +1163,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const imageInput = document.querySelector('[data-pack-image-input]');
         const imagePreview = document.querySelector('[data-pack-image-preview]');
         const digits = new Intl.NumberFormat('fa-IR');
+        const packPriceInput = document.getElementById('pack_price');
+        const packBasePrice = document.querySelector('[data-pack-base-price]');
+        const packDiscount = document.querySelector('[data-pack-discount]');
+        const packPriceStatus = document.querySelector('[data-pack-price-status]');
+        const normalizeMoney = (value) => {
+            const normalized = String(value ?? '')
+                .replace(/[۰-۹]/g, (digit) => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(digit)))
+                .replace(/[٠-٩]/g, (digit) => String('٠١٢٣٤٥٦٧٨٩'.indexOf(digit)));
+            return Number(normalized.replace(/[^0-9.-]/g, '')) || 0;
+        };
 
         imageInput?.addEventListener('change', () => {
             const file = imageInput.files?.[0];
@@ -1187,7 +1197,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const checkbox = row.querySelector('[data-pack-variant-toggle]');
             const quantity = row.querySelector('[data-pack-quantity]');
             if (checkbox?.checked) {
-                selectedVariants.set(checkbox.value, { quantity: Math.max(1, Number.parseInt(quantity?.value || '1', 10) || 1) });
+                selectedVariants.set(checkbox.value, { quantity: Math.max(1, Number.parseInt(quantity?.value || '1', 10) || 1), unitPrice: Number(row.dataset.wholesalePrice || 0) });
             }
         });
 
@@ -1198,6 +1208,7 @@ document.addEventListener('DOMContentLoaded', () => {
             row.className = 'wholesale-pack-variant';
             row.dataset.variantRow = '';
             row.dataset.search = [variant.name, variant.brand, variant.sku, variant.size, variant.color].join(' ').toLowerCase();
+            row.dataset.wholesalePrice = variant.wholesale_price === null ? '' : String(variant.wholesale_price);
             const pick = document.createElement('label');
             pick.className = 'wholesale-pack-variant__pick';
             const checkbox = document.createElement('input');
@@ -1220,14 +1231,14 @@ document.addEventListener('DOMContentLoaded', () => {
             quantity.setAttribute('aria-label', `تعداد ${variant.name}، ${variant.display_name}`);
             qtyLabel.append(qtyLabelText, quantity); row.append(pick, qtyLabel);
             checkbox.addEventListener('change', () => {
-                if (checkbox.checked) selectedVariants.set(id, { quantity: Math.max(1, Number.parseInt(quantity.value || '1', 10) || 1) });
+                if (checkbox.checked) selectedVariants.set(id, { quantity: Math.max(1, Number.parseInt(quantity.value || '1', 10) || 1), unitPrice: Number(row.dataset.wholesalePrice || 0) });
                 else selectedVariants.delete(id);
                 quantity.disabled = !checkbox.checked;
                 if (checkbox.checked && Number(quantity.value || 0) < 1) quantity.value = '1';
                 refresh();
             });
             quantity.addEventListener('input', () => {
-                if (checkbox.checked) selectedVariants.set(id, { quantity: Math.max(1, Number.parseInt(quantity.value || '1', 10) || 1) });
+                if (checkbox.checked) selectedVariants.set(id, { quantity: Math.max(1, Number.parseInt(quantity.value || '1', 10) || 1), unitPrice: Number(row.dataset.wholesalePrice || 0) });
                 refresh();
             });
             return row;
@@ -1264,12 +1275,34 @@ document.addEventListener('DOMContentLoaded', () => {
         const refresh = () => {
             let selected = selectedVariants.size;
             let units = [...selectedVariants.values()].reduce((sum, item) => sum + item.quantity, 0);
+            let baseTotal = [...selectedVariants.values()].reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
+            let requestedPackPrice = normalizeMoney(packPriceInput?.value);
+            let discount = baseTotal - requestedPackPrice;
             let visible = 0;
 
             list.querySelectorAll('[data-variant-row]').forEach((row) => { const checkbox = row.querySelector('[data-pack-variant-toggle]'); row.classList.toggle('is-selected', Boolean(checkbox?.checked)); visible += 1; });
 
             if (selectedCount) selectedCount.textContent = digits.format(selected);
             if (unitCount) unitCount.textContent = digits.format(units);
+            if (packBasePrice) packBasePrice.textContent = digits.format(Math.round(baseTotal));
+            if (packDiscount) packDiscount.textContent = digits.format(Math.round(Math.max(0, discount)));
+            const priceTooHigh = selected > 0 && requestedPackPrice > baseTotal;
+            const invalidPackPrice = selected > 0 && requestedPackPrice <= 0;
+            if (packPriceStatus) {
+                packPriceStatus.textContent = priceTooHigh
+                    ? 'قیمت پک از جمع قیمت عمده اقلام بیشتر است؛ قیمت را کاهش بده.'
+                    : invalidPackPrice
+                        ? 'قیمت پک را وارد کن.'
+                        : selected > 0
+                            ? 'قیمت مناسب است؛ تخفیف نسبت به خرید جداگانه محاسبه شد.'
+                            : 'بعد از انتخاب اقلام، جمع قیمت و تخفیف اینجا نمایش داده می‌شود.';
+                packPriceStatus.classList.toggle('is-error', priceTooHigh || invalidPackPrice);
+                packPriceStatus.classList.toggle('is-success', selected > 0 && !priceTooHigh && !invalidPackPrice);
+            }
+            packPriceInput?.setCustomValidity(
+                priceTooHigh ? 'قیمت پک نباید از جمع قیمت عمده اقلام بیشتر باشد.' :
+                    invalidPackPrice ? 'قیمت پک باید بیشتر از صفر باشد.' : ''
+            );
             if (noResults) noResults.hidden = visible !== 0;
         };
 
@@ -1281,7 +1314,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const quantity = row.querySelector('[data-pack-quantity]');
                 if (!checkbox || checkbox.disabled) return;
                 checkbox.checked = true;
-                selectedVariants.set(checkbox.value, { quantity: Math.max(1, Number.parseInt(quantity?.value || '1', 10) || 1) });
+                selectedVariants.set(checkbox.value, { quantity: Math.max(1, Number.parseInt(quantity?.value || '1', 10) || 1), unitPrice: Number(row.dataset.wholesalePrice || 0) });
                 if (quantity) {
                     quantity.disabled = false;
                     if (Number(quantity.value || 0) < 1) quantity.value = '1';
@@ -1301,7 +1334,14 @@ document.addEventListener('DOMContentLoaded', () => {
             refresh();
         });
 
-        form.addEventListener('submit', () => {
+        packPriceInput?.addEventListener('input', refresh);
+        form.addEventListener('submit', (event) => {
+            refresh();
+            if (packPriceInput?.validationMessage) {
+                event.preventDefault();
+                packPriceInput.reportValidity();
+                return;
+            }
             form.querySelectorAll('[data-pack-submitted-item]').forEach((input) => input.remove());
             selectedVariants.forEach((item, id) => {
                 const idInput = document.createElement('input'); idInput.type = 'hidden'; idInput.name = `items[${id}][variant_id]`; idInput.value = id; idInput.dataset.packSubmittedItem = '';

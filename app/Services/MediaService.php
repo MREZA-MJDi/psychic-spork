@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Media;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Throwable;
 
@@ -79,47 +80,83 @@ final class MediaService
         string $directory,
         ?string $altText = null
     ): Media {
-        $old = $model->media()
-            ->where('collection', $collection)
-            ->orderBy('sort_order')
-            ->orderBy('id')
-            ->first();
-
-        $media = $this->attach(
-            $model,
-            $collection,
-            $file,
-            $directory,
-            $altText,
-            $old?->sort_order ?? 0
-        );
+        $newMedia = null;
 
         try {
-            if ($old) {
-                $this->deleteMedia($old);
-                $old->delete();
-            }
+            return DB::transaction(function () use (
+                $model,
+                $collection,
+                $file,
+                $directory,
+                $altText,
+                &$newMedia
+            ): Media {
+                $old = $model->media()
+                    ->where('collection', $collection)
+                    ->orderBy('sort_order')
+                    ->orderBy('id')
+                    ->first();
+
+                $newMedia = $this->attach(
+                    $model,
+                    $collection,
+                    $file,
+                    $directory,
+                    $altText,
+                    $old?->sort_order ?? 0
+                );
+
+                if ($old) {
+                    $this->deleteRecordAfterCommit($old);
+                }
+
+                return $newMedia;
+            });
         } catch (Throwable $e) {
-            $this->deleteMedia($media);
-            $media->delete();
+            if ($newMedia instanceof Media && filled($newMedia->path)) {
+                Storage::disk($newMedia->disk ?: 'public')->delete(
+                    $this->normalizePath($newMedia->path)
+                );
+            }
 
             throw $e;
         }
+    }
 
-        return $media;
+    public function remove(Media $media): void
+    {
+        DB::transaction(function () use ($media): void {
+            $this->deleteRecordAfterCommit($media);
+        });
     }
 
     public function removeCollection(
         Model $model,
         string $collection
     ): void {
-        $media = $model->media()
-            ->where('collection', $collection)
-            ->get();
+        DB::transaction(function () use ($model, $collection): void {
+            $model->media()
+                ->where('collection', $collection)
+                ->orderBy('id')
+                ->chunkById(100, function ($items): void {
+                    foreach ($items as $item) {
+                        $this->deleteRecordAfterCommit($item);
+                    }
+                });
+        });
+    }
 
-        foreach ($media as $item) {
-            $this->deleteMedia($item);
-            $item->delete();
+    private function deleteRecordAfterCommit(Media $media): void
+    {
+        $disk = $media->disk ?: 'public';
+        $path = $this->normalizePath((string) $media->path);
+
+        $media->delete();
+
+        if ($path !== '') {
+            DB::afterCommit(function () use ($disk, $path): void {
+                Storage::disk($disk)->delete($path);
+            });
         }
     }
 

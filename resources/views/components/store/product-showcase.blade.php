@@ -3,7 +3,7 @@
 ])
 
 @php
-    $products = collect($products)->take(12)->values();
+    $products = collect($products)->take(36)->values();
 @endphp
 
 <section

@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Category;
+use App\Models\Brand;
 use App\Models\Product;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -10,6 +11,28 @@ use Tests\TestCase;
 class PublicSeoTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function test_brand_destinations_are_catalog_filters_not_standalone_pages(): void
+    {
+        $brand = Brand::factory()->create([
+            'is_active' => true,
+        ]);
+
+        $this->get(route('brands.index'))
+            ->assertStatus(301)
+            ->assertRedirect(route('products.index'));
+
+        $this->get(route('brands.show', $brand))
+            ->assertStatus(301)
+            ->assertRedirect(route('products.index', ['brand' => $brand->slug]));
+
+        $this->get(route('seo.sitemap.segment', ['type' => 'brands', 'page' => 1]))
+            ->assertNotFound();
+
+        $this->get(route('seo.sitemap'))
+            ->assertOk()
+            ->assertDontSee('/sitemap/brands/', false);
+    }
 
     public function test_public_seo_endpoints_and_product_metadata_work(): void
     {
@@ -38,6 +61,17 @@ class PublicSeoTest extends TestCase
             ->assertSee('Sitemap:');
 
         $this->get('/sitemap.xml')
+            ->assertOk()
+            ->assertSee('<sitemapindex', false)
+            ->assertSee(route('seo.sitemap.segment', [
+                'type' => 'products',
+                'page' => 1,
+            ]), false);
+
+        $this->get(route('seo.sitemap.segment', [
+            'type' => 'products',
+            'page' => 1,
+        ]))
             ->assertOk()
             ->assertSee(route('products.show', $product));
 
