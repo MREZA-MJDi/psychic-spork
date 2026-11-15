@@ -29,13 +29,14 @@
 
     <section class="catalog-discovery catalog-discovery--compact">
         <div class="container">
-            <form class="catalog-search catalog-search--product" method="GET" action="{{ route('products.index') }}" role="search">
+            <form class="catalog-search catalog-search--product" data-store-search data-suggestions-url="{{ route('search.suggestions') }}" method="GET" action="{{ route('products.index') }}" role="search">
                 <label class="catalog-search__field">
                     <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                         <circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/>
                     </svg>
                     <span class="sr-only">جستجوی محصولات</span>
-                    <input type="search" name="q" value="{{ request('q') }}" placeholder="نام محصول، مدل یا کد کالا…" autocomplete="off" minlength="2">
+                    <input type="search" name="q" value="{{ request('q') }}" placeholder="نام محصول، مدل یا کد کالا…" autocomplete="off" data-search-input minlength="2">
+                    <button type="button" class="catalog-search__clear" data-search-clear aria-label="پاک کردن" @if(!request('q')) hidden @endif>×</button>
                 </label>
                 @if(request('category'))<input type="hidden" name="category" value="{{ request('category') }}">@endif
                 @if(request('brand'))<input type="hidden" name="brand" value="{{ request('brand') }}">@endif
