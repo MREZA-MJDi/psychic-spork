@@ -447,14 +447,6 @@ top:
             31px;
 }
 
-.home-category-card__arrow {
-width:
-            36px;
-
-        height:
-            36px;
-}
-
 .home-brand-tile,
 .home-brand-tile.is-featured {
 border-radius:
@@ -518,14 +510,6 @@ padding-top:
 .home-brand-tile.is-featured .home-brand-tile__name strong {
 font-size:
             17px;
-}
-
-.home-brand-tile__arrow {
-width:
-            34px;
-
-        height:
-            34px;
 }
 
 }
