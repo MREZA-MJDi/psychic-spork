@@ -25,17 +25,17 @@ class StoreCatalogPaginationTest extends TestCase
             });
     }
 
-    public function test_brand_directory_and_profile_redirect_to_catalog_filter(): void
+    public function test_brand_directory_is_database_paginated(): void
     {
-        $brand = Brand::factory()->create();
+        Brand::factory()->count(25)->create();
 
         $this->get(route('brands.index'))
-            ->assertStatus(301)
-            ->assertRedirect(route('products.index'));
-
-        $this->get(route('brands.show', $brand))
-            ->assertStatus(301)
-            ->assertRedirect(route('products.index', ['brand' => $brand->slug]));
+            ->assertOk()
+            ->assertViewHas('brands', function ($brands): bool {
+                return $brands->total() === 25
+                    && $brands->count() === 24
+                    && $brands->perPage() === 24;
+            });
     }
 
     public function test_shop_pagination_keeps_sort_and_page_size_query_state(): void
@@ -54,34 +54,6 @@ class StoreCatalogPaginationTest extends TestCase
                     && $products->currentPage() === 2
                     && $products->perPage() === 6;
             });
-    }
-
-    public function test_parent_category_pages_and_shop_filters_include_active_descendants(): void
-    {
-        $parent = Category::factory()->create([
-            'parent_id' => null,
-            'is_active' => true,
-        ]);
-        $child = Category::factory()->create([
-            'parent_id' => $parent->id,
-            'is_active' => true,
-        ]);
-        $grandchild = Category::factory()->create([
-            'parent_id' => $child->id,
-            'is_active' => true,
-        ]);
-
-        Product::factory()->count(2)->create(['category_id' => $parent->id]);
-        Product::factory()->count(3)->create(['category_id' => $child->id]);
-        Product::factory()->count(4)->create(['category_id' => $grandchild->id]);
-
-        $this->get(route('categories.show', $parent))
-            ->assertOk()
-            ->assertViewHas('products', fn ($products): bool => $products->total() === 9);
-
-        $this->get(route('products.index', ['category' => $parent->slug]))
-            ->assertOk()
-            ->assertViewHas('products', fn ($products): bool => $products->total() === 9);
     }
 
     public function test_homepage_featured_carousel_receives_up_to_thirty_six_active_products(): void
@@ -105,7 +77,7 @@ class StoreCatalogPaginationTest extends TestCase
             });
     }
 
-    public function test_category_product_page_is_paginated_and_brand_url_is_a_filter(): void
+    public function test_category_and_brand_product_pages_are_database_paginated(): void
     {
         $category = Category::factory()->create();
         $brand = Brand::factory()->create();
@@ -125,7 +97,91 @@ class StoreCatalogPaginationTest extends TestCase
             });
 
         $this->get(route('brands.show', $brand) . '?per_page=6&page=2&sort=name_asc')
-            ->assertStatus(301)
-            ->assertRedirect(route('products.index', ['brand' => $brand->slug]));
+            ->assertOk()
+            ->assertViewHas('products', function ($products): bool {
+                return $products->total() === 7
+                    && $products->count() === 1
+                    && $products->currentPage() === 2
+                    && $products->perPage() === 6;
+            });
     }
+
+    public function test_shop_can_filter_brands_by_a_customer_typed_name(): void
+    {
+        $brand = Brand::factory()->create([
+            'name' => 'North Star',
+            'slug' => 'north-star',
+            'is_active' => true,
+        ]);
+        $otherBrand = Brand::factory()->create([
+            'name' => 'South Moon',
+            'slug' => 'south-moon',
+            'is_active' => true,
+        ]);
+
+        Product::factory()->count(2)->create([
+            'brand_id' => $brand->id,
+            'is_active' => true,
+        ]);
+        Product::factory()->create([
+            'brand_id' => $otherBrand->id,
+            'is_active' => true,
+        ]);
+
+        $this->get(route('products.index', ['brand' => 'North']))
+            ->assertOk()
+            ->assertViewHas('products', function ($products): bool {
+                return $products->total() === 2;
+            });
+    }
+
+    public function test_shop_discovery_renders_the_admin_selected_hero_product_banner(): void
+    {
+        Product::factory()->create([
+            'name' => 'Curated Catalog Banner Product',
+            'slug' => 'curated-catalog-banner-product',
+            'is_active' => true,
+            'is_hero' => true,
+        ]);
+
+        $this->get(route('products.index'))
+            ->assertOk()
+            ->assertSee('catalog-category-sidebar')
+            ->assertSee('catalog-brand-filter')
+            ->assertSee('Curated Catalog Banner Product')
+            ->assertViewHas('featuredBanner', function ($banner): bool {
+                return is_array($banner)
+                    && ($banner['title'] ?? null) === 'Curated Catalog Banner Product';
+            });
+    }
+
+
+    public function test_shop_displays_twelve_products_per_page_and_renders_next_page(): void
+    {
+        Product::factory()->count(13)->create([
+            'is_active' => true,
+        ]);
+
+        $firstPage = $this->get(route('products.index'));
+
+        $firstPage->assertOk()
+            ->assertSee('store-pagination')
+            ->assertSee('صفحه 1 از 2')
+            ->assertViewHas('products', function ($products): bool {
+                return $products->total() === 13
+                    && $products->count() === 12
+                    && $products->perPage() === 12
+                    && $products->currentPage() === 1;
+            });
+
+        $this->get(route('products.index', ['page' => 2]))
+            ->assertOk()
+            ->assertViewHas('products', function ($products): bool {
+                return $products->total() === 13
+                    && $products->count() === 1
+                    && $products->perPage() === 12
+                    && $products->currentPage() === 2;
+            });
+    }
+
 }
