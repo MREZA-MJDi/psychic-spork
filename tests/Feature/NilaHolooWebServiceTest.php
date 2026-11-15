@@ -13,6 +13,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\Request as ClientRequest;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Http;
+use Symfony\Component\Console\Output\BufferedOutput;
 use Tests\TestCase;
 
 class NilaHolooWebServiceTest extends TestCase
