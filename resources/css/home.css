@@ -1925,6 +1925,7 @@ outline:
 }
 
 .home-signal-panel--popular .home-signal-item {
+    grid-template-columns: 66px minmax(0, 1fr) 34px;
     border-color: rgba(255,255,255,.08);
     background: rgba(255,255,255,.045);
 }
@@ -2010,7 +2011,7 @@ outline:
     color: rgba(255,255,255,.50);
 }
 
- .home-signal-item__rank {
+.home-signal-item__rank {
     display: grid;
     place-items: center;
     justify-self: end;
