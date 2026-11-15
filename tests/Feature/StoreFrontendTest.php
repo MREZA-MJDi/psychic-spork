@@ -376,14 +376,20 @@ class StoreFrontendTest extends TestCase
             'sort_order' => 1,
         ]);
 
-        $this->get(route('products.show', $product))
-            ->assertOk()
-            ->assertSee('product-detail-v2__layout', false)
-            ->assertSee('product-detail-v2__purchase', false)
-            ->assertSee('محصول جزئیات تست')
-            ->assertSee('125,000', false)
-            ->assertSee('DETAIL-', false)
-            ->assertSee('افزودن به سبد خرید');
+        Model::preventLazyLoading(true);
+
+        try {
+            $this->get(route('products.show', $product))
+                ->assertOk()
+                ->assertSee('product-detail-v2__layout', false)
+                ->assertSee('product-detail-v2__purchase', false)
+                ->assertSee('محصول جزئیات تست')
+                ->assertSee('125,000', false)
+                ->assertSee('DETAIL-', false)
+                ->assertSee('افزودن به سبد خرید');
+        } finally {
+            Model::preventLazyLoading(false);
+        }
     }
 
 
@@ -427,14 +433,20 @@ class StoreFrontendTest extends TestCase
             'sort_order' => 0,
         ]);
 
-        $this->get(route('products.show', $product))
-            ->assertOk()
-            ->assertSee('product-variant-visual', false)
-            ->assertSee(
-                'data-variant-image="' . route('store.media', ['path' => 'variants/test-variant.webp']) . '"',
-                false
-            )
-            ->assertSee($variant->display_name);
+        Model::preventLazyLoading(true);
+
+        try {
+            $this->get(route('products.show', $product))
+                ->assertOk()
+                ->assertSee('product-variant-visual', false)
+                ->assertSee(
+                    'data-variant-image="' . route('store.media', ['path' => 'variants/test-variant.webp']) . '"',
+                    false
+                )
+                ->assertSee($variant->display_name);
+        } finally {
+            Model::preventLazyLoading(false);
+        }
     }
 
 }
