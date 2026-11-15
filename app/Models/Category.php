@@ -35,5 +35,37 @@ class Category extends Model
             ->orderBy('sort_order');
     }
 
+    /**
+     * IDs for this active category and all active descendants.
+     * The visited list protects against malformed legacy cycles; depth is
+     * deliberately bounded so a corrupted tree cannot cause unbounded queries.
+     */
+    public function subtreeIds(): array
+    {
+        $rootId = (int) $this->getKey();
+        $ids = [$rootId];
+        $frontier = [$rootId];
+
+        for ($depth = 0; $depth < 12 && $frontier !== []; $depth++) {
+            $children = static::query()
+                ->active()
+                ->whereIn('parent_id', $frontier)
+                ->orderBy('id')
+                ->pluck('id')
+                ->map(static fn ($id): int => (int) $id)
+                ->all();
+
+            $frontier = array_values(array_diff($children, $ids));
+
+            if ($frontier === []) {
+                break;
+            }
+
+            $ids = array_merge($ids, $frontier);
+        }
+
+        return $ids;
+    }
+
     public function scopeActive($query) { return $query->where('is_active', true); }
 }

@@ -56,6 +56,17 @@
                         <strong>نوع خرید</strong>
                     </legend>
 
+                    @if($hasWholesalePacks)
+                        <input type="hidden" name="order_type" value="wholesale">
+                        <div class="checkout-choice-grid">
+                            <div class="checkout-choice checkout-choice--selected">
+                                <span>
+                                    <strong>خرید عمده · پک آماده</strong>
+                                    <small>سبد شما شامل پک عمده است؛ شرایط و قیمت عمده برای این سفارش اعمال می‌شود.</small>
+                                </span>
+                            </div>
+                        </div>
+                    @else
                     <div class="checkout-choice-grid">
                         <label class="checkout-choice">
                             <input
@@ -92,6 +103,7 @@
                             خرید عمده با پرداخت آنلاین به حساب کاربری نیاز ندارد؛ ورود و تأیید مدیر فقط برای پرداخت چکی لازم است.
                         </p>
                     @endguest
+                    @endif
                 </fieldset>
 
                 <fieldset class="checkout-choice-group" id="payment-options">
@@ -345,6 +357,22 @@
             </div>
 
             <div class="checkout-items">
+                @foreach($packLines as $line)
+                    <div class="checkout-item checkout-item--pack">
+                        <div class="checkout-item__media">
+                            @if($line->pack?->image_path)
+                                <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($line->pack->image_path) }}" alt="{{ $line->pack->name }}" loading="lazy">
+                            @else
+                                <span class="product-image-placeholder">JANAN</span>
+                            @endif
+                        </div>
+                        <div>
+                            <strong>{{ $line->pack?->name ?? 'پک عمده' }}</strong>
+                            <span>{{ number_format($line->quantity) }} پک × {{ number_format((float) ($line->pack?->pack_price ?? 0)) }} تومان</span>
+                        </div>
+                        <b>{{ number_format((float) ($line->pack?->pack_price ?? 0) * $line->quantity) }}</b>
+                    </div>
+                @endforeach
                 @foreach($items as $item)
                     <div class="checkout-item">
                         <div class="checkout-item__media">
@@ -384,7 +412,11 @@
             </div>
 
             <p class="checkout-summary-note">
-                در سفارش عمده، قیمت عمده هنگام ثبت نهایی سفارش محاسبه می‌شود.
+                @if($hasWholesalePacks)
+                    قیمت پک‌ها در ثبت نهایی کنترل می‌شود؛ موجودی همه اقلام داخل هر پک نیز دوباره بررسی خواهد شد.
+                @else
+                    در سفارش عمده، قیمت عمده هنگام ثبت نهایی سفارش محاسبه می‌شود.
+                @endif
             </p>
 
             <a

@@ -311,7 +311,7 @@ class AdminDashboardController extends Controller
         */
 
         $chequesAwaitingReview = ChequePayment::query()
-            ->whereIn('status', ['submitted', 'under_review'])
+            ->whereIn('status', ['submitted', 'under_review', 'awaiting_original', 'original_received'])
             ->count();
 
         $chequesAwaitingReviewAmount = (float) ChequePayment::query()

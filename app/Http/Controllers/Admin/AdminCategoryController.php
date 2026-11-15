@@ -7,6 +7,8 @@ use App\Http\Requests\Admin\StoreCategoryRequest;
 use App\Http\Requests\Admin\UpdateCategoryRequest;
 use App\Models\Category;
 use App\Services\MediaService;
+use App\Services\HeroService;
+use App\Models\Product;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -128,10 +130,15 @@ class AdminCategoryController extends Controller
     public function update(
         UpdateCategoryRequest $request,
         Category $category,
-        MediaService $media
+        MediaService $media,
+        HeroService $hero
     ): RedirectResponse {
         try {
             $data = $request->validated();
+            $heroDependsOnCategory = Product::query()
+                ->where('category_id', $category->id)
+                ->where('is_hero', true)
+                ->exists();
 
             if (
                 !empty($data['parent_id']) &&
@@ -179,6 +186,10 @@ class AdminCategoryController extends Controller
                     );
                 }
             });
+
+            if ($heroDependsOnCategory) {
+                $hero->invalidate();
+            }
 
             return redirect()
                 ->route('admin.categories.index')

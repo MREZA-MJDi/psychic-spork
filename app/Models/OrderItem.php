@@ -21,6 +21,7 @@ class OrderItem extends Model
         'unit_price',
         'quantity',
         'line_total',
+        'wholesale_pack_order_id',
     ];
 
     protected function casts(): array
@@ -30,6 +31,11 @@ class OrderItem extends Model
             'line_total' => 'decimal:2',
             'quantity' => 'integer',
         ];
+    }
+
+    public function wholesalePackOrder(): BelongsTo
+    {
+        return $this->belongsTo(OrderWholesalePack::class, 'wholesale_pack_order_id');
     }
 
     public function order(): BelongsTo

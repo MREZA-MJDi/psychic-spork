@@ -35,13 +35,100 @@
         <div class="admin-stat-card__label">گروه محصول</div>
         <div class="admin-stat-card__value">{{ number_format($batch->product_groups) }}</div>
     </div>
+
+</div>
+
+<div class="admin-card nila-panel nila-panel--comparison">
+    <div class="admin-card-header">
+        <div>
+            <span class="nila-step-label">مقایسه با اطلاعات فعلی جانان</span>
+            <h2 class="admin-card-title">این فایل چه چیزی تغییر می‌دهد؟</h2>
+            <p class="admin-card-description">شناسه‌های نیلا ملاک تطبیق هستند؛ نام مشابه به‌تنهایی باعث ادغام دو محصول نمی‌شود.</p>
+        </div>
+    </div>
+
+    <div class="admin-dashboard-stats">
+        <div class="admin-stat-card">
+            <div class="admin-stat-card__label">محصول جدید</div>
+            <div class="admin-stat-card__value">{{ number_format($comparison['new_products']) }}</div>
+        </div>
+        <div class="admin-stat-card">
+            <div class="admin-stat-card__label">محصول موجود و شناسایی‌شده</div>
+            <div class="admin-stat-card__value">{{ number_format($comparison['existing_products']) }}</div>
+        </div>
+        <div class="admin-stat-card">
+            <div class="admin-stat-card__label">تنوع جدید</div>
+            <div class="admin-stat-card__value">{{ number_format($comparison['new_variants']) }}</div>
+        </div>
+        <div class="admin-stat-card">
+            <div class="admin-stat-card__label">موجودی نیازمند تطبیق</div>
+            <div class="admin-stat-card__value">{{ number_format($comparison['stock_change_count']) }}</div>
+        </div>
+    </div>
+
+    <div class="nila-info-grid">
+        <div class="nila-info-card">
+            <strong>قیمت متفاوت</strong>
+            <p class="admin-muted">{{ number_format($comparison['price_change_count']) }} تنوع قیمت متفاوت با فایل نیلا دارد.</p>
+        </div>
+        <div class="nila-info-card">
+            <strong>نام محصول تغییر کرده</strong>
+            <p class="admin-muted">{{ number_format($comparison['renamed_products']) }} نام محصول در فایل با نام فعلی جانان تفاوت دارد.</p>
+        </div>
+        <div class="nila-info-card">
+            <strong>گروه دارای خطا</strong>
+            <p class="admin-muted">{{ number_format($comparison['blocked_groups']) }} گروه به‌دلیل خطای حداقل یک ردیف وارد نمی‌شود.</p>
+        </div>
+        <div class="nila-info-card">
+            <strong>کد کالا با تعارض</strong>
+            <p class="admin-muted">{{ number_format($comparison['sku_conflict_count']) }} کد از قبل در جانان وجود دارد اما اتصال نیلا ندارد.</p>
+        </div>
+    </div>
+
+    <div class="alert">
+        مقدار ستون «موجودی» در فایل، موجودی نهایی آن تنوع در نیلا فرض می‌شود؛ جانان فقط اختلاف با موجودی فعلی را به‌عنوان گردش اصلاحی ثبت می‌کند. این مقدار به موجودی فعلی اضافه نمی‌شود.
+    </div>
+
+    @if($comparison['stock_changes'])
+        <h3 class="admin-card-title">نمونه تغییرات موجودی</h3>
+        <div class="admin-table-wrap">
+            <table class="admin-table">
+                <thead><tr><th>کد کالا</th><th>موجودی فعلی</th><th>موجودی فایل</th><th>اختلاف</th></tr></thead>
+                <tbody>
+                @foreach($comparison['stock_changes'] as $change)
+                    <tr>
+                        <td dir="ltr">{{ $change['sku'] }}</td>
+                        <td>{{ number_format($change['current']) }}</td>
+                        <td>{{ number_format($change['incoming']) }}</td>
+                        <td>{{ $change['difference'] > 0 ? '+' : '' }}{{ number_format($change['difference']) }}</td>
+                    </tr>
+                @endforeach
+                </tbody>
+            </table>
+        </div>
+        @if($comparison['stock_change_count'] > count($comparison['stock_changes']))
+            <p class="admin-help">فقط ۳۰ مورد اول نمایش داده شده‌اند؛ همه اختلاف‌ها هنگام پردازش بررسی می‌شوند.</p>
+        @endif
+    @else
+        <p class="admin-muted">موجودی هیچ‌کدام از تنوع‌های شناسایی‌شده با فایل تفاوت ندارد.</p>
+    @endif
+
+    @if($comparison['sku_conflicts'])
+        <div class="alert error">
+            <strong>کدهای دارای تعارض</strong>
+            <p>این کدها به محصول دیگری در جانان تعلق دارند و اتصال خودکار انجام نمی‌شود:</p>
+            @foreach($comparison['sku_conflicts'] as $conflict)
+                <span dir="ltr">{{ $conflict['sku'] }}</span>@if(!$loop->last)، @endif
+            @endforeach
+        </div>
+    @endif
 </div>
 
 <div class="admin-card nila-panel nila-panel--progress">
     <div class="nila-progress-heading">
         <div>
-            <span class="nila-step-label">مرحله ۳ · اجرای کنترل‌شده</span>
-            <h2 class="admin-card-title">وضعیت اجرای Import</h2>
+            <span class="nila-step-label">مرحله بعد</span>
+            <h2 class="admin-card-title">تأیید و همگام‌سازی</h2>
         </div>
         <strong class="nila-progress-value">{{ number_format($pilotProgress) }}٪</strong>
     </div>
@@ -66,18 +153,20 @@
             @csrf
             <div class="admin-form-grid">
                 <div class="admin-field">
-                    <label for="batch_size">تعداد محصول اصلی در این مرحله</label>
+                    <label for="batch_size">تعداد گروه محصول در هر نوبت</label>
                     <select id="batch_size" name="batch_size">
-                        <option value="5" selected>۵ گروه محصول (شروع پایلوت)</option>
-                        <option value="10">۱۰ گروه محصول</option>
-                        <option value="25">۲۵ گروه محصول</option>
-                        <option value="50">۵۰ گروه محصول (حداکثر هر مرحله)</option>
+                        <option value="25" selected>۲۵ گروه محصول (پیشنهادی)</option>
+                        <option value="50">۵۰ گروه محصول (حداکثر هر نوبت)</option>
                     </select>
-                    <small class="admin-help">پیشنهاد شروع با ۵ گروه اول است. پس از بررسی نتیجه پایلوت می‌توانی مرحله‌های بعدی را با ۱۰، ۲۵ یا حداکثر ۵۰ گروه ادامه بدهی. هر گروه شامل تمام تنوع‌های همان کد پایه است.</small>
+                    <small class="admin-help">هر گروه شامل یک محصول اصلی و تمام تنوع‌های همان کد پایه است. در صورت نیاز می‌توانی اجرا را در چند نوبت ادامه بدهی.</small>
                 </div>
             </div>
+            <label class="admin-checkbox" style="margin-top:12px;">
+                <input type="checkbox" name="confirm_stock_snapshot" value="1" required>
+                <span><strong>متوجه‌ام:</strong> موجودی فایل، مقدار نهایی موجودی در نیلاست و اختلاف آن در جانان ثبت می‌شود.</span>
+            </label>
             <div class="admin-form-actions nila-pilot-actions">
-                <span class="nila-safe-note">محصولات جدید غیرفعال می‌مانند و دسته/برند به‌صورت حدسی ساخته نمی‌شود.</span>
+                <span class="nila-safe-note">محصول جدید غیرفعال می‌ماند؛ برند، دسته و تصویر دستی جانان بازنویسی نمی‌شوند.</span>
                 <button type="submit" class="admin-btn admin-btn--secondary">
                     {{ $batch->next_group_offset > 0 ? 'ادامه Import' : 'شروع Import مرحله‌ای' }}
                 </button>
@@ -182,7 +271,8 @@
 <div class="admin-card nila-panel nila-panel--rules">
     <h2 class="admin-card-title">محدودیت‌های این مرحله</h2>
     <ul>
-        <li>این گزارش فقط پیش‌نمایش است و هیچ تغییری در محصولات، تنوع‌ها، موجودی یا قیمت‌ها ایجاد نکرده است.</li>
+        <li>این گزارش فقط پیش‌نمایش است؛ تا تأیید مدیر هیچ محصول، تنوع، قیمت یا موجودی تغییر نمی‌کند.</li>
+        <li>محصول و تنوع تکراری با کد پایدار نیلا شناسایی می‌شوند و دوباره ساخته نمی‌شوند.</li>
         <li>رنگ فقط به‌عنوان پیشنهاد استخراج‌شده از بخش بعد از آخرین خط تیره نمایش داده می‌شود و هنوز ذخیره نمی‌شود.</li>
         <li>دسته‌بندی و برند از فایل فعلی قابل تعیین نیستند و باید با داده‌های تأییدشده جانان تطبیق داده شوند.</li>
         <li>ردیف بدون قیمت قابل Import نیست؛ مقدار خالی به قیمت صفر تبدیل نمی‌شود.</li>

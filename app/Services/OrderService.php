@@ -25,12 +25,24 @@ final class OrderService
         array $customer,
         ?User $user = null
     ): Order {
-        return DB::transaction(function () use (
-            $cart,
-            $customer,
-            $user
-        ): Order {
-            $orderType = $customer['order_type'] ?? 'retail';
+        return DB::transaction(function () use ($cart, $customer, $user): Order {
+            $lockedCart = Cart::query()
+                ->lockForUpdate()
+                ->findOrFail($cart->id);
+
+            $cartItems = $lockedCart->items()
+                ->orderBy('product_variant_id')
+                ->lockForUpdate()
+                ->get();
+
+            $packLines = $lockedCart->wholesalePacks()
+                ->with('pack')
+                ->orderBy('id')
+                ->lockForUpdate()
+                ->get();
+
+            $hasPacks = $packLines->isNotEmpty();
+            $orderType = $hasPacks ? 'wholesale' : ($customer['order_type'] ?? 'retail');
 
             abort_unless(
                 in_array($orderType, ['retail', 'wholesale'], true),
@@ -38,91 +50,56 @@ final class OrderService
                 'نوع سفارش نامعتبر است.'
             );
 
-            $cartItems = $cart->items()
-                ->orderBy('product_variant_id')
-                ->get();
-
             abort_if(
-                $cartItems->isEmpty(),
+                $cartItems->isEmpty() && ! $hasPacks,
                 422,
                 'سبد خرید خالی است.'
             );
 
             abort_if(
-                $cartItems->count() > CartService::MAX_ITEMS,
+                $cartItems->count() + $packLines->count() > CartService::MAX_ITEMS,
                 422,
-                'سبد خرید از حداکثر تعداد تنوع مجاز بیشتر است.'
+                'سبد خرید از حداکثر تعداد اقلام مجاز بیشتر است.'
             );
 
-            $lockedVariants = ProductVariant::query()
-                ->with('product.galleryMedia')
-                ->whereIn('id', $cartItems->pluck('product_variant_id')->unique())
-                ->orderBy('id')
-                ->lockForUpdate()
-                ->get()
-                ->keyBy('id');
+            $packIds = $packLines->pluck('wholesale_pack_id')->unique()->values();
+            $packs = $packIds->isEmpty()
+                ? collect()
+                : \App\Models\WholesalePack::query()
+                    ->with(['items.variant.product.galleryMedia'])
+                    ->whereIn('id', $packIds)
+                    ->orderBy('id')
+                    ->lockForUpdate()
+                    ->get()
+                    ->keyBy('id');
 
-            $addressId = $this->resolveAddressId(
-                $customer['address_id'] ?? null,
-                $user
-            );
+            $variantIds = $cartItems->pluck('product_variant_id');
 
-            $order = Order::create([
-                'user_id' => $user?->id,
-                'address_id' => $addressId,
-                'order_number' => $this->orderNumber(),
+            foreach ($packs as $pack) {
+                $variantIds = $variantIds->merge($pack->items->pluck('product_variant_id'));
+            }
 
-                'customer_name' => trim(
-                    (string) $customer['customer_name']
-                ),
+            $variantIds = $variantIds->filter()->unique()->sort()->values();
 
-                'customer_phone' => trim(
-                    (string) $customer['customer_phone']
-                ),
+            $lockedVariants = $variantIds->isEmpty()
+                ? collect()
+                : ProductVariant::query()
+                    ->with('product.galleryMedia')
+                    ->whereIn('id', $variantIds)
+                    ->orderBy('id')
+                    ->lockForUpdate()
+                    ->get()
+                    ->keyBy('id');
 
-                'customer_email' => filled($customer['customer_email'] ?? null)
-                    ? trim((string) $customer['customer_email'])
-                    : null,
-
-                'shipping_address' => trim(
-                    (string) $customer['shipping_address']
-                ),
-
-                'shipping_province' => $this->nullableString(
-                    $customer['shipping_province'] ?? null
-                ),
-
-                'shipping_city' => $this->nullableString(
-                    $customer['shipping_city'] ?? null
-                ),
-
-                'postal_code' => $this->nullableString(
-                    $customer['postal_code'] ?? null
-                ),
-
-                'status' => 'pending',
-                'payment_status' => 'pending',
-                'payment_method' => $customer['payment_method'] ?? 'online',
-                'order_type' => $orderType,
-
-                'subtotal' => 0,
-                'discount' => 0,
-                'shipping_cost' => 0,
-                'total' => 0,
-
-                'customer_note' => $this->nullableString(
-                    $customer['customer_note'] ?? null
-                ),
-
-                'placed_at' => now(),
-            ]);
-
-            $subtotal = 0;
+            $normalLines = [];
+            $packPlans = [];
+            $requiredStock = [];
+            $subtotal = 0.0;
+            $discount = 0.0;
             $orderQuantity = 0;
+
             foreach ($cartItems as $cartItem) {
-                $variant = $lockedVariants->get(
-                    $cartItem->product_variant_id
-                );
+                $variant = $lockedVariants->get($cartItem->product_variant_id);
 
                 abort_unless(
                     $variant
@@ -135,32 +112,183 @@ final class OrderService
                 $quantity = (int) $cartItem->quantity;
 
                 abort_if(
-                    $quantity < 1,
+                    $quantity < 1 || $quantity > CartService::MAX_QUANTITY_PER_ITEM,
                     422,
                     'تعداد یکی از محصولات سبد خرید نامعتبر است.'
-                );
-
-                abort_if(
-                    $quantity > $variant->stock,
-                    422,
-                    "موجودی «{$variant->product->name}» برای سفارش کافی نیست."
                 );
 
                 $unitPrice = $orderType === 'wholesale'
                     ? $this->wholesalePricing->unitPrice($variant)
                     : (float) $variant->effective_price;
 
-                $lineTotal = $unitPrice * $quantity;
+                abort_if($unitPrice < 0, 422, 'مبلغ یکی از محصولات نامعتبر است.');
 
+                $lineTotal = round($unitPrice * $quantity, 2);
+                $subtotal += $lineTotal;
                 $orderQuantity += $quantity;
+                $requiredStock[$variant->id] = ($requiredStock[$variant->id] ?? 0) + $quantity;
 
-                abort_if(
-                    $unitPrice < 0 || $lineTotal < 0,
+                $normalLines[] = [
+                    'variant' => $variant,
+                    'quantity' => $quantity,
+                    'unit_price' => $unitPrice,
+                    'line_total' => $lineTotal,
+                ];
+            }
+
+            foreach ($packLines as $packLine) {
+                $pack = $packs->get($packLine->wholesale_pack_id);
+                $packCount = (int) $packLine->quantity;
+
+                abort_unless(
+                    $pack && $pack->is_active,
                     422,
-                    'مبلغ یکی از محصولات نامعتبر است.'
+                    'یکی از پک‌های سبد دیگر برای فروش فعال نیست.'
                 );
 
-                $subtotal += $lineTotal;
+                abort_if(
+                    $packCount < 1 || $packCount > CartService::MAX_QUANTITY_PER_ITEM,
+                    422,
+                    'تعداد یکی از پک‌های سبد معتبر نیست.'
+                );
+
+                abort_if(
+                    $pack->items->isEmpty(),
+                    422,
+                    "پک «{$pack->name}» هنوز اقلام قابل فروش ندارد."
+                );
+
+                $packBasePrice = 0.0;
+                $packUnitCount = 0;
+                $itemSnapshots = [];
+
+                foreach ($pack->items as $packItem) {
+                    $variant = $lockedVariants->get($packItem->product_variant_id);
+                    $quantityPerPack = (int) $packItem->quantity;
+
+                    abort_unless(
+                        $variant
+                        && $variant->is_active
+                        && $variant->product?->is_active,
+                        422,
+                        "یکی از اقلام پک «{$pack->name}» دیگر فعال نیست."
+                    );
+
+                    abort_if($quantityPerPack < 1, 422, "تعداد یکی از اقلام پک «{$pack->name}» نامعتبر است.");
+
+                    $unitPrice = $this->wholesalePricing->unitPrice($variant);
+                    $totalQuantity = $quantityPerPack * $packCount;
+                    $lineTotal = round($unitPrice * $totalQuantity, 2);
+
+                    $packBasePrice += $unitPrice * $quantityPerPack;
+                    $packUnitCount += $quantityPerPack;
+                    $requiredStock[$variant->id] = ($requiredStock[$variant->id] ?? 0) + $totalQuantity;
+
+                    $itemSnapshots[] = [
+                        'variant_id' => $variant->id,
+                        'product_id' => $variant->product_id,
+                        'product_name' => $variant->product->name,
+                        'variant_name' => $this->variantName($variant),
+                        'sku' => $variant->sku,
+                        'product_image' => $variant->product->galleryMedia->first()?->path,
+                        'quantity_per_pack' => $quantityPerPack,
+                        'quantity' => $totalQuantity,
+                        'unit_price' => $unitPrice,
+                        'line_total' => $lineTotal,
+                    ];
+                }
+
+                $packPrice = (float) $pack->pack_price;
+
+                abort_if(
+                    $packPrice <= 0 || $packPrice > $packBasePrice,
+                    422,
+                    "قیمت پک «{$pack->name}» معتبر نیست؛ قیمت پک نباید از جمع قیمت عمده اقلام بیشتر باشد."
+                );
+
+                $packLineTotal = round($packPrice * $packCount, 2);
+                $packGrossTotal = round($packBasePrice * $packCount, 2);
+
+                $subtotal += $packGrossTotal;
+                $discount += round($packGrossTotal - $packLineTotal, 2);
+                $orderQuantity += $packUnitCount * $packCount;
+
+                $packPlans[] = [
+                    'pack' => $pack,
+                    'quantity' => $packCount,
+                    'unit_price' => $packPrice,
+                    'line_total' => $packLineTotal,
+                    'items_snapshot' => $itemSnapshots,
+                ];
+            }
+
+            foreach ($requiredStock as $variantId => $required) {
+                $variant = $lockedVariants->get($variantId);
+
+                abort_unless(
+                    $variant && $variant->is_active && $variant->product?->is_active,
+                    422,
+                    'یکی از اقلام سفارش دیگر قابل فروش نیست.'
+                );
+
+                abort_if(
+                    (int) $variant->stock < (int) $required,
+                    422,
+                    "موجودی «{$variant->product->name}» برای سفارش کافی نیست."
+                );
+            }
+
+            $total = round($subtotal - $discount, 2);
+
+            abort_if(
+                $total <= 0,
+                422,
+                'مبلغ سفارش معتبر نیست.'
+            );
+
+            $profile = $user?->wholesaleProfile()->first();
+            if ($orderType === 'wholesale' && $profile) {
+                $this->wholesalePricing->assertMinimums(
+                    $profile,
+                    $total,
+                    $orderQuantity
+                );
+            }
+
+            $addressId = $this->resolveAddressId(
+                $customer['address_id'] ?? null,
+                $user
+            );
+
+            $order = Order::create([
+                'user_id' => $user?->id,
+                'address_id' => $addressId,
+                'order_number' => $this->orderNumber(),
+                'customer_name' => trim((string) $customer['customer_name']),
+                'customer_phone' => trim((string) $customer['customer_phone']),
+                'customer_email' => filled($customer['customer_email'] ?? null)
+                    ? trim((string) $customer['customer_email'])
+                    : null,
+                'shipping_address' => trim((string) $customer['shipping_address']),
+                'shipping_province' => $this->nullableString($customer['shipping_province'] ?? null),
+                'shipping_city' => $this->nullableString($customer['shipping_city'] ?? null),
+                'postal_code' => $this->nullableString($customer['postal_code'] ?? null),
+                'status' => 'pending',
+                'payment_status' => 'pending',
+                'payment_method' => $customer['payment_method'] ?? 'online',
+                'order_type' => $orderType,
+                'subtotal' => $subtotal,
+                'discount' => $discount,
+                'shipping_cost' => 0,
+                'total' => $total,
+                'customer_note' => $this->nullableString($customer['customer_note'] ?? null),
+                'placed_at' => now(),
+            ]);
+
+            foreach ($normalLines as $line) {
+                /** @var ProductVariant $variant */
+                $variant = $line['variant'];
+                $quantity = $line['quantity'];
 
                 $order->items()->create([
                     'product_id' => $variant->product_id,
@@ -168,12 +296,10 @@ final class OrderService
                     'product_name' => $variant->product->name,
                     'variant_name' => $this->variantName($variant),
                     'sku' => $variant->sku,
-                    'product_image' => $variant->product
-                        ->galleryMedia
-                        ->first()?->path,
-                    'unit_price' => $unitPrice,
+                    'product_image' => $variant->product->galleryMedia->first()?->path,
+                    'unit_price' => $line['unit_price'],
                     'quantity' => $quantity,
-                    'line_total' => $lineTotal,
+                    'line_total' => $line['line_total'],
                 ]);
 
                 $this->inventory->moveLocked(
@@ -187,33 +313,56 @@ final class OrderService
                 );
             }
 
-            // Wholesale orders are open for online checkout.
-            // Configured customer-specific minimums remain enforced transactionally.
-            if ($orderType === 'wholesale' && $user?->wholesaleProfile) {
-                $this->wholesalePricing->assertMinimums(
-                    $user->wholesaleProfile,
-                    $subtotal,
-                    $orderQuantity
-                );
+            foreach ($packPlans as $plan) {
+                $pack = $plan['pack'];
+                $packOrderLine = $order->wholesalePacks()->create([
+                    'wholesale_pack_id' => $pack->id,
+                    'pack_name' => $pack->name,
+                    'pack_slug' => $pack->slug,
+                    'image_path' => $pack->image_path,
+                    'quantity' => $plan['quantity'],
+                    'unit_pack_price' => $plan['unit_price'],
+                    'line_total' => $plan['line_total'],
+                    'items_snapshot' => $plan['items_snapshot'],
+                ]);
+
+                foreach ($plan['items_snapshot'] as $snapshot) {
+                    /** @var ProductVariant $variant */
+                    $variant = $lockedVariants->get($snapshot['variant_id']);
+
+                    $order->items()->create([
+                        'wholesale_pack_order_id' => $packOrderLine->id,
+                        'product_id' => $variant->product_id,
+                        'product_variant_id' => $variant->id,
+                        'product_name' => $variant->product->name,
+                        'variant_name' => $this->variantName($variant),
+                        'sku' => $variant->sku,
+                        'product_image' => $variant->product->galleryMedia->first()?->path,
+                        'unit_price' => $snapshot['unit_price'],
+                        'quantity' => $snapshot['quantity'],
+                        'line_total' => $snapshot['line_total'],
+                    ]);
+
+                    $this->inventory->moveLocked(
+                        $variant,
+                        -(int) $snapshot['quantity'],
+                        'sale',
+                        "کسر موجودی پک {$pack->name} در سفارش {$order->order_number}",
+                        $user?->id,
+                        Order::class,
+                        $order->id
+                    );
+                }
             }
 
-            // Cheque authorization is enforced only by ChequePaymentMethod.
-            abort_if(
-                $subtotal <= 0,
-                422,
-                'مبلغ سفارش معتبر نیست.'
-            );
-
-            $order->update([
-                'subtotal' => $subtotal,
-                'total' => $subtotal,
-            ]);
-
-            $this->cart->clear($cart);
+            $lockedCart->items()->delete();
+            $lockedCart->wholesalePacks()->delete();
+            $lockedCart->update(['last_activity_at' => now()]);
 
             return $order->fresh([
                 'items',
                 'payments',
+                'wholesalePacks.items',
             ]);
         }, 3);
     }
@@ -297,7 +446,7 @@ final class OrderService
                     'سفارش دارای چک واریزشده را تا تعیین تکلیف چک نمی‌توان لغو کرد.'
                 );
 
-                if ($cheque && in_array($cheque->status, ['submitted', 'under_review', 'accepted'], true)) {
+                if ($cheque && in_array($cheque->status, ['submitted', 'under_review', 'awaiting_original', 'original_received', 'accepted'], true)) {
                     $cheque->update(['status' => 'cancelled']);
                 }
 

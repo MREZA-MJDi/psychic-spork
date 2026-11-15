@@ -37,6 +37,7 @@ class StoreProductController extends Controller
                 'media.path',
                 'media.sort_order',
             ]),
+            'primaryActiveVariant.primaryGalleryMedia',
         ];
     }
 
@@ -48,6 +49,16 @@ class StoreProductController extends Controller
 
         $sort = $filters['sort'] ?? 'newest';
         $perPage = (int) ($filters['per_page'] ?? 6);
+
+        $categoryIds = null;
+        if (! empty($filters['category'])) {
+            $selectedCategory = Category::query()
+                ->active()
+                ->where('slug', $filters['category'])
+                ->first();
+
+            $categoryIds = $selectedCategory?->subtreeIds() ?? [];
+        }
 
         $products = Product::query()
             ->select([
@@ -92,13 +103,8 @@ class StoreProductController extends Controller
                 })
             )
             ->when(
-                ! empty($filters['category']),
-                fn ($query) => $query->whereHas(
-                    'category',
-                    fn ($category) => $category
-                        ->where('slug', $filters['category'])
-                        ->where('is_active', true)
-                )
+                $categoryIds !== null,
+                fn ($query) => $query->whereIn('category_id', $categoryIds)
             )
             ->when(
                 ! empty($filters['brand']),
@@ -199,6 +205,7 @@ class StoreProductController extends Controller
                     'product_variants.is_active',
                     'product_variants.sort_order',
                 ]),
+                'primaryActiveVariant.primaryGalleryMedia',
             ])
             ->where(function ($query) use ($like) {
                 $query
@@ -232,7 +239,7 @@ class StoreProductController extends Controller
                     'name' => $product->name,
                     'brand' => $product->brand?->name,
                     'category' => $product->category?->name,
-                    'image' => $product->primaryGalleryMedia?->url,
+                    'image' => $product->primaryGalleryMedia?->url ?: $variant?->primaryGalleryMedia?->url,
                     'price' => $variant?->effective_price,
                     'url' => route('products.show', $product),
                 ];

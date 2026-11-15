@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\Response;
@@ -38,7 +37,6 @@ class SeoController extends Controller
             'pages' => count($this->staticPages()),
             'products' => Product::query()->active()->count(),
             'categories' => Category::query()->active()->count(),
-            'brands' => Brand::query()->active()->count(),
         ];
 
         $xml = [
@@ -73,7 +71,7 @@ class SeoController extends Controller
     public function sitemapSegment(string $type, int $page): Response
     {
         abort_unless(
-            in_array($type, ['pages', 'products', 'categories', 'brands'], true)
+            in_array($type, ['pages', 'products', 'categories'], true)
             && $page >= 1,
             404
         );
@@ -90,7 +88,6 @@ class SeoController extends Controller
             $query = match ($type) {
                 'products' => Product::query()->active(),
                 'categories' => Category::query()->active(),
-                'brands' => Brand::query()->active(),
             };
 
             $items = $query
@@ -103,7 +100,6 @@ class SeoController extends Controller
             $routeName = match ($type) {
                 'products' => 'products.show',
                 'categories' => 'categories.show',
-                'brands' => 'brands.show',
             };
 
             $entries = $items->map(fn ($item): array => [
@@ -123,7 +119,6 @@ class SeoController extends Controller
             ['loc' => route('home')],
             ['loc' => route('products.index')],
             ['loc' => route('categories.index')],
-            ['loc' => route('brands.index')],
             ['loc' => route('about')],
             ['loc' => route('shipping')],
             ['loc' => route('returns')],

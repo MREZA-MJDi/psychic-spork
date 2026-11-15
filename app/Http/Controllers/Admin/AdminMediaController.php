@@ -8,13 +8,14 @@ use App\Models\Category;
 use App\Models\Media;
 use App\Models\ProductVariant;
 use App\Services\MediaService;
+use App\Services\HeroService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class AdminMediaController extends Controller
 {
-    public function store(Request $request, string $type, int $id, MediaService $media): RedirectResponse
+    public function store(Request $request, string $type, int $id, MediaService $media, HeroService $hero): RedirectResponse
     {
         [$model, $collection, $directory] = $this->target($type, $id);
 
@@ -49,10 +50,12 @@ class AdminMediaController extends Controller
             );
         });
 
+        $this->invalidateHeroIfBrandIsUsed($type, $model, $hero);
+
         return back()->with('success', 'رسانه با موفقیت ذخیره شد.');
     }
 
-    public function destroy(string $type, int $id, Media $media, MediaService $mediaService): RedirectResponse
+    public function destroy(string $type, int $id, Media $media, MediaService $mediaService, HeroService $hero): RedirectResponse
     {
         [$model, $collection] = $this->target($type, $id);
 
@@ -67,7 +70,20 @@ class AdminMediaController extends Controller
             $mediaService->remove($media);
         });
 
+        $this->invalidateHeroIfBrandIsUsed($type, $model, $hero);
+
         return back()->with('success', 'رسانه حذف شد.');
+    }
+
+    private function invalidateHeroIfBrandIsUsed(string $type, mixed $model, HeroService $hero): void
+    {
+        if (
+            $type === 'brand'
+            && $model instanceof Brand
+            && $model->products()->where('is_hero', true)->exists()
+        ) {
+            $hero->invalidate();
+        }
     }
 
     private function target(string $type, int $id): array

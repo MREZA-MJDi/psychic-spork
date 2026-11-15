@@ -25,17 +25,17 @@ class StoreCatalogPaginationTest extends TestCase
             });
     }
 
-    public function test_brand_directory_is_database_paginated(): void
+    public function test_brand_directory_and_profile_redirect_to_catalog_filter(): void
     {
-        Brand::factory()->count(25)->create();
+        $brand = Brand::factory()->create();
 
         $this->get(route('brands.index'))
-            ->assertOk()
-            ->assertViewHas('brands', function ($brands): bool {
-                return $brands->total() === 25
-                    && $brands->count() === 24
-                    && $brands->perPage() === 24;
-            });
+            ->assertStatus(301)
+            ->assertRedirect(route('products.index'));
+
+        $this->get(route('brands.show', $brand))
+            ->assertStatus(301)
+            ->assertRedirect(route('products.index', ['brand' => $brand->slug]));
     }
 
     public function test_shop_pagination_keeps_sort_and_page_size_query_state(): void
@@ -54,6 +54,34 @@ class StoreCatalogPaginationTest extends TestCase
                     && $products->currentPage() === 2
                     && $products->perPage() === 6;
             });
+    }
+
+    public function test_parent_category_pages_and_shop_filters_include_active_descendants(): void
+    {
+        $parent = Category::factory()->create([
+            'parent_id' => null,
+            'is_active' => true,
+        ]);
+        $child = Category::factory()->create([
+            'parent_id' => $parent->id,
+            'is_active' => true,
+        ]);
+        $grandchild = Category::factory()->create([
+            'parent_id' => $child->id,
+            'is_active' => true,
+        ]);
+
+        Product::factory()->count(2)->create(['category_id' => $parent->id]);
+        Product::factory()->count(3)->create(['category_id' => $child->id]);
+        Product::factory()->count(4)->create(['category_id' => $grandchild->id]);
+
+        $this->get(route('categories.show', $parent))
+            ->assertOk()
+            ->assertViewHas('products', fn ($products): bool => $products->total() === 9);
+
+        $this->get(route('products.index', ['category' => $parent->slug]))
+            ->assertOk()
+            ->assertViewHas('products', fn ($products): bool => $products->total() === 9);
     }
 
     public function test_homepage_featured_carousel_receives_up_to_thirty_six_active_products(): void
@@ -77,7 +105,7 @@ class StoreCatalogPaginationTest extends TestCase
             });
     }
 
-    public function test_category_and_brand_product_pages_are_database_paginated(): void
+    public function test_category_product_page_is_paginated_and_brand_url_is_a_filter(): void
     {
         $category = Category::factory()->create();
         $brand = Brand::factory()->create();
@@ -97,12 +125,7 @@ class StoreCatalogPaginationTest extends TestCase
             });
 
         $this->get(route('brands.show', $brand) . '?per_page=6&page=2&sort=name_asc')
-            ->assertOk()
-            ->assertViewHas('products', function ($products): bool {
-                return $products->total() === 7
-                    && $products->count() === 1
-                    && $products->currentPage() === 2
-                    && $products->perPage() === 6;
-            });
+            ->assertStatus(301)
+            ->assertRedirect(route('products.index', ['brand' => $brand->slug]));
     }
 }

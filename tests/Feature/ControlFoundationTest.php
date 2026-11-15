@@ -94,8 +94,8 @@ class ControlFoundationTest extends TestCase
         $this->actingAs($admin)
             ->get(route('admin.nila.index'))
             ->assertOk()
-            ->assertSee('Mapping')
-            ->assertSee('دریافت امن فایل کاتالوگ')
-            ->assertSee('هیچ محصول، تنوع، دسته یا برندی در کاتالوگ ساخته یا ویرایش نمی‌شود');
+            ->assertSee('ورود ماهانه اطلاعات نیلا')
+            ->assertSee('جانان چه چیزی را تغییر می‌دهد؟')
+            ->assertSee('بارگذاری فایل فقط گزارش می‌سازد');
     }
 }

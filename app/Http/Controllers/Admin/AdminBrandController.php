@@ -7,6 +7,7 @@ use App\Http\Requests\Admin\StoreBrandRequest;
 use App\Http\Requests\Admin\UpdateBrandRequest;
 use App\Models\Brand;
 use App\Services\MediaService;
+use App\Services\HeroService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -110,10 +111,12 @@ class AdminBrandController extends Controller
     public function update(
         UpdateBrandRequest $request,
         Brand $brand,
-        MediaService $media
+        MediaService $media,
+        HeroService $hero
     ): RedirectResponse {
         try {
             $data = $request->validated();
+            $heroDependsOnBrand = $brand->products()->where('is_hero', true)->exists();
 
             DB::transaction(function () use ($brand, $data, $request, $media) {
                 $slug = filled($data['slug'] ?? null)
@@ -142,6 +145,10 @@ class AdminBrandController extends Controller
                     );
                 }
             });
+
+            if ($heroDependsOnBrand) {
+                $hero->invalidate();
+            }
 
             return redirect()
                 ->route('admin.brands.index')

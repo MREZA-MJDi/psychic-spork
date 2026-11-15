@@ -75,6 +75,7 @@ class HomeController extends Controller
                     'media.path',
                     'media.sort_order',
                 ]),
+                'primaryActiveVariant.primaryGalleryMedia',
             ]);
 
         $featuredProducts = (clone $productsQuery)
@@ -132,6 +133,7 @@ class HomeController extends Controller
                     'media.path',
                     'media.sort_order',
                 ]),
+                'primaryActiveVariant.primaryGalleryMedia',
                 'primaryActiveVariant' => fn ($query) => $query->select([
                     'product_variants.id',
                     'product_variants.product_id',
@@ -189,6 +191,7 @@ class HomeController extends Controller
                     'media.path',
                     'media.sort_order',
                 ]),
+                'primaryActiveVariant.primaryGalleryMedia',
                 'primaryActiveVariant' => fn ($query) => $query->select([
                     'product_variants.id',
                     'product_variants.product_id',

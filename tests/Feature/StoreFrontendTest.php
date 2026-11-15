@@ -289,6 +289,62 @@ class StoreFrontendTest extends TestCase
         $this->assertStringContainsString('محصول ناموجود', $html);
     }
 
+    public function test_catalog_product_card_uses_variant_media_when_product_has_no_cover(): void
+    {
+        $category = Category::create([
+            'name' => 'تصویر کارت محصول',
+            'slug' => 'product-card-image-' . uniqid(),
+            'is_active' => true,
+        ]);
+
+        $product = Product::create([
+            'category_id' => $category->id,
+            'name' => 'محصول با تصویر واریانت',
+            'slug' => 'product-card-variant-image-' . uniqid(),
+            'is_active' => true,
+            'is_featured' => true,
+        ]);
+
+        $variant = ProductVariant::create([
+            'product_id' => $product->id,
+            'sku' => 'CARD-' . strtoupper(uniqid()),
+            'price' => 125000,
+            'stock' => 3,
+            'is_active' => true,
+        ]);
+
+        Media::create([
+            'mediable_type' => $variant->getMorphClass(),
+            'mediable_id' => $variant->id,
+            'collection' => 'gallery',
+            'disk' => 'public',
+            'path' => 'variants/card-image.webp',
+            'original_name' => 'card-image.webp',
+            'mime_type' => 'image/webp',
+            'sort_order' => 0,
+        ]);
+
+        Model::preventLazyLoading(true);
+
+        try {
+            $imageUrl = route('store.media', ['path' => 'variants/card-image.webp'], false);
+
+            $this->get(route('products.index'))
+                ->assertOk()
+                ->assertSee($imageUrl, false);
+
+            $this->get(route('home'))
+                ->assertOk()
+                ->assertSee($imageUrl, false);
+
+            $this->get(route('products.show', $product))
+                ->assertOk()
+                ->assertSee($imageUrl, false);
+        } finally {
+            Model::preventLazyLoading(false);
+        }
+    }
+
     public function test_product_detail_contains_purchase_panel_and_variant_data(): void
     {
         $category = Category::create([

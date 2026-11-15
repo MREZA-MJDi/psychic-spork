@@ -34,6 +34,11 @@ class Cart extends Model
         return $this->hasMany(CartItem::class);
     }
 
+    public function wholesalePacks(): HasMany
+    {
+        return $this->hasMany(CartWholesalePack::class);
+    }
+
     public function scopeForSession($query, string $sessionId)
     {
         return $query->where('session_id', $sessionId);

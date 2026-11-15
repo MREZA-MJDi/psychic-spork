@@ -271,7 +271,7 @@
                     <span class="dashboard-v2__control-icon">چک</span>
                     <div>
                         <strong>پرداخت‌های چکی</strong>
-                        <small>{{ $formatFaNumber((int) $chequesAwaitingReview) }} مورد نیازمند بررسی · {{ $formatFaNumber((float) $chequesAwaitingReviewAmount) }} تومان</small>
+                        <small>{{ $formatFaNumber((int) $chequesAwaitingReview) }} مورد نیازمند اقدام · {{ $formatFaNumber((float) $chequesAwaitingReviewAmount) }} تومان</small>
                     </div>
                     <b aria-hidden="true">←</b>
                 </a>

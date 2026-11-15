@@ -165,10 +165,15 @@ final class NilaCatalogImporter
 
         $targetStock = $data->stock;
 
+        $batchId = $data->metadata['import_batch_id'] ?? null;
+        $stockNote = $batchId
+            ? "تطبیق موجودی با فایل نیلا (Batch #{$batchId})"
+            : 'تطبیق موجودی با نیلا';
+
         $this->inventory->setStock(
             $variant,
             $targetStock,
-            'به‌روزرسانی موجودی از Nila',
+            $stockNote,
             null,
             IntegrationMapping::class,
             $mapping->id

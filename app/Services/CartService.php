@@ -73,6 +73,7 @@ final class CartService
             }
 
             $cartItemCount = (int) $cart->items()->count();
+            $cartPackCount = (int) $cart->wholesalePacks()->count();
 
             foreach ($guest->items as $guestItem) {
                 $variant = ProductVariant::query()
@@ -113,7 +114,7 @@ final class CartService
                         'quantity' => $quantity,
                     ]);
                 } else {
-                    if ($cartItemCount >= self::MAX_ITEMS) {
+                    if ($cartItemCount + $cartPackCount >= self::MAX_ITEMS) {
                         continue;
                     }
 
@@ -125,7 +126,29 @@ final class CartService
                 }
             }
 
+            foreach ($guest->wholesalePacks()->get() as $guestPack) {
+                $existingPack = $cart->wholesalePacks()
+                    ->where('wholesale_pack_id', $guestPack->wholesale_pack_id)
+                    ->lockForUpdate()
+                    ->first();
+
+                if ($existingPack) {
+                    $existingPack->update([
+                        'quantity' => min(
+                            CartService::MAX_QUANTITY_PER_ITEM,
+                            (int) $existingPack->quantity + (int) $guestPack->quantity
+                        ),
+                    ]);
+                } else {
+                    $cart->wholesalePacks()->create([
+                        'wholesale_pack_id' => $guestPack->wholesale_pack_id,
+                        'quantity' => min(CartService::MAX_QUANTITY_PER_ITEM, (int) $guestPack->quantity),
+                    ]);
+                }
+            }
+
             $guest->items()->delete();
+            $guest->wholesalePacks()->delete();
             $guest->delete();
 
             $cart->update([
@@ -138,11 +161,13 @@ final class CartService
 
     public function items(Cart $cart): Collection
     {
+        $packRequirements = $this->wholesalePackRequirements($cart);
         $items = $cart->items()
             ->with([
                 'productVariant.product.category',
                 'productVariant.product.brand',
                 'productVariant.product.primaryGalleryMedia',
+                'productVariant.primaryGalleryMedia',
             ])
             ->get();
 
@@ -152,13 +177,17 @@ final class CartService
                     && $item->productVariant?->is_active
                     && $item->productVariant?->product?->is_active;
             })
-            ->map(function (CartItem $item): ?array {
+            ->map(function (CartItem $item) use ($packRequirements): ?array {
                 $variant = $item->productVariant;
                 $product = $variant->product;
 
+                $availableStock = max(
+                    0,
+                    (int) $variant->stock - (int) ($packRequirements[$variant->id] ?? 0)
+                );
                 $quantity = min(
                     (int) $item->quantity,
-                    (int) $variant->stock,
+                    $availableStock,
                     self::MAX_QUANTITY_PER_ITEM
                 );
 
@@ -182,7 +211,7 @@ final class CartService
                     'quantity' => $quantity,
                     'unit_price' => $unitPrice,
                     'line_total' => $quantity * $unitPrice,
-                    'image' => $product->primaryGalleryMedia?->url,
+                    'image' => $product->primaryGalleryMedia?->url ?: $variant->primaryGalleryMedia?->url,
                 ];
             })
             ->filter()
@@ -237,17 +266,20 @@ final class CartService
                 'تعداد هر تنوع نمی‌تواند بیشتر از ' . self::MAX_QUANTITY_PER_ITEM . ' عدد باشد.'
             );
 
+            $reservedByPacks = $this->wholesalePackRequirements($lockedCart)[$variant->id] ?? 0;
+            $availableStock = max(0, (int) $variant->stock - (int) $reservedByPacks);
+
             abort_if(
-                $newQuantity > $variant->stock,
+                $newQuantity > $availableStock,
                 422,
-                "حداکثر تعداد قابل سفارش از «{$variant->product->name}» {$variant->stock} عدد است."
+                "با احتساب پک‌های سبد، حداکثر تعداد قابل سفارش از «{$variant->product->name}» {$availableStock} عدد است."
             );
 
             if ($existing) {
                 $existing->update(['quantity' => $newQuantity]);
             } else {
                 abort_if(
-                    $lockedCart->items()->count() >= self::MAX_ITEMS,
+                    ($lockedCart->items()->count() + $lockedCart->wholesalePacks()->count()) >= self::MAX_ITEMS,
                     422,
                     'سبد خرید نمی‌تواند بیشتر از ' . self::MAX_ITEMS . ' تنوع متفاوت داشته باشد.'
                 );
@@ -302,10 +334,13 @@ final class CartService
 
             $this->assertPurchasable($variant);
 
+            $reservedByPacks = $this->wholesalePackRequirements($lockedCart)[$variant->id] ?? 0;
+            $availableStock = max(0, (int) $variant->stock - (int) $reservedByPacks);
+
             abort_if(
-                $quantity > $variant->stock,
+                $quantity > $availableStock,
                 422,
-                "حداکثر تعداد قابل سفارش از «{$variant->product->name}» {$variant->stock} عدد است."
+                "با احتساب پک‌های سبد، حداکثر تعداد قابل سفارش از «{$variant->product->name}» {$availableStock} عدد است."
             );
 
             $lockedItem->update(['quantity' => $quantity]);
@@ -348,6 +383,7 @@ final class CartService
                 ->findOrFail($cart->id);
 
             $lockedCart->items()->delete();
+            $lockedCart->wholesalePacks()->delete();
             $lockedCart->update(['last_activity_at' => now()]);
         });
     }
@@ -357,11 +393,12 @@ final class CartService
         Order $order
     ): void {
         DB::transaction(function () use ($cart, $order): void {
-            $order->load('items');
+            $order->load(['items', 'wholesalePacks']);
 
             $cartItemCount = (int) $cart->items()->count();
+            $cartPackCount = (int) $cart->wholesalePacks()->count();
 
-            foreach ($order->items as $orderItem) {
+            foreach ($order->items->whereNull('wholesale_pack_order_id') as $orderItem) {
                 $variant = ProductVariant::query()
                     ->lockForUpdate()
                     ->find($orderItem->product_variant_id);
@@ -375,15 +412,16 @@ final class CartService
                 }
 
                 $existing = $cart->items()
-                    ->where(
-                        'product_variant_id',
-                        $variant->id
-                    )
+                    ->where('product_variant_id', $variant->id)
                     ->lockForUpdate()
                     ->first();
 
+                $reservedByPacks = $this->wholesalePackRequirements($cart)[$variant->id] ?? 0;
+                $availableStock = max(0, (int) $variant->stock - (int) $reservedByPacks);
+
                 $quantity = min(
                     (int) $variant->stock,
+                    $availableStock,
                     self::MAX_QUANTITY_PER_ITEM,
                     (int) ($existing?->quantity ?? 0) + (int) $orderItem->quantity
                 );
@@ -393,11 +431,9 @@ final class CartService
                 }
 
                 if ($existing) {
-                    $existing->update([
-                        'quantity' => $quantity,
-                    ]);
+                    $existing->update(['quantity' => $quantity]);
                 } else {
-                    if ($cartItemCount >= self::MAX_ITEMS) {
+                    if ($cartItemCount + $cartPackCount >= self::MAX_ITEMS) {
                         continue;
                     }
 
@@ -409,16 +445,70 @@ final class CartService
                 }
             }
 
-            $cart->update([
-                'last_activity_at' => now(),
-            ]);
+            foreach ($order->wholesalePacks as $orderPack) {
+                if (! $orderPack->wholesale_pack_id) {
+                    continue;
+                }
+
+                $existingPack = $cart->wholesalePacks()
+                    ->where('wholesale_pack_id', $orderPack->wholesale_pack_id)
+                    ->lockForUpdate()
+                    ->first();
+
+                $quantity = min(
+                    self::MAX_QUANTITY_PER_ITEM,
+                    (int) ($existingPack?->quantity ?? 0) + (int) $orderPack->quantity
+                );
+
+                if ($existingPack) {
+                    $existingPack->update(['quantity' => $quantity]);
+                } else {
+                    $cart->wholesalePacks()->create([
+                        'wholesale_pack_id' => $orderPack->wholesale_pack_id,
+                        'quantity' => $quantity,
+                    ]);
+                }
+            }
+
+            $cart->update(['last_activity_at' => now()]);
         });
     }
 
     public function total(Cart $cart): float
     {
-        return (float) $this->items($cart)
-            ->sum('line_total');
+        $itemTotal = (float) $this->items($cart)->sum('line_total');
+        $packTotal = (float) $cart->wholesalePacks()
+            ->with('pack')
+            ->get()
+            ->sum(fn ($line) => (float) ($line->pack?->pack_price ?? 0) * (int) $line->quantity);
+
+        return $itemTotal + $packTotal;
+    }
+
+    /**
+     * Quantity of each variant currently required by the selected wholesale
+     * packs in this cart. Normal product lines must not consume the same stock
+     * a second time.
+     *
+     * @return array<int, int>
+     */
+    private function wholesalePackRequirements(Cart $cart): array
+    {
+        $requirements = [];
+
+        $lines = $cart->wholesalePacks()
+            ->with('pack.items')
+            ->get();
+
+        foreach ($lines as $line) {
+            foreach ($line->pack?->items ?? [] as $item) {
+                $variantId = (int) $item->product_variant_id;
+                $requirements[$variantId] = ($requirements[$variantId] ?? 0)
+                    + ((int) $item->quantity * (int) $line->quantity);
+            }
+        }
+
+        return $requirements;
     }
 
     private function assertPurchasable(

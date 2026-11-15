@@ -50,9 +50,10 @@ class NilaSpreadsheetPreviewTest extends TestCase
             ->assertSee('0102001*1')
             ->assertSee('بادمجونی')
             ->assertSee('هنوز هیچ محصولی وارد دیتابیس نشده')
-            ->assertSee('۵ گروه محصول (شروع پایلوت)')
-            ->assertSee('۵۰ گروه محصول (حداکثر هر مرحله)')
-            ->assertSee('پیشنهاد شروع با ۵ گروه اول است');
+            ->assertSee('۲۵ گروه محصول (پیشنهادی)')
+            ->assertSee('۵۰ گروه محصول (حداکثر هر نوبت)')
+            ->assertSee('موجودی نیازمند تطبیق')
+            ->assertSee('موجودی فایل، مقدار نهایی موجودی');
     }
 
     public function test_admin_can_import_one_complete_product_group_without_publishing_it(): void
@@ -75,7 +76,7 @@ class NilaSpreadsheetPreviewTest extends TestCase
 
         $this->actingAs($admin)->post(
             route('admin.nila.imports.import', $batch),
-            ['batch_size' => 5]
+            ['batch_size' => 5, 'confirm_stock_snapshot' => 1]
         )->assertRedirect();
 
         $this->assertDatabaseCount('products', 1);
@@ -113,6 +114,67 @@ class NilaSpreadsheetPreviewTest extends TestCase
         $this->assertSame(0, $batch->failed_groups);
     }
 
+    public function test_monthly_preview_distinguishes_existing_products_new_variants_and_stock_differences(): void
+    {
+        Storage::fake('local');
+
+        $admin = User::factory()->create(['is_admin' => true]);
+
+        $existing = app(\App\Integrations\Nila\NilaCatalogImporter::class)->import(
+            new \App\Integrations\Nila\Data\ExternalProductData(
+                externalId: '0102001',
+                name: 'محصول قبلی',
+                variants: [
+                    new \App\Integrations\Nila\Data\ExternalVariantData(
+                        externalId: '0102001*1',
+                        sku: '0102001*1',
+                        price: 100000,
+                        stock: 2,
+                    ),
+                ],
+            )
+        );
+
+        $csv = implode("\n", [
+            'holooCode,holooName,holooRegularPrice,holooStockQuantity,holooCustomerCode',
+            '0102001*1,محصول قبلی-مشکی,120000,7,1',
+            '0102001*2,محصول قبلی-طوسی,120000,3,1',
+            '0102002*1,محصول کاملاً جدید-آبی,140000,5,1',
+        ]);
+
+        $this->actingAs($admin)->post(
+            route('admin.nila.imports.store'),
+            ['file' => UploadedFile::fake()->createWithContent('monthly-export.csv', $csv)]
+        )->assertRedirect();
+
+        $batch = NilaImportBatch::query()->latest('id')->firstOrFail();
+
+        $this->actingAs($admin)
+            ->get(route('admin.nila.imports.show', $batch))
+            ->assertOk()
+            ->assertViewHas('comparison', function (array $summary) use ($existing): bool {
+                return $summary['existing_products'] === 1
+                    && $summary['new_products'] === 1
+                    && $summary['existing_variants'] === 1
+                    && $summary['new_variants'] === 2
+                    && $summary['stock_change_count'] === 1
+                    && $summary['stock_changes'][0]['current'] === 2
+                    && $summary['stock_changes'][0]['incoming'] === 7;
+            })
+            ->assertSee('محصول قبلی')
+            ->assertSee('موجودی فعلی')
+            ->assertSee('0102001*1');
+
+        $this->assertDatabaseCount('products', 1);
+        $this->assertDatabaseCount('product_variants', 1);
+        $this->assertDatabaseHas('integration_mappings', [
+            'integration' => 'nila',
+            'entity_type' => \App\Models\Product::class,
+            'entity_id' => $existing->id,
+            'external_id' => '0102001',
+        ]);
+    }
+
     public function test_import_progresses_in_bounded_chunks_and_can_resume(): void
     {
         Storage::fake('local');
@@ -136,7 +198,7 @@ class NilaSpreadsheetPreviewTest extends TestCase
 
         $this->actingAs($admin)->post(
             route('admin.nila.imports.import', $batch),
-            ['batch_size' => 5]
+            ['batch_size' => 5, 'confirm_stock_snapshot' => 1]
         )->assertRedirect();
 
         $batch->refresh();
@@ -147,7 +209,7 @@ class NilaSpreadsheetPreviewTest extends TestCase
 
         $this->actingAs($admin)->post(
             route('admin.nila.imports.import', $batch),
-            ['batch_size' => 5]
+            ['batch_size' => 5, 'confirm_stock_snapshot' => 1]
         )->assertRedirect();
 
         $batch->refresh();
@@ -177,7 +239,7 @@ class NilaSpreadsheetPreviewTest extends TestCase
 
         $this->actingAs($admin)->from(route('admin.nila.imports.show', $batch))->post(
             route('admin.nila.imports.import', $batch),
-            ['batch_size' => 51]
+            ['batch_size' => 51, 'confirm_stock_snapshot' => 1]
         )->assertSessionHasErrors('batch_size');
 
         $this->assertDatabaseCount('products', 0);
@@ -204,7 +266,7 @@ class NilaSpreadsheetPreviewTest extends TestCase
 
         $this->actingAs($admin)->post(
             route('admin.nila.imports.import', $batch),
-            ['batch_size' => 5]
+            ['batch_size' => 5, 'confirm_stock_snapshot' => 1]
         )->assertRedirect();
 
         $batch->refresh();

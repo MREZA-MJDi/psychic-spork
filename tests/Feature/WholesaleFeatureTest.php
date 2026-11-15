@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Cart;
 use App\Models\CartItem;
+use App\Models\CartWholesalePack;
 use App\Models\Category;
 use App\Models\Order;
 use App\Models\Product;
@@ -11,6 +12,7 @@ use App\Models\ProductVariant;
 use App\Models\User;
 use App\Models\WholesaleProfile;
 use App\Models\ChequePermission;
+use App\Models\ChequePayment;
 use App\Models\WholesalePack;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Config;
@@ -83,7 +85,123 @@ class WholesaleFeatureTest extends TestCase
         $this->get(route('wholesale.show'))
             ->assertOk()
             ->assertSee(Storage::disk('public')->url($pack->image_path), false)
-            ->assertSee('پک ۱۲ عددی ایزابلا');
+            ->assertSee('پک ۱۲ عددی ایزابلا')
+            ->assertSee('افزودن پک به سبد خرید')
+            ->assertDontSee('موجودی کافی نیست');
+    }
+
+    public function test_cart_with_only_wholesale_packs_is_not_rendered_as_empty(): void
+    {
+        $customer = User::factory()->create(['is_admin' => false]);
+        [, $variant] = $this->makeProduct(stock: 20, wholesalePrice: 250000);
+
+        $pack = WholesalePack::create([
+            'name' => 'پک فقط برای تست سبد',
+            'slug' => 'cart-only-pack-' . uniqid(),
+            'pack_price' => 2000000,
+            'pack_quantity' => 12,
+            'is_active' => true,
+        ]);
+        $pack->items()->create([
+            'product_variant_id' => $variant->id,
+            'quantity' => 12,
+        ]);
+
+        $cart = Cart::create([
+            'user_id' => $customer->id,
+            'last_activity_at' => now(),
+        ]);
+        CartWholesalePack::create([
+            'cart_id' => $cart->id,
+            'wholesale_pack_id' => $pack->id,
+            'quantity' => 1,
+        ]);
+
+        $this->actingAs($customer)
+            ->get(route('cart'))
+            ->assertOk()
+            ->assertSee($pack->name)
+            ->assertSee('ثبت سفارش')
+            ->assertDontSee('سبد خرید خالی است')
+            ->assertViewHas('total', 2000000.0);
+    }
+
+    public function test_cart_uses_wholesale_total_for_mixed_pack_and_direct_items(): void
+    {
+        $customer = User::factory()->create(['is_admin' => false]);
+        [, $packVariant] = $this->makeProduct(stock: 20, wholesalePrice: 250000);
+        [, $directVariant] = $this->makeProduct(stock: 10, wholesalePrice: 70000);
+
+        $pack = WholesalePack::create([
+            'name' => 'پک ترکیبی تست',
+            'slug' => 'mixed-cart-pack-' . uniqid(),
+            'pack_price' => 200000,
+            'pack_quantity' => 1,
+            'is_active' => true,
+        ]);
+        $pack->items()->create([
+            'product_variant_id' => $packVariant->id,
+            'quantity' => 1,
+        ]);
+
+        $cart = Cart::create([
+            'user_id' => $customer->id,
+            'last_activity_at' => now(),
+        ]);
+        CartWholesalePack::create([
+            'cart_id' => $cart->id,
+            'wholesale_pack_id' => $pack->id,
+            'quantity' => 1,
+        ]);
+        CartItem::create([
+            'cart_id' => $cart->id,
+            'product_variant_id' => $directVariant->id,
+            'quantity' => 2,
+        ]);
+
+        $this->actingAs($customer)
+            ->get(route('cart'))
+            ->assertOk()
+            ->assertViewHas('retailTotal', 400000.0)
+            ->assertViewHas('wholesaleTotal', 340000.0)
+            ->assertViewHas('total', 340000.0);
+    }
+
+    public function test_wholesale_catalog_uses_variant_image_when_product_cover_is_missing(): void
+    {
+        $category = Category::create([
+            'name' => 'تصویر کاتالوگ عمده',
+            'slug' => 'wholesale-card-image-' . uniqid(),
+            'is_active' => true,
+        ]);
+        $product = Product::create([
+            'category_id' => $category->id,
+            'name' => 'محصول تصویر عمده',
+            'slug' => 'wholesale-image-product-' . uniqid(),
+            'is_active' => true,
+        ]);
+        $variant = ProductVariant::create([
+            'product_id' => $product->id,
+            'sku' => 'WHOLE-IMAGE-' . strtoupper(uniqid()),
+            'price' => 100000,
+            'wholesale_price' => 70000,
+            'stock' => 8,
+            'is_active' => true,
+        ]);
+        \App\Models\Media::create([
+            'mediable_type' => $variant->getMorphClass(),
+            'mediable_id' => $variant->id,
+            'collection' => 'gallery',
+            'disk' => 'public',
+            'path' => 'variants/wholesale-card.webp',
+            'original_name' => 'wholesale-card.webp',
+            'mime_type' => 'image/webp',
+            'sort_order' => 0,
+        ]);
+
+        $this->get(route('wholesale.catalog'))
+            ->assertOk()
+            ->assertSee(route('store.media', ['path' => 'variants/wholesale-card.webp'], false), false);
     }
 
     public function test_wholesale_page_is_public_and_explains_cheque_access(): void
@@ -94,6 +212,41 @@ class WholesaleFeatureTest extends TestCase
             ->assertSee('درخواست اعتبار خرید چکی')
             ->assertSee(route('login', ['continue' => 'cheque']), false)
             ->assertSee('درخواست خرید چکی');
+    }
+
+    public function test_wholesale_landing_page_keeps_the_catalog_on_a_separate_screen(): void
+    {
+        [$product] = $this->makeProduct(stock: 8, wholesalePrice: 70000);
+
+        $this->get(route('wholesale.show'))
+            ->assertOk()
+            ->assertSee(route('wholesale.catalog'), false)
+            ->assertDontSee($product->name);
+    }
+
+    public function test_wholesale_catalog_filters_products_and_aggregates_prices_without_loading_all_variants(): void
+    {
+        [$wholesaleProduct] = $this->makeProduct(stock: 8, wholesalePrice: 70000);
+        [$retailOnlyProduct] = $this->makeProduct(stock: 8, wholesalePrice: null);
+
+        $wholesaleProduct->update(['name' => 'محصول عمده قابل فروش']);
+        $retailOnlyProduct->update(['name' => 'محصول بدون قیمت عمده']);
+
+        $this->get(route('wholesale.catalog'))
+            ->assertOk()
+            ->assertSee($wholesaleProduct->name)
+            ->assertDontSee($retailOnlyProduct->name)
+            ->assertViewHas('products', function ($products) use ($wholesaleProduct): bool {
+                $product = $products->first();
+
+                return $products->total() === 1
+                    && $product !== null
+                    && $product->id === $wholesaleProduct->id
+                    && ! $product->relationLoaded('activeVariants')
+                    && (int) $product->wholesale_variants_count === 1
+                    && (float) $product->minimum_wholesale_price === 70000.0
+                    && (float) $product->maximum_wholesale_price === 70000.0;
+            });
     }
 
     public function test_customer_account_shows_cheque_request_status_and_next_step(): void
@@ -134,6 +287,55 @@ class WholesaleFeatureTest extends TestCase
             'user_id' => $customer->id,
             'requested_amount' => 10000000,
         ]);
+    }
+
+    public function test_checkout_preview_returns_correct_retail_and_wholesale_totals(): void
+    {
+        $customer = User::factory()->create(['is_admin' => false]);
+        [, $variant] = $this->makeProduct(stock: 8, wholesalePrice: 70000);
+
+        $cart = Cart::create([
+            'user_id' => $customer->id,
+            'last_activity_at' => now(),
+        ]);
+        CartItem::create([
+            'cart_id' => $cart->id,
+            'product_variant_id' => $variant->id,
+            'quantity' => 2,
+        ]);
+
+        $this->actingAs($customer)
+            ->get(route('checkout'))
+            ->assertOk()
+            ->assertViewHas('retailTotal', 200000.0)
+            ->assertViewHas('wholesaleTotal', 140000.0)
+            ->assertViewHas('selectedOrderType', 'retail')
+            ->assertViewHas('canSelectWholesale', true)
+            ->assertViewHas('total', 200000.0);
+    }
+
+    public function test_checkout_preview_disables_wholesale_when_any_cart_item_has_no_wholesale_price(): void
+    {
+        $customer = User::factory()->create(['is_admin' => false]);
+        [, $variant] = $this->makeProduct(stock: 8, wholesalePrice: null);
+
+        $cart = Cart::create([
+            'user_id' => $customer->id,
+            'last_activity_at' => now(),
+        ]);
+        CartItem::create([
+            'cart_id' => $cart->id,
+            'product_variant_id' => $variant->id,
+            'quantity' => 1,
+        ]);
+
+        $this->actingAs($customer)
+            ->get(route('checkout'))
+            ->assertOk()
+            ->assertViewHas('wholesaleTotal', null)
+            ->assertViewHas('wholesaleUnavailableReason', 'قیمت عمده این واریانت تعیین نشده است.')
+            ->assertViewHas('canSelectWholesale', false)
+            ->assertViewHas('total', 100000.0);
     }
 
     public function test_checkout_renders_cheque_request_for_approved_wholesale_customer(): void
@@ -483,6 +685,75 @@ class WholesaleFeatureTest extends TestCase
             'user_id' => $customer->id,
             'enabled' => false,
         ]);
+    }
+
+    public function test_cheque_checkout_normalizes_sayad_digits_and_rejects_duplicate_ids_without_serial_number(): void
+    {
+        Storage::fake('local');
+
+        $customer = User::factory()->create(['is_admin' => false]);
+        ChequePermission::create([
+            'user_id' => $customer->id,
+            'enabled' => true,
+            'approved_at' => now(),
+        ]);
+
+        [, $firstVariant] = $this->makeProduct(stock: 10, wholesalePrice: 70000);
+        $cart = Cart::create([
+            'user_id' => $customer->id,
+            'last_activity_at' => now(),
+        ]);
+        CartItem::create([
+            'cart_id' => $cart->id,
+            'product_variant_id' => $firstVariant->id,
+            'quantity' => 1,
+        ]);
+
+        $sayadId = '۱۲۳۴۵۶۷۸۹۰۱۲۳۴۵۶';
+        $payload = $this->checkoutData([
+            'order_type' => 'wholesale',
+            'payment_method' => 'cheque',
+            'sayad_id' => $sayadId,
+            'bank_name' => 'بانک تست',
+            'due_date' => now()->addDays(15)->toDateString(),
+        ]);
+        $payload['cheque_image'] = UploadedFile::fake()->image('cheque.jpg');
+
+        $this->actingAs($customer)
+            ->post('/checkout', $payload)
+            ->assertRedirect(route('checkout.success'));
+
+        $cheque = ChequePayment::query()->firstOrFail();
+
+        $this->assertSame('1234567890123456', $cheque->sayad_id);
+        $this->assertNull($cheque->cheque_number);
+        $this->assertNotEmpty($cheque->image_path);
+        Storage::disk('local')->assertExists($cheque->image_path);
+
+        [, $secondVariant] = $this->makeProduct(stock: 10, wholesalePrice: 70000);
+        CartItem::create([
+            'cart_id' => $cart->fresh()->id,
+            'product_variant_id' => $secondVariant->id,
+            'quantity' => 1,
+        ]);
+
+        $duplicatePayload = $this->checkoutData([
+            'order_type' => 'wholesale',
+            'payment_method' => 'cheque',
+            'sayad_id' => '1234567890123456',
+            'bank_name' => 'بانک تست',
+            'due_date' => now()->addDays(15)->toDateString(),
+        ]);
+        $duplicatePayload['cheque_image'] = UploadedFile::fake()->image('duplicate-cheque.jpg');
+
+        $this->actingAs($customer)
+            ->from(route('checkout'))
+            ->post('/checkout', $duplicatePayload)
+            ->assertRedirect(route('checkout'))
+            ->assertSessionHasErrors('sayad_id');
+
+        $this->assertDatabaseCount('cheque_payments', 1);
+        $this->assertDatabaseCount('orders', 1);
     }
 
     public function test_wholesale_cheque_requires_admin_granted_permission(): void

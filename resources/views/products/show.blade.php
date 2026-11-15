@@ -11,7 +11,7 @@
         fn ($item) => (int) $item->stock > 0
     ) ?? $variants->first();
 
-    $image = $gallery->first()?->url;
+    $image = $gallery->first()?->url ?: $variant?->primaryGalleryMedia?->url;
     $attributes = collect($product->attributes ?? [])
         ->filter(fn ($value) => filled($value))
         ->values();
