@@ -7,6 +7,7 @@ use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
 use App\Services\SeoService;
+use App\Services\HeroService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -42,12 +43,13 @@ class StoreProductController extends Controller
 
     public function index(
         StoreProductFilterRequest $request,
-        SeoService $seo
+        SeoService $seo,
+        HeroService $hero
     ): View {
         $filters = $request->validated();
 
         $sort = $filters['sort'] ?? 'newest';
-        $perPage = (int) ($filters['per_page'] ?? 6);
+        $perPage = (int) ($filters['per_page'] ?? 12);
 
         $products = Product::query()
             ->select([
@@ -105,8 +107,11 @@ class StoreProductController extends Controller
                 fn ($query) => $query->whereHas(
                     'brand',
                     fn ($brand) => $brand
-                        ->where('slug', $filters['brand'])
                         ->where('is_active', true)
+                        ->where(function ($brand) use ($filters) {
+                            $brand->where('slug', $filters['brand'])
+                                ->orWhere('name', 'like', '%' . $filters['brand'] . '%');
+                        })
                 )
             )
             ->when($sort === 'oldest', fn ($query) =>
@@ -137,6 +142,7 @@ class StoreProductController extends Controller
                 route('products.index')
             ),
             'products' => $products,
+            'featuredBanner' => $hero->slides()[0] ?? null,
             'sort' => $sort,
             'perPage' => $perPage,
             'categories' => Category::query()
