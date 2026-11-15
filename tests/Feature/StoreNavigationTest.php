@@ -43,8 +43,7 @@ class StoreNavigationTest extends TestCase
         $response = $this->get(route('home'));
 
         $response->assertOk()
-            ->assertDontSee('href="' . route('brands.index') . '"', false)
-;
+            ->assertDontSee('href="' . route('brands.index') . '"', false);
     }
 
 }
