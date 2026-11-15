@@ -49,7 +49,7 @@ class CheckoutController extends Controller
 
         try {
             $wholesaleQuote = $wholesalePricing->quote($current, $user);
-        } catch (\\Symfony\\Component\\HttpKernel\\Exception\\HttpExceptionInterface $exception) {
+        } catch (\Symfony\Component\HttpKernel\Exception\HttpExceptionInterface $exception) {
             $wholesaleUnavailableReason = $exception->getMessage();
         }
 
