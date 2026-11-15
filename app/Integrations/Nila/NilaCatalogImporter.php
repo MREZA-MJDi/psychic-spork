@@ -56,21 +56,50 @@ final class NilaCatalogImporter
     private function importProduct(ExternalProductData $data): Product
     {
         $product = $this->resolveProduct($data);
+        $isNew = ! $product->exists;
 
-        $isNewProduct = ! $product->exists;
-
-        $product->fill([
+        // Only update fields that this provider actually supplies. Holoo's
+        // documented product list has no descriptions, storefront flags or
+        // media fields, so a sync must not erase Janan-administered content.
+        $fields = [
             'name' => $data->name,
             'slug' => $this->resolveSlug($data, $product),
-            'short_description' => $data->shortDescription ?? $product->short_description,
-            'description' => $data->description ?? $product->description,
-            'attributes' => $data->attributes ?? $product->attributes,
-            'category_id' => $data->categoryId ?? $product->category_id,
-            'brand_id' => $data->brandId ?? $product->brand_id,
-            'is_active' => $data->isActive ?? ($isNewProduct ? false : $product->is_active),
-            'is_featured' => $data->isFeatured ?? ($isNewProduct ? false : $product->is_featured),
-            'sort_order' => $data->sortOrder ?? ($isNewProduct ? 0 : $product->sort_order),
-        ]);
+        ];
+
+        if ($data->shortDescription !== null) {
+            $fields['short_description'] = $data->shortDescription;
+        }
+
+        if ($data->description !== null) {
+            $fields['description'] = $data->description;
+        }
+
+        if ($data->attributes !== null) {
+            $fields['attributes'] = $data->attributes;
+        }
+
+        if ($data->categoryId !== null) {
+            $fields['category_id'] = $data->categoryId;
+        }
+
+        if ($data->brandId !== null) {
+            $fields['brand_id'] = $data->brandId;
+        }
+
+        if ($data->isActive !== null || $isNew) {
+            $fields['is_active'] = $data->isActive
+                ?? (bool) config('nila.active_by_default', false);
+        }
+
+        if ($data->isFeatured !== null || $isNew) {
+            $fields['is_featured'] = $data->isFeatured ?? false;
+        }
+
+        if ($data->sortOrder !== null || $isNew) {
+            $fields['sort_order'] = $data->sortOrder ?? 0;
+        }
+
+        $product->fill($fields);
         $product->save();
 
         $this->syncMapping(
@@ -140,19 +169,42 @@ final class NilaCatalogImporter
             }
         }
 
-        $isNewVariant = ! $variant->exists;
+        $isNew = ! $variant->exists;
+        $previousStock = (int) ($variant->stock ?? 0);
 
-        $variant->fill([
+        // SKU, price and stock are supplied by Holoo. Optional storefront fields
+        // are preserved unless the source explicitly provides a non-null value.
+        $fields = [
             'product_id' => $product->id,
             'sku' => $data->sku,
-            'size' => $data->size ?? $variant->size,
-            'color' => $data->color ?? $variant->color,
-            'color_code' => $data->colorCode ?? $variant->color_code,
             'price' => $data->price,
-            'sale_price' => $data->salePrice ?? $variant->sale_price,
-            'is_active' => $data->isActive ?? ($isNewVariant ? false : $variant->is_active),
-            'sort_order' => $data->sortOrder ?? ($isNewVariant ? 0 : $variant->sort_order),
-        ]);
+        ];
+
+        if ($data->salePrice !== null) {
+            $fields['sale_price'] = $data->salePrice;
+        }
+
+        if ($data->size !== null) {
+            $fields['size'] = $data->size;
+        }
+
+        if ($data->color !== null) {
+            $fields['color'] = $data->color;
+        }
+
+        if ($data->colorCode !== null) {
+            $fields['color_code'] = $data->colorCode;
+        }
+
+        if ($data->isActive !== null || $isNew) {
+            $fields['is_active'] = $data->isActive ?? true;
+        }
+
+        if ($data->sortOrder !== null || $isNew) {
+            $fields['sort_order'] = $data->sortOrder ?? 0;
+        }
+
+        $variant->fill($fields);
         $variant->save();
 
         $mapping = $this->syncMapping(

@@ -1,132 +1,123 @@
-# Janan Nila Integration Foundation
+# Janan Nila / Holoo Integration
 
 ## Scope
 
-This phase establishes the boundary between Janan and Nila without inventing an external API contract.
+This integration uses the Holoo Web Service contract documented at
+https://holoostore.com/webserviceHelp.pdf. The document describes the service
+base URL as `http://{IPSystem}:8080/TncHoloo/api`, a `POST /Login` call,
+a bearer token returned by login, and authenticated catalog endpoints.
 
-Public information identifies Nila as a connector between WooCommerce stores and Holoo accounting software, including synchronization of product name, price and inventory. The exact Nila/Holoo API payloads and endpoints are not treated as known application contracts here.
+The adapter deliberately keeps provider-specific authentication and payload
+normalization out of the catalog importer.
 
-## Architecture
+## Catalog mapping
 
-```
-Nila API / connector
-        |
-        v
-Nila adapter (future, contract-specific)
-        |
-        v
-ExternalProductData / ExternalVariantData
-        |
-        v
-NilaCatalogImporter
-        |
-        +--> Product
-        +--> ProductVariant
-        +--> IntegrationMapping
-
-Media is intentionally outside this write path.
-Nila/Holoo owns catalog data; Janan Admin owns product media.
-```
-
-The importer only consumes normalized DTOs. This keeps provider-specific field names, authentication and transport out of the domain/catalog write path.
-
-## Idempotency
-
-Every imported product and variant is identified through `integration_mappings`:
-
-- `integration = nila`
-- `entity_type = App\\Models\\Product` or `App\\Models\\ProductVariant`
-- `external_id = provider identifier`
-- variant mappings also retain `external_sku`
-
-A repeated import updates the mapped record instead of creating a duplicate.
-
-A local variant with the same SKU but no Nila mapping is rejected rather than silently adopted. This prevents an ambiguous SKU from hijacking an existing catalog record.
-
-Soft-deleted mapped products/variants are restored during import.
-
-## Transaction boundary
-
-Each product is imported in its own database transaction with retry attempts. A bad product therefore does not roll back an entire catalog batch.
-
-For larger catalogs, the caller should chunk records and dispatch `ImportNilaProductBatch` jobs. The job intentionally does not know how Nila's API works.
-
-## Field ownership
-
-The catalog sync has an explicit ownership boundary:
-
-| Data | Source of truth |
+| Holoo | Janan |
 |---|---|
-| Product name | Nila / Holoo (slug is generated safely by Janan) |
-| Product descriptions | **Janan Admin** unless a verified source contract explicitly owns them |
-| Category and brand | **Janan Admin** until a verified mapping is explicitly configured |
-| Variant SKU, price, sale price, stock | Nila / Holoo |
-| Product active/featured/sort state | **Janan Admin**; spreadsheet imports start inactive |
-| Product gallery images | **Janan Admin** |
-| Primary image / image order | **Janan Admin** |
-| Image alt text | **Janan Admin** |
-| Uploaded media files | **Janan Admin** |
+| `Product.ErpCode` | Stable external ID for product and its single imported stock variant |
+| `Product.Code` | Variant SKU |
+| `Product.Name` | Product name |
+| `Product.Few` | Integer stock quantity; negative/fractional quantities are clamped/floored |
+| `Product.SellPrice` (configurable) | Variant price |
+| `Product.SideGroupErpCode` | Imported child category mapping |
+| `Product.MainGroupErpCode` | Parent category mapping metadata |
+| `MainGroup` / `SideGroup` | Categories managed through `integration_mappings` |
+| Product image | Not imported; images, gallery order and alt text remain Janan-administered |
 
-The normalized Nila DTO contains no image field.
+The price field can be changed to `SellPrice2` ... `SellPrice10` or
+`selpricekarton` via `NILA_PRICE_FIELD`. Janan's product editor and storefront
+label catalog prices in toman. The default multiplier of 1 therefore assumes
+Holoo's selected price field is already in toman. If the Holoo installation
+returns rial, set `NILA_PRICE_MULTIPLIER=0.1`; verify a known item against the
+Holoo desktop application before any write import. `selpricekarton` is a carton
+price and is not divided by `CountInKarton` or `CountInBasteh`; use it only when
+the Janan SKU is intentionally sold at that packaging level.
 
-NilaCatalogImporter must never create, update, delete, reorder or replace rows in media. A Nila re-import therefore cannot overwrite an image that an administrator uploaded manually.
+Holoo's documented product list does not define product description, sale price,
+size, color, active status or storefront ordering. On re-import the adapter
+updates provider-owned name/SKU/price/stock and preserves those local fields
+when Holoo does not supply a value. New imported products are hidden by default
+(`NILA_ACTIVE_BY_DEFAULT=false`) so an administrator can review price, stock
+and media before publishing.
 
-Image upload, replacement, deletion, ordering and primary-image selection belong to the Admin Product Media Manager.
+## Configuration
 
-## Admin spreadsheet workflow (CSV / XLSX)
+Set these values in the local `.env`; do not commit real credentials:
 
-The current dashboard flow is deliberately separate from a live Nila API connection.
+```dotenv
+NILA_ENABLED=true
+NILA_BASE_URL=http://192.168.1.20:8080/TncHoloo/api
+NILA_USERNAME=your_holoo_username
+NILA_PASSWORD=your_holoo_password
+NILA_DATABASE=your_holoo_database_name
+NILA_TIMEOUT=20
+NILA_PAGE_SIZE=100
+NILA_MAX_PAGES=1000
+NILA_PRICE_FIELD=SellPrice
+NILA_PRICE_MULTIPLIER=1
+NILA_ACTIVE_BY_DEFAULT=false
+```
 
-1. An administrator uploads a CSV/XLSX file from the Nila section. The file is stored on the private local disk.
-2. Upload parses and validates the file and creates a preview batch only. It does not create or update products or variants.
-3. The administrator reviews row errors and grouped product codes. A product group is the base Holoo code before the `*` suffix; each suffixed code is a separate variant SKU.
-4. Start with **5 product groups** for the pilot. After reviewing the result, continue in bounded requests of 10, 25 or at most 50 groups.
-5. Each product group is imported transactionally. An invalid row skips the entire group; other valid groups in the same request can continue.
-6. Batch offset and imported/failed counters are persisted so a batch can resume after a successful chunk. A recent `processing` state blocks duplicate concurrent requests; stale processing batches can be retried after the recovery window.
-7. Imported products and variants remain inactive. An administrator completes category, brand, descriptions, images, activation and merchandising in the product dashboard.
+Replace the sample host, username, password and database with values supplied
+by the Holoo administrator. The service must be reachable from the machine
+running Laravel. In production this commonly means a trusted LAN or VPN path;
+do not expose port 8080 directly to the public internet. After changing env
+values on a cached Laravel installation run `php artisan config:clear` (and
+refresh the production config cache during deployment as appropriate).
 
-Current spreadsheet fields:
+The documented login JSON contains a `userinfo` object with `username`,
+Base64-encoded `userpass` and `dbname`. The returned `Login.Token` is sent
+unchanged when it already contains `Bearer`, or prefixed with `Bearer`
+otherwise.
 
-- `holooCode`: base product code plus variant suffix; full value is the variant external ID and SKU.
-- `holooName`: product/variant name; the trailing hyphen segment is treated as a color candidate, not as a trusted category.
-- `holooRegularPrice`: required numeric variant price. Blank values are invalid and never coerced to zero.
-- `holooStockQuantity`: numeric variant stock.
-- `holooCustomerCode`: retained as source metadata only until its business meaning is verified; it is not used as a product or customer identifier.
+## Safe runbook
 
-The importer reuses `products`, `product_variants` and `integration_mappings`. The only spreadsheet-specific table is `nila_import_batches`, which tracks private upload files and batch progress. It does not create a second catalog schema.
+1. Confirm Holoo Web Service is installed, started, and reachable from the
+   Laravel host. The manual lists service name `TncHolooWebService` and the
+   default port 8080.
+2. Configure the env variables above and set `NILA_ENABLED=true`.
+3. Fetch and inspect a small sample without database writes:
 
-## Storefront catalog delivery
+   ```bash
+   php artisan nila:sync-products --dry-run --limit=10
+   ```
 
-- Admin products, shop products, category product lists, and brand product lists use database pagination.
-- Category and brand directories are also database-paginated (24 cards per page).
-- The homepage featured carousel receives up to 36 active products; the immersive Hero separately accepts up to 36 active products explicitly selected as Hero.
-- Hero capacity is enforced in the service and shown in the admin product list. Inactive products cannot be newly added to Hero.
+4. Verify the product names, SKU values, stock, selected price field, and
+   currency unit against Holoo. A dry run does not create categories/products
+   or write stock movements.
+5. Import a small sample first. In production the explicit safety flag is
+   required:
 
-## What is intentionally not implemented yet
+   ```bash
+   php artisan nila:sync-products --limit=10
+   # Production only, after review:
+   php artisan nila:sync-products --limit=10 --confirm-production
+   ```
 
-- Nila authentication details
-- Nila endpoint URLs
-- Nila pagination fields
-- Nila webhook payloads
-- Nila category/brand identifiers
-- Nila order/invoice creation
-- Automatic image downloading
-- Bidirectional stock writes
+6. Review imported products and manually add/verify their media in Janan Admin.
+   Only after the sample is correct should the limit be removed for a full
+   catalog run.
 
-Those belong behind a verified adapter contract. Guessing them would couple Janan to an API we have not verified.
+The command imports categories before products on a write run. Each product is
+written in its own transaction and its external ID is mapped, so a retry
+updates mapped rows rather than creating duplicates. A catalog-wide run is not
+one global transaction; if a connection fails midway, review logs and rerun
+after fixing the issue.
+
+## Admin page
+
+`/admin/nila` displays existing Nila mappings and counts. It is not a live API
+control panel; run the Artisan command on the Laravel host to test connectivity,
+preview or execute imports. No live connection was possible during source-code
+review because the actual service host and credentials are deployment-specific.
 
 ## Tests
 
-`tests/Feature/NilaCatalogImporterTest.php` covers:
-
-- idempotent product/variant import
-- price and stock update on repeated import
-- rejection of an unmapped SKU collision
-- product and variant external mappings
-- protection of Janan-managed media during Nila re-import
-
-Run:
-
 ```bash
+php artisan test --filter=NilaHolooWebServiceTest
 php artisan test --filter=NilaCatalogImporterTest
 ```
+
+The tests use mocked HTTP responses and a test database. They verify contract
+handling and field ownership; they do not prove the real Holoo installation,
+database permissions, price units or network route are correct.
