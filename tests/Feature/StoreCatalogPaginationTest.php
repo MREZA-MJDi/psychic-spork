@@ -25,19 +25,6 @@ class StoreCatalogPaginationTest extends TestCase
             });
     }
 
-    public function test_brand_directory_is_database_paginated(): void
-    {
-        Brand::factory()->count(25)->create();
-
-        $this->get(route('brands.index'))
-            ->assertOk()
-            ->assertViewHas('brands', function ($brands): bool {
-                return $brands->total() === 25
-                    && $brands->count() === 24
-                    && $brands->perPage() === 24;
-            });
-    }
-
     public function test_shop_pagination_keeps_sort_and_page_size_query_state(): void
     {
         Product::factory()->count(7)->create();
@@ -77,7 +64,7 @@ class StoreCatalogPaginationTest extends TestCase
             });
     }
 
-    public function test_category_and_brand_product_pages_are_database_paginated(): void
+    public function test_category_pages_and_brand_filters_are_database_paginated(): void
     {
         $category = Category::factory()->create();
         $brand = Brand::factory()->create();
@@ -96,7 +83,7 @@ class StoreCatalogPaginationTest extends TestCase
                     && $products->perPage() === 6;
             });
 
-        $this->get(route('brands.show', $brand) . '?per_page=6&page=2&sort=name_asc')
+        $this->get(route('products.index', ['brand' => $brand->slug, 'per_page' => 6, 'page' => 2, 'sort' => 'name_asc']))
             ->assertOk()
             ->assertViewHas('products', function ($products): bool {
                 return $products->total() === 7
