@@ -107,15 +107,15 @@
         </a>
 
         <a
-            class="{{ request()->routeIs('brands.*') ? 'is-active' : '' }}"
-            href="{{ route('brands.index') }}"
-            aria-label="برندها"
+            class="{{ request()->routeIs('cart') ? 'is-active' : '' }}"
+            href="{{ route('cart') }}"
+            aria-label="سبد خرید"
         >
             <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M4 7.5 12 4l8 3.5v9L12 20l-8-3.5z"/>
-                <path d="m4.5 7.7 7.5 3.4 7.5-3.4M12 11v8.5"/>
+                <path d="M5 8h14l-1.2 11H6.2L5 8Z"/>
+                <path d="M9 8a3 3 0 0 1 6 0"/>
             </svg>
-            <span>برندها</span>
+            <span>سبد</span>
         </a>
     @endif
 </nav>

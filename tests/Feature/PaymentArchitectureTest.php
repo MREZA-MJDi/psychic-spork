@@ -69,7 +69,7 @@ class PaymentArchitectureTest extends TestCase
     {
         $this->get(route('wholesale.show'))
             ->assertOk()
-            ->assertSee('خرید عمده آنلاین برای همه باز است.');
+            ->assertSee('خرید آنلاین عمده فعال است');
     }
 
     public function test_guest_online_wholesale_payment_does_not_require_approval(): void

@@ -8,7 +8,6 @@
     $isHome = request()->routeIs('home');
     $isProducts = request()->routeIs('products.*');
     $isClub = request()->routeIs('club');
-    $isBrands = request()->routeIs('brands.*');
     $isAbout = request()->routeIs('about');
     $isWholesale = request()->routeIs('wholesale.show');
 @endphp
@@ -65,13 +64,6 @@
                 DrClubz
             </a>
 
-            <a
-                href="{{ route('brands.index') }}"
-                class="store-nav__link {{ $isBrands ? 'is-active' : '' }}"
-                @if($isBrands) aria-current="page" @endif
-            >
-                برندها
-            </a>
 
             <a
                 href="{{ route('about') }}"

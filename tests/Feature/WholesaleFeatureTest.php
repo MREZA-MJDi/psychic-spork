@@ -208,10 +208,11 @@ class WholesaleFeatureTest extends TestCase
     {
         $this->get(route('wholesale.show'))
             ->assertOk()
-            ->assertSee('خرید آنلاین عمده برای همه باز است')
+            ->assertSee('خرید آنلاین عمده فعال است')
+            ->assertSee('wholesale-hero--reference', false)
             ->assertSee('درخواست اعتبار خرید چکی')
             ->assertSee(route('login', ['continue' => 'cheque']), false)
-            ->assertSee('درخواست خرید چکی');
+            ->assertSee('درخواست اعتبار خرید چکی');
     }
 
     public function test_wholesale_landing_page_keeps_the_catalog_on_a_separate_screen(): void

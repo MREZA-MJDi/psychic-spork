@@ -29,13 +29,6 @@
                 </p>
             </div>
 
-            <a
-                href="{{ route('brands.index') }}"
-                class="text-link"
-            >
-                همه برندها
-                <span aria-hidden="true">↗</span>
-            </a>
 
         </header>
 
@@ -46,7 +39,7 @@
                 @foreach($visibleBrands as $brand)
 
                     <a
-                        href="{{ route('brands.show', $brand) }}"
+                        href="{{ route('products.index', ['brand' => $brand->slug]) }}"
                         class="home-brand-tile {{ $loop->first ? 'is-featured' : '' }}"
                     >
 

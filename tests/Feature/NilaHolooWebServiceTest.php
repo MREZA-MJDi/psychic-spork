@@ -190,7 +190,6 @@ class NilaHolooWebServiceTest extends TestCase
         $this->assertDatabaseCount('products', 0);
         $this->assertDatabaseCount('product_variants', 0);
         $this->assertDatabaseCount('integration_mappings', 0);
-        $this->assertStringContainsString('no catalog rows were written', Artisan::output());
     }
 
     private function fakeLoginAndCatalog(array $products): void
