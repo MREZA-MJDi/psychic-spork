@@ -180,17 +180,18 @@ class NilaHolooWebServiceTest extends TestCase
             $this->holooProduct('holoo-product-1', '1001', 'Sample product', '1250.50', '6'),
         ]);
 
+        $output = new BufferedOutput();
         $exitCode = Artisan::call('nila:sync-products', [
             '--dry-run' => true,
             '--limit' => 1,
-        ]);
+        ], $output);
 
         $this->assertSame(0, $exitCode, Artisan::output());
         $this->assertDatabaseCount('categories', 0);
         $this->assertDatabaseCount('products', 0);
         $this->assertDatabaseCount('product_variants', 0);
         $this->assertDatabaseCount('integration_mappings', 0);
-        $this->assertStringContainsString('no catalog rows were written', Artisan::output());
+        $this->assertStringContainsString('no catalog rows were written', $output->fetch());
     }
 
     private function fakeLoginAndCatalog(array $products): void
