@@ -49,7 +49,7 @@ class StoreProductController extends Controller
         $filters = $request->validated();
 
         $sort = $filters['sort'] ?? 'newest';
-        $perPage = (int) ($filters['per_page'] ?? 6);
+        $perPage = (int) ($filters['per_page'] ?? 12);
 
         $products = Product::query()
             ->select([
