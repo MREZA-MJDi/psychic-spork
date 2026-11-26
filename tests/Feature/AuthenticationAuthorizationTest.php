@@ -16,8 +16,8 @@ class AuthenticationAuthorizationTest extends TestCase
 
     public function test_login_and_registration_pages_render(): void
     {
-        $this->get(route('login'))->assertOk()->assertSee('خوش برگشتی.');
-        $this->get(route('register'))->assertOk()->assertSee('فضای خودت را بساز.');
+        $this->get(route('login'))->assertOk()->assertSee('ورود به حساب')->assertDontSee('<img', false);
+        $this->get(route('register'))->assertOk()->assertSee('ساخت حساب')->assertDontSee('<img', false);
     }
 
     public function test_local_admin_credentials_are_shown_only_when_they_match_a_real_admin_account(): void

@@ -40,7 +40,7 @@ class StoreFrontendTest extends TestCase
     {
         $this->get(route('login'))
             ->assertOk()
-            ->assertSee('خوش برگشتی.')
+            ->assertSee('ورود به حساب')
             ->assertSee('شماره موبایل')
             ->assertSee('رمز عبور')
             ->assertSee('ورود به حساب');
