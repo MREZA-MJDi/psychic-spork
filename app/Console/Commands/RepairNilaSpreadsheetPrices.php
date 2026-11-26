@@ -16,6 +16,7 @@ final class RepairNilaSpreadsheetPrices extends Command
     protected $signature = 'nila:repair-rial-prices
         {batch : Completed spreadsheet import that used rial figures as toman}
         {--apply : Write reviewed changes; by default only report them}
+        {--legacy-decimal-saves : Include exact 100× and 10000× amounts from the old amount form}
         {--sku= : Restrict the repair to this SKU}
         {--expected-price= : Allow a specific current price for the selected SKU}';
 
@@ -26,6 +27,7 @@ final class RepairNilaSpreadsheetPrices extends Command
         $id = filter_var($this->argument('batch'), FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
         $sku = $this->option('sku');
         $expected = $this->option('expected-price');
+        $legacyDecimalSaves = (bool) $this->option('legacy-decimal-saves');
 
         if ($id === false || ($expected !== null && (!$sku || !preg_match('/^\d+(?:\.\d{1,2})?$/D', $expected)))) {
             $this->error('Provide a positive batch ID. An expected price requires a SKU and a plain decimal amount.');
@@ -54,8 +56,8 @@ final class RepairNilaSpreadsheetPrices extends Command
         )->keyBy('holoo_code');
         $apply = (bool) $this->option('apply');
 
-        $report = DB::transaction(function () use ($batch, $validRows, $apply, $expected): array {
-            $report = ['changed' => 0, 'correct' => 0, 'review' => []];
+        $report = DB::transaction(function () use ($batch, $validRows, $apply, $expected, $legacyDecimalSaves): array {
+            $report = ['changed' => 0, 'correct' => 0, 'review' => [], 'legacy' => []];
 
             foreach ($validRows->keys()->chunk(500) as $codes) {
                 $mappings = IntegrationMapping::query()->where('integration', 'nila')->where('entity_type', ProductVariant::class)
@@ -82,11 +84,18 @@ final class RepairNilaSpreadsheetPrices extends Command
                     }
 
                     $expectedCurrent = $expected === null ? $source : (float) $expected;
-                    if ($current !== $expectedCurrent
+                    $legacyAmount = $expected === null && $legacyDecimalSaves
+                        && in_array($current, [$source * 100, $source * 10000], true);
+
+                    if (($current !== $expectedCurrent && !$legacyAmount)
                         || ($variant->sale_price !== null && (float) $variant->sale_price >= $target)
                         || ($variant->wholesale_price !== null && (float) $variant->wholesale_price > $target)) {
                         $report['review'][] = [$variant->sku, $source, $current, $target];
                         continue;
+                    }
+
+                    if ($legacyAmount) {
+                        $report['legacy'][] = [$variant->sku, $source, $current, $target];
                     }
 
                     if ($apply) {
@@ -102,6 +111,10 @@ final class RepairNilaSpreadsheetPrices extends Command
         $this->info(sprintf('%s: %d; already correct: %d; needs review: %d.',
             $apply ? 'Updated' : 'Would update', $report['changed'], $report['correct'], count($report['review'])
         ));
+        if ($report['legacy']) {
+            $this->line($apply ? 'Corrected decimal-save amounts:' : 'Decimal-save amounts proposed for correction:');
+            $this->table(['SKU', 'Source rial', 'Current toman', 'Expected toman'], $report['legacy']);
+        }
         if ($report['review']) {
             $this->table(['SKU', 'Source rial', 'Current toman', 'Expected toman'], $report['review']);
         }

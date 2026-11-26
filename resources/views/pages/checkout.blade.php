@@ -181,72 +181,49 @@
                 </fieldset>
 
                 @if($chequeApproved)
-                    <div
-                        class="checkout-cheque-fields"
-                        data-cheque-fields
-                        hidden
-                    >
-                        <div class="section-head">
-                            <div>
-                                <span class="eyebrow">CHEQUE DETAILS</span>
-                                <h3>اطلاعات چک</h3>
-                            </div>
-                        </div>
+                    <fieldset class="checkout-cheque-fields" data-cheque-fields
+                        @if(old('payment_method') !== 'cheque' || (!$hasWholesalePacks && old('order_type') !== 'wholesale')) hidden disabled @endif>
+                        <legend>اطلاعات چک</legend>
+                        <p id="cheque-review-help">
+                            مبلغ چک باید برابر مبلغ نهایی سفارش باشد. پس از ثبت، وضعیت بررسی را در حساب کاربری ببین.
+                        </p>
 
                         <div class="form-grid">
                             <label>
-                                شناسه صیادی *
-                                <input
-                                    name="sayad_id"
-                                    value="{{ old('sayad_id') }}"
-                                    inputmode="numeric"
-                                    maxlength="16"
-                                >
+                                شناسهٔ صیادی
+                                <input name="sayad_id" value="{{ old('sayad_id') }}" inputmode="numeric"
+                                    maxlength="16" dir="ltr" required aria-describedby="cheque-sayad-help">
+                                <small id="cheque-sayad-help">شناسهٔ ۱۶ رقمی درج‌شده روی چک</small>
                             </label>
 
                             <label>
-                                شماره چک *
-                                <input
-                                    name="cheque_number"
-                                    value="{{ old('cheque_number') }}"
-                                >
+                                بانک
+                                <input name="bank_name" value="{{ old('bank_name') }}" maxlength="120" required>
                             </label>
 
                             <label>
-                                بانک *
-                                <input
-                                    name="bank_name"
-                                    value="{{ old('bank_name') }}"
-                                >
+                                تاریخ سررسید
+                                <input type="date" name="due_date" value="{{ old('due_date') }}" required>
                             </label>
 
                             <label>
-                                صاحب حساب
-                                <input
-                                    name="account_holder"
-                                    value="{{ old('account_holder') }}"
-                                >
+                                تصویر واضح چک
+                                <input type="file" name="cheque_image"
+                                    accept="image/jpeg,image/png,image/webp" required aria-describedby="cheque-image-help">
+                                <small id="cheque-image-help">JPEG، PNG یا WebP تا ۵ مگابایت. تصویر در دسترس تیم بررسی است.</small>
                             </label>
 
                             <label>
-                                تاریخ سررسید *
-                                <input
-                                    type="date"
-                                    name="due_date"
-                                    value="{{ old('due_date') }}"
-                                >
+                                شمارهٔ فیزیکی چک <small>(اختیاری)</small>
+                                <input name="cheque_number" value="{{ old('cheque_number') }}" maxlength="100">
                             </label>
 
                             <label>
-                                تصویر چک *
-                                <input
-                                    type="file"
-                                    name="cheque_image"
-                                    accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
-                                >
+                                نام صاحب حساب <small>(اختیاری)</small>
+                                <input name="account_holder" value="{{ old('account_holder') }}" maxlength="160">
                             </label>
                         </div>
-                    </div>
+                    </fieldset>
                 @endif
 
                 <div class="checkout-delivery-divider">

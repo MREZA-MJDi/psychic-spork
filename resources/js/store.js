@@ -172,7 +172,7 @@
         if (!form) return;
 
         const wholesale = form.querySelector(
-            'input[name="order_type"]:checked'
+            'input[name="order_type"]:checked, input[type="hidden"][name="order_type"]'
         )?.value === 'wholesale';
 
         const cheque = form.querySelector(
@@ -195,7 +195,9 @@
         }
 
         if (chequeFields) {
-            chequeFields.hidden = !wholesale || !cheque?.checked;
+            const chequeSelected = wholesale && Boolean(cheque?.checked);
+            chequeFields.hidden = !chequeSelected;
+            chequeFields.disabled = !chequeSelected;
         }
     };
 

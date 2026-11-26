@@ -3615,3 +3615,119 @@ animation-duration:
         flex-wrap: wrap;
     }
 }
+
+/* Customer service pages use the same surfaces and reading scale as checkout. */
+.wholesale-page,
+.club-page,
+.contact-page,
+.checkout-page-layout .checkout-cheque-fields {
+    background: #fff;
+}
+
+.wholesale-page :is(.section-block--soft, .wholesale-hero--reference .wholesale-hero__main, .wholesale-catalog__head),
+.club-page .club-landing {
+    background: #fff;
+}
+
+.wholesale-page :is(.wholesale-hero__main, .wholesale-hero__status, .wholesale-pack-card, .wholesale-form-card, .wholesale-process),
+.contact-page :is(.contact-form-card, .contact-info-card),
+.club-page .club-feature {
+    background: #fff;
+    border: 1px solid var(--janan-line);
+    border-radius: 16px;
+    box-shadow: none;
+}
+
+.club-page .club-landing {
+    padding-block: clamp(32px, 7vw, 72px);
+}
+
+.club-page .club-landing__intro {
+    padding: 0 0 28px;
+    border-bottom: 1px solid var(--janan-line);
+}
+
+.club-page .club-landing__features {
+    margin-top: 24px;
+}
+
+.club-page .club-feature {
+    display: block;
+    height: 100%;
+    padding: 20px;
+    color: var(--janan-ink-strong);
+    text-decoration: none;
+}
+
+.club-page .club-feature:hover {
+    border-color: var(--janan-pink-500);
+}
+
+.wholesale-page .wholesale-hero__main h1,
+.club-page .club-landing__intro h1 {
+    font-size: clamp(24px, 3vw, 36px);
+    line-height: 1.45;
+    letter-spacing: normal;
+}
+
+.wholesale-page :is(.wholesale-catalog__head h2, .wholesale-process h2, .wholesale-form-card h2),
+.contact-page :is(.contact-form-card h2, .contact-info-card h2) {
+    font-size: clamp(18px, 2vw, 23px);
+    line-height: 1.5;
+    letter-spacing: normal;
+}
+
+.wholesale-page :is(.wholesale-hero p, .wholesale-process li p, .wholesale-form-card p, .customer-inline-status p),
+.club-page :is(.club-landing__intro p, .club-feature p),
+.contact-page :is(.contact-form-card__head p, .contact-info-card p, .contact-field, .contact-form__foot p) {
+    font-size: 14px;
+    line-height: 1.85;
+}
+
+.contact-page .contact-info-item {
+    display: block;
+    overflow-wrap: anywhere;
+}
+
+.contact-page .contact-info-item small {
+    font-family: inherit;
+    font-size: 12px;
+    letter-spacing: normal;
+}
+
+.checkout-page-layout .checkout-cheque-fields {
+    min-width: 0;
+    padding: clamp(14px, 3vw, 22px);
+}
+
+.checkout-page-layout .checkout-cheque-fields legend {
+    padding-inline: 8px;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.checkout-page-layout .checkout-cheque-fields p {
+    margin: 0 0 14px;
+    font-size: 14px;
+    line-height: 1.8;
+}
+
+.checkout-page-layout .checkout-cheque-fields small {
+    font-size: 12px;
+    line-height: 1.65;
+}
+
+.checkout-page-layout .checkout-cheque-fields input {
+    min-width: 0;
+    max-width: 100%;
+}
+
+@media (max-width: 600px) {
+    .checkout-page-layout .checkout-cheque-fields .form-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .club-page .club-landing__features {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

@@ -69,20 +69,17 @@
     <section class="section-block section-block--soft" id="cheque-application">
         <div class="container wholesale-content">
             <aside class="customer-surface wholesale-process">
-                <span class="eyebrow">HOW IT WORKS</span>
-                <h2 class="customer-panel-title">مسیر خرید عمده</h2>
+                <h2 class="customer-panel-title">مراحل خرید چکی</h2>
                 <ol>
-                    <li><span>۰۱</span><div><strong>انتخاب محصول</strong><p>پک موردنظر را انتخاب کن؛ قیمت و اقلام از اطلاعات ثبت‌شده در فروشگاه می‌آیند.</p></div></li>
-                    <li><span>۰۲</span><div><strong>پرداخت آنلاین</strong><p>خرید عمده آنلاین برای همه باز است و تأیید حساب نمی‌خواهد.</p></div></li>
-                    <li><span>۰۳</span><div><strong>درخواست پرداخت چکی</strong><p>با حساب مشتری، درخواست اعتبار چکی را ثبت کن.</p></div></li>
-                    <li><span>۰۴</span><div><strong>تأیید مدیر</strong><p>مدیر درخواست را بررسی می‌کند و در صورت تأیید، سقف اعتبار را در حساب ثبت می‌کند.</p></div></li>
+                    <li><span>۱</span><div><strong>درخواست اعتبار</strong><p>مبلغ موردنیاز را ثبت کن. سقف هر سفارش بعد از بررسی مدیر در حساب نمایش داده می‌شود.</p></div></li>
+                    <li><span>۲</span><div><strong>ثبت چک در تسویه‌حساب</strong><p>پس از تأیید اعتبار، پک را به سبد اضافه کن و در پرداخت چکی، شناسهٔ صیادی، بانک، سررسید و تصویر چک را وارد کن.</p></div></li>
+                    <li><span>۳</span><div><strong>پیگیری بررسی</strong><p>سفارش تا بررسی چک در انتظار می‌ماند. نتیجه و درخواست احتمالی ارسال اصل چک را در حساب کاربری ببین.</p></div></li>
                 </ol>
             </aside>
 
             <section class="customer-surface wholesale-form-card" aria-labelledby="cheque-application-title">
                 <header class="section-head">
                     <div>
-                        <span class="eyebrow">CHEQUE PAYMENT</span>
                         <h2 id="cheque-application-title">درخواست اعتبار خرید چکی</h2>
                         <p>خرید آنلاین عمده برای همه باز است؛ این درخواست فقط برای فعال‌شدن پرداخت چکی است.</p>
                     </div>
@@ -96,12 +93,14 @@
                     <div class="customer-inline-status">
                         <strong>مجوز پرداخت چکی فعال است.</strong>
                         <p>سقف هر سفارش: {{ $chequePermission->max_order_amount !== null ? \App\Support\PersianNumber::format((float) $chequePermission->max_order_amount) . ' تومان' : 'بدون سقف تعیین‌شده' }}.</p>
-                        <a class="button button--primary" href="{{ route('checkout') }}#payment-options">رفتن به پرداخت</a>
+                        <a class="button button--primary" href="{{ route('cart') }}">مشاهده سبد خرید</a>
+                        <a class="button button--ghost" href="#packs">انتخاب پک</a>
                     </div>
                 @elseif($chequePermission?->isPending())
                     <div class="customer-inline-status" role="status">
                         <strong>درخواستت در انتظار بررسی مدیر است.</strong>
                         <p>مبلغ درخواستی: {{ \App\Support\PersianNumber::format((float) $chequePermission->requested_amount) }} تومان.</p>
+                        <a href="{{ route('account') }}#account-cheque-title">پیگیری در حساب کاربری</a>
                     </div>
                 @elseif($isCustomer)
                     <form method="POST" action="{{ route('wholesale.cheque.request') }}" class="checkout-form cheque-request-form">
