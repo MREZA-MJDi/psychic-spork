@@ -125,6 +125,7 @@ const animateProductToCart = (form = null) => {
 
     const source =
         form?.closest('.product-card')?.querySelector('.product-card__media img') ||
+        form?.closest('.home-product-card')?.querySelector('.home-product-card__image img') ||
         form?.closest('.product-detail-v2, .product-detail-page')?.querySelector('img') ||
         form?.querySelector('img') ||
         null;
