@@ -9,16 +9,30 @@ use App\Support\NumericInput;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Collection;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class AdminWholesalePackController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
+        $filters = $request->validate([
+            'q' => ['nullable', 'string', 'max:120'],
+            'status' => ['nullable', 'in:active,inactive'],
+        ]);
+
         $packs = WholesalePack::query()
             ->select(['id','name','slug','pack_quantity','pack_price','sort_order','is_active'])
+            ->when(filled($filters['q'] ?? null), function ($query) use ($filters): void {
+                $term = '%' . trim($filters['q']) . '%';
+                $query->where(fn ($packs) => $packs->where('name', 'like', $term)
+                    ->orWhereHas('items.variant.product', fn ($product) => $product->where('name', 'like', $term)));
+            })
+            ->when(isset($filters['status']), fn ($query) => $query
+                ->where('is_active', $filters['status'] === 'active'))
             ->with([
                 'items' => fn ($query) => $query->select([
                     'id','wholesale_pack_id','product_variant_id','quantity',
@@ -31,16 +45,16 @@ class AdminWholesalePackController extends Controller
             ])
             ->orderBy('sort_order')
             ->orderByDesc('id')
-            ->paginate(20);
+            ->paginate(20)->appends($filters);
 
-        return view('admin.wholesale-packs.index', compact('packs'));
+        return view('admin.wholesale-packs.index', compact('packs', 'filters'));
     }
 
-    public function create(): View
+    public function create(Request $request): View
     {
         return view('admin.wholesale-packs.form', [
             'pack' => new WholesalePack(),
-            'variants' => collect(),
+            'variants' => $this->selectedVariants($request, new WholesalePack()),
         ]);
     }
 
@@ -69,13 +83,13 @@ class AdminWholesalePackController extends Controller
             ->with('success', 'پک عمده با موفقیت ساخته شد.');
     }
 
-    public function edit(WholesalePack $wholesalePack): View
+    public function edit(Request $request, WholesalePack $wholesalePack): View
     {
         $wholesalePack->load('items.variant.product.brand');
 
         return view('admin.wholesale-packs.form', [
             'pack' => $wholesalePack,
-            'variants' => $wholesalePack->items->pluck('variant')->filter()->values(),
+            'variants' => $this->selectedVariants($request, $wholesalePack),
         ]);
     }
 
@@ -104,6 +118,18 @@ class AdminWholesalePackController extends Controller
     {
         $wholesalePack->delete();
         return back()->with('success', 'پک عمده حذف شد.');
+    }
+
+    private function selectedVariants(Request $request, WholesalePack $pack): Collection
+    {
+        if (!$request->session()->hasOldInput('items')) {
+            return $pack->exists ? $pack->items->pluck('variant')->filter()->values() : collect();
+        }
+
+        $ids = collect($request->old('items'))->take(60)->pluck('variant_id')
+            ->filter(fn ($id) => is_scalar($id) && ctype_digit((string) $id))->unique();
+
+        return ProductVariant::query()->with('product.brand')->whereIn('id', $ids)->get();
     }
 
     private function validated(Request $request): array
@@ -137,14 +163,18 @@ class AdminWholesalePackController extends Controller
             ->whereHas('product', fn ($query) => $query->where('is_active', true))
             ->count();
 
-        abort_unless($validCount === $variantIds->count(), 422, 'یکی از Variantهای انتخاب‌شده فعال نیست.');
+        if ($validCount !== $variantIds->count()) {
+            throw ValidationException::withMessages(['items' => 'یکی از مدل‌های انتخاب‌شده غیرفعال است. آن را از پک بردار یا در صفحهٔ محصول فعال کن.']);
+        }
 
         $missingWholesalePrice = ProductVariant::query()
             ->whereIn('id', $variantIds)
             ->whereNull('wholesale_price')
             ->exists();
 
-        abort_unless(! $missingWholesalePrice, 422, 'تمام Variantهای داخل پک باید قیمت عمده داشته باشند.');
+        if ($missingWholesalePrice) {
+            throw ValidationException::withMessages(['items' => 'برای همهٔ مدل‌های این پک باید قیمت عمده ثبت شده باشد.']);
+        }
 
         $variantPrices = ProductVariant::query()
             ->whereIn('id', $variantIds)
@@ -156,11 +186,9 @@ class AdminWholesalePackController extends Controller
                 * (int) $item['quantity']
         );
 
-        abort_if(
-            (float) $data['pack_price'] > $packBasePrice,
-            422,
-            'قیمت پک نباید از جمع قیمت عمده اقلام آن بیشتر باشد. برای قیمت بالاتر، قیمت عمده واریانت‌ها را اصلاح کن.'
-        );
+        if ((float) $data['pack_price'] > $packBasePrice) {
+            throw ValidationException::withMessages(['pack_price' => 'قیمت پک نمی‌تواند از جمع قیمت عمدهٔ اقلام بیشتر باشد.']);
+        }
 
         $data['slug'] = filled($data['slug'] ?? null)
             ? Str::slug($data['slug'])

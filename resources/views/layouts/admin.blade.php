@@ -259,6 +259,17 @@
             </div>
         @endif
 
+        @if($errors->any())
+            <div class="alert error admin-form-errors" role="alert">
+                <strong>برای ذخیره، این موارد را اصلاح کن</strong>
+                <ul>
+                    @foreach(array_unique($errors->all()) as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
         <section class="admin-content">
             @yield('content')
         </section>

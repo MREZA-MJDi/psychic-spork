@@ -118,6 +118,8 @@ class AdminControlCenterTest extends TestCase
             ProductVariant::factory()->create([
                 'product_id' => $product->id,
                 'sku' => 'JAN-LOOKUP-' . $number,
+                'color' => 'مشکی',
+                'stock' => $number === 1 ? 3 : 0,
                 'wholesale_price' => $number === 1 ? 800000 : null,
             ]);
         }
@@ -133,6 +135,15 @@ class AdminControlCenterTest extends TestCase
             ->getJson(route('admin.variant-lookup', ['q' => 'JAN-LOOKUP-1', 'wholesale' => 1]))
             ->assertOk()
             ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.sku', 'JAN-LOOKUP-1');
+
+        $this->getJson(route('admin.variant-lookup', ['q' => 'ایزابلا مشكي', 'in_stock' => 1]))
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.sku', 'JAN-LOOKUP-1');
+
+        $this->getJson(route('admin.variant-lookup', ['q' => 'JAN-LOOKUP-۱', 'wholesale' => 1]))
+            ->assertOk()
             ->assertJsonPath('data.0.sku', 'JAN-LOOKUP-1');
     }
 

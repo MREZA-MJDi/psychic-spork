@@ -60,7 +60,8 @@
 
             {{-- SLUG --}}
 
-            <div class="admin-field">
+            <details class="admin-field admin-advanced-field" @if($errors->has('slug')) open @endif>
+                <summary>تنظیمات آدرس صفحه</summary>
 
                 <label for="slug">
                     شناسه دسته‌بندی
@@ -100,7 +101,7 @@
                 </small>
                 @enderror
 
-            </div>
+            </details>
 
 
             {{-- PARENT --}}

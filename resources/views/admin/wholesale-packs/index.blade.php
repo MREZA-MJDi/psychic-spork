@@ -7,7 +7,7 @@
 <div class="admin-page-head">
     <div>
         <h1 class="admin-page-head__title">پک‌های عمده</h1>
-        <p class="admin-page-head__text">پک‌های ترکیبی را از Variantهای واقعی محصولات بساز و تعداد هر قلم را مشخص کن.</p>
+        <p class="admin-page-head__text">پک‌ها را پیدا کن، اقلامشان را ویرایش کن و وضعیت نمایش را مشخص کن.</p>
     </div>
     <a href="{{ route('admin.wholesale-packs.create') }}" class="admin-btn admin-btn--secondary">+ ساخت پک عمده</a>
 </div>
@@ -19,6 +19,25 @@
             <p class="admin-card-description">{{ \App\Support\PersianNumber::format($packs->total()) }} پک</p>
         </div>
     </div>
+
+    <form method="GET" action="{{ route('admin.wholesale-packs.index') }}" class="admin-card-body pack-list-filters">
+        <label class="admin-field">
+            نام پک یا یکی از محصولات داخل آن
+            <input name="q" type="search" maxlength="120" value="{{ $filters['q'] ?? '' }}">
+        </label>
+        <label class="admin-field">
+            وضعیت نمایش
+            <select name="status">
+                <option value="">همه</option>
+                <option value="active" @selected(($filters['status'] ?? '') === 'active')>در فروشگاه</option>
+                <option value="inactive" @selected(($filters['status'] ?? '') === 'inactive')>پنهان</option>
+            </select>
+        </label>
+        <button type="submit" class="admin-btn admin-btn--secondary">جستجو</button>
+        @if(array_filter($filters))
+            <a href="{{ route('admin.wholesale-packs.index') }}" class="admin-btn admin-btn--ghost">پاک‌کردن فیلتر</a>
+        @endif
+    </form>
 
     @if($packs->count())
         <div class="admin-table-wrap">
