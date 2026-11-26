@@ -138,6 +138,34 @@ class NilaSpreadsheetPreviewTest extends TestCase
         $this->assertDatabaseCount('media', 0);
         $this->assertSame(0, Product::query()->active()->count());
         $this->assertSame('completed', $batch->fresh()->status);
+
+        $variant = ProductVariant::query()->where('sku', '0102001*1')->firstOrFail();
+        $edited = ProductVariant::query()->where('sku', '0102002*1')->firstOrFail();
+        $edited->update(['price' => 250000000]);
+        $variant->update(['stock' => 9]);
+
+        $repair = ['batch' => $batch->id];
+        $this->artisan('nila:repair-rial-prices', $repair)
+            ->expectsOutput('Would update: 2; already correct: 0; needs review: 1.')
+            ->assertExitCode(0);
+        $this->assertEquals(2150000, $variant->fresh()->price);
+
+        $this->artisan('nila:repair-rial-prices', $repair + ['--apply' => true])
+            ->expectsOutput('Updated: 2; already correct: 0; needs review: 1.')
+            ->assertExitCode(0);
+        $this->assertEquals(215000, $variant->fresh()->price);
+        $this->assertEquals(9, $variant->fresh()->stock);
+        $this->assertEquals(250000000, $edited->fresh()->price);
+
+        $this->artisan('nila:repair-rial-prices', $repair + [
+            '--apply' => true,
+            '--sku' => $edited->sku,
+            '--expected-price' => '250000000',
+        ])->assertExitCode(0);
+        $this->assertEquals(250000, $edited->fresh()->price);
+        $this->artisan('nila:repair-rial-prices', $repair)
+            ->expectsOutput('Would update: 0; already correct: 3; needs review: 0.')
+            ->assertExitCode(0);
     }
 
     public function test_admin_can_import_one_complete_product_group_without_publishing_it(): void
