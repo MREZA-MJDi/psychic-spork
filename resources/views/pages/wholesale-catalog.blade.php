@@ -18,14 +18,14 @@
             <form method="GET" action="{{ route('wholesale.catalog') }}" class="customer-surface wholesale-catalog__filters">
                 <label>
                     جستجوی محصول یا SKU
-                    <input type="search" name="q" value="{{ request('q') }}" maxlength="120" placeholder="نام محصول، برند یا کد کالا…">
+                    <input type="search" name="q" value="{{ $filters['q'] ?? '' }}" maxlength="120" placeholder="نام محصول، برند یا کد کالا…">
                 </label>
                 <label>
                     دسته‌بندی
                     <select name="category_id">
                         <option value="">همه دسته‌بندی‌ها</option>
                         @foreach($categories as $category)
-                            <option value="{{ $category->id }}" @selected((string) request('category_id') === (string) $category->id)>{{ $category->name }}</option>
+                            <option value="{{ $category->id }}" @selected((string) ($filters['category_id'] ?? '') === (string) $category->id)>{{ $category->name }}</option>
                         @endforeach
                     </select>
                 </label>
@@ -34,10 +34,23 @@
                     <select name="brand_id">
                         <option value="">همه برندها</option>
                         @foreach($brands as $brand)
-                            <option value="{{ $brand->id }}" @selected((string) request('brand_id') === (string) $brand->id)>{{ $brand->name }}</option>
+                            <option value="{{ $brand->id }}" @selected((string) ($filters['brand_id'] ?? '') === (string) $brand->id)>{{ $brand->name }}</option>
                         @endforeach
                     </select>
                 </label>
+                <label>
+                    مرتب‌سازی
+                    <select name="sort">
+                        <option value="featured" @selected($sort === 'featured')>پیشنهادی</option>
+                        <option value="newest" @selected($sort === 'newest')>جدیدترین</option>
+                        <option value="price_asc" @selected($sort === 'price_asc')>کمترین قیمت عمده</option>
+                        <option value="price_desc" @selected($sort === 'price_desc')>بیشترین قیمت عمده</option>
+                        <option value="name_asc" @selected($sort === 'name_asc')>الفبایی</option>
+                    </select>
+                </label>
+                @if(isset($filters['per_page']))
+                    <input type="hidden" name="per_page" value="{{ $perPage }}">
+                @endif
                 <div class="wholesale-catalog__filter-actions">
                     <button class="button button--primary" type="submit">اعمال فیلتر</button>
                     <a class="button button--ghost" href="{{ route('wholesale.catalog') }}">پاک کردن</a>
@@ -59,45 +72,13 @@
             @if($products->count())
                 <div class="wholesale-product-grid">
                     @foreach($products as $product)
-                        <article class="wholesale-product-card">
-                            <a href="{{ route('products.show', $product) }}" class="wholesale-product-card__media">
-                                <x-store.image
-                                    :src="$product->primaryGalleryMedia?->url ?: $product->primaryActiveVariant?->primaryGalleryMedia?->url"
-                                    :alt="$product->name"
-                                    fallback-tag="span"
-                                    fallback-class=""
-                                    fallback="JANAN"
-                                />
-                            </a>
-                            <div class="wholesale-product-card__body">
-                                <div class="wholesale-product-card__meta">
-                                    <span>{{ $product->brand?->name ?? 'Janan' }}</span>
-                                    <span>{{ $product->category?->name ?? 'محصول' }}</span>
-                                </div>
-                                <a href="{{ route('products.show', $product) }}" class="wholesale-product-card__title">{{ $product->name }}</a>
-                                <div class="wholesale-product-card__facts">
-                                    <span>{{ number_format((int) $product->wholesale_variants_count) }} تنوع دارای قیمت عمده</span>
-                                </div>
-                                <div class="wholesale-variant-price">
-                                    @if((float) $product->minimum_wholesale_price === (float) $product->maximum_wholesale_price)
-                                        {{ number_format((float) $product->minimum_wholesale_price) }}
-                                    @else
-                                        {{ number_format((float) $product->minimum_wholesale_price) }}
-                                        تا
-                                        {{ number_format((float) $product->maximum_wholesale_price) }}
-                                    @endif
-                                    <small>تومان</small>
-                                </div>
-                                <a class="button button--ghost wholesale-product-card__action" href="{{ route('products.show', $product) }}">
-                                    مشاهده رنگ و سایزها
-                                    <span aria-hidden="true">↗</span>
-                                </a>
-                            </div>
-                        </article>
+                        @include('pages.wholesale.product-card', ['product' => $product])
                     @endforeach
                 </div>
                 @if($products->hasPages())
-                    <div class="store-pagination">{{ $products->links() }}</div>
+                    <nav class="store-pagination" aria-label="صفحه‌بندی محصولات عمده">
+                        {{ $products->onEachSide(1)->links('vendor.pagination.store') }}
+                    </nav>
                 @endif
             @else
                 <div class="customer-surface wholesale-empty">

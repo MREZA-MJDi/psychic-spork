@@ -62,6 +62,8 @@ class StoreProductController extends Controller
             $categoryIds = $selectedCategory?->subtreeIds() ?? [];
         }
 
+        unset($filters['page']);
+
         $products = Product::query()
             ->select([
                 'id',
@@ -139,7 +141,7 @@ class StoreProductController extends Controller
                 $query->latest('updated_at')->latest('id')
             )
             ->paginate($perPage)
-            ->withQueryString();
+            ->appends($filters);
 
         return view('products.index', [
             'seo' => $seo->page(
@@ -148,6 +150,7 @@ class StoreProductController extends Controller
                 route('products.index')
             ),
             'products' => $products,
+            'filters' => $filters,
             'featuredBanner' => $hero->slides()[0] ?? null,
             'sort' => $sort,
             'perPage' => $perPage,

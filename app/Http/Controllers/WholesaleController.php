@@ -172,6 +172,7 @@ class WholesaleController extends Controller
 
         return view('pages.wholesale-catalog', [
             'products' => $products,
+            'filters' => $filters,
             'sort' => $sort,
             'perPage' => $perPage,
             'categories' => Category::query()

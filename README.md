@@ -11,24 +11,14 @@ Laravel storefront and administration platform for the Persian Jani / Janan stor
 
 ## Windows / XAMPP setup
 
-### 1. Get the Holoo integration branch
-
-Until PR [#52](https://github.com/MREZA-MJDi/psychic-spork/pull/52) is merged, the integration code is on its own branch.
-
-For a fresh clone:
+### 1. Clone the current storefront
 
 ```bat
-git clone --branch feat/nila-holoo-webservice-sync-2026-10-25 --single-branch https://github.com/MREZA-MJDi/psychic-spork.git jani
+git clone https://github.com/MREZA-MJDi/psychic-spork.git jani
 cd jani
 ```
 
-If the repository is already cloned in `C:\\xampp2\\htdocs\\jani`, keep that copy and run:
-
-```bat
-cd /d C:\\xampp2\\htdocs\\jani
-git fetch origin
-git switch --track origin/feat/nila-holoo-webservice-sync-2026-10-25
-```
+The Holoo integration is included in `main`.
 
 ### 2. Create the private local env
 
@@ -117,3 +107,10 @@ Holoo feature tests mock HTTP responses. They verify the expected request/respon
 ## Security and operations
 
 Do not commit `.env` or real service/payment credentials. Keep the Holoo web-service port behind a trusted LAN/VPN rather than exposing it publicly. Do not use production payment credentials in development. Check both authorized and unauthorized access to administrative routes before deployment.
+
+## Production deployment
+
+1. Back up the database, preserve the existing `.env` and `storage/app/public`, and make the repository's `public` directory the domain's document root. Configure HTTPS on the origin. The Nginx example in `deploy/nginx/jani.conf.example` needs the real server names, document root, PHP-FPM socket and TLS configuration.
+2. For a fresh install, populate a private `.env` from `.env.production.example` and generate the application key once. Set `APP_URL` to the canonical HTTPS URL, configure the production database and credentials, and verify the session domain. Run `bash deploy/deploy.sh` from the checked-out release.
+3. Keep shared CDN caching limited to versioned static assets. Bypass the cache for HTML, session responses, search, account, cart, checkout and payment callbacks. Preserve older Vite fingerprints through the rollback window so already-open pages can load their assets.
+4. Check `/up` and verify that the homepage actually belongs to Janan. Check `/products`, `/drclubz`, `/wholesale`, and `/wholesale/catalog`, then verify login, cart and a controlled payment callback against the configured gateway.

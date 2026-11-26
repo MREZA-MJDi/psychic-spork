@@ -12,7 +12,7 @@
                     <h1>باشگاه مشتریان<br><em>جانان.</em></h1>
                     <p>یک مسیر ساده برای دسترسی به حساب، سفارش‌ها و خدمات مشتریان جانان؛ همه‌چیز متصل به حساب واقعی فروشگاه.</p>
                     <div class="club-landing__actions">
-                        @if(auth()->check() && auth()->user()->isCustomer())
+                        @if($isCustomer)
                             <a class="button button--primary" href="{{ route('account') }}">رفتن به حساب کاربری <span aria-hidden="true">↗</span></a>
                             <a class="button button--ghost" href="{{ route('products.index') }}">ادامه خرید</a>
                         @elseif(auth()->guest())
@@ -25,11 +25,11 @@
                 </div>
                 <aside class="club-landing__member" aria-label="وضعیت دسترسی باشگاه">
                     <span class="club-landing__member-kicker">MEMBER ACCESS</span>
-                    @if(auth()->check() && auth()->user()->isCustomer())
+                    @if($isCustomer)
                         <span class="club-landing__member-icon" aria-hidden="true">✓</span>
                         <strong>حساب مشتری فعال است</strong>
-                        <p>برای مشاهده سفارش‌ها و اطلاعات حساب، وارد پنل مشتری شو.</p>
-                        <a href="{{ route('account') }}">مشاهده حساب <span aria-hidden="true">←</span></a>
+                        <p>آخرین سفارش‌ها و وضعیت آن‌ها را در حساب مشتری ببین.</p>
+                        <a href="{{ route('account') }}#account-orders">مشاهده سفارش‌ها <span aria-hidden="true">←</span></a>
                     @elseif(auth()->guest())
                         <span class="club-landing__member-icon" aria-hidden="true">＋</span>
                         <strong>هنوز عضو نشده‌ای؟</strong>

@@ -1,10 +1,11 @@
+import { gsap } from 'gsap';
+import { Draggable } from 'gsap/Draggable';
+import { Flip } from 'gsap/Flip';
+
 (() => {
     const boot = () => {
-        if (window.__JANAN_IMMERSIVE_HERO_INITIALIZED__) return;
-        window.__JANAN_IMMERSIVE_HERO_INITIALIZED__ = true;
-
         const root = document.querySelector('[data-immersive-gallery]');
-        if (!root) return;
+        if (!root || root.dataset.galleryInitialized) return;
 
         const q = (selector) => root.querySelector(selector);
         const viewport = q('#immersiveViewport');
@@ -45,6 +46,8 @@
             return;
         }
 
+        root.dataset.galleryInitialized = 'true';
+
         let slides = [];
         try {
             const payload = JSON.parse(data.textContent || '[]');
@@ -78,113 +81,11 @@
         window.addEventListener('scroll', updateHeaderSurface, { passive: true });
         window.addEventListener('resize', updateHeaderSurface, { passive: true });
 
-        const loadScript = (src) => new Promise((resolve, reject) => {
-            const existing = document.querySelector(
-                'script[data-janan-gsap-src="' + src + '"]'
-            );
+        window.addEventListener('pageshow', updateHeaderSurface);
 
-            if (existing) {
-                existing.addEventListener('load', () => resolve(), { once: true });
-                existing.addEventListener('error', () => reject(new Error('script-load-failed')), { once: true });
-                if (
-                    (src.endsWith('gsap.min.js') && window.gsap) ||
-                    (src.includes('Draggable') && window.Draggable) ||
-                    (src.includes('Flip') && window.Flip)
-                ) {
-                    resolve();
-                }
-                return;
-            }
-
-            const script = document.createElement('script');
-            script.src = src;
-            script.defer = true;
-            script.dataset.jananGsapSrc = src;
-            script.onload = resolve;
-            script.onerror = () => reject(new Error('script-load-failed'));
-            document.head.appendChild(script);
-        });
-
-        const ensureGsap = async () => {
-            if (window.gsap && window.Draggable && window.Flip) {
-                window.gsap.registerPlugin(window.Draggable, window.Flip);
-                return true;
-            }
-
-            if (!window.__JANAN_GSAP_LOAD__) {
-                window.__JANAN_GSAP_LOAD__ = (async () => {
-                    await loadScript(
-                        'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js'
-                    );
-                    await Promise.all([
-                        loadScript(
-                            'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/Draggable.min.js'
-                        ),
-                        loadScript(
-                            'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/Flip.min.js'
-                        ),
-                    ]);
-
-                    if (!window.gsap || !window.Draggable || !window.Flip) {
-                        throw new Error('gsap-incomplete');
-                    }
-
-                    window.gsap.registerPlugin(window.Draggable, window.Flip);
-                })();
-            }
-
-            try {
-                await window.__JANAN_GSAP_LOAD__;
-                return true;
-            } catch {
-                return false;
-            }
-        };
-
-        const renderStaticFallback = () => {
-            root.classList.add('is-static-fallback');
-            viewport.style.opacity = '1';
-            viewport.style.overflow = 'auto';
-            wrap.style.position = 'relative';
-            wrap.style.top = 'auto';
-            wrap.style.left = 'auto';
-            wrap.style.width = '100%';
-            wrap.style.height = '100%';
-            wrap.style.transform = 'none';
-            grid.style.display = 'grid';
-            grid.style.gridTemplateColumns =
-                window.innerWidth <= 540
-                    ? 'repeat(2, minmax(0, 1fr))'
-                    : 'repeat(4, minmax(0, 1fr))';
-            grid.style.gap = window.innerWidth <= 540 ? '6px' : '10px';
-            grid.replaceChildren();
-
-            slides.forEach((slide, index) => {
-                const item = document.createElement('button');
-                item.type = 'button';
-                item.className = 'immersive-grid-item';
-                item.dataset.productUrl = slide.url || '';
-                item.style.position = 'relative';
-                item.style.inset = 'auto';
-                item.style.width = '100%';
-                item.style.height = 'auto';
-                item.style.aspectRatio = '1';
-                item.style.opacity = '1';
-                item.style.setProperty('--hero-intro-index', String(Math.min(index, 12)));
-
-                if (slide.image) {
-                    const image = document.createElement('img');
-                    image.src = slide.image;
-                    image.alt = slide.title || 'محصول جانان';
-                    image.loading = 'lazy';
-                    image.decoding = 'async';
-                    image.draggable = false;
-                    item.appendChild(image);
-                }
-
-                grid.appendChild(item);
-            });
-        };
+        gsap.registerPlugin(Draggable, Flip);
+        // The storefront cart uses the same animation engine on the home page.
+        window.gsap = gsap;
 
         const initGallery = () => {
             if (!slides.length) {
@@ -216,6 +117,7 @@
                     };
                     this.last = { x: 0, y: 0 };
                     this.layoutFrame = 0;
+                    this.introPlaying = true;
                 }
 
                 getItemSize() {
@@ -357,14 +259,14 @@
                         item.element.style.height = this.cfg.size + 'px';
 
                         if (animated) {
-                            window.gsap.to(item.element, {
+                            gsap.to(item.element, {
                                 left: item.baseX,
                                 top: item.baseY,
                                 duration: reducedMotion ? 0.01 : 0.42,
                                 ease: 'power2.out',
                             });
                         } else {
-                            window.gsap.set(item.element, {
+                            gsap.set(item.element, {
                                 left: item.baseX,
                                 top: item.baseY,
                             });
@@ -416,20 +318,20 @@
                     const nextY = Math.max(b.minY, Math.min(b.maxY, y));
 
                     if (animated) {
-                        window.gsap.to(wrap, {
+                        gsap.to(wrap, {
                             x: nextX,
                             y: nextY,
                             duration: reducedMotion ? 0.02 : 0.5,
                             ease: 'power3.out',
                             onUpdate: () => {
                                 this.last = {
-                                    x: window.gsap.getProperty(wrap, 'x'),
-                                    y: window.gsap.getProperty(wrap, 'y'),
+                                    x: gsap.getProperty(wrap, 'x'),
+                                    y: gsap.getProperty(wrap, 'y'),
                                 };
                             },
                         });
                     } else {
-                        window.gsap.set(wrap, {
+                        gsap.set(wrap, {
                             x: nextX,
                             y: nextY,
                         });
@@ -457,7 +359,7 @@
                     wrap.style.height = this.dim.height + 'px';
 
                     const center = this.centerPosition();
-                    window.gsap.set(wrap, {
+                    gsap.set(wrap, {
                         x: center.x,
                         y: center.y,
                         scale: this.cfg.zoom,
@@ -468,7 +370,7 @@
                     const centerY = viewport.clientHeight / 2;
 
                     this.items.forEach((item) => {
-                        window.gsap.set(item.element, {
+                        gsap.set(item.element, {
                             left: centerX / this.cfg.zoom - this.cfg.size / 2,
                             top: centerY / this.cfg.zoom - this.cfg.size / 2,
                             scale: 0.86,
@@ -476,9 +378,9 @@
                         });
                     });
 
-                    window.gsap.set(viewport, { opacity: 1 });
+                    gsap.set(viewport, { opacity: 1 });
 
-                    window.gsap.to(this.items.map((item) => item.element), {
+                    gsap.to(this.items.map((item) => item.element), {
                         left: (i) => this.items[i].baseX,
                         top: (i) => this.items[i].baseY,
                         scale: 1,
@@ -489,12 +391,13 @@
                             ? 0
                             : { amount: 0.45, from: 'start' },
                         onComplete: () => {
+                            this.introPlaying = false;
+                            this.relayout();
                             controls.classList.add('is-visible');
-                            window.gsap.to(root.querySelector('.immersive-footer'), {
+                            gsap.to(root.querySelector('.immersive-footer'), {
                                 opacity: 1,
                                 duration: reducedMotion ? 0.01 : 0.45,
                             });
-                            this.initDrag();
                         },
                     });
                 }
@@ -503,7 +406,7 @@
                     this.drag?.kill();
                     this.dimensions();
 
-                    this.drag = window.Draggable.create(wrap, {
+                    this.drag = Draggable.create(wrap, {
                         type: 'x,y',
                         bounds: this.bounds(),
                         edgeResistance: 0.82,
@@ -587,7 +490,7 @@
                     root.appendChild(anchor);
                     const rect = model.element.getBoundingClientRect();
 
-                    window.gsap.set(anchor, {
+                    gsap.set(anchor, {
                         left: rect.left,
                         top: rect.top,
                         width: rect.width,
@@ -613,7 +516,7 @@
                 }
 
                 open(model) {
-                    if (this.zoom.active) return;
+                    if (this.introPlaying || this.zoom.active) return;
 
                     const overlayAnchor = this.createOverlay(model);
                     this.zoom = {
@@ -631,32 +534,31 @@
                     close.classList.add('is-active');
 
                     const lines = this.updateDetails(model);
-                    window.gsap.set(overlay, { opacity: 0 });
-                    window.gsap.set([number, title, ...lines, close], {
+                    gsap.set(overlay, { opacity: 0 });
+                    gsap.set([number, title, ...lines, close], {
                         opacity: 0,
                     });
-                    window.gsap.set(
-                        itemOrArray(model.element),
-                        { opacity: 0 }
-                    );
+                    gsap.set(model.element, { opacity: 0 });
 
                     const duration = reducedMotion ? 0.04 : 0.74;
 
-                    window.gsap.to(split, {
+                    gsap.to(split, {
                         opacity: 1,
                         duration: reducedMotion ? 0.02 : 0.28,
                     });
 
-                    window.gsap.to(overlay, {
+                    gsap.to(overlay, {
                         opacity: 1,
                         duration: reducedMotion ? 0.02 : 0.22,
                     });
 
-                    window.Flip.fit(overlayAnchor, target, {
+                    Flip.fit(overlayAnchor, target, {
                         absolute: true,
                         duration,
                         ease: 'power3.inOut',
                         onComplete: () => {
+                            if (this.zoom.closing) return;
+
                             overlayAnchor.style.pointerEvents = 'auto';
                             overlay.classList.add('is-active');
 
@@ -666,17 +568,17 @@
                                 this.navigateToProduct(model.slide.url);
                             }, { once: true });
 
-                            window.gsap.fromTo(
+                            gsap.fromTo(
                                 number,
                                 { y: 16, opacity: 0 },
                                 { y: 0, opacity: 1, duration: reducedMotion ? 0.04 : 0.4 }
                             );
-                            window.gsap.fromTo(
+                            gsap.fromTo(
                                 title,
                                 { y: 32, opacity: 0 },
                                 { y: 0, opacity: 1, duration: reducedMotion ? 0.04 : 0.44, delay: reducedMotion ? 0 : 0.04 }
                             );
-                            window.gsap.fromTo(
+                            gsap.fromTo(
                                 lines,
                                 { y: 44, opacity: 0 },
                                 {
@@ -686,7 +588,7 @@
                                     delay: reducedMotion ? 0 : 0.08,
                                 }
                             );
-                            window.gsap.fromTo(
+                            gsap.fromTo(
                                 close,
                                 { x: 26, opacity: 0 },
                                 { x: 0, opacity: 1, duration: reducedMotion ? 0.04 : 0.34 }
@@ -696,9 +598,10 @@
                 }
 
                 close() {
-                    if (!this.zoom.active) return;
+                    if (!this.zoom.active || this.zoom.closing) return;
 
                     const current = this.zoom;
+                    current.closing = true;
                     const overlayAnchor = current.overlay;
                     const lines = [...description.querySelectorAll(
                         '.immersive-description-line'
@@ -706,7 +609,7 @@
 
                     overlayAnchor.style.pointerEvents = 'none';
 
-                    window.gsap.to(
+                    gsap.to(
                         [number, title, ...lines, close],
                         {
                             y: -12,
@@ -716,17 +619,17 @@
                         }
                     );
 
-                    window.gsap.to(overlay, {
+                    gsap.to(overlay, {
                         opacity: 0,
                         duration: reducedMotion ? 0.03 : 0.18,
                     });
 
-                    window.gsap.to(split, {
+                    gsap.to(split, {
                         opacity: 0,
                         duration: reducedMotion ? 0.03 : 0.25,
                     });
 
-                    window.Flip.fit(
+                    Flip.fit(
                         overlayAnchor,
                         current.item.element,
                         {
@@ -761,7 +664,7 @@
                 }
 
                 setZoom(value, button) {
-                    if (this.zoom.active) return;
+                    if (this.introPlaying || this.zoom.active) return;
 
                     const zoom = Math.max(0.25, Math.min(1, value));
                     const oldZoom = this.cfg.zoom;
@@ -778,7 +681,7 @@
                     const x = viewport.clientWidth / 2 - oldCenter.x * zoom;
                     const y = viewport.clientHeight / 2 - oldCenter.y * zoom;
 
-                    window.gsap.to(wrap, {
+                    gsap.to(wrap, {
                         scale: zoom,
                         x,
                         y,
@@ -786,8 +689,8 @@
                         ease: 'power3.inOut',
                         onComplete: () => {
                             this.last = {
-                                x: window.gsap.getProperty(wrap, 'x'),
-                                y: window.gsap.getProperty(wrap, 'y'),
+                                x: gsap.getProperty(wrap, 'x'),
+                                y: gsap.getProperty(wrap, 'y'),
                             };
                             this.initDrag();
                         },
@@ -806,7 +709,7 @@
                 }
 
                 fit() {
-                    if (this.zoom.active) return;
+                    if (this.introPlaying || this.zoom.active) return;
 
                     this.cfg.zoom = 1;
                     this.cfg.gap = this.getGap(1);
@@ -823,7 +726,7 @@
 
                     const center = this.centerPosition();
 
-                    window.gsap.to(wrap, {
+                    gsap.to(wrap, {
                         scale: zoom,
                         x: center.x,
                         y: center.y,
@@ -841,12 +744,12 @@
                 }
 
                 relayout() {
-                    if (root.classList.contains('is-static-fallback')) return;
+                    if (this.introPlaying) return;
 
                     if (this.zoom.active) {
                         const overlayAnchor = this.zoom.overlay;
                         if (overlayAnchor) {
-                            window.Flip.fit(overlayAnchor, target, {
+                            Flip.fit(overlayAnchor, target, {
                                 absolute: true,
                                 duration: 0,
                             });
@@ -884,7 +787,6 @@
                 }
             }
 
-            const itemOrArray = (item) => item;
             const gallery = new Gallery();
 
             // Mobile touch contract:
@@ -938,8 +840,12 @@
                 gallery.open(model);
             }, true);
 
+            root.addEventListener('pointercancel', () => {
+                mobileTapStart = null;
+            });
+
             root.addEventListener('click', (event) => {
-                if (mobileTapHandledUntil > performance.now()) {
+                if (event.target.closest?.('.immersive-grid-item') && mobileTapHandledUntil > performance.now()) {
                     event.preventDefault();
                     event.stopPropagation();
                     mobileTapHandledUntil = 0;
@@ -1015,14 +921,7 @@
             gallery.init();
         };
 
-        ensureGsap().then((ready) => {
-            if (!ready) {
-                renderStaticFallback();
-                return;
-            }
-
-            initGallery();
-        });
+        initGallery();
     };
 
     if (document.readyState === 'loading') {

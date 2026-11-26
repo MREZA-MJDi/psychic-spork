@@ -29,17 +29,24 @@ class StoreCatalogPaginationTest extends TestCase
     {
         Product::factory()->count(7)->create();
 
-        $this->get(route('products.index', [
+        $response = $this->get(route('products.index', [
             'per_page' => 6,
             'sort' => 'name_asc',
             'page' => 2,
-        ]))
-            ->assertOk()
+            'tracking' => 'campaign',
+        ]));
+
+        $response->assertOk()
+            ->assertSee('<input type="hidden" name="per_page" value="6">', false)
+            ->assertDontSee('name="tracking"', false)
             ->assertViewHas('products', function ($products): bool {
+                parse_str(parse_url($products->url(1), PHP_URL_QUERY), $query);
+
                 return $products->total() === 7
                     && $products->count() === 1
                     && $products->currentPage() === 2
-                    && $products->perPage() === 6;
+                    && $products->perPage() === 6
+                    && $query === ['sort' => 'name_asc', 'per_page' => '6', 'page' => '1'];
             });
     }
 

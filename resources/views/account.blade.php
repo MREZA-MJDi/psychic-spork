@@ -69,7 +69,7 @@
             </div>
         </div>
 
-        <div class="account-card account-card--soft">
+        <div class="account-card account-card--soft" id="account-orders">
             <span class="eyebrow">ORDER HISTORY</span>
             <h3>سفارش‌های اخیر</h3>
             @if($orders->isNotEmpty())

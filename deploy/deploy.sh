@@ -13,33 +13,37 @@ php -r 'exit(PHP_VERSION_ID >= 80200 ? 0 : 1);' || fail 'PHP 8.2+ is required; P
 node -e 'const [a,b]=process.versions.node.split(".").map(Number); process.exit((a>22 || (a===22 && b>=12) || (a===20 && b>=19)) ? 0 : 1)' \
     || fail 'Vite 7 requires Node.js 20.19+ or 22.12+; use a supported LTS release.'
 
-php artisan about --only=environment | grep -q 'production' || fail 'APP_ENV must be production.'
+grep -Eq '^APP_ENV=production$' .env || fail 'APP_ENV must be production.'
 grep -Eq '^APP_DEBUG=false$' .env || fail 'Set APP_DEBUG=false in .env.'
 grep -Eq '^DB_CONNECTION=mysql$' .env || fail 'Set DB_CONNECTION=mysql in .env.'
 grep -Eq '^APP_KEY=base64:.+' .env || fail 'Generate APP_KEY once with php artisan key:generate.'
 
 composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
 npm ci --no-audit --no-fund
-npm run build
-[[ -s public/build/manifest.json ]] || fail 'Vite build did not produce public/build/manifest.json.'
-
+build_dir="$(mktemp -d storage/framework/vite-build.XXXXXX)"
 maintenance=0
 cleanup() {
     code=$?
+    rm -rf -- "$build_dir"
     if [[ "$maintenance" == 1 ]]; then php artisan up || true; fi
     exit "$code"
 }
 trap cleanup EXIT
 
+npm run build -- --outDir "$(realpath "$build_dir")"
+[[ -s "$build_dir/manifest.json" && -d "$build_dir/assets" ]] || fail 'Vite build output is incomplete.'
+# Keep previous fingerprints available to tabs opened before this release.
+mkdir -p public/build/assets
+cp -a "$build_dir/assets/." public/build/assets/
+
 php artisan down --retry=60
 maintenance=1
 php artisan migrate --force
 php artisan storage:link --force
-php artisan optimize:clear
 php artisan optimize
+mv "$build_dir/manifest.json" public/build/manifest.json
 php artisan queue:restart
 php artisan up
 maintenance=0
-trap - EXIT
 
 printf 'Janan deploy finished. Verify /up and the storefront before announcing release.\n'
