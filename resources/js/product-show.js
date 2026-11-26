@@ -10,7 +10,6 @@ import { persianDigits } from './persian-digits.js';
     const galleryMain = gallery?.querySelector('[data-gallery-main]');
     const galleryThumbs = [...(gallery?.querySelectorAll('[data-gallery-thumb]') || [])];
     const galleryCurrent = gallery?.querySelector('[data-gallery-current]');
-    const galleryMode = gallery?.querySelector('[data-gallery-mode]');
     const galleryTotal = gallery?.querySelector('[data-gallery-total]');
 
 
@@ -22,10 +21,8 @@ import { persianDigits } from './persian-digits.js';
 
     const price = root.querySelector('[data-product-price]');
     const regularPrice = root.querySelector('[data-product-regular-price]');
-    const wholesalePrice = root.querySelector('[data-product-wholesale-price]');
     const stock = root.querySelector('[data-product-stock]');
-    const skuNodes = [...document.querySelectorAll('[data-product-sku]')];
-    const variantLabel = root.querySelector('[data-product-variant-label]');
+    const variantLabels = document.querySelectorAll('[data-product-variant-label]');
     const addButton = root.querySelector('[data-product-add-button]');
     const addLabel = root.querySelector('[data-product-add-label]');
 
@@ -56,11 +53,9 @@ import { persianDigits } from './persian-digits.js';
         const isLowStock = button.dataset.variantLowStock === '1';
         const onSale = button.dataset.variantSale === '1';
         const variantPrice = Number(button.dataset.variantPrice || 0);
-        const variantWholesale = button.dataset.variantWholesale || '';
         const regular = Number(button.dataset.variantRegular || 0);
         const action = button.dataset.variantAction || '';
         const label = button.dataset.variantLabel || '';
-        const variantSku = button.dataset.variantSku || '';
         const variantImage = button.dataset.variantImage || '';
         const variantImageAlt = button.dataset.variantImageAlt || '';
 
@@ -78,19 +73,9 @@ import { persianDigits } from './persian-digits.js';
             regularPrice.hidden = !onSale;
         }
 
-        if (wholesalePrice) {
-            wholesalePrice.textContent = variantWholesale
-                ? `عمده: ${formatMoney(variantWholesale)} تومان`
-                : '';
-            wholesalePrice.hidden = !variantWholesale;
-        }
 
-        if (variantLabel) {
-            variantLabel.textContent = label || 'انتخاب نشده';
-        }
-
-        skuNodes.forEach((node) => {
-            node.textContent = variantSku || '—';
+        variantLabels.forEach((node) => {
+            node.textContent = label || 'انتخاب نشده';
         });
 
         if (galleryMain && variantImage) {
@@ -100,10 +85,6 @@ import { persianDigits } from './persian-digits.js';
                 item.classList.remove('is-active');
                 item.setAttribute('aria-pressed', 'false');
             });
-
-            if (galleryMode) {
-                galleryMode.textContent = 'VARIANT';
-            }
 
             if (galleryCurrent) {
                 galleryCurrent.textContent = persianDigits(String(button.dataset.variantIndex || '01').padStart(2, '0'));
@@ -176,10 +157,6 @@ import { persianDigits } from './persian-digits.js';
                 item.classList.toggle('is-active', active);
                 item.setAttribute('aria-pressed', String(active));
             });
-
-            if (galleryMode) {
-                galleryMode.textContent = 'PRODUCT';
-            }
 
             if (galleryCurrent) {
                 galleryCurrent.textContent = thumb.dataset.galleryIndex || '01';

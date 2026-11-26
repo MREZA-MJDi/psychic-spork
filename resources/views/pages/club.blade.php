@@ -1,6 +1,6 @@
 @extends('layouts.store')
 
-@section('title', 'باشگاه مشتریان DrClubz — ' . ($siteBrandNameFa ?? 'جانان'))
+@section('title', 'باشگاه مشتریان — ' . ($siteBrandNameFa ?? 'جانان'))
 
 @section('content')
 <div class="store-page club-page">

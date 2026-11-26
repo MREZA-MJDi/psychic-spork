@@ -6,7 +6,7 @@
     <section class="page-hero page-hero--premium">
         <div class="container page-hero__layout">
             <div>
-                <span class="eyebrow">JANAN / RETURNS</span>
+
                 <h1>شرایط<br><em>مرجوعی.</em></h1>
                 <p>
                     سیاست مرجوعی باید بر اساس قوانین واقعی فروشگاه تعریف شود؛ این صفحه از ساختن مقررات فرضی خودداری می‌کند.
@@ -15,7 +15,7 @@
 
             <div class="page-hero__stat">
                 <b>۰۳</b>
-                <span>RETURN FLOW</span>
+
             </div>
         </div>
     </section>
@@ -24,12 +24,12 @@
         <div class="container">
 
             <div class="store-page__intro">
-                <span class="eyebrow">RETURN / POLICY</span>
+
                 <h2>مسیر مرجوعی باید روشن و قابل پیگیری باشد.</h2>
             </div>
 
             <div class="customer-action-strip customer-action-strip--spaced">
-                <div class="customer-action-strip__copy"><small>JANAN / RETURN PATH</small><strong>سیاست واقعی را ببین و در صورت نیاز با پشتیبانی ارتباط بگیر.</strong></div>
+                <div class="customer-action-strip__copy"><strong>سیاست واقعی را ببین و در صورت نیاز با پشتیبانی ارتباط بگیر.</strong></div>
                 <div class="customer-action-strip__actions"><a class="button button--ghost" href="{{ route('faq') }}">سوالات متداول</a><a class="button button--primary" href="{{ route('about') }}#contact">پشتیبانی</a></div>
             </div>
 

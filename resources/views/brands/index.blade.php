@@ -1,6 +1,6 @@
 @extends('layouts.store')
 
-@section('title','برندها — '.($siteBrandNameLatin ?? 'Janan'))
+@section('title','برندها — '.($siteBrandNameFa ?? 'جانان'))
 
 @section('content')
 <div class="catalog-page catalog-page--brands">
@@ -8,7 +8,7 @@
     <section class="catalog-masthead catalog-masthead--directory catalog-masthead--brands">
         <div class="container">
             <div class="catalog-masthead__top">
-                <span class="eyebrow">{{ $siteBrandNameLatin }} / BRANDS / 03</span>
+
 
                 <div class="catalog-masthead__stat">
                     <strong>{{ \App\Support\PersianNumber::format($brands->total()) }}</strong>
@@ -38,7 +38,7 @@
 
             <div class="customer-action-strip customer-action-strip--spaced">
                 <div class="customer-action-strip__copy">
-                    <small>{{ $siteBrandNameLatin }} / BRAND MAP</small>
+
                     <strong>هویت برند را ببین و بعد مستقیم وارد محصولاتش شو.</strong>
                 </div>
                 <div class="customer-action-strip__actions">
@@ -49,7 +49,7 @@
 
             <header class="directory-intro">
                 <div>
-                    <span class="eyebrow">MEET THE HOUSES</span>
+
                     <h2>نام‌ها، لوگوها، شخصیت‌ها.</h2>
                 </div>
 

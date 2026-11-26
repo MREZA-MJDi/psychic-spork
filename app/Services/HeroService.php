@@ -161,7 +161,7 @@ final class HeroService
                     'title' => $product->name,
                     'description' => Str::limit(trim(strip_tags($description)), 120),
                     'category' => $product->category?->name,
-                    'brand' => $product->brand?->name ?? 'JANAN',
+                    'brand' => $product->brand?->name ?? 'جانان',
                     'url' => route('products.show', $product, false),
                 ];
             })

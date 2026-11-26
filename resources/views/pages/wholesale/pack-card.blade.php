@@ -15,7 +15,7 @@
     </div>
     <div class="wholesale-pack-card__top">
         <div>
-            <span class="wholesale-pack-card__eyebrow">WHOLESALE PACK</span>
+
             <h3>{{ \App\Support\PersianNumber::digits($pack->name) }}</h3>
         </div>
         <strong>{{ \App\Support\PersianNumber::format($pack->pack_quantity) }} عدد</strong>
@@ -32,16 +32,16 @@
                 <span class="wholesale-pack-item__media">
                     <x-store.image
                         :src="$v?->primaryGalleryMedia?->url ?? $v?->product?->primaryGalleryMedia?->url"
-                        :alt="$v?->display_name ?? $v?->product?->name ?? 'واریانت پک عمده'"
+                        :alt="$v?->customer_label ?? $v?->product?->name ?? 'مدل پک عمده'"
                         fallback-tag="span"
                         fallback-class=""
-                        fallback="JANAN"
+                        fallback="جانان"
                     />
                 </span>
                 <span class="wholesale-pack-item__copy">
                     <strong>{{ $v?->product?->name ?? 'محصول' }}</strong>
-                    <span>{{ $v?->product?->brand?->name ?? 'بدون برند' }} · {{ $v?->display_name ?? 'واریانت' }}</span>
-                    <small>SKU {{ $v?->sku ?? '—' }} · {{ $v?->stock !== null ? 'موجودی '.\App\Support\PersianNumber::format($v->stock) : 'موجودی نامشخص' }}</small>
+                    <span>{{ $v?->product?->brand?->name ?? 'بدون برند' }} · {{ $v?->customer_label ?? 'مدل' }}</span>
+                    <small>{{ $v?->stock !== null ? 'موجودی '.\App\Support\PersianNumber::format($v->stock) : 'موجودی نامشخص' }}</small>
                 </span>
                 <b class="wholesale-pack-item__quantity">× {{ \App\Support\PersianNumber::format($item->quantity) }}</b>
             </a>

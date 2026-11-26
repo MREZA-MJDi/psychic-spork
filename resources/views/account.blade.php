@@ -5,7 +5,7 @@
 @section('content')
 <section class="page-hero page-hero--motion account-page-hero">
     <div class="container">
-        <span class="eyebrow">MY JANAN</span>
+
         <h1>حساب کاربری</h1>
         <p>{{ $user->name }} عزیز، خوش آمدی. سفارش‌ها، وضعیت چک و درخواست اعتبارت را از همین‌جا پیگیری کن.</p>
     </div>
@@ -15,7 +15,7 @@
     <div class="container account-page">
         <div class="customer-action-strip account-action-strip">
             <div class="customer-action-strip__copy">
-                <small>MY JANAN / QUICK ACTIONS</small>
+
                 <strong>برای خرید چکی، درخواست اعتبار ثبت کن؛ خرید عمده آنلاین هم برای همه باز است.</strong>
             </div>
             <div class="customer-action-strip__actions">
@@ -27,7 +27,7 @@
 
         <section class="account-cheque-card" aria-labelledby="account-cheque-title">
             <div class="account-cheque-card__copy">
-                <span class="eyebrow">CHEQUE PURCHASE</span>
+
                 <h2 id="account-cheque-title">وضعیت درخواست خرید چکی</h2>
                 @if($chequePermission?->isApproved())
                     <p>درخواستت تأیید شده است. سقف مجاز هر سفارش: <strong>{{ $chequePermission->max_order_amount !== null ? \App\Support\PersianNumber::format((float) $chequePermission->max_order_amount) . ' تومان' : 'بدون سقف تعیین‌شده' }}</strong>.</p>
@@ -48,7 +48,7 @@
 
         <div class="account-card">
             <div>
-                <span class="eyebrow">PROFILE</span>
+
                 <h2>{{ \App\Support\PersianNumber::digits($user->name) }}</h2>
                 <p>{{ $user->phone }}{{ $user->email ? ' · ' . $user->email : '' }}</p>
             </div>
@@ -70,7 +70,7 @@
         </div>
 
         <div class="account-card account-card--soft" id="account-orders">
-            <span class="eyebrow">ORDER HISTORY</span>
+
             <h3>سفارش‌های اخیر</h3>
             @if($orders->isNotEmpty())
                 <div class="account-orders">

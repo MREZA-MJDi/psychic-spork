@@ -57,7 +57,7 @@
                 class="store-nav__link {{ $isClub ? 'is-active' : '' }}"
                 @if($isClub) aria-current="page" @endif
             >
-                DrClubz
+                باشگاه مشتریان
             </a>
 
 
@@ -142,9 +142,7 @@
                 >
                 <span class="cart-quick-preview__caret" aria-hidden="true"></span>
 
-                <div class="cart-quick-preview__media" data-cart-preview-image>
-                    <span>JANAN</span>
-                </div>
+                <div class="cart-quick-preview__media" data-cart-preview-image><span>جانان</span></div>
 
                 <div class="cart-quick-preview__copy">
                     <small>به سبد خرید اضافه شد</small>
@@ -201,7 +199,7 @@
                         type="search"
                         name="q"
                         value="{{ request('q') }}"
-                        placeholder="نام محصول، برند، دسته یا SKU را جستجو کن…"
+                        placeholder="نام محصول، برند یا دسته را جستجو کن…"
                         autocomplete="off"
                         enterkeyhint="search"
                         aria-label="جستجوی محصولات"

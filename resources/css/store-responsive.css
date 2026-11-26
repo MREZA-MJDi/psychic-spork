@@ -3449,7 +3449,6 @@ animation-duration:
 }
 
 .product-detail-v2 .product-detail-v2__identity a,
-.product-detail-v2 .product-detail-v2__sku,
 .product-detail-v2 .product-detail-v2__section-label > :is(span, small),
 .product-detail-v2 .product-detail-v2__stock,
 .product-detail-v2 .product-purchase-form__hint,
@@ -3460,12 +3459,6 @@ animation-duration:
 .cart-page .cart-item__meta {
     font-size: var(--commerce-label);
     line-height: 1.65;
-}
-
-.product-detail-v2 .product-detail-v2__sku {
-    color: var(--product-muted);
-    letter-spacing: normal;
-    overflow-wrap: anywhere;
 }
 
 .product-detail-v2 .product-variant-visual__copy > strong {

@@ -1,6 +1,6 @@
 @extends('layouts.store')
 
-@section('title','دسته‌بندی‌ها — '.($siteBrandNameLatin ?? 'Janan'))
+@section('title','دسته‌بندی‌ها — '.($siteBrandNameFa ?? 'جانان'))
 
 @section('content')
 <div class="catalog-page catalog-page--categories">
@@ -8,7 +8,7 @@
     <section class="catalog-masthead catalog-masthead--directory">
         <div class="container">
             <div class="catalog-masthead__top">
-                <span class="eyebrow">JANAN / COLLECTIONS / 02</span>
+
 
                 <div class="catalog-masthead__stat">
                     <strong>{{ \App\Support\PersianNumber::format($categories->total()) }}</strong>
@@ -38,7 +38,7 @@
 
             <div class="customer-action-strip customer-action-strip--spaced">
                 <div class="customer-action-strip__copy">
-                    <small>JANAN / COLLECTION MAP</small>
+
                     <strong>دسته را انتخاب کن و مستقیم وارد محصولات همان مسیر شو.</strong>
                 </div>
                 <div class="customer-action-strip__actions">
@@ -49,7 +49,7 @@
 
             <header class="directory-intro">
                 <div>
-                    <span class="eyebrow">BROWSE BY FEEL</span>
+
                     <h2>انتخاب را از تصویر شروع کن.</h2>
                 </div>
 

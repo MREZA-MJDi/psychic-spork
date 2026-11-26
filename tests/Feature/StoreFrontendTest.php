@@ -385,7 +385,9 @@ class StoreFrontendTest extends TestCase
                 ->assertSee('product-detail-v2__purchase', false)
                 ->assertSee('محصول جزئیات تست')
                 ->assertSee('۱۲۵٬۰۰۰', false)
-                ->assertSee('DETAIL-', false)
+                ->assertDontSee('DETAIL-', false)
+                ->assertSee('دربارهٔ محصول')
+                ->assertSee('مدل اصلی')
                 ->assertSee('افزودن به سبد خرید');
         } finally {
             Model::preventLazyLoading(false);

@@ -16,9 +16,7 @@
         <header class="section-head home-brands__head">
 
             <div class="home-brands__intro">
-                <span class="eyebrow">
-                    HOUSES / 06
-                </span>
+
 
                 <h2 id="{{ $titleId }}">
                     برندهای جانان.
@@ -87,7 +85,7 @@
         @else
 
             <div class="empty-state">
-                <span class="eyebrow">HOUSES / EMPTY</span>
+
 
                 <h2>
                     برندی برای نمایش نیست.

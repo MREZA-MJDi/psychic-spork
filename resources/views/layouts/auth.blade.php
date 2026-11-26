@@ -5,13 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="robots" content="noindex,nofollow">
-    <title>@yield('title') — {{ config('app.store_name', 'JANAN') }}</title>
+    <title>@yield('title') — جانه جانان</title>
     @vite(['resources/css/auth.css', 'resources/js/app.js'])
 </head>
 <body class="auth-page">
     <main class="auth-card">
         <a class="auth-brand" href="{{ route('home') }}" aria-label="بازگشت به فروشگاه">
-            {{ config('app.store_name', 'JANAN') }}
+            جانه جانان
         </a>
         <h1>@yield('title')</h1>
 

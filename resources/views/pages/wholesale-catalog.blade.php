@@ -1,6 +1,6 @@
 @extends('layouts.store')
 
-@section('title', 'کاتالوگ خرید عمده — ' . ($siteBrandNameLatin ?? 'Janan'))
+@section('title', 'کاتالوگ خرید عمده — ' . ($siteBrandNameFa ?? 'جانان'))
 
 @section('content')
 <div class="wholesale-page">
@@ -8,7 +8,7 @@
         <div class="container">
             <header class="wholesale-catalog__head">
                 <div>
-                    <span class="eyebrow">JANAN / WHOLESALE CATALOG</span>
+
                     <h1>کاتالوگ محصولات عمده</h1>
                     <p>محصول را جستجو کن؛ تعداد تنوع‌های دارای قیمت عمده و بازه قیمت هر محصول را ببین.</p>
                 </div>
@@ -17,7 +17,7 @@
 
             <form method="GET" action="{{ route('wholesale.catalog') }}" class="customer-surface wholesale-catalog__filters">
                 <label>
-                    جستجوی محصول یا SKU
+                    جستجوی محصول
                     <input type="search" name="q" value="{{ $filters['q'] ?? '' }}" maxlength="120" placeholder="نام محصول، برند یا کد کالا…">
                 </label>
                 <label>
@@ -63,7 +63,7 @@
         <div class="container">
             <div class="wholesale-products-head">
                 <div>
-                    <span class="eyebrow">WHOLESALE PRODUCTS</span>
+
                     <h2>محصولات دارای قیمت عمده</h2>
                 </div>
                 <span>{{ \App\Support\PersianNumber::format($products->total()) }} محصول</span>

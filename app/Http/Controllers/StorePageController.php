@@ -124,8 +124,8 @@ class StorePageController extends Controller
         return view('pages.club', [
             'isCustomer' => $request->user()?->isCustomer() ?? false,
             'seo' => $seo->page(
-                'DrClubz — باشگاه مشتریان ' . config('app.store_name', 'Janan'),
-                'باشگاه مشتریان DrClubz؛ مسیر اختصاصی اعضای جانان برای خرید، پیگیری سفارش و دسترسی به مزایای مشتریان.',
+                'باشگاه مشتریان جانان',
+                'باشگاه مشتریان جانان برای پیگیری سفارش، دسترسی به حساب کاربری، خرید عمده و ارتباط با پشتیبانی.',
                 route('club')
             ),
         ]);

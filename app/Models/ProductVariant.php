@@ -81,12 +81,17 @@ class ProductVariant extends Model
 
     public function getDisplayNameAttribute(): string
     {
-        $parts = array_values(array_filter([
-            $this->size,
-            $this->color,
-        ]));
+        return $this->optionLabel() ?: ($this->sku ?: $this->product?->name ?: 'Variant');
+    }
 
-        return $parts ? implode(' / ', $parts) : ($this->sku ?: $this->product?->name ?: 'Variant');
+    public function getCustomerLabelAttribute(): string
+    {
+        return $this->optionLabel() ?: 'مدل اصلی';
+    }
+
+    private function optionLabel(): string
+    {
+        return implode(' / ', array_filter([$this->size, $this->color]));
     }
 
     public function scopeActive($query) { return $query->where('is_active', true); }

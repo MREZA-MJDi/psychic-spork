@@ -14,7 +14,7 @@
     <section class="cart-drawer__panel" role="dialog" aria-modal="true">
         <header class="cart-drawer__head">
             <div>
-                <span class="eyebrow">JANAN / BAG</span>
+
                 <h2 id="cart-drawer-title">سبد خرید شما</h2>
             </div>
 

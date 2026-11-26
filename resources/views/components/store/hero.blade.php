@@ -88,7 +88,6 @@
     <footer class="immersive-footer">
         <div class="immersive-footer__info">
             <p>جانان · انتخاب‌شده برای تو</p>
-            <p>{{ config('app.url') ? parse_url(config('app.url'), PHP_URL_HOST) : 'JANAN' }}</p>
         </div>
         <div class="immersive-footer__counter">
             <span>گالری تعاملی محصولات</span>

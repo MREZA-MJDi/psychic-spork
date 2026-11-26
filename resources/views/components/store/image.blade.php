@@ -5,7 +5,7 @@
     'loading' => 'lazy',
     'decoding' => 'async',
     'fetchpriority' => null,
-    'fallback' => 'JANAN',
+    'fallback' => 'جانان',
     'fallbackClass' => 'store-media-placeholder',
     'fallbackTag' => 'div',
 ])

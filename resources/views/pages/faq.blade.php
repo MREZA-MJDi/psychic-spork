@@ -6,7 +6,7 @@
     <section class="page-hero page-hero--premium">
         <div class="container page-hero__layout">
             <div>
-                <span class="eyebrow">JANAN / FAQ</span>
+
                 <h1>سوالات<br><em>متداول.</em></h1>
                 <p>
                     پاسخ‌های کوتاه و مستقیم درباره مسیر خرید و داده‌هایی که همین حالا در فروشگاه فعال‌اند.
@@ -15,7 +15,7 @@
 
             <div class="page-hero__stat">
                 <b>۰۳</b>
-                <span>COMMON QUESTIONS</span>
+
             </div>
         </div>
     </section>
@@ -23,7 +23,7 @@
     <section class="section-block section-block--compact">
         <div class="container">
             <div class="customer-action-strip">
-                <div class="customer-action-strip__copy"><small>JANAN / NEED HELP</small><strong>اول جواب را ببین؛ بعد مستقیم به مسیر خرید برگرد.</strong></div>
+                <div class="customer-action-strip__copy"><strong>اول جواب را ببین؛ بعد مستقیم به مسیر خرید برگرد.</strong></div>
                 <div class="customer-action-strip__actions">
                     <a class="button button--primary" href="{{ route('products.index') }}">مشاهده محصولات</a>
                     <a class="button button--ghost" href="{{ route('about') }}#contact">تماس</a>
@@ -36,7 +36,7 @@
         <div class="container store-page__faq">
 
             <div class="store-page__intro">
-                <span class="eyebrow">NEED TO KNOW</span>
+
                 <h2>قبل از خرید، این سه نکته را بدان.</h2>
             </div>
 

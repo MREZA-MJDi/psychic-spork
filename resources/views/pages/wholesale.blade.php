@@ -1,6 +1,6 @@
 @extends('layouts.store')
 
-@section('title', 'خرید عمده — ' . ($siteBrandNameLatin ?? 'Janan'))
+@section('title', 'خرید عمده — ' . ($siteBrandNameFa ?? 'جانان'))
 
 @section('content')
 <div class="wholesale-page">

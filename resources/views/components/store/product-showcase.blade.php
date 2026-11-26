@@ -14,7 +14,7 @@
 
         <header class="home-product-section__head">
             <div>
-                <span class="eyebrow">JANAN / EDIT / 03</span>
+
 
                 <h2 id="home-products-title">
                     محصولات منتخب
@@ -106,7 +106,7 @@
         @else
 
             <div class="empty-state">
-                <span class="eyebrow">JANAN COLLECTION</span>
+
 
                 <h2>
                     هنوز محصول فعالی برای نمایش وجود ندارد.

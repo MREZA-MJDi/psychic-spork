@@ -26,8 +26,8 @@
             </div>
 
             <div class="about-page__mark" aria-hidden="true">
-                <span>J</span>
-                <small>THE HOUSE<br>OF JANAN</small>
+                <span>جانان</span>
+
             </div>
         </div>
     </section>

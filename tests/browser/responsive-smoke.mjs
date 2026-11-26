@@ -48,6 +48,22 @@ try {
           const bounds = await map.boundingBox();
           if (!bounds || bounds.x < -2 || bounds.x + bounds.width > width + 2) throw new Error('Contact map outside viewport');
         }
+        if (path === '/products/ui-qa-product') {
+          const details = page.locator('.product-information');
+          if (await details.getByRole('heading', { name: 'دربارهٔ محصول' }).count() !== 1) {
+            throw new Error('Missing product information widget');
+          }
+          if (await page.locator('[data-product-sku], [data-variant-sku]').count()) {
+            throw new Error('Internal SKU sent to product page');
+          }
+          const specs = details.locator('details').filter({ hasText: 'مشخصات محصول' });
+          if (!await specs.evaluate(element => element.open)) {
+            await specs.locator('summary').click();
+          }
+          if (!await specs.getByText('مدل منتخب', { exact: true }).isVisible()) {
+            throw new Error('Product specifications did not open');
+          }
+        }
         if (path === '/drclubz') {
           const footer = page.locator('.store-footer');
           if (await page.locator('.store-header .brand__latin').count()) throw new Error('Unexpected Latin header wordmark');

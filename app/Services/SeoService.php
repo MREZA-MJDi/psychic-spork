@@ -54,7 +54,6 @@ final class SeoService
                 '@context' => 'https://schema.org',
                 '@type' => 'Product',
                 'name' => $product->name,
-                'sku' => $variant?->sku,
                 'description' => $description,
                 'image' => array_values(array_filter([$image])),
                 'offers' => [
