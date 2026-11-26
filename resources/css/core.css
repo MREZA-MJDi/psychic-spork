@@ -302,3 +302,35 @@ a.janan-category-card:focus-visible { outline: 2px solid var(--janan-pink-ink); 
 @media (prefers-reduced-motion: reduce) { .janan-category-card { transition: none; } a.janan-category-card:hover { transform: none; } }
 
 .janan-category-card__arrow svg { width: 18px; height: 18px; }
+
+/* One pagination system for admin and storefront, independent of Tailwind. */
+.store-pagination,.admin-pagination { display:block; min-width:0; max-width:100%; margin-block:24px 0; }
+.admin-pagination { padding:12px; }
+.janan-pagination {
+    display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap;
+    gap:14px 20px; direction:rtl; width:100%; min-width:0;
+    padding:clamp(12px,2vw,20px); border:1px solid var(--janan-line-strong);
+    border-radius:16px; background:#fff; color:var(--janan-ink-strong);
+    font-family:var(--janan-font); box-shadow:0 5px 18px rgba(45,55,65,.04);
+}
+.janan-pagination__summary { display:grid; gap:3px; min-width:0; }
+.janan-pagination__summary strong { font-size:13px; font-weight:750; }
+.janan-pagination__summary small { color:var(--janan-ink-soft); font-size:12px; }
+.janan-pagination__controls,.janan-pagination__numbers { display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:6px; min-width:0; }
+.janan-pagination .janan-pagination__button {
+    display:inline-flex; align-items:center; justify-content:center; min-width:44px; min-height:44px;
+    padding:8px 11px; margin:0; border:1px solid #e0e5e8; border-radius:10px;
+    background:#fff; color:var(--janan-ink-strong); font:600 13px/1.4 var(--janan-font);
+    text-decoration:none; box-shadow:none;
+}
+.janan-pagination a.janan-pagination__button:hover { color:#93475f; border-color:#c4869a; background:#fcf5f7; }
+.janan-pagination .is-current { background:#33434c; color:#fff; border-color:#33434c; font-weight:800; }
+.janan-pagination .is-disabled { color:#77828a; background:#f4f6f7; border-color:#e4e8ea; cursor:default; }
+.janan-pagination .janan-pagination__dots { padding-inline:3px; color:var(--janan-ink-soft); font-size:14px; }
+.janan-pagination a:focus-visible { outline:2px solid #93475f; outline-offset:3px; }
+@media(max-width:700px) {
+    .janan-pagination { flex-direction:column; align-items:stretch; gap:10px; text-align:center; }
+    .janan-pagination__controls { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); }
+    .janan-pagination__numbers { grid-column:1/-1; grid-row:1; }
+    .janan-pagination__direction { width:100%; }
+}

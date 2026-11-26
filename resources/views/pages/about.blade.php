@@ -183,8 +183,12 @@
         </div>
     </section>
 
-    <section id="contact" class="store-page__section contact-page">
+    <section id="contact" class="store-page__section contact-page contact-page--refined" aria-labelledby="contact-title">
         <div class="container">
+            <header class="contact-intro">
+                <div><small>پشتیبانی جانان</small><h2 id="contact-title">تماس با ما</h2><p>برای راهنمایی خرید، پیگیری سفارش یا همکاری، از مسیر مناسب با ما در ارتباط باشید.</p></div>
+                <a class="button button--ghost" href="{{ route('faq') }}">سوالات متداول</a>
+            </header>
 
             @if(session('success'))
                 <div class="contact-alert contact-alert--success" role="status">
@@ -215,7 +219,7 @@
                 <section class="contact-form-card">
                     <div class="contact-form-card__head">
                         <div>
-                            <h2>تماس با جانان</h2>
+                            <h2>ارسال پیام</h2>
                             <p>
                                 برای پرسش دربارهٔ محصول، سفارش یا خرید عمده به پشتیبانی پیام بده.
                             </p>
@@ -255,13 +259,13 @@
                         <div class="contact-form__foot">
                             <p>اطلاعات این فرم فقط برای پیگیری همین درخواست استفاده می‌شود.</p>
                             <button class="button button--primary" type="submit">
-                                ارسال پیام <span aria-hidden="true">↗</span>
+                                ارسال پیام
                             </button>
                         </div>
                     </form>
                 </section>
 
-                <aside class="contact-info-card">
+                <aside class="contact-side"><section class="contact-info-card">
                     <div>
                         <h2>راه‌های ارتباط</h2>
                         <p>اگر تماس مستقیم برایت راحت‌تر است، از یکی از مسیرهای زیر استفاده کن.</p>
@@ -308,8 +312,22 @@
                             </div>
                         </div>
                     </div>
+                </section>
+                @if(filled($contactStore['address'] ?? null))
+                    @php($mapQuery = rawurlencode($contactStore['address']))
+                    <section class="contact-map-card" aria-labelledby="contact-map-title">
+                        <div><h3 id="contact-map-title">موقعیت فروشگاه</h3><p>{{ $contactStore['address'] }}</p></div>
+                        <iframe title="نقشه نشانی جانان" src="https://maps.google.com/maps?q={{ $mapQuery }}&amp;output=embed" loading="lazy" referrerpolicy="no-referrer" allowfullscreen></iframe>
+                        <a class="button button--ghost" href="https://www.google.com/maps/search/?api=1&amp;query={{ $mapQuery }}" target="_blank" rel="noopener noreferrer">مشاهده نشانی در گوگل مپ</a>
+                    </section>
+                @endif
                 </aside>
             </div>
+            <section class="contact-trust" aria-label="راهنمای خرید و پیگیری سفارش">
+                <a href="{{ route('shipping') }}"><strong>روش‌های ارسال</strong><small>اطلاعات ارسال سفارش‌ها</small></a>
+                <a href="{{ route('returns') }}"><strong>شرایط بازگشت</strong><small>مرور سیاست‌های بازگشت کالا</small></a>
+                <a href="{{ route('account') }}"><strong>پیگیری سفارش</strong><small>ورود به حساب و مشاهده سفارش‌ها</small></a>
+            </section>
         </div>
     </section>
 

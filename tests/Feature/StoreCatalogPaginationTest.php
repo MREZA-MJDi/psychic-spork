@@ -195,4 +195,17 @@ class StoreCatalogPaginationTest extends TestCase
             ->assertViewHas('children', fn ($children) => $children->modelKeys() === [$child->id])
             ->assertViewHas('products', fn ($products) => $products->total() === 1);
     }
+    public function test_default_and_explicit_pagination_share_persian_controls(): void
+    {
+        Product::factory()->count(25)->create();
+        $this->get(route('products.index', ['page' => 2, 'sort' => 'name_asc']))
+            ->assertOk()->assertSee('janan-pagination__numbers', false)
+            ->assertSee('aria-current="page"', false)
+            ->assertSee('صفحه ۲ از ۳')
+            ->assertDontSee('pagination.next')->assertDontSee('Showing');
+        $paginator = new \Illuminate\Pagination\LengthAwarePaginator(range(1, 5), 20, 5, 2);
+        $html = $paginator->links()->toHtml();
+        $this->assertStringContainsString('janan-pagination__numbers', $html);
+        $this->assertStringContainsString('صفحه ۲ از ۴', $html);
+    }
 }
