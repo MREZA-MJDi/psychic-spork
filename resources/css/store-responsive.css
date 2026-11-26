@@ -3618,7 +3618,7 @@ animation-duration:
 }
 
 .wholesale-page :is(.wholesale-catalog__head h2, .wholesale-process h2, .wholesale-form-card h2),
-.contact-page :is(.contact-form-card h2, .contact-info-card h2) {
+.contact-page :is(.contact-form-card h3, .contact-info-card h3) {
     font-size: clamp(18px, 2vw, 23px);
     line-height: 1.5;
     letter-spacing: normal;
@@ -3803,7 +3803,7 @@ animation-duration:
 .contact-page--refined .contact-side { display:grid; gap:16px; min-width:0; }
 .contact-page--refined :is(.contact-form-card,.contact-info-card,.contact-map-card) { background:#fff; min-width:0; padding:clamp(16px,2.5vw,28px); border:1px solid #e0e5e8; border-radius:18px; color:var(--janan-ink-strong); box-shadow:0 10px 28px rgba(40,50,60,.045); }
 .contact-page--refined .contact-info-card { gap:14px; }
-.contact-page--refined .contact-info-card :is(h2,p,strong,a,small) { color:var(--janan-ink-strong); }
+.contact-page--refined .contact-info-card :is(h3,p,strong,a,small) { color:var(--janan-ink-strong); }
 .contact-page--refined .contact-info-item { border-top-color:#e6ebed; padding:10px 0; }
 .contact-page--refined .contact-info-item small { color:var(--janan-ink-soft); font-size:12px; }
 .contact-page--refined .contact-info-item :is(a,strong) { font-size:14px; overflow-wrap:anywhere; }

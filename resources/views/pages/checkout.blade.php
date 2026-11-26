@@ -385,8 +385,9 @@
             <a
                 class="button button--ghost checkout-back"
                 href="{{ route('cart') }}"
+                aria-label="سبد خرید"
             >
-                بازگشت به سبد
+                <x-store.icon name="basket" />
             </a>
         </aside>
 

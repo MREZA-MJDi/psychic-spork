@@ -8576,7 +8576,7 @@ outline:
     border-bottom: 1px solid var(--janan-line);
 }
 
-.contact-form-card__head h2 {
+.contact-form-card__head h3 {
     margin: 9px 0 7px;
     color: var(--janan-ink-strong);
     font-size: clamp(25px,3vw,38px);
@@ -8699,7 +8699,7 @@ outline:
     color: #b8dfee;
 }
 
-.contact-info-card h2 {
+.contact-info-card h3 {
     margin: 9px 0 7px;
     color: #fff;
     font-size: clamp(27px,3.3vw,41px);
@@ -10067,3 +10067,25 @@ body.store-body :where(a, button, input, select, textarea):focus-visible {
 .location-fields__feedback button { min-height: 36px; border: 1px solid var(--janan-line-strong); background: #fff; border-radius: 8px; color: var(--janan-ink-strong); padding: 4px 12px; }
 .location-fields__error { color: #a32848; font-size: 12px; }
 @media (max-width: 480px) { .location-fields { grid-template-columns: minmax(0,1fr); } }
+
+
+.store-link-icon {
+    display: inline-block;
+    flex: none;
+    width: 1.375rem;
+    height: 1.375rem;
+    vertical-align: middle;
+}
+
+.store-icon-link {
+    display: inline-grid;
+    width: 2.75rem;
+    height: 2.75rem;
+    place-items: center;
+}
+
+.contact-info-item > .store-icon-link {
+    display: inline-grid;
+    width: 2.75rem;
+    height: 2.75rem;
+}

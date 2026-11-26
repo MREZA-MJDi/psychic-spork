@@ -14,11 +14,15 @@ class AdminSiteContentController extends Controller
 {
     public function about(): View
     {
-        $defaults = $this->aboutDefaults();
+        $defaults = config('about');
 
         $about = collect($defaults)
             ->mapWithKeys(
-                fn ($default, $key) => [$key => SiteSetting::getValue("about.$key", $default)]
+                function ($default, $key) {
+                    $value = SiteSetting::getValue("about.$key");
+
+                    return [$key => filled($value) ? $value : $default];
+                }
             )
             ->all();
 
@@ -45,7 +49,7 @@ class AdminSiteContentController extends Controller
 
         try {
             foreach ($data as $key => $value) {
-                SiteSetting::setValue("about.$key", trim($value));
+                SiteSetting::setValue("about.$key", trim($value ?? ''));
             }
 
             return back()->with('success', 'محتوای درباره ما با موفقیت ذخیره شد.');
@@ -140,25 +144,5 @@ class AdminSiteContentController extends Controller
 
             return back()->with('error', 'تغییر وضعیت پیام انجام نشد.');
         }
-    }
-
-    private function aboutDefaults(): array
-    {
-        return [
-            "hero_title" => "انتخاب خوب،
-از شناخت شروع می‌شود.",
-            'hero_description' => 'جانان یک فروشگاه آنلاین برای انتخاب آگاهانه‌تر است؛ محصول را واضح می‌بینی، اطلاعاتش را مقایسه می‌کنی و بدون پیچیدگی به خرید می‌رسی.',
-            'story_title' => 'قرار نیست برای پیدا کردن یک محصول خوب، بین صفحه‌های شلوغ گم شوی.',
-            'story_text_1' => 'جانان با یک ایده ساده ساخته شده: تجربه خرید باید سریع، قابل فهم و قابل اعتماد باشد. برای همین ساختار فروشگاه حول سه چیز می‌چرخد؛ ارائه روشن اطلاعات، مسیر ساده انتخاب و اتصال مستقیم به داده‌های واقعی فروشگاه.',
-            'story_text_2' => 'از محصول و دسته‌بندی تا برند، سبد خرید و پرداخت، هر بخش بخشی از یک مسیر واحد است؛ نه چند صفحه جدا از هم.',
-            'principle_1_title' => 'شفافیت',
-            'principle_1_text' => 'نام، قیمت، موجودی، مشخصات و مسیر خرید باید همان‌جایی دیده شوند که کاربر به آن‌ها نیاز دارد.',
-            'principle_2_title' => 'سادگی',
-            'principle_2_text' => 'کم کردن مراحل اضافه، پیدا کردن محصول را سریع‌تر می‌کند و تصمیم‌گیری را سبک‌تر نگه می‌دارد.',
-            'principle_3_title' => 'جزئیات',
-            'principle_3_text' => 'فاصله‌ها، تایپوگرافی، حالت‌های تعاملی و بازخوردهای کوچک بخشی از خود محصول دیجیتال هستند.',
-            'cta_title' => 'از کشف شروع کن.',
-            'cta_text' => 'محصولی که دنبالش هستی را پیدا کن یا مستقیم با تیم جانان در ارتباط باش.',
-        ];
     }
 }

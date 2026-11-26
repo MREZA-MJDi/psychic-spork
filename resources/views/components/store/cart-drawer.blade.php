@@ -52,8 +52,9 @@
             <a
                 href="{{ route('cart') }}"
                 class="cart-drawer__full-link"
+                aria-label="سبد خرید"
             >
-                مشاهده سبد کامل
+                <x-store.icon name="basket" />
             </a>
         </footer>
     </section>

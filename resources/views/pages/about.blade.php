@@ -6,9 +6,8 @@
     <section class="page-hero page-hero--premium">
         <div class="container page-hero__layout">
             <div>
-                <span class="eyebrow">JANAN / ABOUT</span>
                 <h1>
-{!! nl2br(e($about['hero_title'] ?? 'انتخاب خوب،\nاز شناخت شروع می‌شود.')) !!}
+                    {!! nl2br(e($about['hero_title'])) !!}
                 </h1>
                 <p>
                     {{ $about['hero_description'] ?? '' }}
@@ -21,7 +20,7 @@
                     </a>
 
                     <a class="button button--ghost" href="{{ route('contact') }}">
-                        با ما صحبت کن
+                        تماس با پشتیبانی
                     </a>
                 </div>
             </div>
@@ -36,10 +35,10 @@
     <section class="section-block section-block--compact">
         <div class="container">
             <div class="customer-action-strip">
-                <div class="customer-action-strip__copy"><small>JANAN / START HERE</small><strong>کاتالوگ، دسته‌ها و ارتباط؛ همه در یک مسیر.</strong></div>
+                <div class="customer-action-strip__copy"><strong>محصولات را بر اساس دسته‌بندی ببینید</strong></div>
                 <div class="customer-action-strip__actions">
-                    <a class="button button--primary" href="{{ route('products.index') }}">کشف محصولات</a>
-                    <a class="button button--ghost" href="#contact">ارتباط با جانان</a>
+                    <a class="button button--primary" href="{{ route('categories.index') }}">دسته‌بندی لباس زیر</a>
+                    <a class="button button--ghost" href="{{ route('wholesale.show') }}">خرید عمده</a>
                 </div>
             </div>
         </div>
@@ -50,7 +49,7 @@
 
             <div class="about-story">
                 <div class="about-story__lead">
-                    <span class="eyebrow">A CLEARER WAY TO SHOP</span>
+
                     <h2>
                         {{ $about['story_title'] ?? '' }}
                     </h2>
@@ -69,28 +68,20 @@
 
             <div class="about-stat-grid" aria-label="آمار فعلی فروشگاه">
                 <div class="about-stat-card">
-                    <small>ACTIVE PRODUCTS</small>
                     <strong>{{ \App\Support\PersianNumber::format($aboutStats['products'] ?? 0) }}</strong>
                     <span>محصول فعال در کاتالوگ</span>
                 </div>
 
                 <div class="about-stat-card">
-                    <small>CATEGORIES</small>
                     <strong>{{ \App\Support\PersianNumber::format($aboutStats['categories'] ?? 0) }}</strong>
                     <span>دسته‌بندی فعال</span>
                 </div>
 
                 <div class="about-stat-card">
-                    <small>BRANDS</small>
                     <strong>{{ \App\Support\PersianNumber::format($aboutStats['brands'] ?? 0) }}</strong>
                     <span>برند فعال</span>
                 </div>
 
-                <div class="about-stat-card about-stat-card--dark">
-                    <small>JANAN / LIVE DATA</small>
-                    <strong>۰۱</strong>
-                    <span>یک مسیر یکپارچه از کشف تا سفارش</span>
-                </div>
             </div>
         </div>
     </section>
@@ -99,13 +90,12 @@
         <div class="container">
             <div class="about-principles__head">
                 <div>
-                    <span class="eyebrow">WHAT MATTERS</span>
-                    <h2>چیزی که پشت ظاهر فروشگاه قرار دارد.</h2>
+
+                    <h2>راهنمای خرید لباس زیر از جانان</h2>
                 </div>
 
                 <p>
-                    طراحی فقط زمانی ارزش دارد که استفاده از فروشگاه را بهتر کند.
-                    به همین دلیل، هر تصمیم بصری جانان باید به یک تصمیم کاربردی هم وصل باشد.
+                    پیش از ثبت سفارش، گزینه‌های محصول و شرایط خرید را بررسی کنید.
                 </p>
             </div>
 
@@ -142,13 +132,12 @@
 
             <div class="about-live">
                 <div class="about-live__copy">
-                    <span class="eyebrow">JANAN / LIVE CATALOG</span>
+
                     <h2>
-                        محتوای فروشگاه از داده واقعی می‌آید،
-                        نه متن نمایشی.
+                        مدل‌های لباس زیر در فروشگاه جانان
                     </h2>
                     <p>
-                        موجودی و ساختار کاتالوگ از Backend خوانده می‌شوند تا صفحه درباره ما هم بخشی از همان تجربه واقعی فروشگاه باشد.
+                        برای دیدن قیمت و گزینه‌های موجود هر مدل، صفحه محصول را باز کنید.
                     </p>
 
                     <div class="store-page__actions">
@@ -161,12 +150,16 @@
 
                 <div class="about-live__product">
                     @if($latestProduct)
-                        <span class="about-live__product-label">LATEST ACTIVE PRODUCT</span>
+                        <span class="about-live__product-label">تازه‌ترین محصول</span>
                         <strong>{{ \App\Support\PersianNumber::digits($latestProduct->name) }}</strong>
 
                         <div class="about-live__meta">
-                            <span>{{ $latestProduct->category?->name ?? 'بدون دسته‌بندی' }}</span>
-                            <span>{{ $latestProduct->brand?->name ?? 'بدون برند' }}</span>
+                            @if($latestProduct->category)
+                                <span>{{ $latestProduct->category->name }}</span>
+                            @endif
+                            @if($latestProduct->brand)
+                                <span>{{ $latestProduct->brand->name }}</span>
+                            @endif
                         </div>
 
                         <a href="{{ route('products.show', $latestProduct) }}" class="text-link">
@@ -174,9 +167,9 @@
                             <span aria-hidden="true">↗</span>
                         </a>
                     @else
-                        <span class="about-live__product-label">CATALOG STATUS</span>
+                        <span class="about-live__product-label">موجودی فروشگاه</span>
                         <strong>هنوز محصول فعالی ثبت نشده است.</strong>
-                        <p>به‌محض اضافه شدن محصول، اطلاعات واقعی این بخش هم نمایش داده می‌شود.</p>
+                        <p>برای پرسش درباره موجودی، از طریق فرم تماس پیام بفرستید.</p>
                     @endif
                 </div>
             </div>
@@ -186,7 +179,7 @@
     <section id="contact" class="store-page__section contact-page contact-page--refined" aria-labelledby="contact-title">
         <div class="container">
             <header class="contact-intro">
-                <div><small>پشتیبانی جانان</small><h2 id="contact-title">تماس با ما</h2><p>برای راهنمایی خرید، پیگیری سفارش یا همکاری، از مسیر مناسب با ما در ارتباط باشید.</p></div>
+                <div><small>پشتیبانی جانان</small><h2 id="contact-title">تماس با جانان</h2><p>برای راهنمایی خرید، پیگیری سفارش یا همکاری، از مسیر مناسب با ما در ارتباط باشید.</p></div>
                 <a class="button button--ghost" href="{{ route('faq') }}">سوالات متداول</a>
             </header>
 
@@ -219,9 +212,9 @@
                 <section class="contact-form-card">
                     <div class="contact-form-card__head">
                         <div>
-                            <h2>ارسال پیام</h2>
+                            <h3>ارسال پیام به پشتیبانی</h3>
                             <p>
-                                برای پرسش دربارهٔ محصول، سفارش یا خرید عمده به پشتیبانی پیام بده.
+                                برای راهنمایی سایز، نام یا لینک محصول را بنویسید. برای پیگیری خرید، شماره سفارش را در پیام وارد کنید.
                             </p>
                         </div>
                     </div>
@@ -267,50 +260,40 @@
 
                 <aside class="contact-side"><section class="contact-info-card">
                     <div>
-                        <h2>راه‌های ارتباط</h2>
-                        <p>اگر تماس مستقیم برایت راحت‌تر است، از یکی از مسیرهای زیر استفاده کن.</p>
+                        <h3>راه‌های ارتباط</h3>
+                        <p>برای خرید عمده، بسته‌های موجود و شرایط سفارش را در صفحه <a href="{{ route('wholesale.show') }}">خرید عمده جانان</a> ببینید.</p>
                     </div>
 
                     <div class="contact-info-list">
                         <div class="contact-info-item">
-                            <div>
-                                <small>شماره تماس</small>
-                                @if($contactStore['phone'] ?? null)
-                                    <a href="tel:{{ preg_replace('/\s+/', '', $contactStore['phone']) }}" dir="ltr">{{ $contactStore['phone'] }}</a>
-                                @else
-                                    <strong>شماره تماس ثبت نشده</strong>
-                                @endif
-                            </div>
+                            @if(filled($contactStore['phone'] ?? null))
+                                <a class="store-icon-link" href="tel:{{ preg_replace('/\s+/', '', $contactStore['phone']) }}" aria-label="تماس تلفنی با جانان">
+                                    <x-store.icon name="phone" />
+                                </a>
+                            @else
+                                <span class="store-icon-link">
+                                    <x-store.icon name="phone" />
+                                </span>
+                            @endif
                         </div>
 
-                        <div class="contact-info-item">
-                            <div>
-                                <small>ایمیل</small>
-                                @if($contactStore['email'] ?? null)
+                        @if(filled($contactStore['email'] ?? null))
+                            <div class="contact-info-item">
+                                <div>
+                                    <small>ایمیل</small>
                                     <a href="mailto:{{ $contactStore['email'] }}" dir="ltr">{{ $contactStore['email'] }}</a>
-                                @else
-                                    <strong>ایمیل ثبت نشده</strong>
-                                @endif
+                                </div>
                             </div>
-                        </div>
+                        @endif
 
-                        <div class="contact-info-item">
-                            <div>
-                                <small>نشانی</small>
-                                @if($contactStore['address'] ?? null)
-                                    <strong>{{ $contactStore['address'] }}</strong>
-                                @else
-                                    <strong>آدرس ثبت نشده</strong>
-                                @endif
+                        @if(filled($contactStore['working_hours'] ?? null))
+                            <div class="contact-info-item">
+                                <div>
+                                    <small>ساعت پاسخ‌گویی</small>
+                                    <strong>{{ $contactStore['working_hours'] }}</strong>
+                                </div>
                             </div>
-                        </div>
-
-                        <div class="contact-info-item">
-                            <div>
-                                <small>ساعت پاسخ‌گویی</small>
-                                <strong>{{ $contactStore['working_hours'] ?? 'ساعت کاری ثبت نشده' }}</strong>
-                            </div>
-                        </div>
+                        @endif
                     </div>
                 </section>
                 @if(filled($contactStore['address'] ?? null))
@@ -335,7 +318,7 @@
         <div class="container">
             <div class="page-cta-panel about-page__cta">
                 <div>
-                    <span class="eyebrow">START HERE</span>
+
                     <h2>{{ $about['cta_title'] ?? 'از کشف شروع کن.' }}</h2>
                     <p>{{ $about['cta_text'] ?? '' }}</p>
                 </div>
