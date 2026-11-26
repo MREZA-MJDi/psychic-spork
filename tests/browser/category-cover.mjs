@@ -48,7 +48,7 @@ try {
     const geometry = await editor.evaluate(el => ({mask:getComputedStyle(el).clipPath,width:el.width,height:el.height}));
     assert.equal(geometry.width,960);
     assert.equal(geometry.height,720);
-    assert.notEqual(geometry.mask,'none');
+    assert.equal(geometry.mask,'none');
     await picker.scrollIntoViewIfNeeded();
     await page.screenshot({path:'artifacts/ui-smoke/'+width+'-category-crop.png'});
     await picker.locator('[data-media-apply]').click();
@@ -76,15 +76,15 @@ try {
         const grid = page.locator('.janan-category-grid--home');
         const cards = await grid.locator('.janan-category-card').evaluateAll(elements =>
           elements.map(element => {
-            const { x, y, width } = element.getBoundingClientRect();
-            return { x, y, width };
+            const { y, width } = element.getBoundingClientRect();
+            return { y, width };
           })
         );
-        assert.equal(cards.length, 3);
+        assert.equal(cards.length, 2);
         assert.ok(Math.abs(cards[0].y - cards[1].y) < 1);
-        assert.ok(cards[2].y > cards[0].y);
-        assert.ok(Math.abs(cards[2].x - (cards[0].x + cards[1].x) / 2) < 1);
-        assert.equal(await grid.getByRole('link', { name: 'همه دسته‌بندی‌ها' }).count(), 1);
+        assert.ok(Math.abs(cards[0].width - cards[1].width) < 1);
+        assert.equal(await grid.getByRole('link', { name: 'همه دسته‌بندی‌ها' }).count(), 0);
+        assert.equal(await page.locator('.home-collections__heading').getByRole('link', { name: 'همه دسته‌بندی‌ها' }).count(), 1);
       }
       await image.scrollIntoViewIfNeeded();
       await page.screenshot({path:'artifacts/ui-smoke/'+width+'-category-'+(path==='/'?'home':'directory')+'.png'});
