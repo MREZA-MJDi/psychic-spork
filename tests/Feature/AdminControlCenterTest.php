@@ -23,10 +23,11 @@ class AdminControlCenterTest extends TestCase
         $this->actingAs($admin)
             ->get('/admin')
             ->assertOk()
-            ->assertSee('ACTION CENTER')
-            ->assertSee('کارهایی که الان باید کنترل شوند')
-            ->assertSee('کنترل موجودی')
-            ->assertSee('واردسازی و نگاشت نیلا / هلو');
+            ->assertSee('نیازمند پیگیری')
+            ->assertSee('موجودی در محدودهٔ هشدار')
+            ->assertSee('ورود فایل هلو')
+            ->assertSee(route('admin.inventory.index'))
+            ->assertSee(route('admin.nila.index'));
     }
 
     public function test_nila_control_center_loads_without_claiming_api_sync(): void

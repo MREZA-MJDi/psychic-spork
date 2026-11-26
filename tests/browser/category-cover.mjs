@@ -14,6 +14,15 @@ try {
     await page.locator('input[name="password"]').fill('password');
     await page.locator('form.auth-form button[type="submit"]').click();
     await page.waitForURL(url => /^\/admin\/?$/.test(url.pathname));
+    const dashboard = page.locator('.janan-overview');
+    await dashboard.getByRole('heading', { name: 'نمای کلی فروشگاه' }).waitFor();
+    assert.equal(await dashboard.getByRole('link', { name: 'ورود فایل هلو', exact: true }).count(), 1);
+    assert.equal(await dashboard.evaluate(el => el.scrollWidth <= el.clientWidth + 2), true);
+    await page.screenshot({ path: 'artifacts/ui-smoke/' + width + '-admin-dashboard.png', fullPage: true });
+    await dashboard.getByLabel('بازهٔ گزارش').selectOption('7');
+    await dashboard.getByRole('button', { name: 'نمایش', exact: true }).click();
+    await page.waitForURL(url => url.searchParams.get('period') === '7');
+    assert.equal(await dashboard.getByLabel('بازهٔ گزارش').inputValue(), '7');
     await page.goto(base + '/admin/categories/1/edit');
     const picker = page.locator('[data-category-cover]');
     await picker.waitFor();

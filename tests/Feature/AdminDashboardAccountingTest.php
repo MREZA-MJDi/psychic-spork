@@ -150,9 +150,10 @@ class AdminDashboardAccountingTest extends TestCase
                 return $today !== null
                     && (float) $today['income'] === -250000.0;
             })
-            ->assertSee('−۰٫۳M')
+            ->assertSee('جدول فروش روزانه و جزئیات بازه')
             ->assertSee('-۲۵۰٬۰۰۰')
-            ->assertSee('-۳۵۰٬۰۰۰');
+            ->assertSee('-۳۵۰٬۰۰۰')
+            ->assertSee('janan-overview__plot-bar--negative', false);
     }
 
     public function test_accounting_admin_surfaces_double_entry_foundation(): void

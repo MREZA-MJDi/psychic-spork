@@ -1,717 +1,237 @@
 @extends('layouts.admin')
 
-@section('title', 'داشبورد مدیریت')
+@section('title', 'داشبورد جانان')
 @section('page-title', 'داشبورد')
 
+@push('styles')
+    @vite('resources/css/admin-dashboard.css')
+@endpush
+
 @section('content')
+@php
+    $number = [\App\Support\PersianNumber::class, 'format'];
+    $queues = [
+        ['سفارش‌های در جریان', $pendingOrders, route('admin.orders.index'), 'در انتظار، تأییدشده یا در حال آماده‌سازی'],
+        ['موجودی در محدودهٔ هشدار', $lowStock, route('admin.inventory.index'), 'کدهای فعال کالا'],
+        ['پیام‌های خوانده‌نشده', $unreadContactMessages, route('admin.contact.index'), 'پیام‌های پشتیبانی'],
+        ['چک‌های نیازمند پیگیری', $chequesAwaitingReview, route('admin.cheques.index'), $number($chequesAwaitingReviewAmount) . ' تومان در مرحلهٔ بررسی'],
+        ['درخواست‌های خرید عمده', $pendingWholesaleApplications, route('admin.wholesale.index', ['status' => 'pending']), 'در انتظار تصمیم'],
+        ['درخواست‌های خرید چکی', $pendingChequePermissions ?? 0, route('admin.wholesale.index') . '#cheque-permission-requests', 'در انتظار تأیید مدیر'],
+    ];
+    $qualityItems = [
+        ['محصول فعال بدون عکس', $productsMissingImage, route('admin.products.index', ['quality' => 'missing-image'])],
+        ['محصول فعال با سئوی ناقص', $productsMissingSeo, route('admin.products.index', ['quality' => 'missing-seo'])],
+        ['دستهٔ فعال با سئوی ناقص', $categoriesMissingSeo, route('admin.categories.index')],
+        ['برند فعال با سئوی ناقص', $brandsMissingSeo, route('admin.brands.index')],
+    ];
+    $paymentNames = ['paid' => 'پرداخت‌شده', 'pending' => 'در انتظار', 'failed' => 'ناموفق', 'refunded' => 'برگشت‌خورده'];
+    $hasSales = $daily->contains(fn ($day) => (float) $day['income'] !== 0.0);
+@endphp
 
-    @php
-        $statusClasses = [
-            'pending' => 'warning',
-            'confirmed' => 'info',
-            'preparing' => 'info',
-            'shipped' => 'success',
-            'delivered' => 'success',
-            'cancelled' => 'danger',
-            'returned' => 'neutral',
-        ];
+<div class="janan-overview">
+    <header class="janan-overview__intro">
+        <div>
+            <h1>نمای کلی فروشگاه</h1>
+            <p>سفارش‌ها، موجودی و کارهای نیازمند پیگیری جانان</p>
+        </div>
+        <div class="janan-overview__actions">
+            <a class="janan-overview__button" href="{{ route('admin.nila.index') }}">ورود فایل هلو</a>
+            <a class="janan-overview__button janan-overview__button--primary" href="{{ route('admin.products.create') }}">افزودن محصول</a>
+        </div>
+    </header>
 
-        $paymentClasses = [
-            'paid' => 'success',
-            'pending' => 'warning',
-            'failed' => 'danger',
-            'refunded' => 'neutral',
-        ];
-
-        $paymentRate = $ordersCount > 0
-            ? round(($paidOrdersCount / $ordersCount) * 100)
-            : 0;
-
-        $processingCount = (int) (
-            ($orderBreakdown['pending'] ?? 0)
-            + ($orderBreakdown['confirmed'] ?? 0)
-            + ($orderBreakdown['preparing'] ?? 0)
-        );
-
-        $chartMax = max((float) $maxIncome, 1);
-
-        $formatFaNumber = static function (mixed $value, int $decimals = 0): string {
-            return strtr(
-                number_format((float) $value, $decimals, '.', ','),
-                [
-                    '0' => '۰',
-                    '1' => '۱',
-                    '2' => '۲',
-                    '3' => '۳',
-                    '4' => '۴',
-                    '5' => '۵',
-                    '6' => '۶',
-                    '7' => '۷',
-                    '8' => '۸',
-                    '9' => '۹',
-                    ',' => '٬',
-                    '.' => '٫',
-                ]
-            );
-        };
-    @endphp
-
-    <div class="dashboard-v2">
-
-        <section class="dashboard-v2__hero">
-            <div>
-                <span class="dashboard-v2__eyebrow">JANAN / CONTROL CENTER</span>
-
-                <h1>
-                    نمای کلی فروشگاه،
-                    <br>
-                    <em>در یک نگاه.</em>
-                </h1>
-
-                <p>
-                    فروش، سفارش، موجودی و عملکرد فعلی را از یک نقطه کنترل کن.
-                    اعداد این صفحه مستقیماً از داده‌های واقعی فروشگاه خوانده می‌شوند.
-                </p>
-            </div>
-
-            <div class="dashboard-v2__hero-actions">
-                <div class="dashboard-v2__live">
-                    <i aria-hidden="true"></i>
-                    <span>پنل فروشگاه</span>
-                </div>
-
-                <form
-                    method="GET"
-                    action="{{ route('admin.dashboard') }}"
-                    class="dashboard-v2__period"
-                >
-                    <label for="dashboard-period">بازه گزارش</label>
-                    <select id="dashboard-period" name="period" onchange="this.form.submit()">
-                        @foreach([
-                            7 => '۷ روز اخیر',
-                            30 => '۳۰ روز اخیر',
-                            60 => '۶۰ روز اخیر',
-                            90 => '۹۰ روز اخیر',
-                        ] as $days => $label)
-                            <option value="{{ $days }}" @selected((int) $period === $days)>
-                                {{ $label }}
-                            </option>
-                        @endforeach
-                    </select>
-                </form>
-            </div>
-        </section>
-
-        <section class="dashboard-v2__stats" aria-label="شاخص‌های اصلی">
-            <article class="dashboard-v2__stat dashboard-v2__stat--dark">
-                <span>REVENUE</span>
-                <strong>{{ $formatFaNumber((float) $revenue) }}</strong>
-                <small>تومان درآمد پرداخت‌شده</small>
-                <i>01</i>
-            </article>
-
-            <article class="dashboard-v2__stat">
-                <span>NET CASH</span>
-                <strong>{{ $formatFaNumber((float) $netCash) }}</strong>
-                <small>خالص جریان نقدی</small>
-                <i>02</i>
-            </article>
-
-            <article class="dashboard-v2__stat">
-                <span>ORDERS</span>
-                <strong>{{ $formatFaNumber((int) $ordersCount) }}</strong>
-                <small>{{ $formatFaNumber((int) $paidOrdersCount) }} پرداخت‌شده</small>
-                <i>03</i>
-            </article>
-
-            <article class="dashboard-v2__stat dashboard-v2__stat--accent">
-                <span>PROCESSING</span>
-                <strong>{{ $formatFaNumber($processingCount) }}</strong>
-                <small>{{ $formatFaNumber((int) $pendingOrders) }} سفارش جاری</small>
-                <i>04</i>
-            </article>
-
-            <article class="dashboard-v2__stat">
-                <span>CUSTOMERS</span>
-                <strong>{{ $formatFaNumber((int) $customers) }}</strong>
-                <small>حساب مشتری</small>
-                <i>05</i>
-            </article>
-
-            <article class="dashboard-v2__stat">
-                <span>LOW STOCK</span>
-                <strong>{{ $formatFaNumber((int) $lowStock) }}</strong>
-                <small>تنوع در محدوده هشدار</small>
-                <i>06</i>
-            </article>
-
-            <article class="dashboard-v2__stat dashboard-v2__stat--accent">
-                <span>CONTACT INBOX</span>
-                <strong>{{ $formatFaNumber((int) ($unreadContactMessages ?? 0)) }}</strong>
-                <small>پیام خوانده‌نشده</small>
-                <i>07</i>
-            </article>
-        </section>
-
-        <section class="dashboard-v2__panel" aria-label="وضعیت کاتالوگ">
-            <header class="dashboard-v2__panel-head">
-                <div>
-                    <span class="dashboard-v2__kicker">CATALOG CONTROL</span>
-                    <h2>وضعیت کاتالوگ و قیمت‌گذاری</h2>
-                    <p>تعداد واقعی محصولات، برندها، دسته‌بندی‌ها، واریانت‌ها و قیمت‌های عمده از دیتابیس.</p>
-                </div>
-                <a href="{{ route('admin.products.index') }}" class="dashboard-v2__small-link">
-                    مدیریت محصولات <span aria-hidden="true">↗</span>
-                </a>
+    <div class="janan-overview__work">
+        <section class="janan-overview__card janan-overview__queues" aria-labelledby="work-title">
+            <header class="janan-overview__section-head">
+                <h2 id="work-title">نیازمند پیگیری</h2>
+                <p>وضعیت فعلی فروشگاه</p>
             </header>
-
-            <div class="dashboard-v2__stats" style="margin-top:0;">
-                <article class="dashboard-v2__stat">
-                    <span>PRODUCTS</span>
-                    <strong>{{ $formatFaNumber((int) $catalogProducts) }}</strong>
-                    <small>محصول ثبت‌شده</small>
-                    <i>01</i>
-                </article>
-
-                <article class="dashboard-v2__stat">
-                    <span>BRANDS</span>
-                    <strong>{{ $formatFaNumber((int) $catalogBrands) }}</strong>
-                    <small>برند فعال در کاتالوگ</small>
-                    <i>02</i>
-                </article>
-
-                <article class="dashboard-v2__stat">
-                    <span>CATEGORIES</span>
-                    <strong>{{ $formatFaNumber((int) $catalogCategories) }}</strong>
-                    <small>دسته‌بندی</small>
-                    <i>03</i>
-                </article>
-
-                <article class="dashboard-v2__stat">
-                    <span>VARIANTS</span>
-                    <strong>{{ $formatFaNumber((int) $catalogVariants) }}</strong>
-                    <small>واریانت فعال</small>
-                    <i>04</i>
-                </article>
-
-                <article class="dashboard-v2__stat dashboard-v2__stat--accent">
-                    <span>WHOLESALE PRICE</span>
-                    <strong>{{ $formatFaNumber((int) $catalogWholesalePricedVariants) }}</strong>
-                    <small>واریانت دارای قیمت عمده</small>
-                    <i>05</i>
-                </article>
-            </div>
-        </section>
-
-        <section class="dashboard-v2__control-center" aria-label="آمادگی محتوا و SEO">
-            <div class="dashboard-v2__control-head">
-                <div>
-                    <span class="dashboard-v2__kicker">CONTENT / SEO</span>
-                    <h2>آمادگی محتوا برای انتشار و جستجو</h2>
-                    <p>این شمارنده‌ها از محصولات، دسته‌بندی‌ها و برندهای فعال خوانده می‌شوند. عکس‌های کاتالوگ را جانان بارگذاری می‌کند؛ داده نیلا عکس را جایگزین نمی‌کند.</p>
-                </div>
-            </div>
-
-            <div class="dashboard-v2__control-grid">
-                <a href="{{ route('admin.products.index', ['quality' => 'missing-seo']) }}" class="dashboard-v2__control-item {{ $productsMissingSeo > 0 ? 'is-attention' : '' }}">
-                    <span class="dashboard-v2__control-icon">SEO</span>
-                    <div>
-                        <strong>SEO محصولات</strong>
-                        <small>{{ $formatFaNumber((int) $productsMissingSeo) }} محصول فعال بدون عنوان یا توضیح SEO</small>
-                    </div>
-                    <b aria-hidden="true">←</b>
-                </a>
-
-                <a href="{{ route('admin.products.index', ['quality' => 'missing-image']) }}" class="dashboard-v2__control-item {{ $productsMissingImage > 0 ? 'is-attention' : '' }}">
-                    <span class="dashboard-v2__control-icon">عکس</span>
-                    <div>
-                        <strong>تصاویر محصول</strong>
-                        <small>{{ $formatFaNumber((int) $productsMissingImage) }} محصول فعال بدون تصویر گالری</small>
-                    </div>
-                    <b aria-hidden="true">←</b>
-                </a>
-
-                <a href="{{ route('admin.categories.index') }}" class="dashboard-v2__control-item {{ $categoriesMissingSeo > 0 ? 'is-attention' : '' }}">
-                    <span class="dashboard-v2__control-icon">دسته</span>
-                    <div>
-                        <strong>SEO دسته‌بندی‌ها</strong>
-                        <small>{{ $formatFaNumber((int) $categoriesMissingSeo) }} دسته فعال نیازمند بازبینی</small>
-                    </div>
-                    <b aria-hidden="true">←</b>
-                </a>
-
-                <a href="{{ route('admin.brands.index') }}" class="dashboard-v2__control-item {{ $brandsMissingSeo > 0 ? 'is-attention' : '' }}">
-                    <span class="dashboard-v2__control-icon">برند</span>
-                    <div>
-                        <strong>SEO برندها</strong>
-                        <small>{{ $formatFaNumber((int) $brandsMissingSeo) }} برند فعال نیازمند بازبینی</small>
-                    </div>
-                    <b aria-hidden="true">←</b>
-                </a>
-            </div>
-
-            <div class="dashboard-v2__panel-links">
-                <a href="{{ route('seo.sitemap') }}" target="_blank" rel="noopener">مشاهده نقشه سایت XML ↗</a>
-                <a href="{{ route('seo.robots') }}" target="_blank" rel="noopener">مشاهده robots.txt ↗</a>
-                <a href="{{ route('admin.content.about') }}">ویرایش محتوای درباره ما ↗</a>
-            </div>
-        </section>
-
-        <section class="dashboard-v2__control-center" aria-label="مرکز اقدام مدیریت">
-            <div class="dashboard-v2__control-head">
-                <div>
-                    <span class="dashboard-v2__kicker">ACTION CENTER</span>
-                    <h2>کارهایی که الان باید کنترل شوند</h2>
-                    <p>این بخش فقط وضعیت‌هایی را نشان می‌دهد که واقعاً نیاز به تصمیم یا اقدام مدیریتی دارند.</p>
-                </div>
-            </div>
-
-            <div class="dashboard-v2__control-grid">
-                <a href="{{ route('admin.cheques.index') }}" class="dashboard-v2__control-item {{ $chequesAwaitingReview > 0 ? 'is-attention' : '' }}">
-                    <span class="dashboard-v2__control-icon">چک</span>
-                    <div>
-                        <strong>پرداخت‌های چکی</strong>
-                        <small>{{ $formatFaNumber((int) $chequesAwaitingReview) }} مورد نیازمند اقدام · {{ $formatFaNumber((float) $chequesAwaitingReviewAmount) }} تومان</small>
-                    </div>
-                    <b aria-hidden="true">←</b>
-                </a>
-
-                <a href="{{ route('admin.wholesale.index', ['status' => 'pending']) }}" class="dashboard-v2__control-item {{ $pendingWholesaleApplications > 0 ? 'is-attention' : '' }}">
-                    <span class="dashboard-v2__control-icon">عمده</span>
-                    <div>
-                        <strong>درخواست‌های عمده</strong>
-                        <small>{{ $formatFaNumber((int) $pendingWholesaleApplications) }} درخواست در انتظار تصمیم مدیریتی</small>
-                    </div>
-                    <b aria-hidden="true">←</b>
-                </a>
-
-                <a href="{{ route('admin.wholesale.index') }}#cheque-permission-requests" class="dashboard-v2__control-item {{ ($pendingChequePermissions ?? 0) > 0 ? 'is-attention' : '' }}">
-                    <span class="dashboard-v2__control-icon">مجوز</span>
-                    <div>
-                        <strong>درخواست مجوز پرداخت چکی</strong>
-                        <small>{{ $formatFaNumber((int) ($pendingChequePermissions ?? 0)) }} درخواست در انتظار تأیید مدیر</small>
-                    </div>
-                    <b aria-hidden="true">←</b>
-                </a>
-
-                <a href="{{ route('admin.inventory.index') }}" class="dashboard-v2__control-item {{ $lowStock > 0 ? 'is-attention' : '' }}">
-                    <span class="dashboard-v2__control-icon">انبار</span>
-                    <div>
-                        <strong>کنترل موجودی</strong>
-                        <small>{{ $formatFaNumber((int) $lowStock) }} واریانت در محدوده هشدار · ارزش موجودی {{ $formatFaNumber((float) $inventoryValue) }} تومان</small>
-                    </div>
-                    <b aria-hidden="true">←</b>
-                </a>
-
-                <a href="{{ route('admin.nila.index') }}" class="dashboard-v2__control-item">
-                    <span class="dashboard-v2__control-icon">نیلا</span>
-                    <div>
-                        <strong>واردسازی و نگاشت نیلا / هلو</strong>
-                        <small>{{ $formatFaNumber((int) $nilaProductMappings) }} محصول و {{ $formatFaNumber((int) $nilaVariantMappings) }} واریانت نگاشت داخلی دارند. این عدد به معنی اتصال زنده نیست.</small>
-                    </div>
-                    <span class="dashboard-v2__control-state">کنترل نیلا ←</span>
-                </a>
-            </div>
-        </section>
-
-        <section class="dashboard-v2__grid dashboard-v2__grid--main">
-
-            <article class="dashboard-v2__panel dashboard-v2__panel--chart">
-                <header class="dashboard-v2__panel-head">
-                    <div>
-                        <span class="dashboard-v2__kicker">SALES SIGNAL</span>
-                        <h2>روند فروش روزانه</h2>
-                        <p>درآمد ثبت‌شده در دفترکل و تعداد سفارش‌های ثبت‌شده در {{ $formatFaNumber($period) }} روز اخیر.</p>
-                    </div>
-
-                    <div class="dashboard-v2__mini-stat">
-                        <strong>{{ $formatFaNumber($paymentRate) }}%</strong>
-                        <span>نرخ پرداخت</span>
-                    </div>
-                </header>
-
-                <div class="dashboard-v2__chart-wrap">
-                    <div class="dashboard-v2__chart" style="--chart-columns: {{ max(1, $daily->count()) }};">
-                        @foreach($daily as $day)
-                            @php
-                                $income = (float) ($day['income'] ?? 0);
-                                $magnitude = abs($income);
-                                $height = $magnitude > 0
-                                    ? max(6, ($magnitude / $chartMax) * 100)
-                                    : 3;
-                                $incomeLabel = $magnitude > 0
-                                    ? ($income < 0 ? '−' : '') . $formatFaNumber($magnitude / 1000000, 1) . 'M'
-                                    : '—';
-                                $incomeTitle = ($income < 0 ? 'کاهش خالص ' : '') . $formatFaNumber($magnitude) . ' تومان';
-                            @endphp
-
-                            <div class="dashboard-v2__bar-column">
-                                <div class="dashboard-v2__bar-value {{ $income < 0 ? 'is-negative' : '' }}">
-                                    {{ $incomeLabel }}
-                                </div>
-
-                                <div class="dashboard-v2__bar-track">
-                                    <span
-                                        style="height: {{ $height }}%;{{ $income < 0 ? 'background:linear-gradient(180deg,#d89bad,#8f405e);' : '' }}"
-                                        title="{{ $incomeTitle }}"
-                                    ></span>
-                                </div>
-
-                                <small
-                                    data-admin-date="{{ $day['date'] ?? '' }}"
-                                    data-admin-date-format="day"
-                                >
-                                    {{ $day['label'] ?? '—' }}
-                                </small>
-                                <b class="dashboard-v2__bar-orders">
-                                    {{ $formatFaNumber((int) ($day['orders'] ?? 0)) }}
-                                </b>
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
-
-                <footer class="dashboard-v2__chart-footer">
-                    <span>مقیاس مبلغ: میلیون تومان</span>
-                    <span>مبلغ بر اساس تاریخ سند؛ سفارش بر اساس تاریخ ثبت</span>
-                </footer>
-            </article>
-
-            <aside class="dashboard-v2__panel">
-                <header class="dashboard-v2__panel-head">
-                    <div>
-                        <span class="dashboard-v2__kicker">ORDER FLOW</span>
-                        <h2>قیف سفارش</h2>
-                        <p>تصویر سریع از وضعیت سفارش‌های بازه انتخابی.</p>
-                    </div>
-                </header>
-
-                <div class="dashboard-v2__status-list">
-                    @foreach($statusNames as $status => $name)
-                        @php
-                            $count = (int) ($orderBreakdown[$status] ?? 0);
-                            $percent = $ordersCount > 0
-                                ? round(($count / $ordersCount) * 100)
-                                : 0;
-                        @endphp
-
-                        <div class="dashboard-v2__status">
-                            <div>
-                                <span>{{ $name }}</span>
-                                <strong>{{ $formatFaNumber($count) }}</strong>
-                            </div>
-
-                            <div class="dashboard-v2__status-track">
-                                <i
-                                    class="dashboard-v2__status-fill dashboard-v2__status-fill--{{ $statusClasses[$status] ?? 'neutral' }}"
-                                    style="width: {{ $percent }}%"
-                                ></i>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-            </aside>
-
-        </section>
-
-        <section class="dashboard-v2__grid dashboard-v2__grid--triple">
-
-            <article class="dashboard-v2__panel dashboard-v2__panel--dark">
-                <header class="dashboard-v2__panel-head dashboard-v2__panel-head--dark">
-                    <div>
-                        <span class="dashboard-v2__kicker">CASH FLOW</span>
-                        <h2>پول واردشده و هزینه</h2>
-                    </div>
-                </header>
-
-                <div class="dashboard-v2__cash-list">
-                    <div>
-                        <span>درآمد خالص دفترکل</span>
-                        <strong>{{ $formatFaNumber((float) $revenue) }} <small>تومان</small></strong>
-                    </div>
-                    <div>
-                        <span>هزینه‌های ثبت‌شده، بدون بازپرداخت</span>
-                        <strong>{{ $formatFaNumber((float) $expenses) }} <small>تومان</small></strong>
-                    </div>
-                    <div class="dashboard-v2__cash-total">
-                        <span>خالص</span>
-                        <strong>{{ $formatFaNumber((float) $netCash) }} <small>تومان</small></strong>
-                    </div>
-                </div>
-
-                <a href="{{ route('admin.accounting.index') }}" class="dashboard-v2__panel-link">
-                    رفتن به حسابداری
-                    <span aria-hidden="true">↗</span>
-                </a>
-            </article>
-
-            <article class="dashboard-v2__panel">
-                <header class="dashboard-v2__panel-head">
-                    <div>
-                        <span class="dashboard-v2__kicker">INVENTORY ALERT</span>
-                        <h2>موجودی کم</h2>
-                        <p>اولویت‌های انبار که بهتر است بررسی شوند.</p>
-                    </div>
-
-                    <a href="{{ route('admin.inventory.index') }}" class="dashboard-v2__small-link">
-                        همه
-                        <span aria-hidden="true">↗</span>
-                    </a>
-                </header>
-
-                <div class="dashboard-v2__inventory">
-                    @forelse($lowStockVariants as $variant)
-                        @php
-                            $threshold = max((int) ($variant->low_stock_threshold ?? 5), 1);
-                            $stockPercent = min(100, max(0, ((int) $variant->stock / $threshold) * 100));
-                        @endphp
-
-                        <div class="dashboard-v2__inventory-row">
-                            <div>
-                                <strong>{{ $variant->product?->name ?? 'محصول' }}</strong>
-                                <span dir="ltr">{{ $variant->sku ?: '—' }}</span>
-                            </div>
-
-                            <div class="dashboard-v2__inventory-bar">
-                                <i style="width: {{ $stockPercent }}%"></i>
-                            </div>
-
-                            <b>{{ $formatFaNumber((int) $variant->stock) }}</b>
-                        </div>
-                    @empty
-                        <div class="dashboard-v2__empty">
-                            <strong>انبار در وضعیت مناسب است.</strong>
-                            <span>هیچ تنوعی در محدوده هشدار نیست.</span>
-                        </div>
-                    @endforelse
-                </div>
-            </article>
-
-            <article class="dashboard-v2__panel">
-                <header class="dashboard-v2__panel-head">
-                    <div>
-                        <span class="dashboard-v2__kicker">TOP PRODUCTS</span>
-                        <h2>پرفروش‌ها</h2>
-                        <p>بر اساس تعداد اقلام فروخته‌شده در بازه.</p>
-                    </div>
-
-                    <a href="{{ route('admin.products.index') }}" class="dashboard-v2__small-link">
-                        محصولات
-                        <span aria-hidden="true">↗</span>
-                    </a>
-                </header>
-
-                <div class="dashboard-v2__top-products">
-                    @forelse($topProducts as $index => $product)
-                        @php
-                            $salesQuantity = (int) ($product->sales_quantity ?? 0);
-                            $productImage = $product->galleryMedia?->first();
-                        @endphp
-
-                        <a
-                            href="{{ route('admin.products.index', ['q' => $product->name]) }}"
-                            class="dashboard-v2__top-product"
-                        >
-                            <span class="dashboard-v2__rank">{{ $index + 1 }}</span>
-
-                            @if($productImage?->url)
-                                <img
-                                    src="{{ $productImage->url }}"
-                                    alt="{{ $product->name }}"
-                                    loading="lazy"
-                                >
-                            @else
-                                <span class="dashboard-v2__product-placeholder">—</span>
-                            @endif
-
-                            <div>
-                                <strong>{{ $product->name }}</strong>
-                                <small>{{ $product->category?->name ?? 'بدون دسته‌بندی' }}</small>
-                            </div>
-
-                            <b>{{ $formatFaNumber($salesQuantity) }} <small>عدد</small></b>
+            <ul class="janan-overview__queue-list">
+                @foreach($queues as [$label, $value, $url, $description])
+                    <li>
+                        <a href="{{ $url }}">
+                            <span><strong>{{ $label }}</strong><small>{{ $description }}</small></span>
+                            <b @class(['janan-overview__count', 'janan-overview__count--attention' => $value > 0])>{{ $number($value) }}</b>
                         </a>
-                    @empty
-                        <div class="dashboard-v2__empty">
-                            <strong>هنوز داده فروش وجود ندارد.</strong>
-                            <span>پس از ثبت سفارش‌های واقعی این بخش پر می‌شود.</span>
-                        </div>
-                    @endforelse
-                </div>
-            </article>
-
+                    </li>
+                @endforeach
+            </ul>
         </section>
 
-        <section class="dashboard-v2__panel dashboard-v2__panel--orders">
-
-            <header class="dashboard-v2__panel-head">
-                <div>
-                    <span class="dashboard-v2__kicker">RECENT ACTIVITY</span>
-                    <h2>آخرین سفارش‌ها</h2>
-                    <p>جدیدترین سفارش‌های واقعی فروشگاه.</p>
-                </div>
-
-                <a href="{{ route('admin.orders.index') }}" class="admin-btn admin-btn--secondary admin-btn--sm">
-                    همه سفارش‌ها
-                    <span aria-hidden="true">↗</span>
-                </a>
+        <section class="janan-overview__card janan-overview__orders" aria-labelledby="orders-title">
+            <header class="janan-overview__section-head">
+                <div><h2 id="orders-title">آخرین سفارش‌ها</h2><p>بر اساس زمان ثبت</p></div>
+                <a href="{{ route('admin.orders.index') }}">همهٔ سفارش‌ها</a>
             </header>
-
-            @if($recentOrders->isNotEmpty())
-                <div class="dashboard-v2__orders-mobile" aria-label="آخرین سفارش‌ها در موبایل">
-                    @foreach($recentOrders as $order)
-                        @php
-                            $customerName = $order->user?->name ?? $order->customer_name ?? 'مشتری';
-                        @endphp
-                        <article class="dashboard-v2__order-card">
-                            <div class="dashboard-v2__order-card-head">
-                                <strong>{{ $order->order_number }}</strong>
-                                <span class="admin-badge admin-badge--{{ $statusClasses[$order->status] ?? 'neutral' }}">{{ $statusNames[$order->status] ?? $order->status }}</span>
-                            </div>
-                            <div class="dashboard-v2__order-card-body">
-                                <div><small>مشتری</small><strong>{{ $customerName }}</strong></div>
-                                <div><small>مبلغ</small><strong>{{ $formatFaNumber((float) $order->total) }} <em>تومان</em></strong></div>
-                                <div><small>پرداخت</small><strong>{{ $order->payment_status === 'paid' ? 'پرداخت‌شده' : ($order->payment_status === 'pending' ? 'در انتظار' : $order->payment_status) }}</strong></div>
-                                <a href="{{ route('admin.orders.show', $order) }}" class="dashboard-v2__order-card-link">جزئیات <span aria-hidden="true">←</span></a>
-                            </div>
-                        </article>
-                    @endforeach
-                </div>
-
-                <div class="dashboard-v2__orders-table">
-                    <table>
-                        <thead>
-                        <tr>
-                            <th>سفارش</th>
-                            <th>مشتری</th>
-                            <th>مبلغ</th>
-                            <th>وضعیت</th>
-                            <th>پرداخت</th>
-                            <th>تاریخ</th>
-                            <th></th>
-                        </tr>
-                        </thead>
-
-                        <tbody>
-                        @foreach($recentOrders as $order)
-                            @php
-                                $customerName = $order->user?->name ?? $order->customer_name ?? 'مشتری';
-                                $customerPhone = $order->user?->phone ?? $order->customer_phone ?? null;
-                            @endphp
-
-                            <tr>
-                                <td>
-                                    <strong>{{ $order->order_number }}</strong>
-                                </td>
-
-                                <td>
-                                    <div class="dashboard-v2__customer">
-                                        <strong>{{ $customerName }}</strong>
-                                        @if($customerPhone)
-                                            <small dir="ltr">{{ $customerPhone }}</small>
-                                        @endif
-                                    </div>
-                                </td>
-
-                                <td>
-                                    <strong>{{ $formatFaNumber((float) $order->total) }}</strong>
-                                    <small class="dashboard-v2__muted">تومان</small>
-                                </td>
-
-                                <td>
-                                    <span class="admin-badge admin-badge--{{ $statusClasses[$order->status] ?? 'neutral' }}">
-                                        {{ $statusNames[$order->status] ?? $order->status }}
-                                    </span>
-                                </td>
-
-                                <td>
-                                    <span class="admin-badge admin-badge--{{ $paymentClasses[$order->payment_status] ?? 'neutral' }}">
-                                        @switch($order->payment_status)
-                                            @case('paid') پرداخت‌شده @break
-                                            @case('pending') در انتظار پرداخت @break
-                                            @case('failed') ناموفق @break
-                                            @case('refunded') بازپرداخت‌شده @break
-                                            @default {{ $order->payment_status }}
-                                        @endswitch
-                                    </span>
-                                </td>
-
-                                <td>
-                                    <span class="dashboard-v2__muted">
-                                        <span
-                                            class="admin-local-date"
-                                            data-admin-date="{{ optional($order->placed_at)->toIso8601String() }}"
-                                        >
-                                            {{ optional($order->placed_at)->format('Y/m/d H:i') }}
-                                        </span>
-                                    </span>
-                                </td>
-
-                                <td>
-                                    <a
-                                        href="{{ route('admin.orders.show', $order) }}"
-                                        class="dashboard-v2__order-link"
-                                    >
-                                        جزئیات
-                                        <span aria-hidden="true">←</span>
-                                    </a>
-                                </td>
-                            </tr>
-                        @endforeach
-                        </tbody>
-                    </table>
-                </div>
+            @if($recentOrders->isEmpty())
+                <div class="janan-overview__empty">هنوز سفارشی ثبت نشده است.</div>
             @else
-                <div class="dashboard-v2__empty dashboard-v2__empty--large">
-                    <strong>هنوز سفارشی ثبت نشده است.</strong>
-                    <span>به‌محض ثبت سفارش، فعالیت‌های اخیر اینجا نمایش داده می‌شوند.</span>
-                </div>
+                <ul class="janan-overview__order-list">
+                    @foreach($recentOrders as $order)
+                        <li>
+                            <a href="{{ route('admin.orders.show', $order) }}">
+                                <span>
+                                    <strong>{{ $order->user?->name ?? $order->customer_name ?? 'مشتری' }}</strong>
+                                    <small>سفارش <bdi>{{ \App\Support\PersianNumber::digits($order->order_number) }}</bdi></small>
+                                    @if($order->placed_at)
+                                        <small><time datetime="{{ $order->placed_at->toIso8601String() }}" data-admin-date="{{ $order->placed_at->toIso8601String() }}">{{ $order->placed_at->format('Y/m/d H:i') }}</time></small>
+                                    @endif
+                                </span>
+                                <span class="janan-overview__order-status">
+                                    <strong>{{ $statusNames[$order->status] ?? $order->status }}</strong>
+                                    <small>{{ $paymentNames[$order->payment_status] ?? $order->payment_status }}</small>
+                                </span>
+                                <span class="janan-overview__order-amount"><strong>{{ $number($order->total) }}</strong><small>تومان</small></span>
+                            </a>
+                        </li>
+                    @endforeach
+                </ul>
             @endif
         </section>
+    </div>
 
-        <section class="dashboard-v2__footer-grid">
-            <a href="{{ route('admin.products.create') }}" class="dashboard-v2__quick-action">
-                <span>01</span>
-                <strong>محصول جدید</strong>
-                <small>افزودن محصول به کاتالوگ</small>
-                <b aria-hidden="true">↗</b>
-            </a>
+    <section class="janan-overview__card janan-overview__report" aria-labelledby="sales-title">
+        <header class="janan-overview__section-head">
+            <div><h2 id="sales-title">فروش و دریافت‌ها</h2><p>فروش از دفتر کل و سفارش‌ها از تاریخ ثبت محاسبه می‌شوند.</p></div>
+            <form class="janan-overview__period" action="{{ route('admin.dashboard') }}" method="GET">
+                <label for="dashboard-period">بازهٔ گزارش</label>
+                <select id="dashboard-period" name="period">
+                    @foreach(collect([7, 30, 60, 90, (int) $period])->unique()->sort() as $days)
+                        <option value="{{ $days }}" @selected((int) $period === $days)>{{ $number($days) }} روز اخیر</option>
+                    @endforeach
+                </select>
+                <button class="janan-overview__button" type="submit">نمایش</button>
+            </form>
+        </header>
+        <dl class="janan-overview__metrics">
+            <div><dt>خالص فروش</dt><dd>{{ $number($revenue) }} <small>تومان</small></dd><small>پس از کسر مرجوعی‌ها</small></div>
+            <div><dt>خالص جریان نقدی</dt><dd>{{ $number($netCash) }} <small>تومان</small></dd><small>ورودی منهای خروجی نقد و بانک و هزینه‌های ثبت‌شده</small></div>
+            <div><dt>سفارش‌های ثبت‌شده</dt><dd>{{ $number($ordersCount) }}</dd><small>{{ $number($paidOrdersCount) }} سفارش پرداخت‌شده</small></div>
+        </dl>
 
-            <a href="{{ route('admin.orders.index') }}" class="dashboard-v2__quick-action">
-                <span>02</span>
-                <strong>بررسی سفارش‌ها</strong>
-                <small>پیگیری وضعیت سفارش‌های جاری</small>
-                <b aria-hidden="true">↗</b>
-            </a>
+        @if($hasSales)
+            <figure class="janan-overview__chart">
+                <figcaption>خالص فروش روزانه <span>ثبت فروش ↑ · کاهش خالص ↓</span></figcaption>
+                <div class="janan-overview__plot" aria-hidden="true">
+                    @foreach($daily as $day)
+                        @php
+                            $height = abs($day['income']) / max($maxIncome, 1) * 100;
+                        @endphp
+                        <div class="janan-overview__plot-day">
+                            <div @class(['janan-overview__plot-bar', 'janan-overview__plot-bar--negative' => $day['income'] < 0]) style="--bar-height: {{ $height }}%"></div>
+                        </div>
+                    @endforeach
+                </div>
+                <div class="janan-overview__chart-dates" dir="ltr" aria-hidden="true">
+                    <time data-admin-date="{{ $daily->first()['date'] }}">{{ $daily->first()['label'] }}</time>
+                    <time data-admin-date="{{ $daily->last()['date'] }}">{{ $daily->last()['label'] }}</time>
+                </div>
+            </figure>
+        @else
+            <p class="janan-overview__empty">در این بازه خالص فروش روزانه‌ای برای نمایش وجود ندارد.</p>
+        @endif
 
-            <a href="{{ route('admin.inventory.index') }}" class="dashboard-v2__quick-action">
-                <span>03</span>
-                <strong>کنترل موجودی</strong>
-                <small>بررسی تنوع‌های کم‌موجودی</small>
-                <b aria-hidden="true">↗</b>
-            </a>
+        <details class="janan-overview__details">
+            <summary>جدول فروش روزانه و جزئیات بازه</summary>
+            <dl class="janan-overview__facts">
+                <div><dt>هزینهٔ ثبت‌شده</dt><dd>{{ $number($expenses) }} تومان</dd></div>
+                <div><dt>مرجوعی ثبت‌شده در دفتر کل</dt><dd>{{ $number($salesReturns) }} تومان</dd></div>
+                <div><dt>خالص گردش نقد و بانک</dt><dd>{{ $number($settledFunds) }} تومان</dd></div>
+                @foreach($statusNames as $status => $label)
+                    <div><dt>{{ $label }}</dt><dd>{{ $number($orderBreakdown[$status] ?? 0) }} سفارش</dd></div>
+                @endforeach
+            </dl>
+            <table class="janan-overview__table">
+                <thead><tr><th scope="col">روز</th><th scope="col">خالص فروش (تومان)</th><th scope="col">سفارش</th></tr></thead>
+                <tbody>
+                    @foreach($daily as $day)
+                        <tr><td><time data-admin-date="{{ $day['date'] }}">{{ $day['label'] }}</time></td><td>{{ $number($day['income']) }}</td><td>{{ $number($day['orders']) }}</td></tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </details>
+    </section>
 
-            <a href="{{ route('admin.accounting.index') }}" class="dashboard-v2__quick-action">
-                <span>04</span>
-                <strong>حسابداری</strong>
-                <small>مشاهده جریان مالی فروشگاه</small>
-                <b aria-hidden="true">↗</b>
-            </a>
-
-            <a href="{{ route('admin.content.about') }}" class="dashboard-v2__quick-action">
-                <span>05</span>
-                <strong>محتوای سایت</strong>
-                <small>ویرایش متن‌های درباره ما</small>
-                <b aria-hidden="true">↗</b>
-            </a>
-
-            <a href="{{ route('admin.contact.index') }}" class="dashboard-v2__quick-action">
-                <span>06</span>
-                <strong>پیام‌های تماس</strong>
-                <small>پیگیری درخواست‌های مشتریان</small>
-                <b aria-hidden="true">↗</b>
-            </a>
+    <div class="janan-overview__work janan-overview__work--catalog">
+        <section class="janan-overview__card" aria-labelledby="catalog-title">
+            <header class="janan-overview__section-head">
+                <div><h2 id="catalog-title">محصولات و گزینه‌ها</h2><p>هر مدل می‌تواند چند گزینهٔ سایز یا رنگ داشته باشد.</p></div>
+                <a href="{{ route('admin.products.index') }}">فهرست محصولات</a>
+            </header>
+            <dl class="janan-overview__facts">
+                <div><dt>مدل ثبت‌شده</dt><dd>{{ $number($catalogProducts) }}</dd></div>
+                <div><dt>گزینهٔ فعال</dt><dd>{{ $number($catalogVariants) }}</dd></div>
+                <div><dt>گزینه با قیمت عمده</dt><dd>{{ $number($catalogWholesalePricedVariants) }}</dd></div>
+                <div><dt>دسته‌بندی</dt><dd>{{ $number($catalogCategories) }}</dd></div>
+                <div><dt>برند</dt><dd>{{ $number($catalogBrands) }}</dd></div>
+                <div><dt>حساب مشتری</dt><dd>{{ $number($customers) }}</dd></div>
+            </dl>
+            <div class="janan-overview__catalog-link">
+                <a href="{{ route('admin.nila.index') }}">بررسی فایل هلو و تفاوت ردیف‌ها با مدل‌ها</a>
+            </div>
         </section>
 
+        <section class="janan-overview__card" aria-labelledby="content-title">
+            <header class="janan-overview__section-head">
+                <div><h2 id="content-title">آمادگی صفحه‌های فروشگاه</h2><p>تصویر، عنوان و توضیح برای جستجو</p></div>
+            </header>
+            <ul class="janan-overview__queue-list">
+                @foreach($qualityItems as [$label, $value, $url])
+                    <li>
+                        <a href="{{ $url }}">
+                            <strong>{{ $label }}</strong><b @class(['janan-overview__count', 'janan-overview__count--attention' => $value > 0])>{{ $number($value) }}</b>
+                        </a>
+                    </li>
+                @endforeach
+            </ul>
+        </section>
     </div>
+
+    <div class="janan-overview__work janan-overview__work--catalog">
+        <section class="janan-overview__card" aria-labelledby="stock-title">
+            <header class="janan-overview__section-head">
+                <div><h2 id="stock-title">کمترین موجودی</h2><p>ارزش برآوردی موجودی به قیمت فروش {{ $number($inventoryValue) }} تومان</p></div>
+                <a href="{{ route('admin.inventory.index') }}">انبار</a>
+            </header>
+            <ul class="janan-overview__compact-list">
+                @forelse($lowStockVariants as $variant)
+                    <li><span><strong>{{ $variant->product?->name ?? 'محصول' }}</strong><small><bdi>{{ $variant->sku }}</bdi></small></span><b>{{ $number($variant->stock) }} عدد</b></li>
+                @empty
+                    <li class="janan-overview__empty">هیچ کد فعالی در محدودهٔ هشدار نیست.</li>
+                @endforelse
+            </ul>
+        </section>
+        <section class="janan-overview__card" aria-labelledby="top-title">
+            <header class="janan-overview__section-head">
+                <div><h2 id="top-title">پرفروش‌های بازه</h2><p>بر اساس تعداد فروش در سفارش‌های پرداخت‌شده</p></div>
+            </header>
+            <ul class="janan-overview__compact-list">
+                @forelse($topProducts as $product)
+                    <li><a href="{{ route('admin.products.edit', $product) }}">{{ $product->name }}</a><b>{{ $number($product->sales_quantity) }} عدد</b></li>
+                @empty
+                    <li class="janan-overview__empty">در این بازه محصولی شرایط گزارش پرفروش‌ها را ندارد.</li>
+                @endforelse
+            </ul>
+        </section>
+    </div>
+    <section class="janan-overview__card" aria-labelledby="recent-products-title">
+        <header class="janan-overview__section-head">
+            <div><h2 id="recent-products-title">آخرین مدل‌های ثبت‌شده</h2><p>مدل‌های تازه و وضعیت نمایش آن‌ها در فروشگاه</p></div>
+            <a href="{{ route('admin.products.index') }}">همهٔ محصولات</a>
+        </header>
+        <ul class="janan-overview__compact-list">
+            @forelse($recentProducts as $product)
+                <li>
+                    <div>
+                        <a href="{{ route('admin.products.edit', $product) }}">{{ $product->name }}</a>
+                        @if($product->category)<small>{{ $product->category->name }}</small>@endif
+                    </div>
+                    <b>{{ $product->is_active ? 'فعال' : 'غیرفعال' }}</b>
+                </li>
+            @empty
+                <li class="janan-overview__empty">هنوز مدلی ثبت نشده است.</li>
+            @endforelse
+        </ul>
+    </section>
+</div>
 @endsection
