@@ -111,11 +111,7 @@
             href="{{ route('cart') }}"
             aria-label="سبد خرید"
         >
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M5 8h14l-1.2 11H6.2L5 8Z"/>
-                <path d="M9 8a3 3 0 0 1 6 0"/>
-            </svg>
-            <span>سبد</span>
+            <x-store.icon name="basket" />
         </a>
     @endif
 </nav>

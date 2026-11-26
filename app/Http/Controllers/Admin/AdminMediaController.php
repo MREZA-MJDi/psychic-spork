@@ -33,6 +33,12 @@ class AdminMediaController extends Controller
         $mime = (string) $file->getMimeType();
         $isVideo = str_starts_with($mime, 'video/');
 
+        if ($type === 'category') {
+            $request->validate([
+                'media_file' => ['required', 'image', 'mimes:jpeg,jpg,png,webp', 'max:2048', \App\Support\CategoryCover::VALIDATION],
+            ]);
+        }
+
         if (! $isVideo) {
             validator(
                 ['file' => $file],

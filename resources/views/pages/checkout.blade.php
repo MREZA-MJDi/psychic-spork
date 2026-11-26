@@ -262,21 +262,7 @@
                         >
                     </label>
 
-                    <label>
-                        استان
-                        <input
-                            name="shipping_province"
-                            value="{{ old('shipping_province') }}"
-                        >
-                    </label>
-
-                    <label>
-                        شهر
-                        <input
-                            name="shipping_city"
-                            value="{{ old('shipping_city') }}"
-                        >
-                    </label>
+                    <x-store.location-fields :province="old('shipping_province', '')" :city="old('shipping_city', '')" />
 
                     <label class="form-grid__full">
                         آدرس کامل
@@ -399,8 +385,9 @@
             <a
                 class="button button--ghost checkout-back"
                 href="{{ route('cart') }}"
+                aria-label="سبد خرید"
             >
-                بازگشت به سبد
+                <x-store.icon name="basket" />
             </a>
         </aside>
 

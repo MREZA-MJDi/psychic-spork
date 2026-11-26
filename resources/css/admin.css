@@ -1686,55 +1686,17 @@
    30. PAGINATION
 ========================================================= */
 
-.admin-pagination {
-    display: flex;
-    justify-content: center;
 
-    padding: 18px 20px;
-}
 
-.admin-pagination nav {
-    width: 100%;
-}
 
-.admin-pagination svg {
-    width: 15px;
-    height: 15px;
-}
 
-.admin-pagination a,
-.admin-pagination span {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
 
-    min-width: 34px;
-    min-height: 34px;
 
-    margin: 0 2px;
 
-    padding: 5px 9px;
 
-    border: 1px solid var(--admin-border);
-    border-radius: 9px;
 
-    color: var(--admin-text-soft);
 
-    background: var(--admin-surface);
 
-    font-size: 8px;
-}
-
-.admin-pagination a:hover {
-    background: var(--admin-surface-soft);
-    border-color: var(--admin-border-strong);
-}
-
-.admin-pagination span[aria-current="page"] {
-    color: #ffffff;
-    background: var(--admin-dark);
-    border-color: var(--admin-dark);
-}
 
 
 /* =========================================================
@@ -2181,7 +2143,7 @@
     left: 12px;
     bottom: 10px;
     color: #cfc9c0;
-    font: 28px/1 var(--admin-display, Georgia, serif);
+    font: 28px/1 var(--janan-font);
     font-style: normal;
 }
 
@@ -2744,7 +2706,7 @@
 
 .dashboard-v2__quick-action > span {
     color: var(--admin-faint);
-    font: 16px/1 var(--admin-display, Georgia, serif);
+    font: 16px/1 var(--janan-font);
 }
 
 .dashboard-v2__quick-action > strong {
@@ -3689,7 +3651,7 @@ body.admin-nav-open {
 .accounting-journal-entry { min-width:0; padding:15px 0; border-bottom:1px solid var(--admin-border); }
 .accounting-journal-entry:first-child { padding-top:4px; }
 .accounting-journal-entry__head { display:flex; align-items:center; justify-content:space-between; gap:12px; }
-.accounting-journal-entry__head code { min-width:0; overflow-wrap:anywhere; color:var(--admin-info); font:600 9px ui-monospace,Consolas,monospace; }
+.accounting-journal-entry__head code { min-width:0; overflow-wrap:anywhere; color:var(--admin-info); font:600 9px var(--janan-font); }
 .accounting-journal-entry__head time { flex:none; color:var(--admin-muted); font-size:9px; }
 .accounting-journal-entry__description { margin:8px 0 10px; color:var(--admin-text-soft); font-size:10px; line-height:1.8; }
 .accounting-journal-entry__lines { display:grid; gap:6px; }
@@ -3757,7 +3719,7 @@ body.admin-nav-open {
 .wholesale-pack-variant__copy > strong { color:var(--admin-text); font-size:11px; }
 .wholesale-pack-variant__meta { display:flex; align-items:center; flex-wrap:wrap; gap:6px; color:var(--admin-text-soft); font-size:9px; }
 .wholesale-pack-variant__meta b { font-weight:700; }
-.wholesale-pack-variant__meta code { color:var(--admin-muted); font:9px ui-monospace,Consolas,monospace; }
+.wholesale-pack-variant__meta code { color:var(--admin-muted); font:9px var(--janan-font); }
 .wholesale-pack-variant__copy small { color:var(--admin-muted); font-size:9px; }
 .wholesale-pack-variant__quantity { display:grid; gap:5px; color:var(--admin-text-soft); font-size:9px; }
 .admin-main .wholesale-pack-variant__quantity input { width:100%; min-height:38px; text-align:center; }
@@ -4101,3 +4063,8 @@ body.admin-nav-open {
     .catalog-pack-resume { bottom: calc(92px + env(safe-area-inset-bottom)); }
     .catalog-pack-notice:not([hidden]) { bottom: calc(146px + env(safe-area-inset-bottom)); }
 }
+
+.admin-media-picker[data-category-cover] .admin-media-picker__stage { grid-template-columns: minmax(0,300px) minmax(0,1fr); align-items: center; }
+.admin-media-picker[data-category-cover] .admin-media-picker__editor[hidden] { display: none; }
+.admin-media-picker[data-category-cover] .admin-media-picker__editor canvas { aspect-ratio: 4 / 3; object-fit: contain; }
+@media (max-width:700px) { .admin-media-picker[data-category-cover] .admin-media-picker__stage { grid-template-columns: minmax(0,1fr); } }

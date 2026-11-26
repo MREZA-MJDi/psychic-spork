@@ -29,6 +29,7 @@ use App\Http\Controllers\StoreBrandController;
 use App\Http\Controllers\StoreCategoryController;
 use App\Http\Controllers\StoreMediaController;
 use App\Http\Controllers\StorePageController;
+use App\Http\Controllers\StoreLocationController;
 use App\Http\Controllers\StoreProductController;
 use App\Http\Controllers\WholesaleController;
 use Illuminate\Support\Facades\Route;
@@ -45,6 +46,11 @@ Route::get('/', [HomeController::class, 'index'])
 Route::get('/media/{path}', [StoreMediaController::class, 'show'])
     ->where('path', '.*')
     ->name('store.media');
+
+Route::get('/locations/provinces', [StoreLocationController::class, 'provinces'])
+    ->middleware('throttle:60,1')->name('locations.provinces');
+Route::get('/locations/cities', [StoreLocationController::class, 'cities'])
+    ->middleware('throttle:60,1')->name('locations.cities');
 
 Route::get('/robots.txt', [SeoController::class, 'robots'])
     ->name('seo.robots');

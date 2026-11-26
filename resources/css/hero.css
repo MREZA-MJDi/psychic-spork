@@ -270,7 +270,7 @@ body.home-immersive {
 
 .immersive-title-overlay__number span {
   display: block;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-family: var(--janan-font);
   font-size: 12px;
   font-weight: 400;
   letter-spacing: .1em;
@@ -426,7 +426,7 @@ body.home-immersive {
   justify-content: center;
   padding: .625em 1.25em;
   color: #333;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-family: var(--janan-font);
   font-size: .75em;
 }
 
@@ -445,7 +445,7 @@ body.home-immersive {
   border: 0;
   background: transparent;
   color: #666;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-family: var(--janan-font);
   font-size: .75em;
   font-weight: 400;
   white-space: nowrap;
@@ -480,7 +480,7 @@ body.home-immersive {
 
 .immersive-footer__info p {
   color: #fff;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-family: var(--janan-font);
   font-size: 12px;
   line-height: 1.5;
 }
@@ -490,7 +490,7 @@ body.home-immersive {
   text-align: right;
   align-self: end;
   color: rgba(255,255,255,.55);
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-family: var(--janan-font);
   font-size: 11px;
 }
 
@@ -754,4 +754,66 @@ body.home-page-layout .store-header--immersive.is-over-content .mobile-menu-togg
 .immersive-grid-hero .immersive-controls {
     max-block-size: calc(100svh - 24px);
     box-sizing: border-box;
+}
+
+/* Selected product inspector: keep the gallery animation and separate text from imagery. */
+.immersive-grid-hero .immersive-title-overlay {
+  left: clamp(18px, 4vw, 56px); right: auto; bottom: 92px;
+  width: min(420px, calc(50vw - 64px)); max-width: 100%;
+  max-height: calc(100svh - 180px); padding: 20px;
+  border: 1px solid rgba(255,255,255,.17); border-radius: 18px;
+  background: rgba(20,22,25,.94); box-shadow: 0 16px 45px rgba(0,0,0,.25);
+  direction: rtl; text-align: start; overflow: auto;
+  visibility: hidden; pointer-events: none; scrollbar-width: thin; transition-property: none;
+}
+.immersive-grid-hero.is-zoomed .immersive-title-overlay { visibility: visible; pointer-events: auto; }
+.immersive-grid-hero .immersive-title-overlay__number { width: auto; height: auto; margin-bottom: 5px; color: #efb9cc; }
+.immersive-grid-hero .immersive-title-overlay__title { width: auto; min-height: 0; margin-bottom: 10px; }
+.immersive-grid-hero .immersive-title-overlay__title h1 { font-size: clamp(19px,2.3vw,29px); font-weight: 750; line-height: 1.45; letter-spacing: normal; overflow-wrap: anywhere; }
+.immersive-product-meta { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
+.immersive-product-meta span { padding: 3px 8px; border-radius: 7px; background: rgba(255,255,255,.10); color: #f5f5f5; font-size: 11px; line-height: 1.6; overflow-wrap: anywhere; }
+.immersive-grid-hero .immersive-title-overlay__description { width: auto; min-height: 0; margin-bottom: 10px; }
+.immersive-grid-hero .immersive-description-line { font-size: 12px; line-height: 1.7; font-weight: 400; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.immersive-product-price { color: #fff; font-size: 17px; font-weight: 750; margin-bottom: 10px; }
+.home-page .immersive-grid-hero .immersive-title-overlay__link { justify-content: space-between; display: flex; min-height: 42px; padding: 8px 12px; background: #fff; color: #24262a; border-radius: 10px; font-weight: 700; border: 0; }
+.immersive-grid-hero .immersive-title-overlay__link[hidden] { display: none; }
+.immersive-grid-hero .immersive-title-overlay__link:focus-visible { outline: 2px solid #efb9cc; outline-offset: 3px; }
+
+.immersive-grid-hero.is-zoomed .immersive-product-price { display:block; visibility:visible; opacity:1; line-height:1.6; }
+
+/* Interaction surfaces: clear affordances, predictable focus, unobstructed product details. */
+.immersive-grid-hero { background: radial-gradient(ellipse at 50% 45%,#24272b 0%,#101214 55%,#090a0b 100%); }
+.immersive-grid-item { border-radius: 12px; background:#191b1e; box-shadow:0 10px 28px #0005; }
+.immersive-grid-item:focus-visible,.immersive-grid-hero :is(button,a):focus-visible { outline:2px solid #f2b9cc; outline-offset:3px; }
+.immersive-discover { position:absolute; inset-inline:clamp(16px,4vw,56px); top:clamp(88px,13vh,124px); z-index:6; display:flex; justify-content:space-between; align-items:center; gap:14px; pointer-events:none; }
+.immersive-discover > div { max-width:60%; }
+.immersive-discover span { font-size:clamp(16px,2vw,22px); font-weight:750; }
+.immersive-discover p { color:#d4d8db; font-size:12px; line-height:1.8; }
+.immersive-discover a { pointer-events:auto; padding:10px 15px; min-height:44px; border:1px solid #ffffff36; border-radius:12px; background:#202326df; font-size:12px; display:grid; place-items:center; }
+.immersive-grid-hero.is-zoomed .immersive-discover,.immersive-grid-hero.is-zoomed .immersive-footer,.immersive-grid-hero.is-zoomed .immersive-controls { visibility:hidden; pointer-events:none; }
+.immersive-grid-hero.is-zoomed .immersive-controls > * { pointer-events:none; }
+.immersive-grid-hero .immersive-controls { gap:6px; transition:none; }
+.immersive-grid-hero .immersive-switch { border-radius:14px; gap:4px; padding:5px; background:#202326ed; border:1px solid #ffffff23; }
+.immersive-grid-hero .immersive-percentage { border-radius:12px; background:#f3f3f3; font-size:12px; }
+.immersive-grid-hero .immersive-switch__button { min-height:44px; min-width:44px; border-radius:9px; padding:6px 12px; color:#d1d5d8; font-size:12px; font-weight:650; }
+.immersive-grid-hero .immersive-switch__button.is-current { background:#f3f3f3; color:#24282b; }
+.immersive-grid-hero .immersive-switch__button > span { display:none; }
+.immersive-grid-hero .immersive-split-screen { direction:rtl; background:#121416; }
+.immersive-grid-hero .immersive-split-screen__left { padding:clamp(18px,4vw,64px); }
+.immersive-grid-hero .immersive-scaling-overlay { background:#191c1f; padding:0; border:0; border-radius:14px; overflow:hidden; }
+.immersive-grid-hero .immersive-scaling-overlay img { object-fit:contain; }
+.immersive-grid-hero.is-zoomed .immersive-title-overlay { inset-inline-start:auto; left:clamp(20px,4vw,64px); right:auto; bottom:auto; top:50%; transform:translateY(-50%); width:min(440px,calc(50vw - 80px)); max-height:calc(100svh - 170px); overflow:auto; overscroll-behavior:contain; touch-action:pan-y; user-select:text; }
+.immersive-grid-hero.is-zoomed .immersive-close-button { top:100px; right:24px; width:48px; height:48px; border:1px solid #ffffff35; border-radius:50%; color:#fff; background:#202326; transform:none; }
+.immersive-grid-hero .immersive-close-button svg { width:24px; height:24px; transform:none; }
+.immersive-grid-hero .immersive-title-overlay__link { margin-top:8px; transition-property:none; }
+.immersive-empty-state { position:absolute; inset:0; display:grid; align-content:center; justify-items:center; gap:14px; text-align:center; padding:24px; z-index:7; }
+.immersive-grid-hero.is-empty :is(.immersive-discover,.immersive-controls,.immersive-footer) { display:none; }
+@media(prefers-reduced-motion:reduce){.immersive-grid-hero *{scroll-behavior:auto;}}
+
+.immersive-grid-hero .immersive-scaling-overlay:focus-visible { outline-offset:-3px; }
+.immersive-grid-hero .immersive-discover a:hover { background:#363b40; }
+
+/* The storefront header sits above the gallery outside the product dialog. */
+.immersive-zoom-lock .store-header--immersive {
+    visibility: hidden;
 }

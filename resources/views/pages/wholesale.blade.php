@@ -85,7 +85,9 @@
                     <div class="customer-inline-status">
                         <strong>مجوز پرداخت چکی فعال است.</strong>
                         <p>سقف هر سفارش: {{ $chequePermission->max_order_amount !== null ? \App\Support\PersianNumber::format((float) $chequePermission->max_order_amount) . ' تومان' : 'بدون سقف تعیین‌شده' }}.</p>
-                        <a class="button button--primary" href="{{ route('cart') }}">مشاهده سبد خرید</a>
+                        <a class="button button--primary" href="{{ route('cart') }}" aria-label="سبد خرید">
+                            <x-store.icon name="basket" />
+                        </a>
                         <a class="button button--ghost" href="#packs">انتخاب پک</a>
                     </div>
                 @elseif($chequePermission?->isPending())

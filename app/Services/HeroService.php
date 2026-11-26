@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Product;
+use App\Models\ProductVariant;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -14,8 +15,8 @@ final class HeroService
 
     // Cache only request-independent slide data. URLs are kept relative so a request
     // arriving through an old proxy/port can never poison the shared hero cache.
-    private const VERSION_KEY = 'store:home:hero:products:version:v3';
-    private const CACHE_PREFIX = 'store:home:hero:products:v3:';
+    private const VERSION_KEY = 'store:home:hero:products:version:v4';
+    private const CACHE_PREFIX = 'store:home:hero:products:v4:';
     private const CACHE_TTL_MINUTES = 30;
 
     public function slides(): array
@@ -26,11 +27,43 @@ final class HeroService
             static fn () => '1'
         );
 
-        return Cache::remember(
+        $slides = Cache::remember(
             self::CACHE_PREFIX . $version,
             now()->addMinutes(self::CACHE_TTL_MINUTES),
             fn () => $this->loadSlides()
         );
+
+        if ($slides === []) {
+            return [];
+        }
+
+        // Price and stock must not be cached for the full editorial cache TTL.
+        // One bounded aggregate query for the selected products keeps them fresh.
+        $metrics = ProductVariant::query()
+            ->whereIn('product_id', array_column($slides, 'id'))
+            ->where('is_active', true)
+            ->select('product_id')
+            ->selectRaw('MIN(COALESCE(sale_price, price)) as min_price')
+            ->selectRaw('MAX(COALESCE(sale_price, price)) as max_price')
+            ->selectRaw('SUM(stock) as stock_total')
+            ->selectRaw("COUNT(DISTINCT NULLIF(TRIM(color), '')) as colors_count")
+            ->selectRaw("COUNT(DISTINCT NULLIF(TRIM(size), '')) as sizes_count")
+            ->groupBy('product_id')->get()->keyBy('product_id');
+
+        return array_map(static function (array $slide) use ($metrics): array {
+            $metric = $metrics->get($slide['id']);
+            $min = (float) ($metric?->min_price ?? 0);
+            $max = (float) ($metric?->max_price ?? 0);
+            $slide['price'] = $min > 0
+                ? ($max > $min ? 'از ' : '') . \App\Support\PersianNumber::format($min) . ' تومان'
+                : null;
+            $slide['availability'] = (int) ($metric?->stock_total ?? 0) > 0 ? 'موجود' : 'ناموجود';
+            $slide['facts'] = array_values(array_filter([
+                (int) ($metric?->colors_count ?? 0) > 0 ? \App\Support\PersianNumber::format($metric->colors_count) . ' رنگ' : null,
+                (int) ($metric?->sizes_count ?? 0) > 0 ? \App\Support\PersianNumber::format($metric->sizes_count) . ' سایز' : null,
+            ]));
+            return $slide;
+        }, $slides);
     }
 
     public function toggle(Product $product): bool
@@ -126,7 +159,8 @@ final class HeroService
                     'image' => $product->primaryGalleryMedia?->url
                         ?: $product->brand?->logoMedia?->url,
                     'title' => $product->name,
-                    'description' => Str::limit($description, 220),
+                    'description' => Str::limit(trim(strip_tags($description)), 120),
+                    'category' => $product->category?->name,
                     'brand' => $product->brand?->name ?? 'JANAN',
                     'url' => route('products.show', $product, false),
                 ];

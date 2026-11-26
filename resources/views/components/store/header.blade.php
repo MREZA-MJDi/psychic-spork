@@ -131,14 +131,7 @@
                     aria-label="سبد خرید"
                     data-cart-open
                 >
-                <svg
-                    viewBox="0 0 24 24"
-                    aria-hidden="true"
-                    focusable="false"
-                >
-                    <path d="M5 8h14l-1.2 11H6.2L5 8Z"/>
-                    <path d="M9 8a3 3 0 0 1 6 0"/>
-                </svg>
+                <x-store.icon name="basket" />
 
                     <span class="cart-count" data-cart-count @if(($cartCount ?? 0) < 1) hidden @endif>
                         {{ $cartCount ?? 0 }}
@@ -166,9 +159,9 @@
                 <a
                     href="{{ route('cart') }}"
                     class="cart-quick-preview__link"
+                    aria-label="سبد خرید"
                 >
-                    <span>مشاهده سبد</span>
-                    <i aria-hidden="true">←</i>
+                    <x-store.icon name="basket" />
                 </a>
 
                 <button

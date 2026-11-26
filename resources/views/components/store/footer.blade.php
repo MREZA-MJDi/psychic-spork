@@ -34,9 +34,8 @@
                     <b aria-hidden="true">↗</b>
                 </a>
 
-                <a href="{{ route('cart') }}">
-                    <span>سبد خرید</span>
-                    <b aria-hidden="true">↗</b>
+                <a href="{{ route('cart') }}" aria-label="سبد خرید">
+                    <x-store.icon name="basket" />
                 </a>
 
                 <a href="{{ route('about') }}#contact">
@@ -144,16 +143,15 @@
 
             <div class="footer-contact-list">
 
-                @if($siteStorePhone)
-                    <a
-                        href="tel:{{ preg_replace('/\s+/', '', $siteStorePhone) }}"
-                        class="footer-contact-line"
-                        dir="ltr"
-                    >
-                        <small>PHONE</small>
-                        <span>{{ $siteStorePhone }}</span>
+                @if(filled($siteStorePhone))
+                    <a class="store-icon-link" href="tel:{{ preg_replace('/\s+/', '', $siteStorePhone) }}" aria-label="تماس تلفنی با جانان">
+                        <x-store.icon name="phone" />
                     </a>
+                @else
+                    <span class="store-icon-link"><x-store.icon name="phone" /></span>
                 @endif
+
+                <a href="{{ route('about') }}#contact" class="footer-contact-line">فرم تماس با پشتیبانی</a>
 
                 @if($siteStoreEmail)
                     <a
@@ -161,14 +159,14 @@
                         class="footer-contact-line"
                         dir="ltr"
                     >
-                        <small>EMAIL</small>
+                        <small>ایمیل</small>
                         <span>{{ $siteStoreEmail }}</span>
                     </a>
                 @endif
 
                 @if($siteStoreAddress)
                     <span class="footer-contact-line">
-                        <small>ADDRESS</small>
+                        <small>نشانی</small>
                         <span>{{ $siteStoreAddress }}</span>
                     </span>
                 @endif
@@ -205,12 +203,11 @@
         <div class="footer-trust__head">
             <div>
                 <span class="footer-col__index">۰۴</span>
-                <h3>اعتبار، اطلاعات و مسیرهای رسمی</h3>
+                <h3>راهنمای سفارش و اطلاعات فروشگاه</h3>
             </div>
 
             <p>
-                اطلاعات قانونی و نشان‌های رسمی فروشگاه باید از مقادیر واقعی محیط production تأمین شوند.
-                هیچ مجوز یا نمادی بدون اتصال اطلاعات معتبر نمایش داده نمی‌شود.
+                قبل از خرید، شرایط ارسال و بازگشت را بخوانید. برای پیگیری خرید، به حساب کاربری بروید.
             </p>
         </div>
 
@@ -237,11 +234,10 @@
                     <span>مشاهده اطلاعات رسمی</span>
                 </a>
             @else
-                <div class="footer-trust__item">
-                    <span class="footer-trust__label">VERIFIED TRUST</span>
-                    <strong>نماد اعتماد</strong>
-                    <span>پس از ثبت اطلاعات رسمی فعال می‌شود</span>
-                </div>
+                <a href="{{ route('shipping') }}" class="footer-trust__item">
+                    <strong>راهنمای ارسال</strong>
+                    <span>روش‌های ارسال و اطلاعات تحویل سفارش</span>
+                </a>
             @endif
 
             @if(!empty($trust['license_url']))
@@ -256,22 +252,20 @@
                     <span>مشاهده جزئیات رسمی</span>
                 </a>
             @else
-                <div class="footer-trust__item">
-                    <span class="footer-trust__label">LEGAL</span>
-                    <strong>مجوزها و اطلاعات قانونی</strong>
-                    <span>اطلاعات رسمی از تنظیمات فروشگاه</span>
-                </div>
+                <a href="{{ route('returns') }}" class="footer-trust__item">
+                    <strong>راهنمای بازگشت کالا</strong>
+                    <span>شرایط و مراحل درخواست بازگشت کالا</span>
+                </a>
             @endif
 
             <div class="footer-trust__item">
-                <span class="footer-trust__label">SECURE CHECKOUT</span>
+
                 <strong>پرداخت آنلاین</strong>
-                <span>اتصال به درگاه پرداخت پیکربندی‌شده فروشگاه</span>
+                <span>مبلغ نهایی سفارش را پیش از پرداخت در مرحله تسویه‌حساب بررسی کنید.</span>
             </div>
 
             <div class="footer-trust__item">
-                <span class="footer-trust__label">SOCIAL / SUPPORT</span>
-                <strong>شبکه‌های اجتماعی</strong>
+                <strong>پشتیبانی جانان</strong>
 
                 <span>
                     @if(!empty($trust['social_instagram']))
@@ -287,7 +281,7 @@
                     @endif
 
                     @if(empty($trust['social_instagram']) && empty($trust['social_telegram']))
-                        لینک‌های اجتماعی از تنظیمات محیطی اضافه می‌شوند.
+                        <a href="{{ route('faq') }}">پاسخ پرسش‌های متداول خرید و سفارش</a>
                     @endif
                 </span>
             </div>

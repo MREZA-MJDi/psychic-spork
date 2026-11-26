@@ -178,4 +178,34 @@ class StoreCatalogPaginationTest extends TestCase
             });
     }
 
+    public function test_category_detail_renders_active_children_and_scoped_catalog(): void
+    {
+        $parent = Category::factory()->create(['is_active' => true]);
+        $child = Category::factory()->create(['parent_id' => $parent->id, 'is_active' => true]);
+        $inactive = Category::factory()->create(['parent_id' => $parent->id, 'is_active' => false]);
+        Product::factory()->create(['category_id' => $child->id, 'is_active' => true]);
+        Product::factory()->create(['category_id' => $inactive->id, 'is_active' => true]);
+
+        $this->get(route('categories.show', $parent->slug))
+            ->assertOk()
+            ->assertSee('category-collection__hero', false)
+            ->assertSee('category-collection__child-grid', false)
+            ->assertSee('id="category-products"', false)
+            ->assertSee('value="6"', false)
+            ->assertViewHas('children', fn ($children) => $children->modelKeys() === [$child->id])
+            ->assertViewHas('products', fn ($products) => $products->total() === 1);
+    }
+    public function test_default_and_explicit_pagination_share_persian_controls(): void
+    {
+        Product::factory()->count(25)->create();
+        $this->get(route('products.index', ['page' => 2, 'sort' => 'name_asc']))
+            ->assertOk()->assertSee('janan-pagination__numbers', false)
+            ->assertSee('aria-current="page"', false)
+            ->assertSee('صفحه ۲ از ۳')
+            ->assertDontSee('pagination.next')->assertDontSee('Showing');
+        $paginator = new \Illuminate\Pagination\LengthAwarePaginator(range(1, 5), 20, 5, 2);
+        $html = $paginator->links()->toHtml();
+        $this->assertStringContainsString('janan-pagination__numbers', $html);
+        $this->assertStringContainsString('صفحه ۲ از ۴', $html);
+    }
 }

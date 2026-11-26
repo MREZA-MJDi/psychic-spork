@@ -66,6 +66,7 @@ class StoreCategoryRequest extends FormRequest
                 'image',
                 'mimes:jpeg,jpg,png,webp',
                 'max:2048',
+                \App\Support\CategoryCover::VALIDATION,
             ],
 
             'sort_order' => [
@@ -111,6 +112,7 @@ class StoreCategoryRequest extends FormRequest
             'image_file.image' => 'فایل انتخاب‌شده باید یک تصویر باشد.',
             'image_file.mimes' => 'فرمت تصویر باید JPG، PNG یا WebP باشد.',
             'image_file.max' => 'حجم تصویر نمی‌تواند بیشتر از ۲ مگابایت باشد.',
+            'image_file.dimensions' => 'نسبت تصویر باید ۴:۳ باشد؛ ابتدا کادر را در ویرایشگر اعمال کنید.',
 
             'sort_order.integer' => 'ترتیب نمایش باید یک عدد باشد.',
             'sort_order.min' => 'ترتیب نمایش نمی‌تواند منفی باشد.',

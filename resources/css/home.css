@@ -187,9 +187,7 @@ display:
         #e4a9bf;
 
     font-family:
-        Georgia,
-        "Times New Roman",
-        serif;
+        var(--janan-font);
 
     font-size:
         20px;
@@ -290,7 +288,7 @@ align-self:
         rgba(255, 255, 255, .22);
 
     font:
-        9px Georgia, serif;
+        9px var(--janan-font);
 
     letter-spacing:
         .08em;
@@ -1255,7 +1253,7 @@ display:
         rgba(255, 255, 255, .72);
 
     font:
-        500 28px/1 Georgia, serif;
+        500 28px/1 var(--janan-font);
 }
 
 .home-brand-tile.is-featured .home-brand-tile__initial {
@@ -1541,7 +1539,7 @@ outline:
     border: 1px solid rgba(255,255,255,.22);
     border-radius: 50%;
     color: rgba(255,255,255,.86);
-    font: 10px Georgia, serif;
+    font: 10px var(--janan-font);
 }
 
 .discovery-card__body {
@@ -1851,7 +1849,7 @@ outline:
     border-radius: 50%;
     color: var(--janan-blue-ink);
     background: var(--janan-sky-50);
-    font: 10px Georgia, serif;
+    font: 10px var(--janan-font);
 }
 
 .home-signal-panel--popular .home-signal-panel__index {
@@ -1946,7 +1944,7 @@ outline:
 
 .home-signal-item__media > span {
     color: var(--janan-blue-ink);
-    font: italic 17px Georgia, serif;
+    font: italic 17px var(--janan-font);
 }
 
 .home-signal-item__copy {
@@ -2004,7 +2002,7 @@ outline:
     color: rgba(255,255,255,.76);
     border: 1px solid rgba(255,255,255,.16);
     background: rgba(255,255,255,.035);
-    font: 10px Georgia, serif;
+    font: 10px var(--janan-font);
 }
 
 .home-signal-empty {
@@ -2178,7 +2176,7 @@ outline:
 
 .janan-trust__eyebrow {
     color: rgba(255,255,255,.46);
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-family: var(--janan-font);
     font-size: 8px;
     font-weight: 400;
     letter-spacing: .16em;
@@ -2234,7 +2232,7 @@ outline:
 .janan-trust__index {
     padding-top: 1px;
     color: rgba(255,255,255,.28);
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-family: var(--janan-font);
     font-size: 8px;
     letter-spacing: .08em;
 }
@@ -2347,7 +2345,7 @@ outline:
 
 .janan-trust__eyebrow {
     color: rgba(23,23,23,.48);
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-family: var(--janan-font);
     font-size: 8px;
     font-weight: 400;
     letter-spacing: .15em;
@@ -2412,7 +2410,7 @@ outline:
 
 .janan-trust__index {
     color: rgba(23,23,23,.32);
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-family: var(--janan-font);
     font-size: 8px;
     letter-spacing: .08em;
 }
@@ -2468,64 +2466,7 @@ outline:
 }
 
 
-.home-category-grid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: clamp(12px, 3vw, 38px);
-    width: min(100%, 1060px);
-    margin-inline: auto;
-}
-
-.home-collection-link {
-    display: grid;
-    align-content: start;
-    justify-items: center;
-    gap: 6px;
-    min-width: 0;
-    padding-block: 4px 10px;
-    color: var(--janan-ink-strong);
-    text-align: center;
-    text-decoration: none;
-}
-
-.home-collection-link:hover {
-    color: var(--janan-pink-ink);
-}
-
-.home-collection-link__art {
-    width: min(100%, 256px);
-    aspect-ratio: 4 / 3;
-    overflow: hidden;
-    clip-path: polygon(48% 2%, 52% 2%, 98% 94%, 96% 98%, 4% 98%, 2% 94%);
-    background: #f3e3e9;
-}
-
-.home-collection-link__art img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.home-collection-link h3 {
-    margin: 4px 0 0;
-    font-size: clamp(13px, 1.5vw, 19px);
-    line-height: 1.5;
-    overflow-wrap: anywhere;
-}
-
-.home-collection-link > span {
-    color: var(--janan-muted);
-    font-size: clamp(11px, 1.2vw, 13px);
-}
-
-.home-collection-link:nth-child(3n + 2) .home-collection-link__art {
-    clip-path: polygon(2% 6%, 4% 2%, 96% 2%, 98% 6%, 52% 98%, 48% 98%);
-}
-
-.home-collection-link:only-child {
-    grid-column: 2;
-}
+/* Category cards are shared by home, directory and admin preview in core.css. */
 
 .home-picks {
     padding-block: clamp(28px, 5vw, 60px);
@@ -2596,3 +2537,74 @@ outline:
 @media (max-width: 600px) {
     .home-picks__grid { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* Curated category section. Shared card geometry remains in core.css so the
+   dashboard crop preview and public cards have exactly the same mask. */
+.home-page .home-collections--curated {
+    padding-block: clamp(30px, 5vw, 72px);
+    background: #f8f9fa;
+    overflow: visible;
+}
+.home-collections--curated::before { display: none; }
+.home-collections__panel {
+    position: relative;
+    isolation: isolate;
+    min-width: 0;
+    padding: clamp(20px, 3.5vw, 48px);
+    border: 1px solid #e4e8ea;
+    border-radius: 28px;
+    background: linear-gradient(145deg,#fff 0%,#fcfafb 62%,#f1f6f7 100%);
+    box-shadow: 0 16px 48px rgba(40,54,65,.055);
+}
+.home-collections__heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px 24px;
+    padding-bottom: clamp(16px, 2vw, 26px);
+    border-bottom: 1px solid rgba(57,65,74,.10);
+}
+.home-collections__intro { min-width: 0; max-width: 620px; }
+.home-collections__eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    color: #93475f; font-size: 12px; font-weight: 750;
+}
+.home-collections__eyebrow i { width: 22px; height: 2px; background: #c4869a; border-radius: 2px; }
+.home-collections__heading h2 { margin: 6px 0; color: var(--janan-ink-strong); font-size: clamp(24px,3vw,38px); line-height: 1.45; font-weight: 800; }
+.home-collections__heading p { margin: 0; color: #606b76; font-size: clamp(12px,1.15vw,14px); line-height: 1.9; }
+.home-collections__browse {
+    display: inline-flex; align-items: center; justify-content: center; gap: 12px;
+    padding: 10px 16px; min-height: 44px; border: 1px solid #e0e4e7;
+    border-radius: 12px; background: #fff; color: var(--janan-ink-strong);
+    font-size: 12px; font-weight: 750; transition: background .2s ease,border-color .2s ease;
+}
+.home-collections__browse svg { width: 18px; height: 18px; }
+.home-collections__browse:hover { border-color: #c4869a; background: #fbf2f5; }
+.home-collections__gallery { padding-block: clamp(18px,3vw,36px); min-width: 0; }
+.home-collections__gallery .janan-category-grid--home {
+    display: flex; flex-wrap: wrap; justify-content: center; align-items: stretch;
+    gap: clamp(12px,1.7vw,22px); width: 100%;
+}
+.home-collections__gallery .janan-category-grid--home > .janan-category-card {
+    flex: 0 1 calc((100% - 66px) / 4); max-width: 300px; min-width: 0;
+}
+.home-collections__gallery .janan-category-grid--home[data-category-count="1"] > .janan-category-card,
+.home-collections__gallery .janan-category-grid--home[data-category-count="2"] > .janan-category-card {
+    flex-basis: min(100%,300px);
+}
+.home-collections__gallery .janan-category-grid--home[data-category-count="3"] > .janan-category-card {
+    flex-basis: calc((100% - 44px) / 3);
+}
+.home-collections__gallery .janan-category-grid--home[data-category-count="5"] > .janan-category-card {
+    flex-basis: calc((100% - 88px) / 5);
+}
+.home-collections__foot {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px;
+    border-top: 1px solid rgba(57,65,74,.10); padding-top: 14px;
+    color: #606b76; font-size: 12px;
+}
+.home-collections__foot a { display: inline-flex; align-items: center; gap: 7px; min-height: 44px; font-weight: 700; color: #93475f; }
+.home-collections__empty { display: grid; justify-items: center; gap: 12px; padding-block: 28px; text-align: center; }
+.home-collections__browse:focus-visible,.home-collections__foot a:focus-visible { outline: 2px solid #93475f; outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) { .home-collections__browse { transition: none; } }
