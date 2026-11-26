@@ -86,6 +86,7 @@ class StoreCategoryController extends Controller
         return view('categories.show', [
             'seo' => $seo->category($category),
             'category' => $category,
+            'children' => $category->children()->active()->with('coverMedia')->limit(12)->get(),
             'products' => $products,
             'sort' => $sort,
             'perPage' => $perPage,

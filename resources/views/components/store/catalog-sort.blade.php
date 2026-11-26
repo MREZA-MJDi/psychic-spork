@@ -19,6 +19,9 @@
     <label>
         <span>نمایش</span>
         <select name="per_page" onchange="this.form.submit()">
+            @if(request()->routeIs('categories.show') || $perPage === 6)
+                <option value="6" @selected($perPage === 6)>۶</option>
+            @endif
             <option value="12" @selected($perPage === 12)>۱۲</option>
             <option value="24" @selected($perPage === 24)>۲۴</option>
             <option value="36" @selected($perPage === 36)>۳۶</option>
