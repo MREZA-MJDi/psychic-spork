@@ -178,4 +178,21 @@ class StoreCatalogPaginationTest extends TestCase
             });
     }
 
+    public function test_category_detail_renders_active_children_and_scoped_catalog(): void
+    {
+        $parent = Category::factory()->create(['is_active' => true]);
+        $child = Category::factory()->create(['parent_id' => $parent->id, 'is_active' => true]);
+        $inactive = Category::factory()->create(['parent_id' => $parent->id, 'is_active' => false]);
+        Product::factory()->create(['category_id' => $child->id, 'is_active' => true]);
+        Product::factory()->create(['category_id' => $inactive->id, 'is_active' => true]);
+
+        $this->get(route('categories.show', $parent->slug))
+            ->assertOk()
+            ->assertSee('category-collection__hero', false)
+            ->assertSee('category-collection__child-grid', false)
+            ->assertSee('id="category-products"', false)
+            ->assertSee('value="6"', false)
+            ->assertViewHas('children', fn ($children) => $children->modelKeys() === [$child->id])
+            ->assertViewHas('products', fn ($products) => $products->total() === 1);
+    }
 }

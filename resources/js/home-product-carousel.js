@@ -17,8 +17,10 @@ import { persianDigits } from './persian-digits.js';
     let index = 0;
 
     const visibleCount = () => {
-        if (window.innerWidth <= 560) return 1;
-        if (window.innerWidth <= 900) return 2;
+        const width = viewport.clientWidth;
+        if (width < 440) return 1;
+        if (width < 720) return 2;
+        if (width < 1000) return 3;
         return 4;
     };
 
@@ -100,7 +102,7 @@ import { persianDigits } from './persian-digits.js';
     const start = () => {
         stop();
 
-        if (cards.length <= visibleCount()) return;
+        if (cards.length <= visibleCount() || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
         timer = window.setInterval(advance, autoplayMs);
     };

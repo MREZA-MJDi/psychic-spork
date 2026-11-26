@@ -108,4 +108,21 @@ class AdminHeroTest extends TestCase
                 && $slides[35]['number'] === '36';
         });
     }
+    public function test_hero_inspector_uses_current_price_and_stock_even_with_cached_slides(): void
+    {
+        Cache::flush();
+        $product = Product::factory()->create(['is_active' => true, 'is_hero' => true]);
+        $variant = ProductVariant::factory()->create([
+            'product_id' => $product->id, 'is_active' => true,
+            'price' => 200000, 'sale_price' => 150000, 'stock' => 5,
+        ]);
+        $hero = app(\App\Services\HeroService::class);
+        $slide = $hero->slides()[0];
+        $this->assertSame('۱۵۰٬۰۰۰ تومان', $slide['price']);
+        $this->assertSame('موجود', $slide['availability']);
+        $variant->update(['sale_price' => 120000, 'stock' => 0]);
+        $slide = $hero->slides()[0];
+        $this->assertSame('۱۲۰٬۰۰۰ تومان', $slide['price']);
+        $this->assertSame('ناموجود', $slide['availability']);
+    }
 }

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Product;
+use App\Models\ProductVariant;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -26,11 +27,43 @@ final class HeroService
             static fn () => '1'
         );
 
-        return Cache::remember(
+        $slides = Cache::remember(
             self::CACHE_PREFIX . $version,
             now()->addMinutes(self::CACHE_TTL_MINUTES),
             fn () => $this->loadSlides()
         );
+
+        if ($slides === []) {
+            return [];
+        }
+
+        // Price and stock must not be cached for the full editorial cache TTL.
+        // One bounded aggregate query for the selected products keeps them fresh.
+        $metrics = ProductVariant::query()
+            ->whereIn('product_id', array_column($slides, 'id'))
+            ->where('is_active', true)
+            ->select('product_id')
+            ->selectRaw('MIN(COALESCE(sale_price, price)) as min_price')
+            ->selectRaw('MAX(COALESCE(sale_price, price)) as max_price')
+            ->selectRaw('SUM(stock) as stock_total')
+            ->selectRaw("COUNT(DISTINCT NULLIF(TRIM(color), '')) as colors_count")
+            ->selectRaw("COUNT(DISTINCT NULLIF(TRIM(size), '')) as sizes_count")
+            ->groupBy('product_id')->get()->keyBy('product_id');
+
+        return array_map(static function (array $slide) use ($metrics): array {
+            $metric = $metrics->get($slide['id']);
+            $min = (float) ($metric?->min_price ?? 0);
+            $max = (float) ($metric?->max_price ?? 0);
+            $slide['price'] = $min > 0
+                ? ($max > $min ? 'از ' : '') . \App\Support\PersianNumber::format($min) . ' تومان'
+                : null;
+            $slide['availability'] = (int) ($metric?->stock_total ?? 0) > 0 ? 'موجود' : 'ناموجود';
+            $slide['facts'] = array_values(array_filter([
+                (int) ($metric?->colors_count ?? 0) > 0 ? \App\Support\PersianNumber::format($metric->colors_count) . ' رنگ' : null,
+                (int) ($metric?->sizes_count ?? 0) > 0 ? \App\Support\PersianNumber::format($metric->sizes_count) . ' سایز' : null,
+            ]));
+            return $slide;
+        }, $slides);
     }
 
     public function toggle(Product $product): bool
@@ -98,7 +131,6 @@ final class HeroService
             ])
             ->where('is_active', true)
             ->where('is_hero', true)
-            ->withCatalogMetrics()
             ->with([
                 'brand:id,name',
                 'brand.logoMedia',
@@ -129,15 +161,6 @@ final class HeroService
                     'title' => $product->name,
                     'description' => Str::limit(trim(strip_tags($description)), 120),
                     'category' => $product->category?->name,
-                    'price' => (float) $product->minimum_effective_price > 0
-                        ? ((float) $product->maximum_effective_price > (float) $product->minimum_effective_price ? 'از ' : '')
-                            . \App\Support\PersianNumber::format($product->minimum_effective_price) . ' تومان'
-                        : null,
-                    'availability' => (int) $product->active_stock_total > 0 ? 'موجود' : 'ناموجود',
-                    'facts' => array_values(array_filter([
-                        (int) $product->active_variant_colors_count > 0 ? \App\Support\PersianNumber::format($product->active_variant_colors_count) . ' رنگ' : null,
-                        (int) $product->active_variant_sizes_count > 0 ? \App\Support\PersianNumber::format($product->active_variant_sizes_count) . ' سایز' : null,
-                    ])),
                     'brand' => $product->brand?->name ?? 'JANAN',
                     'url' => route('products.show', $product, false),
                 ];
