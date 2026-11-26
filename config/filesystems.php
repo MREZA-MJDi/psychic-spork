@@ -1,6 +1,8 @@
 <?php
 
 return [
+    'media_min_free_mib' => (int) env('JANAN_MEDIA_MIN_FREE_MIB', 0),
+
 
     /*
     |--------------------------------------------------------------------------

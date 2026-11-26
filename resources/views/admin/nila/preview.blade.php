@@ -18,24 +18,30 @@
     <a class="admin-btn admin-btn--ghost" href="{{ route('admin.nila.index') }}">بازگشت به نیلا</a>
 </div>
 
-<div class="admin-dashboard-stats">
+<div class="admin-dashboard-stats" aria-label="وضعیت داده‌های فایل">
     <div class="admin-stat-card">
-        <div class="admin-stat-card__label">کل ردیف‌ها</div>
-        <div class="admin-stat-card__value">{{ number_format($batch->total_rows) }}</div>
-    </div>
-    <div class="admin-stat-card">
-        <div class="admin-stat-card__label">ردیف‌های معتبر</div>
-        <div class="admin-stat-card__value">{{ number_format($batch->valid_rows) }}</div>
-    </div>
-    <div class="admin-stat-card">
-        <div class="admin-stat-card__label">ردیف‌های دارای خطا</div>
-        <div class="admin-stat-card__value">{{ number_format($batch->invalid_rows) }}</div>
-    </div>
-    <div class="admin-stat-card">
-        <div class="admin-stat-card__label">گروه محصول</div>
+        <div class="admin-stat-card__label">کل گروه‌های محصول</div>
         <div class="admin-stat-card__value">{{ number_format($batch->product_groups) }}</div>
+        <div class="admin-stat-card__meta">{{ number_format($batch->total_rows) }} ردیف تنوع در فایل</div>
     </div>
-
+    <div class="admin-stat-card">
+        <div class="admin-stat-card__label">گروه‌های معتبر در فایل</div>
+        <div class="admin-stat-card__value">{{ number_format($comparison['valid_groups']) }}</div>
+        <div class="admin-stat-card__meta">{{ number_format($batch->imported_groups) }} گروه تاکنون ثبت شده</div>
+    </div>
+    <div class="admin-stat-card">
+        <div class="admin-stat-card__label">گروه‌های نیازمند اصلاح فایل</div>
+        <div class="admin-stat-card__value">{{ number_format($comparison['blocked_groups']) }}</div>
+        <div class="admin-stat-card__meta">{{ number_format($batch->invalid_rows) }} ردیف دارای خطا</div>
+    </div>
+    <div class="admin-stat-card">
+        <div class="admin-stat-card__label">ردیف‌های دارای قیمت خالی یا نامعتبر</div>
+        <div class="admin-stat-card__value">{{ number_format($comparison['invalid_price_rows']) }}</div>
+        <div class="admin-stat-card__meta">
+            {{ number_format($comparison['invalid_stock_rows']) }} ردیف با موجودی نامعتبر
+            · {{ number_format($comparison['name_conflict_groups']) }} گروه با نام ناسازگار
+        </div>
+    </div>
 </div>
 
 <div class="admin-card nila-panel nila-panel--comparison">

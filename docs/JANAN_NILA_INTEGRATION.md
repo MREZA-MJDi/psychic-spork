@@ -104,12 +104,19 @@ updates mapped rows rather than creating duplicates. A catalog-wide run is not
 one global transaction; if a connection fails midway, review logs and rerun
 after fixing the issue.
 
-## Admin page
+## Excel or CSV import
 
-`/admin/nila` displays existing Nila mappings and counts. It is not a live API
-control panel; run the Artisan command on the Laravel host to test connectivity,
-preview or execute imports. No live connection was possible during source-code
-review because the actual service host and credentials are deployment-specific.
+1. Upload the XLS, XLSX, or CSV export at `/admin/nila`. The file is limited to 10 MiB and can omit product images. The preview groups inventory rows into products and identifies invalid rows before any catalog writes. Fill missing prices in Holoo or the export and upload it again. A group with an invalid variant is skipped in full.
+2. Review the grouping, SKU, price unit and stock. Treat the file's stock quantities as a snapshot. Import from a current export so that a stale quantity does not replace live stock.
+3. For a small pilot, use the admin controls with the database queue worker running. Set `DB_QUEUE_RETRY_AFTER=360` to allow the spreadsheet job's 300-second timeout to expire before another worker can reserve it.
+4. For a large catalog, use the same reviewed upload with the CLI. Replace `42` with the batch ID from the preview URL.
+
+   ```bash
+   php artisan nila:import-spreadsheet 42 --batch-size=50 --confirm-stock-snapshot --confirm-production
+   ```
+
+   The command processes at most 50 complete product groups at a time and resumes from the saved offset on retry. An upload already owned by the queue must finish its current job before it can be resumed from the CLI. Check the final imported/failed totals and review any rejected groups in the admin panel.
+5. New products and their imported variants are inactive. Review prices, stock and images before publishing from Janan Admin.
 
 ## Tests
 

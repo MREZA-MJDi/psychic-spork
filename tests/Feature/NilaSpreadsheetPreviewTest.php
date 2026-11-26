@@ -9,6 +9,8 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xls;
 use Tests\TestCase;
 
 class NilaSpreadsheetPreviewTest extends TestCase
@@ -54,6 +56,88 @@ class NilaSpreadsheetPreviewTest extends TestCase
             ->assertSee('۵۰ گروه محصول (حداکثر هر نوبت)')
             ->assertSee('موجودی نیازمند تطبیق')
             ->assertSee('موجودی فایل، مقدار نهایی موجودی');
+    }
+
+    public function test_admin_can_preview_legacy_xls_and_missing_prices_are_preserved(): void
+    {
+        Storage::fake('local');
+
+        $admin = User::factory()->create(['is_admin' => true]);
+        $workbook = new Spreadsheet();
+        $workbook->getActiveSheet()->fromArray([
+            ['holooCode', 'holooName', 'holooRegularPrice', 'holooStockQuantity', 'holooCustomerCode'],
+            ['0102001*1', 'محصول - مشکی', 2150000, 4, 1],
+            ['0102001*2', 'محصول - سفید', null, 0, 1],
+        ]);
+        $file = tmpfile();
+
+        try {
+            (new Xls($workbook))->save(stream_get_meta_data($file)['uri']);
+            $response = $this->actingAs($admin)->post(route('admin.nila.imports.store'), [
+                'file' => new UploadedFile(stream_get_meta_data($file)['uri'], 'product.xls', null, null, true),
+            ]);
+
+            $batch = NilaImportBatch::query()->firstOrFail();
+            $response->assertRedirect(route('admin.nila.imports.show', $batch));
+            $this->assertSame(2, $batch->total_rows);
+            $this->assertSame(1, $batch->invalid_rows);
+            $this->assertSame(1, $batch->product_groups);
+            $this->get(route('admin.nila.imports.show', $batch))
+                ->assertOk()
+                ->assertSee('ردیف‌های دارای قیمت خالی یا نامعتبر')
+                ->assertViewHas('comparison', fn (array $counts): bool =>
+                    $counts['valid_groups'] === 0
+                    && $counts['blocked_groups'] === 1
+                    && $counts['invalid_price_rows'] === 1
+                );
+            $this->assertDatabaseCount('products', 0);
+        } finally {
+            fclose($file);
+            $workbook->disconnectWorksheets();
+        }
+    }
+
+    public function test_cli_resumes_a_reviewed_spreadsheet_in_bounded_batches(): void
+    {
+        Storage::fake('local');
+
+        $admin = User::factory()->create(['is_admin' => true]);
+        $csv = implode("\n", [
+            'holooCode,holooName,holooRegularPrice,holooStockQuantity,holooCustomerCode',
+            '0102001*1,First product,2150000,4,1',
+            '0102002*1,Second product,2500000,2,1',
+            '0102003*1,Third product,3200000,0,1',
+        ]);
+
+        $this->actingAs($admin)->post(
+            route('admin.nila.imports.store'),
+            ['file' => UploadedFile::fake()->createWithContent('holoo.csv', $csv)]
+        )->assertRedirect();
+
+        $batch = NilaImportBatch::query()->firstOrFail();
+        $arguments = ['batch' => $batch->id, '--batch-size' => 1];
+
+        $this->artisan('nila:import-spreadsheet', $arguments)->assertExitCode(2);
+        $this->assertDatabaseCount('products', 0);
+
+        $this->post(route('admin.nila.imports.import', $batch), [
+            'batch_size' => 1,
+            'confirm_stock_snapshot' => 1,
+        ])->assertRedirect();
+        $this->assertSame(1, $batch->fresh()->next_group_offset);
+
+        $arguments['--confirm-stock-snapshot'] = true;
+        $this->artisan('nila:import-spreadsheet', $arguments)
+            ->expectsOutput('2/3 groups processed (1 imported, 0 failed in this batch).')
+            ->expectsOutput('3/3 groups processed (1 imported, 0 failed in this batch).')
+            ->assertExitCode(0);
+        $this->artisan('nila:import-spreadsheet', $arguments)->assertExitCode(0);
+
+        $this->assertDatabaseCount('products', 3);
+        $this->assertDatabaseCount('product_variants', 3);
+        $this->assertDatabaseCount('media', 0);
+        $this->assertSame(0, Product::query()->active()->count());
+        $this->assertSame('completed', $batch->fresh()->status);
     }
 
     public function test_admin_can_import_one_complete_product_group_without_publishing_it(): void

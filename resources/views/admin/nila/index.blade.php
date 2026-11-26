@@ -54,10 +54,10 @@
                     id="nila-import-file"
                     type="file"
                     name="file"
-                    accept=".xlsx,.csv,.txt"
+                    accept=".xls,.xlsx,.csv,.txt"
                     required
                 >
-                <p class="admin-muted nila-file-hint">فرمت مجاز: XLSX یا CSV · حداکثر ۱۰ مگابایت · فقط شیت اول XLSX بررسی می‌شود.</p>
+                <p class="admin-muted nila-file-hint">فرمت مجاز: XLS، XLSX یا CSV · حداکثر ۱۰ مگابایت · فقط شیت اول اکسل بررسی می‌شود.</p>
                 @error('file')
                     <div class="alert error">{{ $message }}</div>
                 @enderror

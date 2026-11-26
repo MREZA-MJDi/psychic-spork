@@ -41,10 +41,9 @@ final class NilaSpreadsheetImportService
             }
 
             $metadata = $locked->metadata ?? [];
+            $storedToken = (string) ($metadata['queue_token'] ?? '');
 
             if ($queueToken !== null) {
-                $storedToken = (string) ($metadata['queue_token'] ?? '');
-
                 if (
                     $locked->status !== 'queued'
                     || $storedToken === ''

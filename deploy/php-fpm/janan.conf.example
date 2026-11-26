@@ -13,3 +13,8 @@ pm.process_idle_timeout = 10s
 pm.max_requests = 500
 
 chdir = /var/www/janan
+
+; Match the import form and Nginx request size limits for this pool.
+php_admin_value[upload_max_filesize] = 10M
+php_admin_value[post_max_size] = 32M
+php_admin_value[memory_limit] = 256M

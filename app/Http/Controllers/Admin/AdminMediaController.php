@@ -36,7 +36,7 @@ class AdminMediaController extends Controller
         if (! $isVideo) {
             validator(
                 ['file' => $file],
-                ['file' => ['image', 'dimensions:min_width=300,min_height=300,max_width=6000,max_height=6000']]
+                ['file' => ['dimensions:min_width=300,min_height=300']]
             )->validate();
         }
 

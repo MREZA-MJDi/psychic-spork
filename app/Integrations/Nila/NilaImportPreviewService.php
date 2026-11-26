@@ -26,19 +26,17 @@ final class NilaImportPreviewService
                 || (bool) ($group['name_conflict'] ?? false)
         );
 
-        $validGroups = $groups->reject(
-            fn (array $group): bool => (int) ($group['invalid_rows'] ?? 0) > 0
-                || (bool) ($group['name_conflict'] ?? false)
-        )->values();
+        $validGroups = $groups->diffKeys($blockedGroups)->values();
 
         $validCodes = $validGroups
             ->pluck('product_code')
             ->map(fn ($code): string => (string) $code)
             ->all();
 
+        $validCodeSet = array_fill_keys($validCodes, true);
         $validRows = $rows->filter(
             fn (array $row): bool => (bool) ($row['is_valid'] ?? false)
-                && in_array((string) ($row['product_code'] ?? ''), $validCodes, true)
+                && isset($validCodeSet[(string) ($row['product_code'] ?? '')])
         )->values();
 
         $productMappings = $this->mappingsByExternalId(Product::class, $validCodes);
@@ -135,6 +133,13 @@ final class NilaImportPreviewService
         return [
             'valid_groups' => $validGroups->count(),
             'blocked_groups' => $blockedGroups->count(),
+            'invalid_price_rows' => $rows->filter(fn (array $row): bool =>
+                ($row['price'] ?? null) === null || $row['price'] < 0
+            )->count(),
+            'invalid_stock_rows' => $rows->filter(fn (array $row): bool =>
+                ($row['stock'] ?? null) === null || $row['stock'] < 0
+            )->count(),
+            'name_conflict_groups' => $groups->where('name_conflict', true)->count(),
             'existing_products' => $existingProducts,
             'new_products' => $newProducts,
             'renamed_products' => $renamedProducts,

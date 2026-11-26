@@ -51,6 +51,32 @@ class AdminProductMediaTest extends TestCase
         );
     }
 
+    public function test_large_product_upload_is_stored_as_a_smaller_webp_with_actual_metadata(): void
+    {
+        Storage::fake('public');
+
+        $admin = User::factory()->create(['is_admin' => true]);
+        $product = Product::factory()->create();
+
+        $this->actingAs($admin)
+            ->post(route('admin.products.media.store', $product), [
+                'images' => [UploadedFile::fake()->image('phone-photo.jpg', 3000, 4000)],
+            ])
+            ->assertSessionHasNoErrors()
+            ->assertRedirect();
+
+        $media = $product->primaryGalleryMedia()->firstOrFail();
+        $disk = Storage::disk('public');
+
+        $this->assertStringEndsWith('.webp', $media->path);
+        $this->assertSame('phone-photo.jpg', $media->original_name);
+        $this->assertSame('image/webp', $media->mime_type);
+        $this->assertSame([1200, 1600], [$media->width, $media->height]);
+        $this->assertSame($disk->size($media->path), $media->size);
+        $this->assertLessThanOrEqual(512 * 1024, $media->size);
+        $this->get($media->url)->assertOk()->assertHeader('Content-Type', 'image/webp');
+    }
+
     public function test_admin_can_reorder_product_images_and_first_image_is_primary(): void
     {
         $admin = User::factory()->create();

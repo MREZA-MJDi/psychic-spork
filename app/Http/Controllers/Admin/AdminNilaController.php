@@ -51,7 +51,7 @@ class AdminNilaController extends Controller
     public function upload(Request $request, NilaSpreadsheetParser $parser): RedirectResponse
     {
         $validated = $request->validate([
-            'file' => ['required', 'file', 'max:10240', 'mimes:xlsx,csv,txt'],
+            'file' => ['required', 'file', 'max:10240', 'mimes:xls,xlsx,csv,txt'],
         ], [], [
             'file' => 'فایل اکسل یا CSV',
         ]);
@@ -59,13 +59,13 @@ class AdminNilaController extends Controller
         $file = $validated['file'];
         $extension = strtolower($file->getClientOriginalExtension());
 
-        if (! in_array($extension, ['xlsx', 'csv', 'txt'], true)) {
+        if (! in_array($extension, ['xls', 'xlsx', 'csv', 'txt'], true)) {
             return back()->withErrors([
-                'file' => 'فقط فایل XLSX یا CSV مجاز است.',
+                'file' => 'فقط فایل XLS، XLSX یا CSV مجاز است.',
             ]);
         }
 
-        $path = $file->store('nila/imports', 'local');
+        $path = $file->storeAs('nila/imports', Str::uuid() . '.' . $extension, 'local');
 
         if (! $path) {
             return back()->with('error', 'ذخیره امن فایل انجام نشد.');

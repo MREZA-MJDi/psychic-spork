@@ -10,6 +10,8 @@ command -v npm >/dev/null || fail 'Node.js/npm are required to build fresh Vite 
 [[ -f .env ]] || fail 'Create .env from .env.production.example and fill production values first.'
 
 php -r 'exit(PHP_VERSION_ID >= 80200 ? 0 : 1);' || fail 'PHP 8.2+ is required; PHP 8.5 is supported.'
+php -r 'exit(extension_loaded("gd") && extension_loaded("exif") && (imagetypes() & IMG_WEBP) ? 0 : 1);' \
+    || fail 'Enable PHP GD with WebP support and the EXIF extension for image uploads.'
 node -e 'const [a,b]=process.versions.node.split(".").map(Number); process.exit((a>22 || (a===22 && b>=12) || (a===20 && b>=19)) ? 0 : 1)' \
     || fail 'Vite 7 requires Node.js 20.19+ or 22.12+; use a supported LTS release.'
 
