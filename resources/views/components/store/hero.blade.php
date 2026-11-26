@@ -32,7 +32,9 @@
         <div class="immersive-title-overlay__title">
             <h1 id="immersiveSlideTitle">کالکشن منتخب جانان</h1>
         </div>
+        <div class="immersive-product-meta" id="immersiveProductMeta"></div>
         <div class="immersive-title-overlay__description" id="immersiveSlideDescription"></div>
+        <div class="immersive-product-price" id="immersiveProductPrice"></div>
         <a
             class="immersive-title-overlay__link"
             id="immersiveSlideLink"

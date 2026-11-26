@@ -3731,3 +3731,20 @@ animation-duration:
         grid-template-columns: minmax(0, 1fr);
     }
 }
+
+/* Compact selected-product details above the touch controls. */
+@media (max-width: 820px) {
+  .immersive-grid-hero .immersive-title-overlay {
+    inset-inline: 12px; bottom: 78px; width: auto; max-width: 440px;
+    max-height: calc(100svh - 190px); padding: 12px; border-radius: 14px;
+  }
+  .immersive-grid-hero .immersive-title-overlay__title h1 { font-size: clamp(16px,4.5vw,22px); }
+  .immersive-grid-hero .immersive-title-overlay__description { max-width: none; }
+  .immersive-grid-hero .immersive-description-line { font-size: 11px; }
+  .immersive-product-price { font-size: 15px; }
+  .immersive-grid-hero .immersive-switch__button { color: #c4c4c4; font-size: 10px; white-space: normal; line-height: 1.35; }
+  .immersive-grid-hero .immersive-switch__button.is-current { color: #fff; }
+}
+@media (max-height: 470px) and (max-width: 820px) {
+  .immersive-grid-hero .immersive-title-overlay { max-height: calc(100svh - 145px); bottom: 70px; }
+}

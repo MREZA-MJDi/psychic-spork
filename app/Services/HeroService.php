@@ -14,8 +14,8 @@ final class HeroService
 
     // Cache only request-independent slide data. URLs are kept relative so a request
     // arriving through an old proxy/port can never poison the shared hero cache.
-    private const VERSION_KEY = 'store:home:hero:products:version:v3';
-    private const CACHE_PREFIX = 'store:home:hero:products:v3:';
+    private const VERSION_KEY = 'store:home:hero:products:version:v4';
+    private const CACHE_PREFIX = 'store:home:hero:products:v4:';
     private const CACHE_TTL_MINUTES = 30;
 
     public function slides(): array
@@ -98,6 +98,7 @@ final class HeroService
             ])
             ->where('is_active', true)
             ->where('is_hero', true)
+            ->withCatalogMetrics()
             ->with([
                 'brand:id,name',
                 'brand.logoMedia',
@@ -126,7 +127,17 @@ final class HeroService
                     'image' => $product->primaryGalleryMedia?->url
                         ?: $product->brand?->logoMedia?->url,
                     'title' => $product->name,
-                    'description' => Str::limit($description, 220),
+                    'description' => Str::limit(trim(strip_tags($description)), 120),
+                    'category' => $product->category?->name,
+                    'price' => (float) $product->minimum_effective_price > 0
+                        ? ((float) $product->maximum_effective_price > (float) $product->minimum_effective_price ? 'از ' : '')
+                            . \App\Support\PersianNumber::format($product->minimum_effective_price) . ' تومان'
+                        : null,
+                    'availability' => (int) $product->active_stock_total > 0 ? 'موجود' : 'ناموجود',
+                    'facts' => array_values(array_filter([
+                        (int) $product->active_variant_colors_count > 0 ? \App\Support\PersianNumber::format($product->active_variant_colors_count) . ' رنگ' : null,
+                        (int) $product->active_variant_sizes_count > 0 ? \App\Support\PersianNumber::format($product->active_variant_sizes_count) . ' سایز' : null,
+                    ])),
                     'brand' => $product->brand?->name ?? 'JANAN',
                     'url' => route('products.show', $product, false),
                 ];

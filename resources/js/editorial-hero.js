@@ -22,6 +22,8 @@ import { Flip } from 'gsap/Flip';
         const title = q('#immersiveSlideTitle');
         const description = q('#immersiveSlideDescription');
         const link = q('#immersiveSlideLink');
+        const productMeta = q('#immersiveProductMeta');
+        const productPrice = q('#immersiveProductPrice');
         const controls = q('#immersiveControls');
         const percentage = q('#immersivePercentage');
         const data = q('#immersiveHeroData');
@@ -440,7 +442,17 @@ import { Flip } from 'gsap/Flip';
                     number.textContent = persianDigits(String(
                         slide.number || model.index + 1
                     ).padStart(2, '0'));
-                    title.textContent = slide.title || 'JANAN';
+                    title.textContent = persianDigits(slide.title || 'JANAN');
+                    if (productMeta) {
+                        productMeta.replaceChildren();
+                        [slide.brand, slide.category, slide.availability, ...(Array.isArray(slide.facts) ? slide.facts : [])]
+                            .filter(Boolean).forEach(value => {
+                                const chip = document.createElement('span');
+                                chip.textContent = persianDigits(String(value));
+                                productMeta.appendChild(chip);
+                            });
+                    }
+                    if (productPrice) productPrice.textContent = slide.price || 'قیمت در صفحه محصول';
 
                     link.href = slide.url || '#';
                     link.hidden = !slide.url;
