@@ -17,20 +17,9 @@
         </div>
 
         @if($visibleCategories->isNotEmpty())
-            <div class="home-category-grid">
+            <div class="janan-category-grid janan-category-grid--home">
                 @foreach($visibleCategories as $category)
-                    <a href="{{ route('categories.show', $category) }}" class="home-collection-link">
-                        <div class="home-collection-link__art" aria-hidden="true">
-                            <x-store.image
-                                :src="$category->coverMedia?->url"
-                                alt=""
-                                fallback-class="home-collection-link__fallback"
-                                fallback=""
-                            />
-                        </div>
-                        <h3>{{ $category->name }}</h3>
-                        <span>{{ \App\Support\PersianNumber::format($category->active_products_count) }} محصول</span>
-                    </a>
+                    <x-store.category-card :category="$category" />
                 @endforeach
             </div>
         @else

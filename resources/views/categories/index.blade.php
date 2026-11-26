@@ -59,42 +59,9 @@
             </header>
 
             @if($categories->isNotEmpty())
-                <div class="collection-grid">
+                <div class="janan-category-grid">
                     @foreach($categories as $category)
-                        <a
-                            href="{{ route('categories.show',$category) }}"
-                            class="collection-card"
-                        >
-                            <div class="collection-card__image">
-                                <x-store.image
-                                    :src="$category->coverMedia?->url"
-                                    :alt="$category->name"
-                                    fallback-class="card-image-placeholder"
-                                    :fallback="$category->name"
-                                />
-
-                                <span class="collection-card__number">
-                                    {{ sprintf('%02d', $loop->iteration) }}
-                                </span>
-
-                                <span class="collection-card__veil" aria-hidden="true"></span>
-                            </div>
-
-                            <div class="collection-card__body">
-                                <div>
-                                    <small>JANAN / COLLECTION</small>
-                                    <h2>{{ \App\Support\PersianNumber::digits($category->name) }}</h2>
-                                    <p>
-                                        {{ $category->description ?: 'منتخب محصولات این دسته را ببینید.' }}
-                                    </p>
-                                </div>
-
-                                <div class="collection-card__meta">
-                                    <span>{{ \App\Support\PersianNumber::format($category->active_products_count) }} محصول</span>
-                                    <b aria-hidden="true">↗</b>
-                                </div>
-                            </div>
-                        </a>
+                        <x-store.category-card :category="$category" />
                     @endforeach
                 </div>
 

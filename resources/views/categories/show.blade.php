@@ -76,7 +76,7 @@
                 </div>
                 @if($products->hasPages())
                     <nav class="store-pagination" aria-label="صفحه‌بندی محصولات این دسته">
-                        {{ $products->onEachSide(1)->links() }}
+                        {{ $products->onEachSide(1)->links('vendor.pagination.store') }}
                     </nav>
                 @endif
             @else

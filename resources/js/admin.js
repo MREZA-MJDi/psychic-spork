@@ -74,6 +74,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const [ratioW, ratioH] = ratioValue.split(':').map(Number);
         const ratio = ratioW > 0 && ratioH > 0 ? ratioW / ratioH : 1;
         const fitButton = field.querySelector('[data-media-fit]');
+        const categoryCover = field.hasAttribute('data-category-cover');
+        const categoryStatus = field.querySelector('[data-category-crop-status]');
+        const categoryName = field.querySelector('[data-category-preview-name]');
+        const nameInput = categoryCover ? field.closest('form')?.querySelector('[name="name"]') : null;
+        nameInput?.addEventListener('input', () => { if (categoryName) categoryName.textContent = nameInput.value.trim() || 'نام دسته‌بندی'; });
+        let liveCanvas = null;
+        let previousPreview = null;
+        let previewUrl = null;
+        let loading = false;
+        let selection = 0;
+        let saving = false;
 
         if (!input || !editor || !canvas || !zoom || !apply || !ctx) return;
 
@@ -88,6 +99,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 
         const resizeCanvas = () => {
+            if (categoryCover) {
+                canvas.width = Number(field.dataset.mediaWidth);
+                canvas.height = Number(field.dataset.mediaHeight);
+                return;
+            }
             const max = 720;
             if (ratio >= 1) { canvas.width = max; canvas.height = Math.round(max / ratio); }
             else { canvas.height = max; canvas.width = Math.round(max * ratio); }
@@ -119,12 +135,30 @@ document.addEventListener('DOMContentLoaded', () => {
             const y = (canvas.height - renderedHeight) / 2 + offsetY;
 
             ctx.drawImage(image, x, y, renderedWidth, renderedHeight);
+            if (categoryCover && liveCanvas) {
+                liveCanvas.getContext('2d').drawImage(canvas, 0, 0);
+            }
         };
 
-        const openEditor = (src, name) => {
-            image = new Image();
-
-            image.onload = () => {
+        const openEditor = (src, name, token) => {
+            const candidate = new Image();
+            candidate.onerror = () => {
+                if (token !== selection) return;
+                loading = false; input.value = ''; image = null;
+                if (categoryStatus) categoryStatus.textContent = 'خواندن تصویر ممکن نیست.';
+            };
+            candidate.onload = () => {
+                if (token !== selection) return;
+                loading = false;
+                image = candidate;
+                if (categoryCover) {
+                    if (!previousPreview) previousPreview = [...preview.childNodes];
+                    liveCanvas = document.createElement('canvas');
+                    liveCanvas.width = canvas.width; liveCanvas.height = canvas.height;
+                    liveCanvas.setAttribute('aria-label', 'پیش‌نمایش زنده کارت دسته‌بندی');
+                    preview.replaceChildren(liveCanvas);
+                    if (categoryStatus) categoryStatus.textContent = image.naturalWidth < canvas.width || image.naturalHeight < canvas.height ? 'وضوح تصویر کم است؛ ممکن است خروجی تار شود.' : 'پیش‌نمایش زنده آماده است.';
+                }
                 offsetX = 0;
                 offsetY = 0;
                 scale = 1;
@@ -135,7 +169,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 fileName.textContent = name;
             };
 
-            image.src = src;
+            candidate.src = src;
         };
 
         input.addEventListener('change', () => {
@@ -148,8 +182,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
+            const token = ++selection;
+            loading = true;
+            image = null;
             const reader = new FileReader();
-            reader.onload = () => openEditor(String(reader.result), file.name);
+            reader.onerror = () => { if (token === selection) { loading = false; input.value = ''; } };
+            reader.onload = () => openEditor(String(reader.result), file.name, token);
             reader.readAsDataURL(file);
         });
 
@@ -166,8 +204,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const point = pointFromEvent(event);
             dragging = true;
-            dragStartX = point.clientX - offsetX;
-            dragStartY = point.clientY - offsetY;
+            const bounds = canvas.getBoundingClientRect();
+            dragStartX = point.clientX * canvas.width / bounds.width - offsetX;
+            dragStartY = point.clientY * canvas.height / bounds.height - offsetY;
 
             event.preventDefault?.();
         };
@@ -176,8 +215,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!dragging) return;
 
             const point = pointFromEvent(event);
-            offsetX = point.clientX - dragStartX;
-            offsetY = point.clientY - dragStartY;
+            const bounds = canvas.getBoundingClientRect();
+            offsetX = point.clientX * canvas.width / bounds.width - dragStartX;
+            offsetY = point.clientY * canvas.height / bounds.height - dragStartY;
             draw();
 
             event.preventDefault?.();
@@ -193,6 +233,7 @@ document.addEventListener('DOMContentLoaded', () => {
         canvas.addEventListener('touchstart', startDrag, { passive: false });
         window.addEventListener('touchmove', moveDrag, { passive: false });
         window.addEventListener('touchend', endDrag);
+        window.addEventListener('touchcancel', endDrag);
 
         const replaceInputWithCrop = () => new Promise((resolve) => {
             if (!image || !input.files?.length) {
@@ -208,11 +249,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const originalName = input.files[0].name || 'image';
                 const baseName = originalName.replace(/\\.[^/.]+$/, '') || 'image';
-                const croppedFile = new File(
-                    [blob],
-                    baseName + '.webp',
-                    { type: 'image/webp', lastModified: Date.now() }
-                );
+                const mime = blob.type === 'image/webp' ? 'image/webp' : 'image/png';
+                const croppedFile = new File([blob], baseName + (mime === 'image/webp' ? '.webp' : '.png'), { type: mime, lastModified: Date.now() });
 
                 const transfer = new DataTransfer();
                 transfer.items.add(croppedFile);
@@ -226,16 +264,21 @@ document.addEventListener('DOMContentLoaded', () => {
         fitButton?.addEventListener('click', () => { offsetX = 0; offsetY = 0; scale = 1; zoom.value = '1'; draw(); });
 
         const saveCropToPreview = async () => {
-            if (!image) return;
-
+            if (!image || saving || loading) return;
+            saving = true;
             const saved = await replaceInputWithCrop();
+            saving = false;
             if (!saved) return;
 
             const previewImage = document.createElement('img');
             previewImage.setAttribute('data-media-preview-image', '');
             previewImage.alt = input.files[0].name || 'پیش‌نمایش تصویر';
-            previewImage.src = URL.createObjectURL(input.files[0]);
+            if (previewUrl) URL.revokeObjectURL(previewUrl);
+            previewUrl = URL.createObjectURL(input.files[0]);
+            previewImage.src = previewUrl;
             preview.replaceChildren(previewImage);
+            liveCanvas = null;
+            if (categoryStatus) categoryStatus.textContent = 'کادر اعمال شد؛ برای ثبت نهایی فرم را ذخیره کنید.';
             fileName.textContent = input.files[0].name;
             field.classList.remove('is-cropping');
             editor.hidden = true;
@@ -244,12 +287,16 @@ document.addEventListener('DOMContentLoaded', () => {
         apply.addEventListener('click', saveCropToPreview);
 
         cancel?.addEventListener('click', () => {
+            ++selection; loading = false; image = null;
             editor.hidden = true;
             field.classList.remove('is-cropping');
             input.value = '';
+            if (categoryCover && previousPreview) { preview.replaceChildren(...previousPreview); previousPreview = null; liveCanvas = null; }
+            if (categoryStatus) categoryStatus.textContent = 'انتخاب تصویر لغو شد.';
         });
 
         field.closest('form')?.addEventListener('submit', async (event) => {
+            if (loading || saving) { event.preventDefault(); return; }
             if (image && input.files?.length && editor.hidden === false) {
                 event.preventDefault();
                 const saved = await replaceInputWithCrop();

@@ -2466,64 +2466,7 @@ outline:
 }
 
 
-.home-category-grid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: clamp(12px, 3vw, 38px);
-    width: min(100%, 1060px);
-    margin-inline: auto;
-}
-
-.home-collection-link {
-    display: grid;
-    align-content: start;
-    justify-items: center;
-    gap: 6px;
-    min-width: 0;
-    padding-block: 4px 10px;
-    color: var(--janan-ink-strong);
-    text-align: center;
-    text-decoration: none;
-}
-
-.home-collection-link:hover {
-    color: var(--janan-pink-ink);
-}
-
-.home-collection-link__art {
-    width: min(100%, 256px);
-    aspect-ratio: 4 / 3;
-    overflow: hidden;
-    clip-path: polygon(48% 2%, 52% 2%, 98% 94%, 96% 98%, 4% 98%, 2% 94%);
-    background: #f3e3e9;
-}
-
-.home-collection-link__art img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.home-collection-link h3 {
-    margin: 4px 0 0;
-    font-size: clamp(13px, 1.5vw, 19px);
-    line-height: 1.5;
-    overflow-wrap: anywhere;
-}
-
-.home-collection-link > span {
-    color: var(--janan-muted);
-    font-size: clamp(11px, 1.2vw, 13px);
-}
-
-.home-collection-link:nth-child(3n + 2) .home-collection-link__art {
-    clip-path: polygon(2% 6%, 4% 2%, 96% 2%, 98% 6%, 52% 98%, 48% 98%);
-}
-
-.home-collection-link:only-child {
-    grid-column: 2;
-}
+/* Category cards are shared by home, directory and admin preview in core.css. */
 
 .home-picks {
     padding-block: clamp(28px, 5vw, 60px);

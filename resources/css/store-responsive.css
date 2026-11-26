@@ -3779,9 +3779,6 @@ animation-duration:
     .home-page .home-brand-tile__logo img { max-width: 100%; max-height: 100%; object-fit: contain; }
     .home-page .home-brand-tile__footer { margin-top: auto; min-width: 0; }
     .home-page .home-brand-tile__name strong { font-size: 14px; overflow-wrap: anywhere; }
-    .home-page .home-category-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
-    .home-page .home-collection-link:only-child { grid-column: 1 / -1; }
-    .home-page .home-collection-link__art { width: min(100%, 200px); }
     .home-page :is(.home-discovery__grid,.home-signals__grid,.home-product-carousel,.home-product-carousel__viewport,.home-product-carousel__track) { min-width: 0; max-width: 100%; }
     .home-page .home-product-carousel__control { min-width: 44px; min-height: 44px; }
     .customer-store :is(.catalog-toolbar__actions,.customer-action-strip__actions,.brand-hero__actions,.page-cta-panel) { min-width: 0; max-width: 100%; flex-wrap: wrap; }

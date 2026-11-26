@@ -4101,3 +4101,8 @@ body.admin-nav-open {
     .catalog-pack-resume { bottom: calc(92px + env(safe-area-inset-bottom)); }
     .catalog-pack-notice:not([hidden]) { bottom: calc(146px + env(safe-area-inset-bottom)); }
 }
+
+.admin-media-picker[data-category-cover] .admin-media-picker__stage { grid-template-columns: minmax(0,300px) minmax(0,1fr); align-items: center; }
+.admin-media-picker[data-category-cover] .admin-media-picker__editor[hidden] { display: none; }
+.admin-media-picker[data-category-cover] .admin-media-picker__editor canvas { aspect-ratio: 4 / 3; object-fit: contain; }
+@media (max-width:700px) { .admin-media-picker[data-category-cover] .admin-media-picker__stage { grid-template-columns: minmax(0,1fr); } }
