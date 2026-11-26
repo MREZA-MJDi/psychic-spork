@@ -16,7 +16,7 @@
     <div class="admin-card-header">
         <div>
             <h2 class="admin-card-title">فهرست پک‌ها</h2>
-            <p class="admin-card-description">{{ number_format($packs->total()) }} پک</p>
+            <p class="admin-card-description">{{ \App\Support\PersianNumber::format($packs->total()) }} پک</p>
         </div>
     </div>
 
@@ -37,7 +37,7 @@
                 @foreach($packs as $pack)
                     <tr>
                         <td>
-                            <strong class="admin-product-name">{{ $pack->name }}</strong>
+                            <strong class="admin-product-name">{{ \App\Support\PersianNumber::digits($pack->name) }}</strong>
                             <div class="admin-muted" dir="ltr">{{ $pack->slug }}</div>
                         </td>
                         <td>
@@ -47,16 +47,16 @@
                                         {{ $item->variant?->product?->brand?->name ? $item->variant->product->brand->name . ' · ' : '' }}
                                         {{ $item->variant?->product?->name }}
                                         @if($item->variant?->display_name) / {{ $item->variant->display_name }} @endif
-                                        × {{ number_format($item->quantity) }}
+                                        × {{ \App\Support\PersianNumber::format($item->quantity) }}
                                     </span>
                                 @endforeach
                                 @if($pack->items->count() > 5)
-                                    <span class="admin-muted">+ {{ number_format($pack->items->count() - 5) }} قلم دیگر</span>
+                                    <span class="admin-muted">+ {{ \App\Support\PersianNumber::format($pack->items->count() - 5) }} قلم دیگر</span>
                                 @endif
                             </div>
                         </td>
-                        <td><strong>{{ number_format($pack->pack_quantity) }} عدد</strong></td>
-                        <td>{{ number_format($pack->display_price) }} تومان</td>
+                        <td><strong>{{ \App\Support\PersianNumber::format($pack->pack_quantity) }} عدد</strong></td>
+                        <td>{{ \App\Support\PersianNumber::format($pack->display_price) }} تومان</td>
                         <td>
                             <span class="admin-badge {{ $pack->is_active ? 'admin-badge--success' : 'admin-badge--neutral' }}">
                                 {{ $pack->is_active ? 'فعال' : 'غیرفعال' }}

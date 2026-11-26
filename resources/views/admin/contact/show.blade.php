@@ -38,7 +38,7 @@
             </header>
 
             <div class="admin-card-body admin-detail-stack">
-                <div><span>نام</span><strong>{{ $message->name }}</strong></div>
+                <div><span>نام</span><strong>{{ \App\Support\PersianNumber::digits($message->name) }}</strong></div>
                 <div><span>ایمیل</span><strong dir="ltr">{{ $message->email ?: '—' }}</strong></div>
                 <div><span>تلفن</span><strong dir="ltr">{{ $message->phone ?: '—' }}</strong></div>
                 <div><span>ثبت</span><strong class="admin-local-date" data-admin-date="{{ optional($message->created_at)->toIso8601String() }}">{{ optional($message->created_at)->format('Y-m-d H:i') }}</strong></div>

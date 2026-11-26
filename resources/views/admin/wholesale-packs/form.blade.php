@@ -158,7 +158,7 @@
                                         <span>{{ $variant->display_name ?: 'بدون رنگ و سایز' }}</span>
                                         <code dir="ltr">{{ $variant->sku ?: 'بدون SKU' }}</code>
                                     </span>
-                                    <small>قیمت عمدهٔ تکی: {{ $variant->wholesale_price !== null ? number_format($variant->wholesale_price) . ' تومان' : 'ثبت نشده' }} <span aria-hidden="true">·</span> موجودی: {{ number_format($variant->stock) }}</small>
+                                    <small>قیمت عمدهٔ تکی: {{ $variant->wholesale_price !== null ? \App\Support\PersianNumber::format($variant->wholesale_price) . ' تومان' : 'ثبت نشده' }} <span aria-hidden="true">·</span> موجودی: {{ \App\Support\PersianNumber::format($variant->stock) }}</small>
                                 </span>
                             </label>
                             <label class="wholesale-pack-variant__quantity">

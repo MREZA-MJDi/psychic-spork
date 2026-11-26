@@ -29,7 +29,7 @@
                     {{ $brandProfile['eyebrow'] }}
                 </span>
 
-                <h1>{{ $brand->name }}</h1>
+                <h1>{{ \App\Support\PersianNumber::digits($brand->name) }}</h1>
 
                 <p>
                     {{ $brandProfile['position'] }}
@@ -37,7 +37,7 @@
 
                 <div class="brand-hero__meta">
                     <span>
-                        <strong>{{ number_format($products->total()) }}</strong>
+                        <strong>{{ \App\Support\PersianNumber::format($products->total()) }}</strong>
                         محصول فعال
                     </span>
 
@@ -100,7 +100,7 @@
                 class="brand-profile-nav__shop"
                 href="#brand-products"
             >
-                {{ number_format($products->total()) }} محصول
+                {{ \App\Support\PersianNumber::format($products->total()) }} محصول
                 <span aria-hidden="true">↘</span>
             </a>
         </div>

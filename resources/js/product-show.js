@@ -1,3 +1,4 @@
+import { persianDigits } from './persian-digits.js';
 (() => {
     if (window.__JANAN_PRODUCT_SHOW_INITIALIZED__) return;
     window.__JANAN_PRODUCT_SHOW_INITIALIZED__ = true;
@@ -105,11 +106,11 @@
             }
 
             if (galleryCurrent) {
-                galleryCurrent.textContent = String(button.dataset.variantIndex || '01').padStart(2, '0');
+                galleryCurrent.textContent = persianDigits(String(button.dataset.variantIndex || '01').padStart(2, '0'));
             }
 
             if (galleryTotal) {
-                galleryTotal.textContent = String(variants.length).padStart(2, '0');
+                galleryTotal.textContent = persianDigits(String(variants.length).padStart(2, '0'));
             }
 
             if (form) {
@@ -185,7 +186,7 @@
             }
 
             if (galleryTotal) {
-                galleryTotal.textContent = String(galleryThumbs.length).padStart(2, '0');
+                galleryTotal.textContent = persianDigits(String(galleryThumbs.length).padStart(2, '0'));
             }
 
             if (form && !variants.some((item) => item.classList.contains('is-selected') && item.dataset.variantImage)) {

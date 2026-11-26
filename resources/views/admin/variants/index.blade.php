@@ -126,7 +126,7 @@
                 </h2>
 
                 <p class="admin-card-description">
-                    {{ number_format($variants->total()) }}
+                    {{ \App\Support\PersianNumber::format($variants->total()) }}
                     واریانت
                 </p>
 
@@ -289,7 +289,7 @@
 
                                 <div class="admin-price">
 
-                                    {{ number_format((float) $variant->price) }}
+                                    {{ \App\Support\PersianNumber::format((float) $variant->price) }}
 
                                 </div>
 
@@ -308,7 +308,7 @@
 
                                     <div class="admin-price">
 
-                                        {{ number_format((float) $variant->sale_price) }}
+                                        {{ \App\Support\PersianNumber::format((float) $variant->sale_price) }}
 
                                     </div>
 
@@ -331,7 +331,7 @@
 
                             <td>
                                 @if($variant->wholesale_price !== null)
-                                    <div class="admin-price">{{ number_format((float) $variant->wholesale_price) }}</div>
+                                    <div class="admin-price">{{ \App\Support\PersianNumber::format((float) $variant->wholesale_price) }}</div>
                                     <div class="admin-muted">تومان</div>
                                 @else
                                     <span class="admin-muted">ثبت نشده</span>
@@ -344,7 +344,7 @@
 
                                 <div class="admin-price">
 
-                                    {{ number_format($stock) }}
+                                    {{ \App\Support\PersianNumber::format($stock) }}
 
                                 </div>
 
@@ -360,7 +360,7 @@
                                     <span class="admin-muted">
 
                                         حد هشدار:
-                                        {{ number_format($threshold) }}
+                                        {{ \App\Support\PersianNumber::format($threshold) }}
 
                                     </span>
 
@@ -396,7 +396,7 @@
 
                                 <span class="admin-muted">
 
-                                    {{ number_format(
+                                    {{ \App\Support\PersianNumber::format(
                                         $variant->sort_order ?? 0
                                     ) }}
 

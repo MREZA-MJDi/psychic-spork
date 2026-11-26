@@ -72,10 +72,10 @@
                 <span class="eyebrow">HOW IT WORKS</span>
                 <h2 class="customer-panel-title">مسیر خرید عمده</h2>
                 <ol>
-                    <li><span>01</span><div><strong>انتخاب محصول</strong><p>پک موردنظر را انتخاب کن؛ قیمت و اقلام از اطلاعات ثبت‌شده در فروشگاه می‌آیند.</p></div></li>
-                    <li><span>02</span><div><strong>پرداخت آنلاین</strong><p>خرید عمده آنلاین برای همه باز است و تأیید حساب نمی‌خواهد.</p></div></li>
-                    <li><span>03</span><div><strong>درخواست پرداخت چکی</strong><p>با حساب مشتری، درخواست اعتبار چکی را ثبت کن.</p></div></li>
-                    <li><span>04</span><div><strong>تأیید مدیر</strong><p>مدیر درخواست را بررسی می‌کند و در صورت تأیید، سقف اعتبار را در حساب ثبت می‌کند.</p></div></li>
+                    <li><span>۰۱</span><div><strong>انتخاب محصول</strong><p>پک موردنظر را انتخاب کن؛ قیمت و اقلام از اطلاعات ثبت‌شده در فروشگاه می‌آیند.</p></div></li>
+                    <li><span>۰۲</span><div><strong>پرداخت آنلاین</strong><p>خرید عمده آنلاین برای همه باز است و تأیید حساب نمی‌خواهد.</p></div></li>
+                    <li><span>۰۳</span><div><strong>درخواست پرداخت چکی</strong><p>با حساب مشتری، درخواست اعتبار چکی را ثبت کن.</p></div></li>
+                    <li><span>۰۴</span><div><strong>تأیید مدیر</strong><p>مدیر درخواست را بررسی می‌کند و در صورت تأیید، سقف اعتبار را در حساب ثبت می‌کند.</p></div></li>
                 </ol>
             </aside>
 
@@ -95,13 +95,13 @@
                 @if($chequePermission?->isApproved())
                     <div class="customer-inline-status">
                         <strong>مجوز پرداخت چکی فعال است.</strong>
-                        <p>سقف هر سفارش: {{ $chequePermission->max_order_amount !== null ? number_format((float) $chequePermission->max_order_amount) . ' تومان' : 'بدون سقف تعیین‌شده' }}.</p>
+                        <p>سقف هر سفارش: {{ $chequePermission->max_order_amount !== null ? \App\Support\PersianNumber::format((float) $chequePermission->max_order_amount) . ' تومان' : 'بدون سقف تعیین‌شده' }}.</p>
                         <a class="button button--primary" href="{{ route('checkout') }}#payment-options">رفتن به پرداخت</a>
                     </div>
                 @elseif($chequePermission?->isPending())
                     <div class="customer-inline-status" role="status">
                         <strong>درخواستت در انتظار بررسی مدیر است.</strong>
-                        <p>مبلغ درخواستی: {{ number_format((float) $chequePermission->requested_amount) }} تومان.</p>
+                        <p>مبلغ درخواستی: {{ \App\Support\PersianNumber::format((float) $chequePermission->requested_amount) }} تومان.</p>
                     </div>
                 @elseif($isCustomer)
                     <form method="POST" action="{{ route('wholesale.cheque.request') }}" class="checkout-form cheque-request-form">

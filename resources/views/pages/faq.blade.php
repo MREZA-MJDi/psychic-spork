@@ -14,7 +14,7 @@
             </div>
 
             <div class="page-hero__stat">
-                <b>03</b>
+                <b>۰۳</b>
                 <span>COMMON QUESTIONS</span>
             </div>
         </div>
@@ -43,7 +43,7 @@
             <div class="faq-shell">
                 <details class="faq-item">
                     <summary>
-                        <span><small>01</small> قیمت و موجودی از Backend می‌آیند؟</span>
+                        <span><small>۰۱</small> قیمت و موجودی از Backend می‌آیند؟</span>
                         <i>+</i>
                     </summary>
                     <p>
@@ -53,7 +53,7 @@
 
                 <details class="faq-item">
                     <summary>
-                        <span><small>02</small> افزودن به سبد چگونه انجام می‌شود؟</span>
+                        <span><small>۰۲</small> افزودن به سبد چگونه انجام می‌شود؟</span>
                         <i>+</i>
                     </summary>
                     <p>
@@ -63,7 +63,7 @@
 
                 <details class="faq-item">
                     <summary>
-                        <span><small>03</small> شرایط ارسال و مرجوعی قطعی هستند؟</span>
+                        <span><small>۰۳</small> شرایط ارسال و مرجوعی قطعی هستند؟</span>
                         <i>+</i>
                     </summary>
                     <p>

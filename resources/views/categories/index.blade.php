@@ -11,7 +11,7 @@
                 <span class="eyebrow">JANAN / COLLECTIONS / 02</span>
 
                 <div class="catalog-masthead__stat">
-                    <strong>{{ number_format($categories->total()) }}</strong>
+                    <strong>{{ \App\Support\PersianNumber::format($categories->total()) }}</strong>
                     <span>دسته فعال</span>
                 </div>
             </div>
@@ -83,14 +83,14 @@
                             <div class="collection-card__body">
                                 <div>
                                     <small>JANAN / COLLECTION</small>
-                                    <h2>{{ $category->name }}</h2>
+                                    <h2>{{ \App\Support\PersianNumber::digits($category->name) }}</h2>
                                     <p>
                                         {{ $category->description ?: 'منتخب محصولات این دسته را ببینید.' }}
                                     </p>
                                 </div>
 
                                 <div class="collection-card__meta">
-                                    <span>{{ number_format($category->active_products_count) }} محصول</span>
+                                    <span>{{ \App\Support\PersianNumber::format($category->active_products_count) }} محصول</span>
                                     <b aria-hidden="true">↗</b>
                                 </div>
                             </div>

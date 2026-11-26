@@ -45,15 +45,15 @@
 
             <div class="club-landing__features">
                 <article class="club-feature">
-                    <span>01</span>
+                    <span>۰۱</span>
                     <div><strong>حساب یکپارچه</strong><p>اطلاعات حساب از همان حساب کاربری فروشگاه خوانده می‌شود.</p></div>
                 </article>
                 <article class="club-feature">
-                    <span>02</span>
+                    <span>۰۲</span>
                     <div><strong>پیگیری سفارش‌ها</strong><p>وضعیت سفارش‌ها را از پنل مشتری دنبال کن؛ اطلاعات ساختگی نمایش داده نمی‌شود.</p></div>
                 </article>
                 <article class="club-feature">
-                    <span>03</span>
+                    <span>۰۳</span>
                     <div><strong>خرید آسان‌تر</strong><p>از باشگاه به محصولات، سبد خرید و خدمات فروشگاه دسترسی مستقیم داری.</p></div>
                 </article>
             </div>

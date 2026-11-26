@@ -31,7 +31,7 @@
             <p>{{ $description }}</p>
 
             <div class="editorial-collection-hero__meta">
-                <strong>{{ number_format($count) }}</strong>
+                <strong>{{ \App\Support\PersianNumber::format($count) }}</strong>
                 <span>محصول فعال</span>
                 <i aria-hidden="true"></i>
                 <span>JANAN SELECT</span>

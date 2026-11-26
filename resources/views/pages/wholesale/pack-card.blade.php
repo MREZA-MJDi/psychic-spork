@@ -16,9 +16,9 @@
     <div class="wholesale-pack-card__top">
         <div>
             <span class="wholesale-pack-card__eyebrow">WHOLESALE PACK</span>
-            <h3>{{ $pack->name }}</h3>
+            <h3>{{ \App\Support\PersianNumber::digits($pack->name) }}</h3>
         </div>
-        <strong>{{ number_format($pack->pack_quantity) }} عدد</strong>
+        <strong>{{ \App\Support\PersianNumber::format($pack->pack_quantity) }} عدد</strong>
     </div>
 
     @if($pack->description)
@@ -41,16 +41,16 @@
                 <span class="wholesale-pack-item__copy">
                     <strong>{{ $v?->product?->name ?? 'محصول' }}</strong>
                     <span>{{ $v?->product?->brand?->name ?? 'بدون برند' }} · {{ $v?->display_name ?? 'واریانت' }}</span>
-                    <small>SKU {{ $v?->sku ?? '—' }} · {{ $v?->stock !== null ? 'موجودی '.number_format($v->stock) : 'موجودی نامشخص' }}</small>
+                    <small>SKU {{ $v?->sku ?? '—' }} · {{ $v?->stock !== null ? 'موجودی '.\App\Support\PersianNumber::format($v->stock) : 'موجودی نامشخص' }}</small>
                 </span>
-                <b class="wholesale-pack-item__quantity">× {{ number_format($item->quantity) }}</b>
+                <b class="wholesale-pack-item__quantity">× {{ \App\Support\PersianNumber::format($item->quantity) }}</b>
             </a>
         @endforeach
     </div>
 
     <div class="wholesale-pack-card__foot">
         <span>قیمت پک عمده</span>
-        <strong>{{ number_format($pack->display_price) }} تومان</strong>
+        <strong>{{ \App\Support\PersianNumber::format($pack->display_price) }} تومان</strong>
     </div>
     @php
         $packAvailable = $pack->items->isNotEmpty() && $pack->items->every(

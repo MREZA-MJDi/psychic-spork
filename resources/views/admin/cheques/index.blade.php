@@ -60,7 +60,7 @@
                         {{ $cheque->order?->user?->name ?: '—' }}
                         <small>{{ $cheque->order?->user?->phone ?: '—' }}</small>
                     </td>
-                    <td>{{ number_format((float) $cheque->amount) }} تومان</td>
+                    <td>{{ \App\Support\PersianNumber::format((float) $cheque->amount) }} تومان</td>
                     <td>{{ $cheque->due_date?->format('Y/m/d') ?: '—' }}</td>
                     <td><span class="status-badge">{{ $statusNames[$cheque->status] ?? $cheque->status }}</span></td>
                     <td>

@@ -70,25 +70,25 @@
             <div class="about-stat-grid" aria-label="آمار فعلی فروشگاه">
                 <div class="about-stat-card">
                     <small>ACTIVE PRODUCTS</small>
-                    <strong>{{ number_format($aboutStats['products'] ?? 0) }}</strong>
+                    <strong>{{ \App\Support\PersianNumber::format($aboutStats['products'] ?? 0) }}</strong>
                     <span>محصول فعال در کاتالوگ</span>
                 </div>
 
                 <div class="about-stat-card">
                     <small>CATEGORIES</small>
-                    <strong>{{ number_format($aboutStats['categories'] ?? 0) }}</strong>
+                    <strong>{{ \App\Support\PersianNumber::format($aboutStats['categories'] ?? 0) }}</strong>
                     <span>دسته‌بندی فعال</span>
                 </div>
 
                 <div class="about-stat-card">
                     <small>BRANDS</small>
-                    <strong>{{ number_format($aboutStats['brands'] ?? 0) }}</strong>
+                    <strong>{{ \App\Support\PersianNumber::format($aboutStats['brands'] ?? 0) }}</strong>
                     <span>برند فعال</span>
                 </div>
 
                 <div class="about-stat-card about-stat-card--dark">
                     <small>JANAN / LIVE DATA</small>
-                    <strong>01</strong>
+                    <strong>۰۱</strong>
                     <span>یک مسیر یکپارچه از کشف تا سفارش</span>
                 </div>
             </div>
@@ -111,7 +111,7 @@
 
             <div class="about-principles__grid">
                 <article class="about-principle">
-                    <span>01</span>
+                    <span>۰۱</span>
                     <div>
                         <h3>{{ $about['principle_1_title'] ?? 'شفافیت' }}</h3>
                         <p>{{ $about['principle_1_text'] ?? '' }}</p>
@@ -119,7 +119,7 @@
                 </article>
 
                 <article class="about-principle">
-                    <span>02</span>
+                    <span>۰۲</span>
                     <div>
                         <h3>{{ $about['principle_2_title'] ?? 'سادگی' }}</h3>
                         <p>{{ $about['principle_2_text'] ?? '' }}</p>
@@ -127,7 +127,7 @@
                 </article>
 
                 <article class="about-principle">
-                    <span>03</span>
+                    <span>۰۳</span>
                     <div>
                         <h3>{{ $about['principle_3_title'] ?? 'جزئیات' }}</h3>
                         <p>{{ $about['principle_3_text'] ?? '' }}</p>
@@ -162,7 +162,7 @@
                 <div class="about-live__product">
                     @if($latestProduct)
                         <span class="about-live__product-label">LATEST ACTIVE PRODUCT</span>
-                        <strong>{{ $latestProduct->name }}</strong>
+                        <strong>{{ \App\Support\PersianNumber::digits($latestProduct->name) }}</strong>
 
                         <div class="about-live__meta">
                             <span>{{ $latestProduct->category?->name ?? 'بدون دسته‌بندی' }}</span>
@@ -221,7 +221,7 @@
                                 سوالی درباره محصول یا سفارش داری؟ پیام را همین‌جا بفرست تا مستقیماً وارد سیستم پشتیبانی شود.
                             </p>
                         </div>
-                        <span class="contact-form-card__count">02</span>
+                        <span class="contact-form-card__count">۰۲</span>
                     </div>
 
                     <form method="POST" action="{{ route('contact.submit') }}" class="contact-form">
@@ -272,7 +272,7 @@
 
                     <div class="contact-info-list">
                         <div class="contact-info-item">
-                            <span>01</span>
+                            <span>۰۱</span>
                             <div>
                                 <small>PHONE</small>
                                 @if($contactStore['phone'] ?? null)
@@ -284,7 +284,7 @@
                         </div>
 
                         <div class="contact-info-item">
-                            <span>02</span>
+                            <span>۰۲</span>
                             <div>
                                 <small>EMAIL</small>
                                 @if($contactStore['email'] ?? null)
@@ -296,7 +296,7 @@
                         </div>
 
                         <div class="contact-info-item">
-                            <span>03</span>
+                            <span>۰۳</span>
                             <div>
                                 <small>ADDRESS</small>
                                 @if($contactStore['address'] ?? null)
@@ -308,7 +308,7 @@
                         </div>
 
                         <div class="contact-info-item">
-                            <span>04</span>
+                            <span>۰۴</span>
                             <div>
                                 <small>WORKING HOURS</small>
                                 <strong>{{ $contactStore['working_hours'] ?? 'ساعت کاری ثبت نشده' }}</strong>

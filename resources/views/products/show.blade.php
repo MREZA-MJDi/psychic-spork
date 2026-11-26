@@ -54,7 +54,7 @@
                 @endif
 
                 <span aria-hidden="true">/</span>
-                <span aria-current="page">{{ $product->name }}</span>
+                <span aria-current="page">{{ \App\Support\PersianNumber::digits($product->name) }}</span>
             </nav>
 
             <div class="product-detail-v2__layout">
@@ -78,7 +78,7 @@
                                 </span>
 
                                 <span class="product-gallery-v2__index">
-                                    <span data-gallery-current>01</span>
+                                    <span data-gallery-current>۰۱</span>
                                     <i aria-hidden="true">/</i>
                                     <span>{{ str_pad((string) $galleryCount, 2, '0', STR_PAD_LEFT) }}</span>
                                 </span>
@@ -111,7 +111,7 @@
                                     <span>برای مشاهده تصویر، روی thumbnail بزن.</span>
                                 </div>
 
-                                <span>{{ number_format($gallery->count()) }} تصویر</span>
+                                <span>{{ \App\Support\PersianNumber::format($gallery->count()) }} تصویر</span>
                             </div>
 
                             <div
@@ -220,7 +220,7 @@
                                                 <small>
                                                     {{ $variantOption->stock > 0 ? 'موجود' : 'ناموجود' }}
                                                     ·
-                                                    {{ number_format($variantOption->effective_price) }} تومان
+                                                    {{ \App\Support\PersianNumber::format($variantOption->effective_price) }} تومان
                                                 </small>
                                             </span>
 
@@ -262,7 +262,7 @@
                     </div>
 
                     <div class="product-detail-v2__title">
-                        <h1 id="product-title">{{ $product->name }}</h1>
+                        <h1 id="product-title">{{ \App\Support\PersianNumber::digits($product->name) }}</h1>
 
                         <p>
                             {{ $product->short_description ?: 'جزئیات محصول را بررسی کن و انتخابت را برای خرید کامل کن.' }}
@@ -281,7 +281,7 @@
                         <div class="product-detail-v2__price-row">
                             <div class="product-buy-card__price product-buy-card__price--v2" aria-live="polite">
                                 <strong data-product-price>
-                                    {{ number_format($variant?->effective_price ?? 0) }}
+                                    {{ \App\Support\PersianNumber::format($variant?->effective_price ?? 0) }}
                                 </strong>
                                 <span>تومان</span>
 
@@ -291,7 +291,7 @@
                                     @if($variant?->wholesale_price === null) hidden @endif
                                 >
                                     @if($variant?->wholesale_price !== null)
-                                        عمده: {{ number_format($variant->wholesale_price) }} تومان
+                                        عمده: {{ \App\Support\PersianNumber::format($variant->wholesale_price) }} تومان
                                     @endif
                                 </span>
 
@@ -299,7 +299,7 @@
                                     data-product-regular-price
                                     @if(!$variant?->is_on_sale) hidden @endif
                                 >
-                                    {{ number_format($variant?->price ?? 0) }}
+                                    {{ \App\Support\PersianNumber::format($variant?->price ?? 0) }}
                                 </del>
                             </div>
 
@@ -377,7 +377,7 @@
 
                     <div class="product-buy-benefits product-buy-benefits--v2" aria-label="اطلاعات خرید">
                         <div>
-                            <span>01</span>
+                            <span>۰۱</span>
                             <div>
                                 <strong>موجودی واقعی</strong>
                                 <small>وضعیت موجودی همین مدل نمایش داده می‌شود.</small>
@@ -385,7 +385,7 @@
                         </div>
 
                         <div>
-                            <span>02</span>
+                            <span>۰۲</span>
                             <div>
                                 <strong>انتخاب مدل</strong>
                                 <small>قیمت و موجودی با تغییر مدل هماهنگ می‌شود.</small>
@@ -393,7 +393,7 @@
                         </div>
 
                         <div>
-                            <span>03</span>
+                            <span>۰۳</span>
                             <div>
                                 <strong>خرید سریع</strong>
                                 <small>بعد از افزودن، سبد خرید از همان صفحه در دسترس است.</small>

@@ -1,3 +1,4 @@
+import { persianDigits } from './persian-digits.js';
 (() => {
     if (window.__JANAN_STORE_CART_INITIALIZED__) return;
     window.__JANAN_STORE_CART_INITIALIZED__ = true;
@@ -59,7 +60,7 @@ const escapeText = (value) => String(value ?? '');
 
 const setCartCount = (count) => {
     document.querySelectorAll('.cart-count, [data-cart-count]').forEach((node) => {
-        node.textContent = count;
+        node.textContent = persianDigits(count);
         node.hidden = count < 1;
     });
 };
@@ -332,7 +333,7 @@ const renderCart = (payload) => {
             minus.dataset.itemId = item.id;
 
             const number = document.createElement('span');
-            number.textContent = String(item.quantity);
+            number.textContent = persianDigits(item.quantity);
 
             const plus = document.createElement('button');
             plus.type = 'button';

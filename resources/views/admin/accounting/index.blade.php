@@ -39,7 +39,7 @@
             </div>
 
             <div class="admin-stat-card__value">
-                {{ number_format((float) ($income ?? 0)) }}
+                {{ \App\Support\PersianNumber::format((float) ($income ?? 0)) }}
             </div>
 
             <div class="admin-stat-card__meta">
@@ -56,7 +56,7 @@
             </div>
 
             <div class="admin-stat-card__value">
-                {{ number_format((float) ($expense ?? 0)) }}
+                {{ \App\Support\PersianNumber::format((float) ($expense ?? 0)) }}
             </div>
 
             <div class="admin-stat-card__meta">
@@ -73,7 +73,7 @@
             </div>
 
             <div class="admin-stat-card__value">
-                {{ number_format((float) ($net ?? 0)) }}
+                {{ \App\Support\PersianNumber::format((float) ($net ?? 0)) }}
             </div>
 
             <div class="admin-stat-card__meta">
@@ -120,12 +120,12 @@
                             @endphp
                             <tr>
                                 <td>
-                                    <strong>{{ $account->name }}</strong>
+                                    <strong>{{ \App\Support\PersianNumber::digits($account->name) }}</strong>
                                     <div class="admin-muted">{{ $account->code }}</div>
                                 </td>
-                                <td>{{ number_format($debit) }} تومان</td>
-                                <td>{{ number_format($credit) }} تومان</td>
-                                <td>{{ number_format($debit - $credit) }} تومان</td>
+                                <td>{{ \App\Support\PersianNumber::format($debit) }} تومان</td>
+                                <td>{{ \App\Support\PersianNumber::format($credit) }} تومان</td>
+                                <td>{{ \App\Support\PersianNumber::format($debit - $credit) }} تومان</td>
                             </tr>
                         @endforeach
                         </tbody>
@@ -165,9 +165,9 @@
                                     <span>{{ $line->account?->name ?? 'حساب' }}</span>
                                     <strong>
                                         @if((float) $line->debit > 0)
-                                            بدهکار {{ number_format((float) $line->debit) }}
+                                            بدهکار {{ \App\Support\PersianNumber::format((float) $line->debit) }}
                                         @else
-                                            بستانکار {{ number_format((float) $line->credit) }}
+                                            بستانکار {{ \App\Support\PersianNumber::format((float) $line->credit) }}
                                         @endif
                                         <small>تومان</small>
                                     </strong>
@@ -359,7 +359,7 @@
                     </h2>
 
                     <p class="admin-card-description">
-                        {{ number_format($transactions->total()) }}
+                        {{ \App\Support\PersianNumber::format($transactions->total()) }}
                         تراکنش
                     </p>
 
@@ -484,7 +484,7 @@
 
                                     <div class="admin-price">
 
-                                        {{ number_format(
+                                        {{ \App\Support\PersianNumber::format(
                                             (float) $transaction->amount
                                         ) }}
 

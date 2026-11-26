@@ -35,12 +35,12 @@
             <section class="home-signal-panel home-signal-panel--new" aria-labelledby="home-new-title">
                 <div class="home-signal-panel__head">
                     <div>
-                        <span class="home-signal-panel__index">01</span>
+                        <span class="home-signal-panel__index">۰۱</span>
                         <h3 id="home-new-title">تازه اضافه شده</h3>
                     </div>
 
                     <span class="home-signal-panel__meta">
-                        {{ number_format($recentProducts->count()) }} محصول
+                        {{ \App\Support\PersianNumber::format($recentProducts->count()) }} محصول
                     </span>
                 </div>
 
@@ -69,10 +69,10 @@
 
                                 <span class="home-signal-item__copy">
                                     <small>{{ $product->brand?->name ?? $product->category?->name ?? 'JANAN' }}</small>
-                                    <strong>{{ $product->name }}</strong>
+                                    <strong>{{ \App\Support\PersianNumber::digits($product->name) }}</strong>
 
                                     @if($variant?->effective_price)
-                                        <span>{{ number_format($variant->effective_price) }} تومان</span>
+                                        <span>{{ \App\Support\PersianNumber::format($variant->effective_price) }} تومان</span>
                                     @endif
                                 </span>
 
@@ -87,12 +87,12 @@
             <section class="home-signal-panel home-signal-panel--popular" aria-labelledby="home-popular-title">
                 <div class="home-signal-panel__head">
                     <div>
-                        <span class="home-signal-panel__index">02</span>
+                        <span class="home-signal-panel__index">۰۲</span>
                         <h3 id="home-popular-title">پرفروش‌های ۳۰ روز اخیر</h3>
                     </div>
 
                     <span class="home-signal-panel__meta">
-                        {{ number_format($popularProducts->count()) }} محصول
+                        {{ \App\Support\PersianNumber::format($popularProducts->count()) }} محصول
                     </span>
                 </div>
 
@@ -122,10 +122,10 @@
 
                                 <span class="home-signal-item__copy">
                                     <small>{{ $product->category?->name ?? 'JANAN COLLECTION' }}</small>
-                                    <strong>{{ $product->name }}</strong>
+                                    <strong>{{ \App\Support\PersianNumber::digits($product->name) }}</strong>
 
                                     <span>
-                                        {{ number_format($sales) }} فروش ثبت‌شده
+                                        {{ \App\Support\PersianNumber::format($sales) }} فروش ثبت‌شده
                                     </span>
                                 </span>
 

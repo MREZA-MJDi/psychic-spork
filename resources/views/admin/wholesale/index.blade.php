@@ -65,10 +65,10 @@
                 @foreach($chequePermissions as $permission)
                     <tr>
                         <td><div class="admin-product-name">{{ $permission->user?->name ?: 'بدون نام' }}</div><div class="admin-muted" dir="ltr">{{ $permission->user?->phone ?: $permission->user?->email ?: '—' }}</div></td>
-                        <td>{{ $permission->requested_amount !== null ? number_format((float) $permission->requested_amount).' تومان' : '—' }}</td>
+                        <td>{{ $permission->requested_amount !== null ? \App\Support\PersianNumber::format((float) $permission->requested_amount).' تومان' : '—' }}</td>
                         <td>
                             @if($permission->isPending())<span class="admin-badge admin-badge--warning">در انتظار بررسی</span>
-                            @elseif($permission->isApproved())<span class="admin-badge admin-badge--success">فعال · سقف {{ $permission->max_order_amount !== null ? number_format((float) $permission->max_order_amount).' تومان' : 'نامحدود' }}</span>
+                            @elseif($permission->isApproved())<span class="admin-badge admin-badge--success">فعال · سقف {{ $permission->max_order_amount !== null ? \App\Support\PersianNumber::format((float) $permission->max_order_amount).' تومان' : 'نامحدود' }}</span>
                             @elseif($permission->requested_at && $permission->disabled_at)<span class="admin-badge admin-badge--neutral">رد یا غیرفعال</span>
                             @else<span class="admin-badge admin-badge--neutral">بدون درخواست</span>@endif
                         </td>
@@ -99,7 +99,7 @@
     <div class="admin-card-header">
         <div>
             <h2 class="admin-card-title">درخواست‌های عمده</h2>
-            <p class="admin-card-description">{{ number_format($profiles->total()) }} حساب</p>
+            <p class="admin-card-description">{{ \App\Support\PersianNumber::format($profiles->total()) }} حساب</p>
         </div>
     </div>
 
@@ -138,10 +138,10 @@
                         <td><span class="admin-badge">{{ $statusLabel }}</span></td>
                         <td>
                             <div class="admin-price">
-                                {{ $profile->minimum_order_amount !== null ? number_format((float) $profile->minimum_order_amount) . ' تومان' : 'بدون حد مبلغ' }}
+                                {{ $profile->minimum_order_amount !== null ? \App\Support\PersianNumber::format((float) $profile->minimum_order_amount) . ' تومان' : 'بدون حد مبلغ' }}
                             </div>
                             <div class="admin-muted">
-                                {{ $profile->minimum_order_quantity !== null ? number_format((int) $profile->minimum_order_quantity) . ' عدد' : 'بدون حد تعداد' }}
+                                {{ $profile->minimum_order_quantity !== null ? \App\Support\PersianNumber::format((int) $profile->minimum_order_quantity) . ' عدد' : 'بدون حد تعداد' }}
                             </div>
                         </td>
                         <td>
@@ -196,12 +196,12 @@
                                         @method('PATCH')
                                         <div class="admin-field" style="min-width:220px;flex:1;">
                                             <label>سقف هر سفارش</label>
-                                            <input type="text" value="{{ $profile->user->chequePermission->max_order_amount !== null ? number_format((float) $profile->user->chequePermission->max_order_amount) . ' تومان' : 'بدون سقف' }}" readonly>
+                                            <input type="text" value="{{ $profile->user->chequePermission->max_order_amount !== null ? \App\Support\PersianNumber::format((float) $profile->user->chequePermission->max_order_amount) . ' تومان' : 'بدون سقف' }}" readonly>
                                         </div>
                                         <button class="admin-btn admin-btn--ghost" type="submit">غیرفعال کردن چک</button>
                                     </form>
                                 @elseif($profile->user?->chequePermission?->isPending())
-                                    <small class="admin-muted">مبلغ درخواستی: {{ number_format((float) $profile->user->chequePermission->requested_amount) }} تومان · برای بررسی از جدول درخواست‌های بالا استفاده کن.</small>
+                                    <small class="admin-muted">مبلغ درخواستی: {{ \App\Support\PersianNumber::format((float) $profile->user->chequePermission->requested_amount) }} تومان · برای بررسی از جدول درخواست‌های بالا استفاده کن.</small>
                                 @else
                                     <small class="admin-muted">فعالسازی فقط پس از ثبت درخواست مشتری ممکن است؛ درخواست‌ها در جدول بالای صفحه بررسی می‌شوند.</small>
                                 @endif

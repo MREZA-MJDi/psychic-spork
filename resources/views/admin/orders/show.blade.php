@@ -77,7 +77,7 @@
             </div>
 
             <div class="admin-stat-card__value">
-                {{ number_format((float) $order->total) }}
+                {{ \App\Support\PersianNumber::format((float) $order->total) }}
             </div>
 
             <div class="admin-stat-card__meta">
@@ -213,7 +213,7 @@
                     </h2>
 
                     <p class="admin-card-description">
-                        {{ number_format($order->items->count()) }}
+                        {{ \App\Support\PersianNumber::format($order->items->count()) }}
                         قلم
                     </p>
 
@@ -319,7 +319,7 @@
                                 <td>
 
                                     <span class="admin-price">
-                                        {{ number_format((int) $item->quantity) }}
+                                        {{ \App\Support\PersianNumber::format((int) $item->quantity) }}
                                     </span>
 
                                 </td>
@@ -329,7 +329,7 @@
 
                                     <div class="admin-price">
 
-                                        {{ number_format(
+                                        {{ \App\Support\PersianNumber::format(
                                             (float) $item->unit_price
                                         ) }}
 
@@ -346,7 +346,7 @@
 
                                     <div class="admin-price">
 
-                                        {{ number_format(
+                                        {{ \App\Support\PersianNumber::format(
                                             (float) $lineTotal
                                         ) }}
 

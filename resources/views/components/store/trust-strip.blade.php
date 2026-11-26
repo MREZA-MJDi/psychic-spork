@@ -14,7 +14,7 @@
     <div class="janan-trust__rail">
 
         <div class="janan-trust__item">
-            <span class="janan-trust__index">01</span>
+            <span class="janan-trust__index">۰۱</span>
 
             <div class="janan-trust__icon">
                 <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -33,7 +33,7 @@
 
 
         <div class="janan-trust__item">
-            <span class="janan-trust__index">02</span>
+            <span class="janan-trust__index">۰۲</span>
 
             <div class="janan-trust__icon">
                 <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -52,7 +52,7 @@
 
 
         <div class="janan-trust__item">
-            <span class="janan-trust__index">03</span>
+            <span class="janan-trust__index">۰۳</span>
 
             <div class="janan-trust__icon">
                 <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -71,7 +71,7 @@
 
 
         <div class="janan-trust__item">
-            <span class="janan-trust__index">04</span>
+            <span class="janan-trust__index">۰۴</span>
 
             <div class="janan-trust__icon">
                 <svg viewBox="0 0 24 24" aria-hidden="true">

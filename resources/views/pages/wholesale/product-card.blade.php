@@ -13,17 +13,17 @@
             <span>{{ $product->brand?->name ?? 'Janan' }}</span>
             <span>{{ $product->category?->name ?? 'محصول' }}</span>
         </div>
-        <a href="{{ route('products.show', $product) }}" class="wholesale-product-card__title">{{ $product->name }}</a>
+        <a href="{{ route('products.show', $product) }}" class="wholesale-product-card__title">{{ \App\Support\PersianNumber::digits($product->name) }}</a>
         <div class="wholesale-product-card__facts">
-            <span>{{ number_format((int) $product->wholesale_variants_count) }} تنوع دارای قیمت عمده</span>
+            <span>{{ \App\Support\PersianNumber::format((int) $product->wholesale_variants_count) }} تنوع دارای قیمت عمده</span>
         </div>
         <div class="wholesale-variant-price">
             @if((float) $product->minimum_wholesale_price === (float) $product->maximum_wholesale_price)
-                {{ number_format((float) $product->minimum_wholesale_price) }}
+                {{ \App\Support\PersianNumber::format((float) $product->minimum_wholesale_price) }}
             @else
-                {{ number_format((float) $product->minimum_wholesale_price) }}
+                {{ \App\Support\PersianNumber::format((float) $product->minimum_wholesale_price) }}
                 تا
-                {{ number_format((float) $product->maximum_wholesale_price) }}
+                {{ \App\Support\PersianNumber::format((float) $product->maximum_wholesale_price) }}
             @endif
             <small>تومان</small>
         </div>

@@ -60,7 +60,7 @@
         <div class="footer-col">
 
             <span class="footer-col__index">
-                01
+                ۰۱
             </span>
 
             <h3>
@@ -94,7 +94,7 @@
         <div class="footer-col">
 
             <span class="footer-col__index">
-                02
+                ۰۲
             </span>
 
             <h3>
@@ -135,7 +135,7 @@
         <div class="footer-newsletter">
 
             <span class="footer-col__index">
-                03
+                ۰۳
             </span>
 
             <h3>
@@ -204,7 +204,7 @@
     <div class="container footer-trust">
         <div class="footer-trust__head">
             <div>
-                <span class="footer-col__index">04</span>
+                <span class="footer-col__index">۰۴</span>
                 <h3>اعتبار، اطلاعات و مسیرهای رسمی</h3>
             </div>
 

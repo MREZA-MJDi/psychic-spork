@@ -160,7 +160,7 @@ class StoreCatalogPaginationTest extends TestCase
 
         $firstPage->assertOk()
             ->assertSee('store-pagination')
-            ->assertSee('صفحه 1 از 2')
+            ->assertSee('صفحه ۱ از ۲')
             ->assertViewHas('products', function ($products): bool {
                 return $products->total() === 13
                     && $products->count() === 12

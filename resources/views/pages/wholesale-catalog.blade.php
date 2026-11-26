@@ -25,7 +25,7 @@
                     <select name="category_id">
                         <option value="">همه دسته‌بندی‌ها</option>
                         @foreach($categories as $category)
-                            <option value="{{ $category->id }}" @selected((string) ($filters['category_id'] ?? '') === (string) $category->id)>{{ $category->name }}</option>
+                            <option value="{{ $category->id }}" @selected((string) ($filters['category_id'] ?? '') === (string) $category->id)>{{ \App\Support\PersianNumber::digits($category->name) }}</option>
                         @endforeach
                     </select>
                 </label>
@@ -34,7 +34,7 @@
                     <select name="brand_id">
                         <option value="">همه برندها</option>
                         @foreach($brands as $brand)
-                            <option value="{{ $brand->id }}" @selected((string) ($filters['brand_id'] ?? '') === (string) $brand->id)>{{ $brand->name }}</option>
+                            <option value="{{ $brand->id }}" @selected((string) ($filters['brand_id'] ?? '') === (string) $brand->id)>{{ \App\Support\PersianNumber::digits($brand->name) }}</option>
                         @endforeach
                     </select>
                 </label>
@@ -66,7 +66,7 @@
                     <span class="eyebrow">WHOLESALE PRODUCTS</span>
                     <h2>محصولات دارای قیمت عمده</h2>
                 </div>
-                <span>{{ number_format($products->total()) }} محصول</span>
+                <span>{{ \App\Support\PersianNumber::format($products->total()) }} محصول</span>
             </div>
 
             @if($products->count())

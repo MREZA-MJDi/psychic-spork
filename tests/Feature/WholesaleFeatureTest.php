@@ -272,7 +272,7 @@ class WholesaleFeatureTest extends TestCase
             ->get(route('account'))
             ->assertOk()
             ->assertSee('منتظر بررسی مدیر است')
-            ->assertSee('10,000,000');
+            ->assertSee('۱۰٬۰۰۰٬۰۰۰');
     }
 
     public function test_cheque_request_accepts_grouped_customer_amount(): void

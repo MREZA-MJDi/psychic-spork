@@ -9,7 +9,7 @@
             <div class="catalog-masthead__top">
                 <span class="eyebrow">{{ $siteBrandNameLatin }} / CATALOG</span>
                 <div class="catalog-masthead__stat">
-                    <strong>{{ number_format($products->total()) }}</strong>
+                    <strong>{{ \App\Support\PersianNumber::format($products->total()) }}</strong>
                     <span>محصول فعال</span>
                 </div>
             </div>
@@ -60,7 +60,7 @@
                         <a href="{{ route('products.index', array_merge($filters, ['category' => $category->slug])) }}"
                            class="{{ ($filters['category'] ?? null) === $category->slug ? 'is-active' : '' }}"
                            @if(($filters['category'] ?? null) === $category->slug) aria-current="page" @endif>
-                            <span>{{ $category->name }}</span>
+                            <span>{{ \App\Support\PersianNumber::digits($category->name) }}</span>
                         </a>
                     @endforeach
                 </nav>
@@ -101,7 +101,7 @@
                                title="فیلتر محصولات {{ $brand->name }}"
                                @if(($filters['brand'] ?? null) === $brand->slug) aria-current="page" @endif>
                                 <span class="catalog-brand-chip__shape" aria-hidden="true">{{ mb_substr($brand->name, 0, 1) }}</span>
-                                <span>{{ $brand->name }}</span>
+                                <span>{{ \App\Support\PersianNumber::digits($brand->name) }}</span>
                             </a>
                         @endforeach
                     </div>
@@ -114,7 +114,7 @@
                     <div class="catalog-results__title">
                         <span class="eyebrow">{{ $siteBrandNameLatin }} / CATALOG</span>
                         <h2>{{ isset($filters['q']) ? 'نتیجه جستجوی «'.$filters['q'].'»' : 'محصولات جانان' }}</h2>
-                        <p>{{ number_format($products->total()) }} محصول مطابق انتخاب‌های شما</p>
+                        <p>{{ \App\Support\PersianNumber::format($products->total()) }} محصول مطابق انتخاب‌های شما</p>
                     </div>
                     <form class="catalog-inline-sort" method="GET" action="{{ route('products.index') }}">
                         <x-store.catalog-filter-inputs :filters="$filters" exclude="sort" />
@@ -131,8 +131,8 @@
                         <noscript><button class="button button--ghost" type="submit">مرتب‌سازی</button></noscript>
                     </form>
                     <div class="catalog-results__meta" aria-live="polite">
-                        <span>نمایش {{ number_format($products->firstItem() ?? 0) }} تا {{ number_format($products->lastItem() ?? 0) }} از {{ number_format($products->total()) }} محصول</span>
-                        <span>صفحه {{ number_format($products->currentPage()) }} از {{ number_format($products->lastPage()) }}</span>
+                        <span>نمایش {{ \App\Support\PersianNumber::format($products->firstItem() ?? 0) }} تا {{ \App\Support\PersianNumber::format($products->lastItem() ?? 0) }} از {{ \App\Support\PersianNumber::format($products->total()) }} محصول</span>
+                        <span>صفحه {{ \App\Support\PersianNumber::format($products->currentPage()) }} از {{ \App\Support\PersianNumber::format($products->lastPage()) }}</span>
                     </div>
                 </header>
 

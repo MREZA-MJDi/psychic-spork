@@ -138,7 +138,7 @@
                                     <strong>پرداخت با چک</strong>
                                     <small>
                                         فقط برای سفارش عمده و تا سقف
-                                        {{ $chequePermission->max_order_amount !== null ? number_format((float) $chequePermission->max_order_amount) . ' تومان' : 'بدون سقف تعیین‌شده' }}
+                                        {{ $chequePermission->max_order_amount !== null ? \App\Support\PersianNumber::format((float) $chequePermission->max_order_amount) . ' تومان' : 'بدون سقف تعیین‌شده' }}
                                     </small>
                                 </span>
                             </label>
@@ -368,9 +368,9 @@
                         </div>
                         <div>
                             <strong>{{ $line->pack?->name ?? 'پک عمده' }}</strong>
-                            <span>{{ number_format($line->quantity) }} پک × {{ number_format((float) ($line->pack?->pack_price ?? 0)) }} تومان</span>
+                            <span>{{ \App\Support\PersianNumber::format($line->quantity) }} پک × {{ \App\Support\PersianNumber::format((float) ($line->pack?->pack_price ?? 0)) }} تومان</span>
                         </div>
-                        <b>{{ number_format((float) ($line->pack?->pack_price ?? 0) * $line->quantity) }}</b>
+                        <b>{{ \App\Support\PersianNumber::format((float) ($line->pack?->pack_price ?? 0) * $line->quantity) }}</b>
                     </div>
                 @endforeach
                 @foreach($items as $item)
@@ -390,15 +390,15 @@
                             </strong>
 
                             <span>
-                                {{ number_format($item['quantity']) }}
+                                {{ \App\Support\PersianNumber::format($item['quantity']) }}
                                 ×
-                                {{ number_format($item['unit_price']) }}
+                                {{ \App\Support\PersianNumber::format($item['unit_price']) }}
                                 تومان
                             </span>
                         </div>
 
                         <b>
-                            {{ number_format($item['line_total']) }}
+                            {{ \App\Support\PersianNumber::format($item['line_total']) }}
                         </b>
                     </div>
                 @endforeach
@@ -407,7 +407,7 @@
             <div class="checkout-total">
                 <span>مبلغ فعلی سبد</span>
                 <strong>
-                    {{ number_format($total) }} تومان
+                    {{ \App\Support\PersianNumber::format($total) }} تومان
                 </strong>
             </div>
 

@@ -16,12 +16,12 @@
 <div class="admin-dashboard-stats">
     <div class="admin-stat-card">
         <div class="admin-stat-card__label">محصولات متصل به نیلا</div>
-        <div class="admin-stat-card__value">{{ number_format($products) }}</div>
+        <div class="admin-stat-card__value">{{ \App\Support\PersianNumber::format($products) }}</div>
         <div class="admin-stat-card__meta">Product mappings</div>
     </div>
     <div class="admin-stat-card">
         <div class="admin-stat-card__label">تنوع‌های متصل به نیلا</div>
-        <div class="admin-stat-card__value">{{ number_format($variants) }}</div>
+        <div class="admin-stat-card__value">{{ \App\Support\PersianNumber::format($variants) }}</div>
         <div class="admin-stat-card__meta">Variant mappings</div>
     </div>
     <div class="admin-stat-card">
@@ -100,12 +100,12 @@
                 @foreach($batches as $batch)
                     <tr>
                         <td>{{ $batch->original_name }}</td>
-                        <td>{{ number_format($batch->total_rows) }}</td>
-                        <td>{{ number_format($batch->valid_rows) }}</td>
-                        <td>{{ number_format($batch->invalid_rows) }}</td>
-                        <td>{{ number_format($batch->product_groups) }}</td>
-                        <td>{{ number_format($batch->imported_groups) }}</td>
-                        <td>{{ number_format($batch->failed_groups) }}</td>
+                        <td>{{ \App\Support\PersianNumber::format($batch->total_rows) }}</td>
+                        <td>{{ \App\Support\PersianNumber::format($batch->valid_rows) }}</td>
+                        <td>{{ \App\Support\PersianNumber::format($batch->invalid_rows) }}</td>
+                        <td>{{ \App\Support\PersianNumber::format($batch->product_groups) }}</td>
+                        <td>{{ \App\Support\PersianNumber::format($batch->imported_groups) }}</td>
+                        <td>{{ \App\Support\PersianNumber::format($batch->failed_groups) }}</td>
                         <td>
                             @if($batch->status === 'completed')
                                 تکمیل‌شده

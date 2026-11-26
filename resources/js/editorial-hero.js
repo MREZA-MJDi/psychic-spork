@@ -1,3 +1,4 @@
+import { persianDigits } from './persian-digits.js';
 import { gsap } from 'gsap';
 import { Draggable } from 'gsap/Draggable';
 import { Flip } from 'gsap/Flip';
@@ -353,7 +354,7 @@ import { Flip } from 'gsap/Flip';
                         this.cfg.zoom = Math.max(0.25, fit);
                         this.cfg.gap = this.getGap();
                         this.dimensions();
-                        percentage.textContent = Math.round(this.cfg.zoom * 100) + '%';
+                        percentage.textContent = persianDigits(Math.round(this.cfg.zoom * 100)) + '٪';
                     }
                     wrap.style.width = this.dim.width + 'px';
                     wrap.style.height = this.dim.height + 'px';
@@ -436,9 +437,9 @@ import { Flip } from 'gsap/Flip';
 
                 updateDetails(model) {
                     const slide = model.slide || {};
-                    number.textContent = String(
+                    number.textContent = persianDigits(String(
                         slide.number || model.index + 1
-                    ).padStart(2, '0');
+                    ).padStart(2, '0'));
                     title.textContent = slide.title || 'JANAN';
 
                     link.href = slide.url || '#';
@@ -696,7 +697,7 @@ import { Flip } from 'gsap/Flip';
                         },
                     });
 
-                    percentage.textContent = Math.round(zoom * 100) + '%';
+                    percentage.textContent = persianDigits(Math.round(zoom * 100)) + '٪';
 
                     root.querySelectorAll('[data-zoom]').forEach((node) => {
                         node.classList.toggle(
@@ -736,7 +737,7 @@ import { Flip } from 'gsap/Flip';
                     });
 
                     this.last = center;
-                    percentage.textContent = Math.round(zoom * 100) + '%';
+                    percentage.textContent = persianDigits(Math.round(zoom * 100)) + '٪';
 
                     root.querySelectorAll('[data-zoom]').forEach((node) => {
                         node.classList.remove('is-current');

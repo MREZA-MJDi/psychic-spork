@@ -177,7 +177,7 @@
 
                         <span class="admin-price">
 
-                            {{ number_format(
+                            {{ \App\Support\PersianNumber::format(
                                 (float) $transaction->amount
                             ) }}
 

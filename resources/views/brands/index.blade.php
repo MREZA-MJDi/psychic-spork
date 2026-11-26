@@ -11,7 +11,7 @@
                 <span class="eyebrow">{{ $siteBrandNameLatin }} / BRANDS / 03</span>
 
                 <div class="catalog-masthead__stat">
-                    <strong>{{ number_format($brands->total()) }}</strong>
+                    <strong>{{ \App\Support\PersianNumber::format($brands->total()) }}</strong>
                     <span>برند فعال</span>
                 </div>
             </div>
@@ -79,14 +79,14 @@
 
                             <div class="brand-mosaic__bottom">
                                 <div>
-                                    <h2>{{ $brand->name }}</h2>
+                                    <h2>{{ \App\Support\PersianNumber::digits($brand->name) }}</h2>
                                     <p>
                                         {{ $brand->description ?: 'معرفی این برند هنوز تکمیل نشده است.' }}
                                     </p>
                                 </div>
 
                                 <div class="brand-mosaic__meta">
-                                    <small>{{ number_format($brand->active_products_count) }} محصول</small>
+                                    <small>{{ \App\Support\PersianNumber::format($brand->active_products_count) }} محصول</small>
                                     <b aria-hidden="true">↗</b>
                                 </div>
                             </div>

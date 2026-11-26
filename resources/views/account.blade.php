@@ -30,9 +30,9 @@
                 <span class="eyebrow">CHEQUE PURCHASE</span>
                 <h2 id="account-cheque-title">وضعیت درخواست خرید چکی</h2>
                 @if($chequePermission?->isApproved())
-                    <p>درخواستت تأیید شده است. سقف مجاز هر سفارش: <strong>{{ $chequePermission->max_order_amount !== null ? number_format((float) $chequePermission->max_order_amount) . ' تومان' : 'بدون سقف تعیین‌شده' }}</strong>.</p>
+                    <p>درخواستت تأیید شده است. سقف مجاز هر سفارش: <strong>{{ $chequePermission->max_order_amount !== null ? \App\Support\PersianNumber::format((float) $chequePermission->max_order_amount) . ' تومان' : 'بدون سقف تعیین‌شده' }}</strong>.</p>
                 @elseif($chequePermission?->isPending())
-                    <p>درخواست {{ number_format((float) $chequePermission->requested_amount) }} تومانی ثبت شده و منتظر بررسی مدیر است.</p>
+                    <p>درخواست {{ \App\Support\PersianNumber::format((float) $chequePermission->requested_amount) }} تومانی ثبت شده و منتظر بررسی مدیر است.</p>
                 @else
                     <p>برای فعال‌شدن پرداخت چکی، مبلغ اعتبار مدنظرت را ثبت کن. بعد از تأیید مدیر، گزینه پرداخت چکی در تسویه‌حساب فعال می‌شود.</p>
                 @endif
@@ -49,7 +49,7 @@
         <div class="account-card">
             <div>
                 <span class="eyebrow">PROFILE</span>
-                <h2>{{ $user->name }}</h2>
+                <h2>{{ \App\Support\PersianNumber::digits($user->name) }}</h2>
                 <p>{{ $user->phone }}{{ $user->email ? ' · ' . $user->email : '' }}</p>
             </div>
 
@@ -81,8 +81,8 @@
                                 <span>{{ optional($order->placed_at)->format('Y/m/d H:i') }}</span>
                             </div>
                             <div>
-                                <b>{{ number_format($order->total) }} تومان</b>
-                                <span>{{ number_format($order->items_count) }} قلم ·
+                                <b>{{ \App\Support\PersianNumber::format($order->total) }} تومان</b>
+                                <span>{{ \App\Support\PersianNumber::format($order->items_count) }} قلم ·
                                     {{ $statusNames[$order->status] ?? $order->status }}
                                 </span>
                                 @if($order->wholesalePacks->isNotEmpty())
