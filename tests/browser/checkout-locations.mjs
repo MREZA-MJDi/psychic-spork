@@ -13,13 +13,10 @@ try {
     });
     assert.ok(added.ok(), 'Fixture product should be added to cart');
     let offline = false;
-    await page.route('**/locations/provinces', route => route.fulfill({
-      status: offline ? 503 : 200, json: offline ? {} : [{id:7,name:'تهران'},{id:8,name:'فارس'}],
-    }));
-    await page.route('**/locations/cities?*', route => route.fulfill({
-      json: new URL(route.request().url()).searchParams.get('province') === '7'
-        ? [{name:'تهران'},{name:'ورامین'}] : [{name:'شیراز'}],
-    }));
+    await page.route('**/locations/provinces', route => offline
+      ? route.fulfill({status: 503, json: {}})
+      : route.continue()
+    );
     await page.goto(base + '/checkout');
     const picker = page.locator('[data-location-fields]');
     const province = picker.locator('[data-location-province]');
@@ -31,7 +28,9 @@ try {
     await province.selectOption('فارس');
     await city.locator('option[value="شیراز"]').waitFor({state:'attached'});
     assert.equal(await city.inputValue(),'');
-    await city.selectOption('شیراز');
+    await city.selectOption('__manual__');
+    const manualCity = picker.locator('[data-location-city-manual]');
+    await manualCity.fill('شیراز');
     const values = await picker.evaluate(el => {
       const form = new FormData(el.closest('form'));
       return [form.getAll('shipping_province'), form.getAll('shipping_city')];
@@ -40,7 +39,6 @@ try {
     offline = true;
     await page.reload();
     const manualProvince = picker.locator('[data-location-province-manual]');
-    const manualCity = picker.locator('[data-location-city-manual]');
     await picker.locator('[data-location-retry]').waitFor();
     await manualProvince.fill('تهران');
     await manualCity.fill('ورامین');

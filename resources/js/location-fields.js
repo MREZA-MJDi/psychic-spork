@@ -65,6 +65,7 @@ export function initLocationFields() {
                 const rows = await request(url, signal);
                 if (token !== sequence) return;
                 options(city, rows, 'انتخاب شهر');
+                city.add(new Option('ورود دستی نام شهر', '__manual__'));
                 const pendingCity = cityManual.value;
                 const previous = rows.find(row => normalize(row.name) === normalize(pendingCity));
                 if (pendingCity && !previous) {
@@ -110,6 +111,13 @@ export function initLocationFields() {
             }
         };
         province.addEventListener('change', () => { provinceManual.value = province.value; loadCities(); });
+        city.addEventListener('change', () => {
+            if (city.value !== '__manual__') return;
+            cityManual.value = '';
+            switchField(city, cityManual, false);
+            feedback('نام شهر را وارد کنید.', () => loadCities(cityManual.value));
+            cityManual.focus();
+        });
         retry.addEventListener('click', () => retryAction?.());
         loadProvinces();
     });

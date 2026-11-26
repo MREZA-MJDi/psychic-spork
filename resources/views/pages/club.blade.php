@@ -4,36 +4,59 @@
 
 @section('content')
 <div class="store-page club-page">
-    <section class="club-landing">
-        <div class="container">
-            <header class="club-landing__intro">
+    <div class="container club-page__layout">
+        <header class="club-page__welcome">
+            <div>
                 <h1>باشگاه مشتریان جانان</h1>
-                <p>سفارش‌هایت را پیگیری کن و به خدمات جانان دسترسی داشته باش.</p>
-                <div class="club-landing__actions">
+                <p>از حساب کاربری سفارش‌هایت را پیگیری کن و برای خرید عمده یا پرسش دربارهٔ سفارش، مستقیم سراغ خدمات موردنیازت برو.</p>
+            </div>
+
+            <section class="club-page__account" aria-labelledby="club-account">
+                <h2 id="club-account">حساب جانان</h2>
+                <div class="club-page__account-actions">
                     @if($isCustomer)
-                        <a class="button button--primary" href="{{ route('account') }}#account-orders">مشاهده سفارش‌ها</a>
-                        <a class="button button--ghost" href="{{ route('account') }}">حساب کاربری</a>
+                        <div>
+                            <x-store.icon-link :href="route('account') . '#account-orders'" icon="orders" label="مشاهده سفارش‌ها" />
+                            <span aria-hidden="true">سفارش‌ها</span>
+                        </div>
+                        <div>
+                            <x-store.icon-link :href="route('account')" icon="user" label="حساب کاربری" />
+                            <span aria-hidden="true">حساب کاربری</span>
+                        </div>
                     @elseif(auth()->guest())
-                        <a class="button button--primary" href="{{ route('register') }}">ساخت حساب</a>
-                        <a class="button button--ghost" href="{{ route('login') }}">ورود به حساب</a>
+                        <div>
+                            <x-store.icon-link :href="route('register')" icon="user-plus" label="ساخت حساب" />
+                            <span aria-hidden="true">ساخت حساب</span>
+                        </div>
+                        <div>
+                            <x-store.icon-link :href="route('login')" icon="login" label="ورود به حساب" />
+                            <span aria-hidden="true">ورود به حساب</span>
+                        </div>
                     @else
-                        <a class="button button--primary" href="{{ route('products.index') }}">مشاهده محصولات</a>
+                        <div>
+                            <x-store.icon-link :href="route('products.index')" icon="bag" label="مشاهده محصولات" />
+                            <span aria-hidden="true">محصولات</span>
+                        </div>
                     @endif
                 </div>
-            </header>
+            </section>
+        </header>
 
-            <nav class="club-landing__features" aria-label="خدمات جانان">
-                <a class="club-feature" href="{{ route('products.index') }}">
-                    <div><strong>خرید از جانان</strong><p>محصولات را بر اساس دسته‌بندی یا برند پیدا کن.</p></div>
-                </a>
-                <a class="club-feature" href="{{ route('wholesale.show') }}#cheque-application">
-                    <div><strong>خرید عمده و چکی</strong><p>شرایط خرید عمده و درخواست اعتبار چکی را ببین.</p></div>
-                </a>
-                <a class="club-feature" href="{{ route('contact') }}">
-                    <div><strong>پشتیبانی</strong><p>برای پرسش دربارهٔ محصول یا سفارش به جانان پیام بده.</p></div>
-                </a>
-            </nav>
-        </div>
-    </section>
+        <section class="club-page__services" aria-labelledby="club-services">
+            <h2 id="club-services">خدمات مشتریان</h2>
+            <div class="club-page__service-grid">
+                @foreach([
+                    ['خرید از جانان', 'مدل‌ها، قیمت‌ها و سایزهای موجود را ببین.', route('products.index'), 'bag'],
+                    ['خرید عمده و چکی', 'شرایط خرید عمده و درخواست اعتبار چکی را بررسی کن.', route('wholesale.show') . '#cheque-application', 'layers'],
+                    ['پشتیبانی', 'برای سؤال دربارهٔ محصول یا پیگیری سفارش پیام بفرست.', route('contact'), 'message'],
+                ] as [$title, $description, $url, $icon])
+                    <article class="club-page__service">
+                        <x-store.icon-link :href="$url" :icon="$icon" :label="$title" />
+                        <div><h3>{{ $title }}</h3><p>{{ $description }}</p></div>
+                    </article>
+                @endforeach
+            </div>
+        </section>
+    </div>
 </div>
 @endsection

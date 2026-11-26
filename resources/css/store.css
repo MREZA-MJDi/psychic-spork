@@ -8547,64 +8547,6 @@ outline:
 /* =========================================================
    DRCLUBZ / CUSTOMER CLUB
 ========================================================= */
-.club-page__hero { overflow: hidden; min-height: 300px; padding-block: 34px; }
-.club-page__hero h1 { font-size: clamp(36px, 4.6vw, 58px); }
-.club-page__hero .page-hero__layout { gap: 24px; }
-.club-page__hero .page-hero__stat { min-width: 130px; }
-.club-page__grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1.25fr) minmax(280px, .75fr);
-    gap: clamp(16px, 2vw, 28px);
-    align-items: stretch;
-}
-.club-card {
-    min-width: 0;
-    padding: clamp(20px, 3vw, 34px);
-    border: 1px solid var(--store-line, rgba(35,58,68,.08));
-    border-radius: 24px;
-    background: linear-gradient(145deg, rgba(255,255,255,.96), rgba(247,250,251,.9));
-    box-shadow: 0 18px 48px rgba(35,58,68,.06);
-}
-.club-card--primary {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    min-height: 360px;
-    background:
-        radial-gradient(circle at 100% 0, rgba(247,232,239,.72), transparent 20rem),
-        radial-gradient(circle at 0 100%, rgba(223,243,250,.72), transparent 22rem),
-        #fff;
-}
-.club-card__eyebrow,
-.club-card__number {
-    color: var(--store-gray, #7b858b);
-    font-size: 9px;
-    font-weight: 800;
-    letter-spacing: .14em;
-}
-.club-card--primary h2 {
-    max-width: 14ch;
-    margin: 12px 0 14px;
-    font-size: clamp(28px, 4vw, 54px);
-    line-height: 1.12;
-    letter-spacing: -.045em;
-}
-.club-card p {
-    max-width: 62ch;
-    margin: 0;
-    color: var(--store-gray, #7b858b);
-    line-height: 2;
-    font-size: 11px;
-}
-.club-card__actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 24px;
-}
-.club-page__stack { display: grid; gap: 12px; }
-.club-page__stack .club-card { min-height: 0; }
-.club-page__stack strong { display: block; margin: 10px 0 7px; font-size: 16px; }
 /* =========================================================
    JANAN / STORE ACTION MESSAGE
 ========================================================= */
@@ -9828,19 +9770,6 @@ body.store-body :where(a, button, input, select, textarea):focus-visible {
     overflow-wrap: anywhere;
 }
 
-.store-footer__main li a {
-    display: inline-flex;
-    align-items: center;
-    min-height: 36px;
-    color: inherit;
-}
-
-.store-footer :is(li, .store-footer__credentials) a:hover {
-    color: #74374e;
-    text-decoration: underline;
-    text-underline-offset: 4px;
-}
-
 .store-footer a:focus-visible {
     outline: 2px solid #8a415d;
     outline-offset: 3px;
@@ -9856,19 +9785,31 @@ body.store-body :where(a, button, input, select, textarea):focus-visible {
 
 .store-footer__actions { margin-top: 14px; }
 
-.store-footer :is(.store-footer__account, .store-footer__icon) {
+.store-footer ul.store-footer__icons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.store-footer__address {
+    margin: 8px 0 0;
+    color: #67515d;
+    font-size: 13px;
+}
+
+.store-action-icon {
     display: inline-grid;
-    min-height: 44px;
+    width: 44px;
+    height: 44px;
+    flex: 0 0 auto;
     place-items: center;
     border: 1px solid #ddc7cf;
-    border-radius: 9px;
+    border-radius: 10px;
     color: #6d344b;
     background: #fff;
 }
 
-.store-footer__account { padding-inline: 12px; font-size: 13px; font-weight: 750; }
-.store-footer__icon { width: 44px; }
-.store-footer :is(.store-footer__account, .store-footer__icon):hover { background: #f3e8ec; }
+.store-action-icon:hover { background: #f3e8ec; }
 
 .store-footer__bottom {
     display: flex;
@@ -9888,5 +9829,4 @@ body.store-body :where(a, button, input, select, textarea):focus-visible {
 @media (max-width: 760px) {
     .store-footer__main { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .store-footer__identity { grid-column: 1 / -1; }
-    .store-footer__main li a { min-height: 44px; }
 }

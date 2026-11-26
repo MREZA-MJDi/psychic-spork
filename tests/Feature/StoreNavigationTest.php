@@ -36,7 +36,10 @@ class StoreNavigationTest extends TestCase
         // contract and must not silently fall back to the wholesale link.
         $response->assertSee('mobile-bottom-nav--store');
         $response->assertSee('aria-label="باشگاه مشتریان DrClubz"', false);
-        $response->assertDontSee('aria-label="خرید عمده"', false);
+        $this->assertDoesNotMatchRegularExpression(
+            '/<nav[^>]+mobile-bottom-nav--store[^>]*>(?:(?!<\/nav>).)*aria-label="خرید عمده"/s',
+            $response->getContent()
+        );
     }
     public function test_brand_names_filter_products_instead_of_opening_a_standalone_brand_directory(): void
     {

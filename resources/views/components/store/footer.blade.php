@@ -12,55 +12,53 @@
                     <p>{{ $siteFooterText }}</p>
                 @endif
                 <div class="store-footer__actions">
-                    <a class="store-footer__account" href="{{ auth()->check() ? route('account') : route('login') }}">
-                        {{ auth()->check() ? 'حساب کاربری' : 'ورود به حساب' }}
-                    </a>
-                    <a href="{{ route('cart') }}" class="store-footer__icon" aria-label="سبد خرید">
-                        <x-store.icon name="basket" />
-                    </a>
+                    <x-store.icon-link
+                        :href="auth()->check() ? route('account') : route('login')"
+                        :icon="auth()->check() ? 'user' : 'login'"
+                        :label="auth()->check() ? 'حساب کاربری' : 'ورود به حساب'"
+                    />
+                    <x-store.icon-link :href="route('cart')" icon="basket" label="سبد خرید" />
                     @if(filled($siteStorePhone ?? null))
-                        <a href="tel:{{ preg_replace('/\s+/', '', $siteStorePhone) }}" class="store-footer__icon" aria-label="تماس تلفنی با جانان">
-                            <x-store.icon name="phone" />
-                        </a>
+                        <x-store.icon-link :href="'tel:' . preg_replace('/\s+/', '', $siteStorePhone)" icon="phone" label="تماس تلفنی با جانان" />
                     @endif
                 </div>
             </div>
 
             <nav aria-labelledby="footer-shop-heading">
                 <h2 id="footer-shop-heading">خرید از جانان</h2>
-                <ul>
-                    <li><a href="{{ route('products.index') }}">محصولات</a></li>
-                    <li><a href="{{ route('categories.index') }}">دسته‌بندی‌ها</a></li>
-                    <li><a href="{{ route('wholesale.show') }}">خرید عمده</a></li>
+                <ul class="store-footer__icons">
+                    <li><x-store.icon-link :href="route('products.index')" icon="bag" label="محصولات" /></li>
+                    <li><x-store.icon-link :href="route('categories.index')" icon="grid" label="دسته‌بندی‌ها" /></li>
+                    <li><x-store.icon-link :href="route('wholesale.show')" icon="layers" label="خرید عمده" /></li>
                 </ul>
             </nav>
 
             <nav aria-labelledby="footer-help-heading">
                 <h2 id="footer-help-heading">راهنمای سفارش</h2>
-                <ul>
-                    <li><a href="{{ route('shipping') }}">روش‌های ارسال</a></li>
-                    <li><a href="{{ route('returns') }}">شرایط مرجوعی</a></li>
-                    <li><a href="{{ route('faq') }}">سؤالات متداول</a></li>
+                <ul class="store-footer__icons">
+                    <li><x-store.icon-link :href="route('shipping')" icon="truck" label="روش‌های ارسال" /></li>
+                    <li><x-store.icon-link :href="route('returns')" icon="return" label="شرایط مرجوعی" /></li>
+                    <li><x-store.icon-link :href="route('faq')" icon="help" label="سؤالات متداول" /></li>
                 </ul>
             </nav>
 
             <section aria-labelledby="footer-contact-heading">
                 <h2 id="footer-contact-heading">ارتباط با جانان</h2>
-                <ul>
-                    <li><a href="{{ route('about') }}#contact">فرم تماس با پشتیبانی</a></li>
+                <ul class="store-footer__icons">
+                    <li><x-store.icon-link :href="route('about') . '#contact'" icon="message" label="فرم تماس با پشتیبانی" /></li>
                     @if(filled($siteStoreEmail ?? null))
-                        <li><a href="mailto:{{ $siteStoreEmail }}"><bdi>{{ $siteStoreEmail }}</bdi></a></li>
-                    @endif
-                    @if(filled($siteStoreAddress ?? null))
-                        <li>{{ $siteStoreAddress }}</li>
+                        <li><x-store.icon-link :href="'mailto:' . $siteStoreEmail" icon="mail" label="ایمیل پشتیبانی" /></li>
                     @endif
                     @if(!empty($trust['social_instagram']))
-                        <li><a href="{{ $trust['social_instagram'] }}" target="_blank" rel="noopener noreferrer">اینستاگرام</a></li>
+                        <li><x-store.icon-link :href="$trust['social_instagram']" icon="instagram" label="اینستاگرام" target="_blank" rel="noopener noreferrer" /></li>
                     @endif
                     @if(!empty($trust['social_telegram']))
-                        <li><a href="{{ $trust['social_telegram'] }}" target="_blank" rel="noopener noreferrer">تلگرام</a></li>
+                        <li><x-store.icon-link :href="$trust['social_telegram']" icon="telegram" label="تلگرام" target="_blank" rel="noopener noreferrer" /></li>
                     @endif
                 </ul>
+                @if(filled($siteStoreAddress ?? null))
+                    <p class="store-footer__address">{{ $siteStoreAddress }}</p>
+                @endif
             </section>
         </div>
 
@@ -69,16 +67,16 @@
             @if(!empty($trust['enamad_url']) || !empty($trust['license_url']))
                 <div class="store-footer__credentials">
                     @if(!empty($trust['enamad_url']))
-                        <a href="{{ $trust['enamad_url'] }}" target="_blank" rel="noopener noreferrer">
-                            @if(!empty($trust['enamad_image']))
+                        @if(!empty($trust['enamad_image']))
+                            <a href="{{ $trust['enamad_url'] }}" target="_blank" rel="noopener noreferrer">
                                 <img src="{{ $trust['enamad_image'] }}" alt="نماد اعتماد الکترونیکی" loading="lazy">
-                            @else
-                                نماد اعتماد الکترونیکی
-                            @endif
-                        </a>
+                            </a>
+                        @else
+                            <x-store.icon-link :href="$trust['enamad_url']" icon="shield" label="نماد اعتماد الکترونیکی" target="_blank" rel="noopener noreferrer" />
+                        @endif
                     @endif
                     @if(!empty($trust['license_url']))
-                        <a href="{{ $trust['license_url'] }}" target="_blank" rel="noopener noreferrer">مجوزهای فروشگاه</a>
+                        <x-store.icon-link :href="$trust['license_url']" icon="document" label="مجوزهای فروشگاه" target="_blank" rel="noopener noreferrer" />
                     @endif
                 </div>
             @endif

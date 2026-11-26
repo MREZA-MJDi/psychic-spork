@@ -1763,17 +1763,6 @@ font-size:
         transition-duration: .01ms !important;
         animation-duration: .01ms !important;
     }
-}
-
-@media (max-width: 900px) {
-    .club-page__grid { grid-template-columns: 1fr; }
-    .club-card--primary { min-height: 0; }
-}
-
-@media (max-width: 560px) {
-    .club-card { border-radius: 18px; padding: 20px; }
-    .club-card__actions { display: grid; grid-template-columns: 1fr; }
-    .club-card__actions .button { width: 100%; }
 }@media (max-width: 1000px) {
     .immersive-grid-hero {
         --immersive-item-size: 240px;
@@ -3529,47 +3518,18 @@ animation-duration:
     background: #fff;
 }
 
-.wholesale-page :is(.section-block--soft, .wholesale-hero--reference .wholesale-hero__main, .wholesale-catalog__head),
-.club-page .club-landing {
+.wholesale-page :is(.section-block--soft, .wholesale-hero--reference .wholesale-hero__main, .wholesale-catalog__head) {
     background: #fff;
 }
 
-.wholesale-page :is(.wholesale-hero__main, .wholesale-hero__status, .wholesale-pack-card, .wholesale-form-card, .wholesale-process),
-.contact-page :is(.contact-form-card, .contact-info-card),
-.club-page .club-feature {
+.wholesale-page :is(.wholesale-hero__main, .wholesale-hero__status, .wholesale-pack-card, .wholesale-form-card, .wholesale-process), .contact-page :is(.contact-form-card, .contact-info-card) {
     background: #fff;
     border: 1px solid var(--janan-line);
     border-radius: 16px;
     box-shadow: none;
 }
 
-.club-page .club-landing {
-    padding-block: clamp(32px, 7vw, 72px);
-}
-
-.club-page .club-landing__intro {
-    padding: 0 0 28px;
-    border-bottom: 1px solid var(--janan-line);
-}
-
-.club-page .club-landing__features {
-    margin-top: 24px;
-}
-
-.club-page .club-feature {
-    display: block;
-    height: 100%;
-    padding: 20px;
-    color: var(--janan-ink-strong);
-    text-decoration: none;
-}
-
-.club-page .club-feature:hover {
-    border-color: var(--janan-pink-500);
-}
-
-.wholesale-page .wholesale-hero__main h1,
-.club-page .club-landing__intro h1 {
+.wholesale-page .wholesale-hero__main h1 {
     font-size: clamp(24px, 3vw, 36px);
     line-height: 1.45;
     letter-spacing: normal;
@@ -3582,9 +3542,7 @@ animation-duration:
     letter-spacing: normal;
 }
 
-.wholesale-page :is(.wholesale-hero p, .wholesale-process li p, .wholesale-form-card p, .customer-inline-status p),
-.club-page :is(.club-landing__intro p, .club-feature p),
-.contact-page :is(.contact-form-card__head p, .contact-info-card p, .contact-field, .contact-form__foot p) {
+.wholesale-page :is(.wholesale-hero p, .wholesale-process li p, .wholesale-form-card p, .customer-inline-status p), .contact-page :is(.contact-form-card__head p, .contact-info-card p, .contact-field, .contact-form__foot p) {
     font-size: 14px;
     line-height: 1.85;
 }
@@ -3629,10 +3587,6 @@ animation-duration:
 
 @media (max-width: 600px) {
     .checkout-page-layout .checkout-cheque-fields .form-grid {
-        grid-template-columns: minmax(0, 1fr);
-    }
-
-    .club-page .club-landing__features {
         grid-template-columns: minmax(0, 1fr);
     }
 }

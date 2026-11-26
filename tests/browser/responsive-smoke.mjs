@@ -56,8 +56,15 @@ try {
               throw new Error('Expected one footer link for ' + label);
             }
           }
-          const basket = footer.getByRole('link', { name: 'سبد خرید', exact: true });
-          if ((await basket.innerText()).trim() || !await basket.locator('svg').count()) throw new Error('Basket link must use its icon');
+          const textActions = await footer.locator('.store-action-icon').evaluateAll(links =>
+            links.some(link => link.textContent.trim() || !link.querySelector('svg') || !link.getAttribute('aria-label'))
+          );
+          if (textActions) throw new Error('Footer actions must show a named icon without visible button text');
+          const club = page.locator('.club-page');
+          if (await club.locator('.club-page__service').count() !== 3 ||
+              await club.getByRole('link', { name: 'ساخت حساب', exact: true }).count() !== 1) {
+            throw new Error('Missing customer club services or guest actions');
+          }
           await footer.screenshot({ path: 'artifacts/ui-smoke/' + width + '-footer.png', animations: 'disabled' });
         }
         await page.screenshot({ path: 'artifacts/ui-smoke/' + width + '-' + name + '.png', fullPage: true, animations: 'disabled' });
