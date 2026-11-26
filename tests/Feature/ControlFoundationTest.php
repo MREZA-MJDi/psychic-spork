@@ -94,8 +94,8 @@ class ControlFoundationTest extends TestCase
         $this->actingAs($admin)
             ->get(route('admin.nila.index'))
             ->assertOk()
-            ->assertSee('ورود ماهانه اطلاعات نیلا')
-            ->assertSee('جانان چه چیزی را تغییر می‌دهد؟')
-            ->assertSee('بارگذاری فایل فقط گزارش می‌سازد');
+            ->assertSee('ورود محصولات و موجودی از هلو')
+            ->assertSee('چرا تعداد ردیف‌های فایل از تعداد محصولات بیشتر است؟')
+            ->assertSee('ثبت اطلاعات نیاز به تأیید شما در صفحهٔ گزارش دارد.');
     }
 }

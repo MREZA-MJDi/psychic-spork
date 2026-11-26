@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\IntegrationMapping;
 use App\Models\NilaImportBatch;
 use App\Models\Product;
 use App\Models\ProductVariant;
@@ -16,6 +17,37 @@ use Tests\TestCase;
 class NilaSpreadsheetPreviewTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function test_overview_counts_existing_models_and_their_linked_options(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        $active = Product::factory()->create(['is_active' => true]);
+        $inactive = Product::factory()->create(['is_active' => false]);
+        $unlinked = Product::factory()->create();
+        $option = ProductVariant::factory()->create(['product_id' => $active->id]);
+
+        foreach ([
+            [Product::class, $active->id, '100'],
+            [Product::class, $active->id, '101'],
+            [Product::class, $inactive->id, '200'],
+            [Product::class, $unlinked->id + 100, '300'],
+            [ProductVariant::class, $option->id, '100*1'],
+        ] as [$type, $id, $code]) {
+            IntegrationMapping::query()->create([
+                'integration' => 'nila',
+                'entity_type' => $type,
+                'entity_id' => $id,
+                'external_id' => $code,
+            ]);
+        }
+
+        $this->actingAs($admin)->get(route('admin.nila.index'))
+            ->assertOk()
+            ->assertViewHas('products', 2)
+            ->assertViewHas('activeProducts', 1)
+            ->assertViewHas('variants', 1)
+            ->assertSee('چرا تعداد ردیف‌های فایل از تعداد محصولات بیشتر است؟');
+    }
 
     public function test_admin_can_upload_csv_for_preview_without_creating_catalog_records(): void
     {
@@ -51,9 +83,10 @@ class NilaSpreadsheetPreviewTest extends TestCase
             ->assertOk()
             ->assertSee('0102001*1')
             ->assertSee('بادمجونی')
-            ->assertSee('هنوز هیچ محصولی وارد دیتابیس نشده')
-            ->assertSee('۲۵ گروه محصول (پیشنهادی)')
-            ->assertSee('۵۰ گروه محصول (حداکثر هر نوبت)')
+            ->assertSee('از ۲ ردیف فایل، ۱ مدل با کد پایه شناسایی شد.')
+            ->assertSee('ثبت اطلاعات این فایل هنوز شروع نشده است')
+            ->assertSee('۲۵ مدل (پیشنهادی)')
+            ->assertSee('۵۰ مدل (حداکثر هر نوبت)')
             ->assertSee('موجودی نیازمند تطبیق')
             ->assertSee('موجودی فایل، مقدار نهایی موجودی');
     }

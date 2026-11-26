@@ -20,14 +20,15 @@
                 </h1>
 
                 <p class="admin-page-head__text">
-                    مدیریت محصولات، قیمت، موجودی و وضعیت انتشار
+                    مدل‌ها، گزینه‌های سایز و رنگ و وضعیت نمایش در فروشگاه را مدیریت کنید.
                 </p>
 
                 <p class="admin-muted" style="margin-top:8px;">
-                    ظرفیت Hero صفحه اصلی:
+                    محصولات منتخب صفحهٔ اصلی:
                     <strong>{{ \App\Support\PersianNumber::format($heroCount ?? 0) }} از {{ \App\Support\PersianNumber::format($heroLimit ?? 36) }}</strong>
                     محصول فعال
                 </p>
+                <p><a href="{{ route('admin.nila.index') }}">ورود قیمت و موجودی از فایل هلو</a></p>
 
             </div>
 
@@ -57,7 +58,7 @@
                     </h2>
 
                     <p class="admin-card-description">
-                        محصول را با نام، SKU، دسته‌بندی یا وضعیت پیدا کنید.
+                        محصول را با نام، کد کالا، دسته‌بندی یا وضعیت نمایش پیدا کنید.
                     </p>
 
                 </div>
@@ -301,7 +302,7 @@
 
                     <p class="admin-card-description">
                         {{ \App\Support\PersianNumber::format($products->total()) }}
-                        محصول
+                        مدل با فیلترهای فعلی
                     </p>
 
                 </div>
