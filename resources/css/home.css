@@ -187,9 +187,7 @@ display:
         #e4a9bf;
 
     font-family:
-        Georgia,
-        "Times New Roman",
-        serif;
+        var(--janan-font);
 
     font-size:
         20px;
@@ -290,7 +288,7 @@ align-self:
         rgba(255, 255, 255, .22);
 
     font:
-        9px Georgia, serif;
+        9px var(--janan-font);
 
     letter-spacing:
         .08em;
@@ -1255,7 +1253,7 @@ display:
         rgba(255, 255, 255, .72);
 
     font:
-        500 28px/1 Georgia, serif;
+        500 28px/1 var(--janan-font);
 }
 
 .home-brand-tile.is-featured .home-brand-tile__initial {
@@ -1541,7 +1539,7 @@ outline:
     border: 1px solid rgba(255,255,255,.22);
     border-radius: 50%;
     color: rgba(255,255,255,.86);
-    font: 10px Georgia, serif;
+    font: 10px var(--janan-font);
 }
 
 .discovery-card__body {
@@ -1851,7 +1849,7 @@ outline:
     border-radius: 50%;
     color: var(--janan-blue-ink);
     background: var(--janan-sky-50);
-    font: 10px Georgia, serif;
+    font: 10px var(--janan-font);
 }
 
 .home-signal-panel--popular .home-signal-panel__index {
@@ -1946,7 +1944,7 @@ outline:
 
 .home-signal-item__media > span {
     color: var(--janan-blue-ink);
-    font: italic 17px Georgia, serif;
+    font: italic 17px var(--janan-font);
 }
 
 .home-signal-item__copy {
@@ -2004,7 +2002,7 @@ outline:
     color: rgba(255,255,255,.76);
     border: 1px solid rgba(255,255,255,.16);
     background: rgba(255,255,255,.035);
-    font: 10px Georgia, serif;
+    font: 10px var(--janan-font);
 }
 
 .home-signal-empty {
@@ -2178,7 +2176,7 @@ outline:
 
 .janan-trust__eyebrow {
     color: rgba(255,255,255,.46);
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-family: var(--janan-font);
     font-size: 8px;
     font-weight: 400;
     letter-spacing: .16em;
@@ -2234,7 +2232,7 @@ outline:
 .janan-trust__index {
     padding-top: 1px;
     color: rgba(255,255,255,.28);
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-family: var(--janan-font);
     font-size: 8px;
     letter-spacing: .08em;
 }
@@ -2347,7 +2345,7 @@ outline:
 
 .janan-trust__eyebrow {
     color: rgba(23,23,23,.48);
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-family: var(--janan-font);
     font-size: 8px;
     font-weight: 400;
     letter-spacing: .15em;
@@ -2412,7 +2410,7 @@ outline:
 
 .janan-trust__index {
     color: rgba(23,23,23,.32);
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-family: var(--janan-font);
     font-size: 8px;
     letter-spacing: .08em;
 }

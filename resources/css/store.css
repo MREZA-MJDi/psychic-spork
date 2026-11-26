@@ -7313,7 +7313,7 @@ outline:
 
 .cart-quick-preview__media span {
     color: var(--janan-blue-ink);
-    font: italic 14px Georgia, serif;
+    font: italic 14px var(--janan-font);
 }
 
 .cart-quick-preview__copy {
@@ -7574,7 +7574,7 @@ outline:
     border-radius: 9px;
     color: var(--janan-blue-ink);
     background: linear-gradient(135deg, var(--janan-sky-100), var(--janan-pink-100));
-    font: italic 15px Georgia, serif;
+    font: italic 15px var(--janan-font);
 }
 
 .search-suggestion__media img {
@@ -7865,7 +7865,7 @@ outline:
 
 .product-gallery__placeholder {
     color: var(--janan-blue-ink);
-    font: italic 38px Georgia, serif;
+    font: italic 38px var(--janan-font);
 }
 
 .product-gallery__counter {
@@ -7881,7 +7881,7 @@ outline:
     color: rgba(255,255,255,.92);
     background: rgba(22,29,34,.22);
     backdrop-filter: blur(9px);
-    font: 8px Georgia, serif;
+    font: 8px var(--janan-font);
 }
 
 .product-gallery__sale {
@@ -7937,7 +7937,7 @@ outline:
     height: 100%;
     color: var(--janan-blue-ink);
     background: linear-gradient(135deg, var(--janan-sky-100), var(--janan-pink-100));
-    font: 500 12px/1 Georgia, serif;
+    font: 500 12px/1 var(--janan-font);
 }
 
 .product-gallery__thumb img {
@@ -8226,7 +8226,7 @@ outline:
 
 .product-buy-benefits span {
     color: var(--janan-pink-ink);
-    font: 7px Georgia,serif;
+    font: 7px var(--janan-font);
 }
 
 .product-buy-benefits strong {
@@ -9857,7 +9857,7 @@ body.store-body :where(a, button, input, select, textarea):focus-visible {
     border-radius: 50%;
     color: #fff;
     background: #27343c;
-    font: 700 10px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+    font: 700 10px/1 var(--janan-font);
 }
 
 .customer-stepper__item:not([aria-current="step"]) .customer-stepper__index {

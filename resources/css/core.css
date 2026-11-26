@@ -269,8 +269,8 @@ textarea:disabled {
         Arial,
         sans-serif;
 
-    --janan-display:
-        Georgia,
-        'Times New Roman',
-        serif;
+    --janan-display: var(--janan-font);
 }
+
+/* Normalize native controls and technical labels. */
+code, pre, kbd, samp, optgroup, option { font-family: var(--janan-font); }
