@@ -351,7 +351,7 @@ import { Flip } from 'gsap/Flip';
 
                 init() {
                     this.build();
-                    this.cfg.zoom = viewport.clientWidth <= 540 ? 0.6 : 0.6;
+                    this.cfg.zoom = 0.6;
                     this.cfg.gap = this.getGap();
                     this.dimensions();
                     if (viewport.clientWidth <= 540) {
@@ -561,12 +561,13 @@ import { Flip } from 'gsap/Flip';
                     controls.inert = true;
                     overlay.removeAttribute('inert');
                     overlay.setAttribute('aria-hidden', 'false');
-                    overlay.setAttribute('role', 'dialog');
-                    overlay.setAttribute('aria-modal', 'true');
+                    root.setAttribute('role', 'dialog');
+                    root.setAttribute('aria-modal', 'true');
+                    root.setAttribute('aria-labelledby', 'immersiveSlideTitle');
                     close.disabled = false;
                     close.setAttribute('aria-hidden', 'false');
-                    close.focus({ preventScroll: true });
                     const lines = this.updateDetails(model);
+                    close.focus({ preventScroll: true });
                     gsap.set(overlay, { opacity: 0 });
                     gsap.set([number, title, ...lines, close], {
                         opacity: 0,
@@ -595,6 +596,7 @@ import { Flip } from 'gsap/Flip';
                             overlayAnchor.style.pointerEvents = 'auto';
                             overlayAnchor.tabIndex = 0;
                             root.dataset.productReady = 'true';
+                            if (this.layoutPending) Flip.fit(overlayAnchor, target, {absolute:true,duration:0});
                             overlay.classList.add('is-active');
 
                             overlayAnchor.addEventListener('click', (event) => {
@@ -695,7 +697,9 @@ import { Flip } from 'gsap/Flip';
                                 controls.inert = false;
                                 overlay.setAttribute('inert', '');
                                 overlay.setAttribute('aria-hidden', 'true');
-                                overlay.removeAttribute('aria-modal');
+                                root.removeAttribute('role');
+                                root.removeAttribute('aria-modal');
+                                root.removeAttribute('aria-labelledby');
                                 close.disabled = true;
                                 close.setAttribute('aria-hidden', 'true');
                                 this.drag?.enable();
@@ -727,7 +731,8 @@ import { Flip } from 'gsap/Flip';
                 }
 
                 finishZoomMotion() {
-                    this.zoomTween?.kill();
+                    if (!this.zoomTween) return;
+                    this.zoomTween.kill();
                     this.zoomTween = null;
                     this.applyItemPositions(false);
                     const b = this.bounds();

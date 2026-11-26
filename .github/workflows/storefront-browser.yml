@@ -57,6 +57,9 @@ jobs:
       - name: Test category crop and public display
         if: success() || failure()
         run: node tests/browser/category-cover.mjs
+      - name: Test interactive hero actions
+        if: success() || failure()
+        run: node tests/browser/hero-interactions.mjs
       - name: Check layouts in Chromium
         if: success() || failure()
         run: node tests/browser/responsive-smoke.mjs

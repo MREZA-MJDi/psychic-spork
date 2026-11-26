@@ -809,3 +809,6 @@ body.home-page-layout .store-header--immersive.is-over-content .mobile-menu-togg
 .immersive-empty-state { position:absolute; inset:0; display:grid; align-content:center; justify-items:center; gap:14px; text-align:center; padding:24px; z-index:7; }
 .immersive-grid-hero.is-empty :is(.immersive-discover,.immersive-controls,.immersive-footer) { display:none; }
 @media(prefers-reduced-motion:reduce){.immersive-grid-hero *{scroll-behavior:auto;}}
+
+.immersive-grid-hero .immersive-scaling-overlay:focus-visible { outline-offset:-3px; }
+.immersive-grid-hero .immersive-discover a:hover { background:#363b40; }

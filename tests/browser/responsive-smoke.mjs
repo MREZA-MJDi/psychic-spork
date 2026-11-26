@@ -52,6 +52,7 @@ try {
         if (path === '/') {
           const hero = page.locator('[data-immersive-gallery]');
           const item = hero.locator('.immersive-grid-item').first();
+          await hero.locator('.immersive-controls.is-visible').waitFor({state:'visible'});
           await item.waitFor({ state: 'visible', timeout: 10000 });
           await item.click({ timeout: 10000 });
           await hero.locator('.immersive-title-overlay.is-active').waitFor({ state: 'visible' });
