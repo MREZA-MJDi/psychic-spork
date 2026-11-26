@@ -20,12 +20,8 @@
         <a
             href="{{ route('home') }}"
             class="brand"
-            aria-label="{{ $siteBrandNameLatin ?? 'Janan' }}"
+            aria-label="{{ $siteBrandNameFa ?? 'جانه جانان' }}"
         >
-            <span class="brand__latin">
-                {{ $siteBrandNameLatin ?? 'Janan' }}
-            </span>
-
             <span class="brand__nastaliq">
                 {{ $siteBrandNameFa ?? 'جانه جانان' }}
             </span>

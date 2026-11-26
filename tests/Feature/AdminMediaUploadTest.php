@@ -78,7 +78,8 @@ class AdminMediaUploadTest extends TestCase
         $this->actingAs($admin)->get(route('admin.categories.edit', $category))
             ->assertOk()->assertSee('data-media-ratio="4:3"', false)
             ->assertSee('data-media-width="960"', false)
-            ->assertSee('janan-category-card--preview', false);
+            ->assertSee('class="janan-category-card__frame" data-media-preview', false)
+            ->assertSee('data-media-canvas', false);
 
         $this->put(route('admin.categories.update', $category), $data + [
             'image_file' => UploadedFile::fake()->image('wrong.jpg', 800, 800),

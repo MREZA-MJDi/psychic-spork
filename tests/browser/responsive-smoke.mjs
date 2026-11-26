@@ -5,7 +5,7 @@ const base = process.env.UI_BASE_URL || 'http://127.0.0.1:8000';
 const widths = [320, 360, 390, 543, 768, 1024, 1440];
 const paths = ['/', '/products', '/categories', '/categories/ui-qa-category',
   '/products/ui-qa-product', '/brands', '/brands/ui-qa-brand', '/cart',
-  '/about', '/faq', '/shipping', '/returns', '/login'];
+  '/about', '/faq', '/shipping', '/returns', '/login', '/drclubz'];
 const failures = [];
 await mkdir('artifacts/ui-smoke', { recursive: true });
 const browser = await chromium.launch({ headless: true });
@@ -47,6 +47,18 @@ try {
           if (!(await map.getAttribute('src')).includes('maps.google.com')) throw new Error('Contact map missing');
           const bounds = await map.boundingBox();
           if (!bounds || bounds.x < -2 || bounds.x + bounds.width > width + 2) throw new Error('Contact map outside viewport');
+        }
+        if (path === '/drclubz') {
+          const footer = page.locator('.store-footer');
+          if (await page.locator('.store-header .brand__latin').count()) throw new Error('Unexpected Latin header wordmark');
+          for (const label of ['محصولات', 'روش‌های ارسال', 'شرایط مرجوعی', 'فرم تماس با پشتیبانی', 'ورود به حساب', 'سبد خرید']) {
+            if (await footer.getByRole('link', { name: label, exact: true }).count() !== 1) {
+              throw new Error('Expected one footer link for ' + label);
+            }
+          }
+          const basket = footer.getByRole('link', { name: 'سبد خرید', exact: true });
+          if ((await basket.innerText()).trim() || !await basket.locator('svg').count()) throw new Error('Basket link must use its icon');
+          await footer.screenshot({ path: 'artifacts/ui-smoke/' + width + '-footer.png', animations: 'disabled' });
         }
         await page.screenshot({ path: 'artifacts/ui-smoke/' + width + '-' + name + '.png', fullPage: true, animations: 'disabled' });
         if (path === '/') {
