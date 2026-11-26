@@ -16,16 +16,13 @@
         :products="$products"
     />
 
-    {{-- 04. Editorial discovery --}}
-    <x-store.home-discovery :products="$products" />
-
-    {{-- 05. Store signals --}}
+    {{-- 04. Store signals --}}
     <x-store.home-signals
         :recent-products="$recentProducts"
         :popular-products="$popularProducts"
     />
 
-    {{-- 06. Brand discovery --}}
+    {{-- 05. Brand discovery --}}
     <x-store.brand-grid
         :brands="$brands"
     />
