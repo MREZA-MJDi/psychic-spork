@@ -812,3 +812,8 @@ body.home-page-layout .store-header--immersive.is-over-content .mobile-menu-togg
 
 .immersive-grid-hero .immersive-scaling-overlay:focus-visible { outline-offset:-3px; }
 .immersive-grid-hero .immersive-discover a:hover { background:#363b40; }
+
+/* The storefront header sits above the gallery outside the product dialog. */
+.immersive-zoom-lock .store-header--immersive {
+    visibility: hidden;
+}
