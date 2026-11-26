@@ -25,7 +25,7 @@
         <div class="immersive-split-screen__right" id="immersiveSplitRight"></div>
     </div>
 
-    <div class="immersive-title-overlay" id="immersiveTitleOverlay">
+    <div class="immersive-title-overlay" id="immersiveTitleOverlay" aria-labelledby="immersiveSlideTitle" aria-hidden="true" inert>
         <div class="immersive-title-overlay__number">
             <span id="immersiveSlideNumber">۰۱</span>
         </div>
@@ -50,35 +50,41 @@
         class="immersive-close-button"
         id="immersiveCloseButton"
         aria-label="بستن نمای محصول"
+        aria-hidden="true" disabled
     >
-        <svg width="64" height="64" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-            <path d="M7.89873 16L6.35949 14.48L11.8278 9.08H0V6.92H11.8278L6.35949 1.52L7.89873 0L16 8L7.89873 16Z" fill="white"/>
-        </svg>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
     </button>
 
-    <div class="immersive-controls" id="immersiveControls">
+    <div class="immersive-controls" id="immersiveControls" role="group" aria-label="کنترل اندازه گالری">
         <div class="immersive-percentage" id="immersivePercentage">۶۰٪</div>
 
         <div class="immersive-switch" id="immersiveSwitch">
-            <button type="button" class="immersive-switch__button immersive-switch__button--current" data-zoom="0.3">
+            <button type="button" class="immersive-switch__button" aria-pressed="false" data-zoom="0.3">
                 <span></span>
                 کوچک‌نمایی
             </button>
-            <button type="button" class="immersive-switch__button immersive-switch__button--current-false" data-zoom="0.6">
+            <button type="button" class="immersive-switch__button is-current" aria-pressed="true" data-zoom="0.6">
                 <span></span>
                 اندازه عادی
             </button>
-            <button type="button" class="immersive-switch__button" data-zoom="1">
+            <button type="button" class="immersive-switch__button" aria-pressed="false" data-zoom="1">
                 <span></span>
                 بزرگ‌نمایی
             </button>
-            <button type="button" class="immersive-switch__button" data-fit="1">
+            <button type="button" class="immersive-switch__button" aria-pressed="false" data-fit="1">
                 <span></span>
                 نمایش کامل
             </button>
         </div>
     </div>
 
+    <div class="immersive-discover">
+        <div><span>کالکشن جانان</span><p>محصولی را انتخاب کنید تا جزئیات آن را ببینید.</p></div>
+        <a href="{{ route('products.index') }}">همه محصولات</a>
+    </div>
+    @if(empty($slides))
+        <div class="immersive-empty-state"><h1>به جانان خوش آمدید</h1><p>کالکشن فروشگاه را مرور کنید.</p><a href="{{ route('products.index') }}" class="button button--primary">مشاهده فروشگاه</a></div>
+    @endif
     <footer class="immersive-footer">
         <div class="immersive-footer__info">
             <p>جانان · انتخاب‌شده برای تو</p>

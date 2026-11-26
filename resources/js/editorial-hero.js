@@ -121,6 +121,10 @@ import { Flip } from 'gsap/Flip';
                     this.last = { x: 0, y: 0 };
                     this.layoutFrame = 0;
                     this.introPlaying = true;
+                    this.layoutPending = false;
+                    this.fitMode = false;
+                    this.zoomTween = null;
+                    this.returnFocus = null;
                 }
 
                 getItemSize() {
@@ -251,6 +255,8 @@ import { Flip } from 'gsap/Flip';
 
                 applyItemPositions(animated = false) {
                     this.items.forEach((item) => {
+                        item.row = Math.floor(item.index / this.cfg.cols);
+                        item.col = item.index % this.cfg.cols;
                         item.baseX =
                             item.col * (this.cfg.size + this.cfg.gap);
                         item.baseY =
@@ -265,7 +271,8 @@ import { Flip } from 'gsap/Flip';
                             gsap.to(item.element, {
                                 left: item.baseX,
                                 top: item.baseY,
-                                duration: reducedMotion ? 0.01 : 0.42,
+                                duration: reducedMotion ? 0.01 : 0.24,
+                                overwrite: 'auto',
                                 ease: 'power2.out',
                             });
                         } else {
@@ -344,20 +351,17 @@ import { Flip } from 'gsap/Flip';
 
                 init() {
                     this.build();
-                    this.cfg.zoom = viewport.clientWidth <= 540 ? 1 : 0.6;
+                    this.cfg.zoom = viewport.clientWidth <= 540 ? 0.6 : 0.6;
                     this.cfg.gap = this.getGap();
                     this.dimensions();
                     if (viewport.clientWidth <= 540) {
-                        const fit = Math.min(
-                            1,
-                            (viewport.clientWidth - 32) / this.dim.width,
-                            (viewport.clientHeight - 150) / this.dim.height
-                        );
-                        this.cfg.zoom = Math.max(0.25, fit);
+                        // Keep the initial cards large enough to identify and tap.
+                        this.cfg.zoom = Math.max(0.3, Math.min(0.85, (viewport.clientWidth - 32) / this.dim.width));
                         this.cfg.gap = this.getGap();
                         this.dimensions();
-                        percentage.textContent = persianDigits(Math.round(this.cfg.zoom * 100)) + '٪';
                     }
+                    this.syncControls();
+                    this.applyItemPositions(false);
                     wrap.style.width = this.dim.width + 'px';
                     wrap.style.height = this.dim.height + 'px';
 
@@ -388,15 +392,16 @@ import { Flip } from 'gsap/Flip';
                         top: (i) => this.items[i].baseY,
                         scale: 1,
                         opacity: 1,
-                        duration: reducedMotion ? 0.05 : 0.52,
+                        duration: reducedMotion ? 0.01 : 0.32,
                         ease: 'power2.out',
                         stagger: reducedMotion
                             ? 0
-                            : { amount: 0.45, from: 'start' },
+                            : { amount: 0.18, from: 'start' },
                         onComplete: () => {
                             this.introPlaying = false;
                             this.relayout();
                             controls.classList.add('is-visible');
+                            root.dataset.galleryReady = 'true';
                             gsap.to(root.querySelector('.immersive-footer'), {
                                 opacity: 1,
                                 duration: reducedMotion ? 0.01 : 0.45,
@@ -412,7 +417,8 @@ import { Flip } from 'gsap/Flip';
                     this.drag = Draggable.create(wrap, {
                         type: 'x,y',
                         bounds: this.bounds(),
-                        edgeResistance: 0.82,
+                        edgeResistance: 0.95,
+                        minimumMovement: 8,
                         inertia: false,
                         onDragStart: () => root.classList.add('is-dragging'),
                         onDrag: () => {
@@ -421,7 +427,11 @@ import { Flip } from 'gsap/Flip';
                                 y: this.drag.y,
                             };
                         },
-                        onDragEnd: () => root.classList.remove('is-dragging'),
+                        onDragEnd: () => {
+                            root.classList.remove('is-dragging');
+                            this.applyPosition(this.drag.x, this.drag.y);
+                            this.drag.update();
+                        },
                     })[0];
                 }
 
@@ -481,6 +491,7 @@ import { Flip } from 'gsap/Flip';
                         (model.slide.title || 'محصول جانان') + ' — مشاهده محصول'
                     );
                     anchor.setAttribute('aria-live', 'off');
+                    anchor.tabIndex = -1;
 
                     if (model.slide.image) {
                         const image = document.createElement('img');
@@ -530,7 +541,8 @@ import { Flip } from 'gsap/Flip';
 
                 open(model) {
                     if (this.introPlaying || this.zoom.active) return;
-
+                    this.finishZoomMotion();
+                    this.returnFocus = model.element;
                     const overlayAnchor = this.createOverlay(model);
                     this.zoom = {
                         active: true,
@@ -545,7 +557,15 @@ import { Flip } from 'gsap/Flip';
                     split.classList.add('is-active');
                     controls.classList.add('is-split');
                     close.classList.add('is-active');
-
+                    viewport.inert = true;
+                    controls.inert = true;
+                    overlay.removeAttribute('inert');
+                    overlay.setAttribute('aria-hidden', 'false');
+                    overlay.setAttribute('role', 'dialog');
+                    overlay.setAttribute('aria-modal', 'true');
+                    close.disabled = false;
+                    close.setAttribute('aria-hidden', 'false');
+                    close.focus({ preventScroll: true });
                     const lines = this.updateDetails(model);
                     gsap.set(overlay, { opacity: 0 });
                     gsap.set([number, title, ...lines, close], {
@@ -553,7 +573,7 @@ import { Flip } from 'gsap/Flip';
                     });
                     gsap.set(model.element, { opacity: 0 });
 
-                    const duration = reducedMotion ? 0.04 : 0.74;
+                    const duration = reducedMotion ? 0.01 : 0.42;
 
                     gsap.to(split, {
                         opacity: 1,
@@ -570,9 +590,11 @@ import { Flip } from 'gsap/Flip';
                         duration,
                         ease: 'power3.inOut',
                         onComplete: () => {
-                            if (this.zoom.closing) return;
+                            if (!this.zoom.active || this.zoom.closing || this.zoom.overlay !== overlayAnchor) return;
 
                             overlayAnchor.style.pointerEvents = 'auto';
+                            overlayAnchor.tabIndex = 0;
+                            root.dataset.productReady = 'true';
                             overlay.classList.add('is-active');
 
                             overlayAnchor.addEventListener('click', (event) => {
@@ -615,12 +637,16 @@ import { Flip } from 'gsap/Flip';
 
                     const current = this.zoom;
                     current.closing = true;
+                    delete root.dataset.productReady;
                     const overlayAnchor = current.overlay;
                     const lines = [...description.querySelectorAll(
                         '.immersive-description-line'
                     )];
 
                     overlayAnchor.style.pointerEvents = 'none';
+                    overlayAnchor.tabIndex = -1;
+                    gsap.killTweensOf([overlay, split, number, title, ...lines, close]);
+                    Flip.killFlipsOf(overlayAnchor);
 
                     gsap.to(
                         [number, title, ...lines, close],
@@ -647,7 +673,7 @@ import { Flip } from 'gsap/Flip';
                         current.item.element,
                         {
                             absolute: true,
-                            duration: reducedMotion ? 0.04 : 0.62,
+                            duration: reducedMotion ? 0.01 : 0.36,
                             ease: 'power3.inOut',
                             onComplete: () => {
                                 current.item.element.style.opacity = '1';
@@ -665,128 +691,120 @@ import { Flip } from 'gsap/Flip';
                                 split.classList.remove('is-active');
                                 root.classList.remove('is-zoomed');
                                 document.body.classList.remove('immersive-zoom-lock');
+                                viewport.inert = false;
+                                controls.inert = false;
+                                overlay.setAttribute('inert', '');
+                                overlay.setAttribute('aria-hidden', 'true');
+                                overlay.removeAttribute('aria-modal');
+                                close.disabled = true;
+                                close.setAttribute('aria-hidden', 'true');
                                 this.drag?.enable();
                                 this.zoom = {
                                     active: false,
                                     item: null,
                                     overlay: null,
                                 };
+                                if (this.layoutPending) {
+                                    this.layoutPending = false;
+                                    this.relayout();
+                                }
+                                this.returnFocus?.focus({ preventScroll: true });
+                                this.returnFocus = null;
                             },
                         }
                     );
                 }
 
-                setZoom(value, button) {
-                    if (this.introPlaying || this.zoom.active) return;
-
-                    const zoom = Math.max(0.25, Math.min(1, value));
-                    const oldZoom = this.cfg.zoom;
-                    const oldCenter = {
-                        x: (viewport.clientWidth / 2 - this.last.x) / oldZoom,
-                        y: (viewport.clientHeight / 2 - this.last.y) / oldZoom,
-                    };
-
-                    this.cfg.zoom = zoom;
-                    this.cfg.gap = this.getGap(zoom);
-                    this.dimensions();
-                    this.applyItemPositions(true);
-
-                    const x = viewport.clientWidth / 2 - oldCenter.x * zoom;
-                    const y = viewport.clientHeight / 2 - oldCenter.y * zoom;
-
-                    gsap.to(wrap, {
-                        scale: zoom,
-                        x,
-                        y,
-                        duration: reducedMotion ? 0.04 : 0.62,
-                        ease: 'power3.inOut',
-                        onComplete: () => {
-                            this.last = {
-                                x: gsap.getProperty(wrap, 'x'),
-                                y: gsap.getProperty(wrap, 'y'),
-                            };
-                            this.initDrag();
-                        },
-                    });
-
-                    percentage.textContent = persianDigits(Math.round(zoom * 100)) + '٪';
-
-                    root.querySelectorAll('[data-zoom]').forEach((node) => {
-                        node.classList.toggle(
-                            'is-current',
-                            Number(node.dataset.zoom) === zoom
-                        );
-                    });
-
-                    button?.focus({ preventScroll: true });
-                }
-
-                fit() {
-                    if (this.introPlaying || this.zoom.active) return;
-
-                    this.cfg.zoom = 1;
-                    this.cfg.gap = this.getGap(1);
-                    this.dimensions();
-
-                    const scaleX = (viewport.clientWidth - 80) / this.dim.width;
-                    const scaleY = (viewport.clientHeight - 130) / this.dim.height;
-                    const zoom = Math.max(0.25, Math.min(1, scaleX, scaleY));
-
-                    this.cfg.zoom = zoom;
-                    this.cfg.gap = this.getGap(zoom);
-                    this.dimensions();
-                    this.applyItemPositions();
-
-                    const center = this.centerPosition();
-
-                    gsap.to(wrap, {
-                        scale: zoom,
-                        x: center.x,
-                        y: center.y,
-                        duration: reducedMotion ? 0.04 : 0.62,
-                        ease: 'power3.inOut',
-                        onComplete: () => this.initDrag(),
-                    });
-
-                    this.last = center;
-                    percentage.textContent = persianDigits(Math.round(zoom * 100)) + '٪';
-
-                    root.querySelectorAll('[data-zoom]').forEach((node) => {
-                        node.classList.remove('is-current');
+                syncControls() {
+                    percentage.textContent = persianDigits(Math.round(this.cfg.zoom * 100)) + '٪';
+                    root.querySelectorAll('[data-zoom], [data-fit]').forEach(node => {
+                        const selected = node.hasAttribute('data-fit')
+                            ? this.fitMode
+                            : !this.fitMode && Math.abs(Number(node.dataset.zoom) - this.cfg.zoom) < 0.001;
+                        node.classList.toggle('is-current', selected);
+                        node.setAttribute('aria-pressed', String(selected));
                     });
                 }
 
-                relayout() {
-                    if (this.introPlaying) return;
+                finishZoomMotion() {
+                    this.zoomTween?.kill();
+                    this.zoomTween = null;
+                    this.applyItemPositions(false);
+                    const b = this.bounds();
+                    const x = Math.max(b.minX, Math.min(b.maxX, Number(gsap.getProperty(wrap, 'x')) || 0));
+                    const y = Math.max(b.minY, Math.min(b.maxY, Number(gsap.getProperty(wrap, 'y')) || 0));
+                    gsap.set(wrap, {scale:this.cfg.zoom, x, y});
+                    this.last = {x,y};
+                    this.initDrag();
+                }
 
-                    if (this.zoom.active) {
-                        const overlayAnchor = this.zoom.overlay;
-                        if (overlayAnchor) {
-                            Flip.fit(overlayAnchor, target, {
-                                absolute: true,
-                                duration: 0,
-                            });
-                        }
-                        return;
-                    }
+                fittedScale() {
+                    const gap = this.getGap(0.25);
+                    const width = this.cfg.cols * this.cfg.size + Math.max(0, this.cfg.cols - 1) * gap;
+                    const height = this.cfg.rows * this.cfg.size + Math.max(0, this.cfg.rows - 1) * gap;
+                    return Math.max(0.05, Math.min(1,
+                        Math.max(1, viewport.clientWidth - 32) / width,
+                        Math.max(1, viewport.clientHeight - 180) / height));
+                }
 
-                    const changed = this.syncConfig();
+                transitionZoom(value, fit = false) {
+                    if (this.introPlaying || this.zoom.active) return;
+                    this.zoomTween?.kill();
+                    this.drag?.disable();
+                    const actualScale = Number(gsap.getProperty(wrap, 'scaleX')) || this.cfg.zoom;
+                    const actualX = Number(gsap.getProperty(wrap, 'x')) || 0;
+                    const actualY = Number(gsap.getProperty(wrap, 'y')) || 0;
+                    const oldCenter = {x:(viewport.clientWidth/2-actualX)/actualScale,y:(viewport.clientHeight/2-actualY)/actualScale};
+                    this.fitMode = fit;
+                    this.cfg.zoom = fit ? this.fittedScale() : Math.max(0.25,Math.min(1,value));
+                    this.cfg.gap = this.getGap();
                     this.dimensions();
                     wrap.style.width = this.dim.width + 'px';
                     wrap.style.height = this.dim.height + 'px';
+                    this.items.forEach(item => gsap.killTweensOf(item.element, 'left,top'));
+                    this.applyItemPositions(false);
+                    const center = fit ? this.centerPosition() : {
+                        x:viewport.clientWidth/2-oldCenter.x*this.cfg.zoom,
+                        y:viewport.clientHeight/2-oldCenter.y*this.cfg.zoom
+                    };
+                    const b = this.bounds();
+                    const x = Math.max(b.minX,Math.min(b.maxX,center.x));
+                    const y = Math.max(b.minY,Math.min(b.maxY,center.y));
+                    this.syncControls();
+                    this.zoomTween = gsap.to(wrap, {
+                        scale:this.cfg.zoom,x,y,overwrite:true,
+                        duration:reducedMotion?0.01:0.3,ease:'power2.out',
+                        onComplete:()=>{this.zoomTween=null;this.last={x,y};this.initDrag();}
+                    });
+                }
 
-                    const center = this.centerPosition();
+                setZoom(value) { this.transitionZoom(value); }
 
-                    if (changed) {
-                        this.applyItemPositions(false);
+                fit() { this.transitionZoom(1,true); }
+
+                relayout() {
+                    if (this.introPlaying) return;
+                    if (this.zoom.active) {
+                        this.layoutPending = true;
+                        // Never interrupt an opening or closing FLIP transition.
+                        if (!this.zoom.closing && root.dataset.productReady === 'true') {
+                            Flip.fit(this.zoom.overlay,target,{absolute:true,duration:0});
+                        }
+                        return;
                     }
-
-                    this.applyPosition(
-                        changed ? center.x : this.last.x,
-                        changed ? center.y : this.last.y,
-                        false
-                    );
-
+                    this.zoomTween?.kill();
+                    this.zoomTween=null;
+                    const changed=this.syncConfig();
+                    if(this.fitMode) this.cfg.zoom=this.fittedScale();
+                    this.cfg.gap=this.getGap();
+                    this.dimensions();
+                    wrap.style.width=this.dim.width+'px';
+                    wrap.style.height=this.dim.height+'px';
+                    this.applyItemPositions(false);
+                    gsap.set(wrap,{scale:this.cfg.zoom});
+                    const center=this.centerPosition();
+                    this.applyPosition(changed||this.fitMode?center.x:this.last.x,changed||this.fitMode?center.y:this.last.y);
+                    this.syncControls();
                     this.initDrag();
                 }
 
@@ -811,7 +829,7 @@ import { Flip } from 'gsap/Flip';
             const mobileTapQuery = window.matchMedia?.('(max-width: 820px)');
 
             root.addEventListener('pointerdown', (event) => {
-                if (!mobileTapQuery?.matches || event.pointerType === 'mouse') return;
+                if (!mobileTapQuery?.matches || event.pointerType === 'mouse' || !event.isPrimary) return;
 
                 const item = event.target.closest?.('.immersive-grid-item');
                 if (!item || !root.contains(item)) {
@@ -839,7 +857,7 @@ import { Flip } from 'gsap/Flip';
                     event.clientY - start.y
                 );
 
-                if (distance > 10 || gallery.zoom.active) return;
+                if (distance > 10 || gallery.zoom.active || gallery.drag?.isDragging) return;
 
                 const model = gallery.items.find(
                     (candidate) => candidate.element === start.item
@@ -905,13 +923,20 @@ import { Flip } from 'gsap/Flip';
                         event.preventDefault();
                         gallery.close();
                     }
+                    if (event.key === 'Tab') {
+                        const candidates = [close, link, gallery.zoom.overlay].filter(node => node && !node.hidden && !node.disabled && node.tabIndex >= 0);
+                        if (!candidates.length) return;
+                        const index = candidates.indexOf(document.activeElement);
+                        const next = index < 0 ? (event.shiftKey ? candidates.length-1 : 0) : (index + (event.shiftKey ? -1 : 1) + candidates.length) % candidates.length;
+                        event.preventDefault();
+                        candidates[next].focus({preventScroll:true});
+                    }
                     return;
                 }
-
-                if (event.key === '1') gallery.setZoom(0.3);
-                if (event.key === '2') gallery.setZoom(0.6);
-                if (event.key === '3') gallery.setZoom(1);
-                if (event.key.toLowerCase() === 'f') gallery.fit();
+                if (!root.contains(document.activeElement) || event.target.matches?.('input,textarea,select,[contenteditable]') || event.ctrlKey || event.metaKey || event.altKey) return;
+                const actions = {'1':()=>gallery.setZoom(0.3),'2':()=>gallery.setZoom(0.6),'3':()=>gallery.setZoom(1),'f':()=>gallery.fit()};
+                const action = actions[event.key.toLowerCase()];
+                if(action) {event.preventDefault();action();}
             });
 
             root.addEventListener('mouseleave', () => {
