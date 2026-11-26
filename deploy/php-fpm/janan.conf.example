@@ -1,0 +1,15 @@
+[janan]
+user = janan
+group = www-data
+
+listen = /run/php/janan.sock
+listen.owner = www-data
+listen.group = www-data
+listen.mode = 0660
+
+pm = ondemand
+pm.max_children = 4
+pm.process_idle_timeout = 10s
+pm.max_requests = 500
+
+chdir = /var/www/janan
