@@ -23,6 +23,8 @@ try {
   await page.waitForFunction(()=>document.querySelector('[data-immersive-gallery]')?.dataset.galleryReady==='true');
   const cards=hero.locator('.immersive-grid-item');
   assert.equal(await cards.count(),8);
+  const close = hero.locator('#immersiveCloseButton');
+  assert.equal(await close.isVisible(), false);
   const fit=hero.locator('[data-fit]');
   await fit.click();
   await page.waitForFunction(()=>document.querySelector('[data-fit]')?.getAttribute('aria-pressed')==='true');
@@ -37,6 +39,7 @@ try {
   await page.waitForFunction(()=>document.querySelector('[data-immersive-gallery]')?.dataset.productReady==='true');
   assert.equal(await hero.locator('#immersiveProductPrice').textContent(),'3۰۰٬۰۰۰ تومان');
   assert.equal(await hero.getAttribute('aria-modal'),'true');
+  assert.equal(await close.isVisible(), true);
   assert.equal(await page.evaluate(()=>document.activeElement.id),'immersiveCloseButton');
   await page.keyboard.press('Tab');
   assert.equal(await page.evaluate(()=>document.activeElement.id),'immersiveSlideLink');
@@ -48,6 +51,7 @@ try {
   await page.keyboard.press('Escape');
   await page.waitForFunction(()=>!document.body.classList.contains('immersive-zoom-lock'));
   assert.equal(await cards.nth(2).evaluate(el=>document.activeElement===el),true);
+  assert.equal(await close.isVisible(), false);
   await fit.click();
   await page.waitForTimeout(100);
   assert.ok(await allInView(),'fit should remain correct after resize');

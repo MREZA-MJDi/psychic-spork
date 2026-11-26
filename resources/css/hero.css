@@ -333,15 +333,17 @@ body.home-immersive {
   border: 0;
   background: transparent;
   opacity: 0;
+  visibility: hidden;
   pointer-events: none;
   transform: translate(40px, -50%);
 }
 
 .immersive-close-button.is-active {
+  visibility: visible;
   pointer-events: all;
 }
 
-.immersive-close-button:hover {
+.immersive-close-button.is-active:hover {
   opacity: .72 !important;
 }
 
