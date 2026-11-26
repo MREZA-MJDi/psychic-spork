@@ -2573,7 +2573,7 @@ outline:
 
 .home-collections__browse:hover { text-decoration: underline; }
 
-.janan-category-grid--home {
+.home-collections .janan-category-grid--home {
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr));
     max-width: 1050px;
 }
@@ -2581,5 +2581,5 @@ outline:
 .home-collections__empty { text-align: center; margin: 20px 0; }
 
 @media (max-width: 620px) {
-    .janan-category-grid--home { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .home-collections .janan-category-grid--home { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
