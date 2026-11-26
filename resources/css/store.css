@@ -10172,3 +10172,14 @@ body.store-body :where(a, button, input, select, textarea):focus-visible {
 .category-collection__empty { padding: 36px 12px; text-align: center; background: #f8fafb; border-radius: 14px; }
 .category-collection__empty h3 { color: var(--janan-ink-strong); }
 .category-collection a:focus-visible, .category-collection select:focus-visible { outline: 2px solid var(--janan-pink-ink); outline-offset: 3px; }
+
+/* Iran province / city cascade, with manual fallback on service failure. */
+.location-fields { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; min-width: 0; }
+.location-fields label { min-width: 0; }
+.location-fields :is(input,select) { min-width: 0; width: 100%; min-height: 44px; font-family: var(--janan-font); font-size: 14px; }
+.location-fields [hidden] { display: none !important; }
+.location-fields__feedback { grid-column: 1 / -1; display: flex; align-items: center; flex-wrap: wrap; gap: 8px; color: var(--janan-ink-soft); font-size: 12px; }
+.location-fields__feedback:has([data-location-status]:empty) { display: none; }
+.location-fields__feedback button { min-height: 36px; border: 1px solid var(--janan-line-strong); background: #fff; border-radius: 8px; color: var(--janan-ink-strong); padding: 4px 12px; }
+.location-fields__error { color: #a32848; font-size: 12px; }
+@media (max-width: 480px) { .location-fields { grid-template-columns: minmax(0,1fr); } }

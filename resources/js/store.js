@@ -1,3 +1,4 @@
+import { initLocationFields } from './location-fields.js';
 (() => {
     if (window.__JANAN_STORE_CUSTOMER_UI_INITIALIZED__) return;
     window.__JANAN_STORE_CUSTOMER_UI_INITIALIZED__ = true;
@@ -206,6 +207,7 @@
         initStoreImages();
         initHeroNavbar();
         syncCheckoutChoices();
+        initLocationFields();
 
         document.addEventListener('change', (event) => {
             if (
