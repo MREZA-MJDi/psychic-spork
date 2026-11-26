@@ -14,19 +14,21 @@ use Illuminate\Support\Facades\Storage;
 final class RepairNilaSpreadsheetPrices extends Command
 {
     protected $signature = 'nila:repair-rial-prices
-        {batch : Completed spreadsheet import that used rial figures as toman}
+        {batch : Completed spreadsheet import to reconcile with its source file}
+        {--source-is-toman : Restore raw file prices without dividing by ten}
         {--apply : Write reviewed changes; by default only report them}
         {--legacy-decimal-saves : Include exact 100× and 10000× amounts from the old amount form}
         {--sku= : Restrict the repair to this SKU}
         {--expected-price= : Allow a specific current price for the selected SKU}';
 
-    protected $description = 'Correct base prices from a completed legacy rial spreadsheet without importing stock';
+    protected $description = 'Reconcile base prices against a completed spreadsheet without importing stock';
 
     public function handle(NilaSpreadsheetParser $parser): int
     {
         $id = filter_var($this->argument('batch'), FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
         $sku = $this->option('sku');
         $expected = $this->option('expected-price');
+        $sourceIsToman = (bool) $this->option('source-is-toman');
         $legacyDecimalSaves = (bool) $this->option('legacy-decimal-saves');
 
         if ($id === false || ($expected !== null && (!$sku || !preg_match('/^\d+(?:\.\d{1,2})?$/D', $expected)))) {
@@ -56,7 +58,13 @@ final class RepairNilaSpreadsheetPrices extends Command
         )->keyBy('holoo_code');
         $apply = (bool) $this->option('apply');
 
-        $report = DB::transaction(function () use ($batch, $validRows, $apply, $expected, $legacyDecimalSaves): array {
+        $report = DB::transaction(function () use ($batch, $validRows, $apply, $expected, $legacyDecimalSaves, $sourceIsToman): ?array {
+            $lockedBatch = NilaImportBatch::query()->lockForUpdate()->findOrFail($batch->id);
+            $metadata = $lockedBatch->metadata ?? [];
+            if (!$sourceIsToman && ($metadata['confirmed_source_unit'] ?? null) === 'toman') {
+                return null;
+            }
+
             $report = ['changed' => 0, 'correct' => 0, 'review' => [], 'legacy' => []];
 
             foreach ($validRows->keys()->chunk(500) as $codes) {
@@ -75,7 +83,8 @@ final class RepairNilaSpreadsheetPrices extends Command
                     }
 
                     $source = round((float) $row['price'], 2);
-                    $target = SpreadsheetPriceUnit::Rial->toToman((float) $row['price']);
+                    $converted = SpreadsheetPriceUnit::Rial->toToman((float) $row['price']);
+                    $target = $sourceIsToman ? $source : $converted;
                     $current = (float) $variant->price;
 
                     if ($current === $target) {
@@ -83,7 +92,7 @@ final class RepairNilaSpreadsheetPrices extends Command
                         continue;
                     }
 
-                    $expectedCurrent = $expected === null ? $source : (float) $expected;
+                    $expectedCurrent = $expected === null ? ($sourceIsToman ? $converted : $source) : (float) $expected;
                     $legacyAmount = $expected === null && $legacyDecimalSaves
                         && in_array($current, [$source * 100, $source * 10000], true);
 
@@ -105,18 +114,30 @@ final class RepairNilaSpreadsheetPrices extends Command
                 }
             }
 
+            if ($apply && $sourceIsToman && $validRows->isNotEmpty() && !$this->option('sku')) {
+                $metadata['confirmed_source_unit'] = 'toman';
+                $lockedBatch->update(['metadata' => $metadata]);
+            }
+
             return $report;
         }, 3);
+
+        if ($report === null) {
+            $this->error('The source of this batch was confirmed as toman. Use --source-is-toman.');
+            return self::FAILURE;
+        }
+
+        $columns = ['SKU', $sourceIsToman ? 'Source toman' : 'Source rial', 'Previous toman', 'Expected toman'];
 
         $this->info(sprintf('%s: %d; already correct: %d; needs review: %d.',
             $apply ? 'Updated' : 'Would update', $report['changed'], $report['correct'], count($report['review'])
         ));
         if ($report['legacy']) {
             $this->line($apply ? 'Corrected decimal-save amounts:' : 'Decimal-save amounts proposed for correction:');
-            $this->table(['SKU', 'Source rial', 'Current toman', 'Expected toman'], $report['legacy']);
+            $this->table($columns, $report['legacy']);
         }
         if ($report['review']) {
-            $this->table(['SKU', 'Source rial', 'Current toman', 'Expected toman'], $report['review']);
+            $this->table($columns, $report['review']);
         }
 
         return self::SUCCESS;

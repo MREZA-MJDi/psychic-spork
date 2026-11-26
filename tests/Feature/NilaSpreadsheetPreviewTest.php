@@ -168,6 +168,20 @@ class NilaSpreadsheetPreviewTest extends TestCase
         $this->artisan('nila:repair-rial-prices', $repair)
             ->expectsOutput('Would update: 0; already correct: 3; needs review: 0.')
             ->assertExitCode(0);
+
+        $restore = $repair + ['--source-is-toman' => true];
+        $this->artisan('nila:repair-rial-prices', $restore)
+            ->expectsOutput('Would update: 3; already correct: 0; needs review: 0.')
+            ->assertExitCode(0);
+        $this->assertEquals(215000, $variant->fresh()->price);
+
+        $this->artisan('nila:repair-rial-prices', $restore + ['--apply' => true])->assertExitCode(0);
+        $this->assertEquals(2150000, $variant->fresh()->price);
+        $this->assertEquals(9, $variant->fresh()->stock);
+        $this->artisan('nila:repair-rial-prices', $restore)
+            ->expectsOutput('Would update: 0; already correct: 3; needs review: 0.')
+            ->assertExitCode(0);
+        $this->artisan('nila:repair-rial-prices', $repair + ['--apply' => true])->assertExitCode(1);
     }
 
     public function test_admin_can_import_one_complete_product_group_without_publishing_it(): void
