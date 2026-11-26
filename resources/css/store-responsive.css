@@ -3764,35 +3764,6 @@ animation-duration:
     .customer-store .product-grid--related { grid-template-columns: minmax(0,1fr); }
 }
 
-/* Home category section uses content-width-aware wrapping without empty
-   grid tracks or oversized cards at intermediate mobile widths. */
-@media (max-width: 1100px) {
-    .home-collections__gallery .janan-category-grid--home[data-category-count] > .janan-category-card {
-        flex-basis: calc((100% - 44px) / 3);
-    }
-}
-@media (max-width: 820px) {
-    .home-page .home-collections--curated { padding-block: 26px; }
-    .home-collections__panel { padding: 18px; border-radius: 22px; }
-    .home-collections__gallery .janan-category-grid--home[data-category-count] > .janan-category-card {
-        flex-basis: calc((100% - 16px) / 2);
-    }
-}
-@media (max-width: 480px) {
-    .home-collections__panel { padding: 12px; border-radius: 17px; }
-    .home-collections__heading { gap: 12px; }
-    .home-collections__heading h2 { font-size: 24px; }
-    .home-collections__gallery { padding-block: 16px; }
-    .home-collections__gallery .janan-category-grid--home { gap: 8px; }
-    .home-collections__gallery .janan-category-grid--home[data-category-count] > .janan-category-card {
-        flex-basis: calc((100% - 8px) / 2);
-    }
-    .home-collections__browse { padding-inline: 12px; }
-}
-@media (max-width: 360px) {
-    .home-collections__gallery .janan-category-grid--home[data-category-count] > .janan-category-card { flex-basis: 100%; max-width: 260px; }
-}
-
 /* Contact remains part of the existing about route; anchor works with sticky header. */
 .contact-page--refined { scroll-margin-top:100px; background:#f4f6f7; }
 .contact-page--refined .contact-intro { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px; margin-bottom:22px; }

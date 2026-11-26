@@ -3091,5 +3091,17 @@ body.admin-nav-open {
 
 .admin-media-picker[data-category-cover] .admin-media-picker__stage { grid-template-columns: minmax(0,300px) minmax(0,1fr); align-items: center; }
 .admin-media-picker[data-category-cover] .admin-media-picker__editor[hidden] { display: none; }
-.admin-media-picker[data-category-cover] .admin-media-picker__editor canvas { aspect-ratio: 4 / 3; object-fit: contain; }
+.admin-media-picker[data-category-cover].is-cropping .admin-media-picker__stage { grid-template-columns: minmax(0, 1fr); }
+.admin-media-picker[data-category-cover].is-cropping [data-media-preview] { display: none; }
+.admin-media-picker[data-category-cover] .admin-media-picker__editor {
+    background: transparent;
+    border: 0;
+    padding: 0;
+}
+.admin-media-picker[data-category-cover] .admin-media-picker__editor canvas {
+    width: min(100%, 460px, 80vh);
+    max-height: none;
+    aspect-ratio: var(--media-ratio);
+    border-radius: 0;
+}
 @media (max-width:700px) { .admin-media-picker[data-category-cover] .admin-media-picker__stage { grid-template-columns: minmax(0,1fr); } }

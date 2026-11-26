@@ -76,11 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const fitButton = field.querySelector('[data-media-fit]');
         const categoryCover = field.hasAttribute('data-category-cover');
         const categoryStatus = field.querySelector('[data-category-crop-status]');
-        const categoryName = field.querySelector('[data-category-preview-name]');
-        const nameInput = categoryCover ? field.closest('form')?.querySelector('[name="name"]') : null;
-        nameInput?.addEventListener('input', () => { if (categoryName) categoryName.textContent = nameInput.value.trim() || 'نام دسته‌بندی'; });
-        let liveCanvas = null;
-        let previousPreview = null;
+        const originalPreview = categoryCover ? [...preview.childNodes] : [];
         let previewUrl = null;
         let loading = false;
         let selection = 0;
@@ -135,9 +131,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const y = (canvas.height - renderedHeight) / 2 + offsetY;
 
             ctx.drawImage(image, x, y, renderedWidth, renderedHeight);
-            if (categoryCover && liveCanvas) {
-                liveCanvas.getContext('2d').drawImage(canvas, 0, 0);
-            }
         };
 
         const openEditor = (src, name, token) => {
@@ -152,11 +145,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 loading = false;
                 image = candidate;
                 if (categoryCover) {
-                    if (!previousPreview) previousPreview = [...preview.childNodes];
-                    liveCanvas = document.createElement('canvas');
-                    liveCanvas.width = canvas.width; liveCanvas.height = canvas.height;
-                    liveCanvas.setAttribute('aria-label', 'پیش‌نمایش زنده کارت دسته‌بندی');
-                    preview.replaceChildren(liveCanvas);
                     if (categoryStatus) categoryStatus.textContent = image.naturalWidth < canvas.width || image.naturalHeight < canvas.height ? 'وضوح تصویر کم است؛ ممکن است خروجی تار شود.' : 'پیش‌نمایش زنده آماده است.';
                 }
                 offsetX = 0;
@@ -277,7 +265,6 @@ document.addEventListener('DOMContentLoaded', () => {
             previewUrl = URL.createObjectURL(input.files[0]);
             previewImage.src = previewUrl;
             preview.replaceChildren(previewImage);
-            liveCanvas = null;
             if (categoryStatus) categoryStatus.textContent = 'کادر اعمال شد؛ برای ثبت نهایی فرم را ذخیره کنید.';
             fileName.textContent = input.files[0].name;
             field.classList.remove('is-cropping');
@@ -291,7 +278,7 @@ document.addEventListener('DOMContentLoaded', () => {
             editor.hidden = true;
             field.classList.remove('is-cropping');
             input.value = '';
-            if (categoryCover && previousPreview) { preview.replaceChildren(...previousPreview); previousPreview = null; liveCanvas = null; }
+            if (categoryCover) preview.replaceChildren(...originalPreview);
             if (categoryStatus) categoryStatus.textContent = 'انتخاب تصویر لغو شد.';
         });
 
