@@ -65,10 +65,10 @@
             <div class="admin-field">
                 <label for="nila-price-unit">واحد قیمت فایل</label>
                 <select id="nila-price-unit" name="price_unit" required>
-                    <option value="rial" @selected(old('price_unit', 'rial') === 'rial')>ریال</option>
-                    <option value="toman" @selected(old('price_unit') === 'toman')>تومان</option>
+                    <option value="rial" @selected(old('price_unit') === 'rial')>ریال</option>
+                    <option value="toman" @selected(old('price_unit', 'toman') === 'toman')>تومان</option>
                 </select>
-                <p class="admin-help">جانان قیمت نهایی را به تومان ذخیره و نمایش می‌دهد.</p>
+                <p class="admin-help">برای حفظ عدد فایل، تومان را انتخاب کن. جانان قیمت را با رقم فارسی و جداکنندهٔ هزارگان نمایش می‌دهد.</p>
                 @error('price_unit')<div class="alert error">{{ $message }}</div>@enderror
             </div>
         </div>
