@@ -153,10 +153,8 @@
                             <section class="product-variant-visuals" aria-label="تصاویر واریانت‌ها">
                                 <div class="product-variant-visuals__head">
                                     <div>
-                                        <span class="eyebrow">VARIANTS / VISUAL</span>
-                                        <strong>تصویر مدل‌ها</strong>
+                                        <strong>انتخاب مدل</strong>
                                     </div>
-                                    <span>با انتخاب هر مدل، تصویر اصلی هم هماهنگ می‌شود.</span>
                                 </div>
 
                                 <div class="product-variant-visuals__grid">
@@ -245,7 +243,6 @@
                 >
                     <div class="product-detail-v2__purchase-head">
                         <div class="product-detail-v2__identity">
-                            <span class="eyebrow">JANAN / PRODUCT</span>
 
                             @if($product->brand)
                                 <a href="{{ route('brands.show', $product->brand) }}">
@@ -375,31 +372,6 @@
                         </div>
                     @endif
 
-                    <div class="product-buy-benefits product-buy-benefits--v2" aria-label="اطلاعات خرید">
-                        <div>
-                            <span>۰۱</span>
-                            <div>
-                                <strong>موجودی واقعی</strong>
-                                <small>وضعیت موجودی همین مدل نمایش داده می‌شود.</small>
-                            </div>
-                        </div>
-
-                        <div>
-                            <span>۰۲</span>
-                            <div>
-                                <strong>انتخاب مدل</strong>
-                                <small>قیمت و موجودی با تغییر مدل هماهنگ می‌شود.</small>
-                            </div>
-                        </div>
-
-                        <div>
-                            <span>۰۳</span>
-                            <div>
-                                <strong>خرید سریع</strong>
-                                <small>بعد از افزودن، سبد خرید از همان صفحه در دسترس است.</small>
-                            </div>
-                        </div>
-                    </div>
                 </aside>
 
             </div>

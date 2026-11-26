@@ -3,7 +3,8 @@
 @section('title', 'سبد خرید — ' . ($siteBrandNameLatin ?? 'Janan'))
 
 @section('content')
-<section class="page-hero page-hero--motion"><div class="container"><span class="eyebrow">JANAN / BAG</span><h1>سبد خرید</h1><p>سبد خرید فعلی شما.</p></div></section>
+<div class="cart-page">
+<section class="page-hero page-hero--motion"><div class="container"><h1>سبد خرید</h1></div></section>
 
 <section class="section-block">
 <div class="container">
@@ -22,7 +23,7 @@
         </div>
     </div>
 @if($items->isEmpty() && $packLines->isEmpty())
-    <div class="cart-empty reveal-up"><div class="cart-empty__ring">۰</div><span class="eyebrow">YOUR BAG / 00 ITEMS</span><h2>سبد خرید خالی است.</h2><a class="button button--primary" href="{{ route('products.index') }}">مشاهده کالکشن</a></div>
+    <div class="cart-empty reveal-up"><h2>سبد خرید خالی است.</h2><a class="button button--primary" href="{{ route('products.index') }}">مشاهده کالکشن</a></div>
 @else
 <div class="cart-layout">
 <div class="cart-items">
@@ -113,4 +114,5 @@
 @endif
 </div>
 </section>
+</div>
 @endsection
