@@ -43,28 +43,6 @@
          VALIDATION ERRORS
     ========================================================== --}}
 
-    @if($errors->any())
-
-        <div class="alert error">
-
-            <strong>
-                اطلاعات واردشده نیاز به بررسی دارد.
-            </strong>
-
-            <ul
-                style="
-                margin:8px 0 0;
-                padding-right:18px;
-            "
-            >
-                @foreach($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-
-        </div>
-
-    @endif
 
 
     {{-- =========================================================

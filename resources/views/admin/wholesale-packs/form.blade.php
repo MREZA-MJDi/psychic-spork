@@ -5,7 +5,7 @@
     $selected = $pack->exists
         ? $pack->items->keyBy('product_variant_id')
         : collect();
-    $oldItems = collect(old('items', []));
+    $oldItems = collect(old('items', []))->keyBy('variant_id');
 @endphp
 
 @section('title', $editing ? 'ویرایش پک عمده' : 'ساخت پک عمده')
@@ -22,16 +22,7 @@
         <a href="{{ route('admin.wholesale-packs.index') }}" class="admin-btn admin-btn--ghost">بازگشت به پک‌ها</a>
     </div>
 
-    @if(session('success'))
-        <div class="alert alert--success" role="status">{{ session('success') }}</div>
-    @endif
 
-    @if($errors->any())
-        <div class="alert error" role="alert">
-            <strong>چند مورد نیاز به اصلاح دارد:</strong>
-            <ul>@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>
-        </div>
-    @endif
 
     <form class="wholesale-pack-editor__form" method="POST" enctype="multipart/form-data" action="{{ $editing ? route('admin.wholesale-packs.update', $pack) : route('admin.wholesale-packs.store') }}" data-wholesale-pack-form data-lookup-url="{{ route('admin.variant-lookup', ['wholesale' => 1]) }}">
         @csrf
@@ -63,11 +54,12 @@
                         <small class="admin-help" id="pack-price-help">قیمت نهایی همهٔ اقلام داخل بسته است؛ با قیمت عمدهٔ هر قلم فرق دارد.</small>
                     </div>
 
-                    <div class="admin-field wholesale-pack-editor__slug">
+                    <details class="admin-field wholesale-pack-editor__slug" @if($errors->has('slug')) open @endif>
+                        <summary>تنظیمات آدرس بسته</summary>
                         <label for="slug">نامک پیوند <span class="wholesale-pack-editor__optional">اختیاری</span></label>
                         <input id="slug" name="slug" dir="ltr" value="{{ old('slug', $pack->slug) }}" placeholder="isabella-12-pack" aria-describedby="pack-slug-help">
                         <small class="admin-help" id="pack-slug-help">اگر خالی بماند، خودکار از نام بسته ساخته می‌شود.</small>
-                    </div>
+                    </details>
 
                     <div class="admin-field wholesale-pack-editor__description">
                         <label for="description">توضیح کوتاه برای مشتری <span class="wholesale-pack-editor__optional">اختیاری</span></label>
@@ -99,6 +91,7 @@
                             <small class="admin-help">عدد کمتر زودتر نمایش داده می‌شود.</small>
                         </div>
                         <label class="admin-checkbox wholesale-pack-editor__active">
+                            <input type="hidden" name="is_active" value="0">
                             <input type="checkbox" name="is_active" value="1" @checked(old('is_active', $editing ? $pack->is_active : true))>
                             <span><strong>نمایش در صفحهٔ خرید عمده</strong><small>خاموش‌کردن، پک را از دید مشتری پنهان می‌کند.</small></span>
                         </label>
@@ -112,7 +105,7 @@
                 <span class="wholesale-pack-editor__step">۲</span>
                 <div>
                     <h2 class="admin-card-title" id="pack-items-title">انتخاب اقلام بسته</h2>
-                    <p class="admin-card-description">هر رنگ و سایز جداگانه انتخاب می‌شود. تعداد کنار هر مورد یعنی از همان واریانت چند عدد در این پک باشد.</p>
+                    <p class="admin-card-description">محصول را پیدا کن، مدل موردنظر را انتخاب کن و تعداد آن را در بسته مشخص کن.</p>
                 </div>
             </header>
 
@@ -123,32 +116,35 @@
                     <p data-pack-price-status>بعد از انتخاب اقلام، جمع قیمت و تخفیف اینجا نمایش داده می‌شود.</p>
                 </div>
                 <div class="wholesale-pack-editor__selection-summary" aria-live="polite" data-pack-selection-summary>
-                    <div><strong data-pack-selected-count>۰</strong><span>واریانت انتخاب‌شده</span></div>
+                    <div><strong data-pack-selected-count>۰</strong><span>مدل انتخاب‌شده</span></div>
                     <div><strong data-pack-unit-count>۰</strong><span>تعداد کل داخل پک</span></div>
-                    <div class="wholesale-pack-editor__summary-note">برای ساخت پک، دست‌کم یک واریانت انتخاب کن.</div>
+                    <div class="wholesale-pack-editor__summary-note">برای ساخت پک، دست‌کم یک مدل انتخاب کن.</div>
                 </div>
 
                 <div class="wholesale-pack-editor__tools">
                     <label class="wholesale-pack-editor__search">
                         <span class="sr-only">جستجو در واریانت‌ها</span>
-                        <input id="variant-search" type="search" placeholder="جستجو بر اساس محصول، برند، SKU، رنگ یا سایز…" autocomplete="off" aria-describedby="variant-search-help">
-                        <small class="admin-help" id="variant-search-help">برای جلوگیری از بارگذاری یک‌جای کل کاتالوگ، هر بار حداکثر ۲۰ نتیجه نمایش داده می‌شود.</small>
+                        <input id="variant-search" type="search" placeholder="مثلاً ایزابلا مشکی یا ۰۹۰۲۱۰۷" autocomplete="off" aria-describedby="variant-search-help">
+                        <small class="admin-help" id="variant-search-help">با نوشتن نام، رنگ، سایز، برند یا کد کالا، پیشنهادها نمایش داده می‌شوند.</small>
                     </label>
                     <div class="wholesale-pack-editor__bulk-actions">
-                        <button type="button" class="admin-btn admin-btn--ghost admin-btn--sm" data-pack-select-visible>انتخاب موارد پیدا شده</button>
+                        <label class="admin-checkbox"><input type="checkbox" data-pack-in-stock> فقط مدل‌های موجود</label>
                         <button type="button" class="admin-btn admin-btn--ghost admin-btn--sm" data-pack-clear-all>پاک‌کردن انتخاب‌ها</button>
                     </div>
                 </div>
 
+                <p class="admin-help" role="status" data-pack-search-status>در حال دریافت مدل‌ها…</p>
+                <button type="button" class="admin-btn admin-btn--ghost" data-pack-search-retry hidden>تلاش دوباره</button>
+                <h3 class="admin-card-title">پیشنهادهای محصول</h3>
                 <div class="wholesale-pack-variant-list" data-pack-variant-list>
-                    @forelse($variants as $variant)
+                    @foreach($variants as $variant)
                         @php
                             $item = $selected->get($variant->id);
                             $oldItem = $oldItems->get((string) $variant->id, $oldItems->get($variant->id));
                             $isSelected = $oldItem !== null ? (string) data_get($oldItem, 'variant_id') === (string) $variant->id : (bool) $item;
                             $quantity = data_get($oldItem, 'quantity', $item?->quantity ?? 1);
                         @endphp
-                        <article class="wholesale-pack-variant" data-variant-row data-search="{{ \Illuminate\Support\Str::lower(($variant->product?->name ?? '') . ' ' . ($variant->product?->brand?->name ?? '') . ' ' . ($variant->sku ?? '') . ' ' . ($variant->size ?? '') . ' ' . ($variant->color ?? '')) }}">
+                        <article class="wholesale-pack-variant" hidden data-variant-row data-wholesale-price="{{ $variant->wholesale_price ?? '' }}">
                             <label class="wholesale-pack-variant__pick">
                                 <input type="checkbox" value="{{ $variant->id }}" data-pack-variant-toggle data-wholesale-price="{{ $variant->wholesale_price ?? '' }}" @checked($isSelected) @disabled($variant->wholesale_price === null && !$isSelected)>
                                 <span class="wholesale-pack-variant__copy">
@@ -161,20 +157,18 @@
                                     <small>قیمت عمدهٔ تکی: {{ $variant->wholesale_price !== null ? \App\Support\PersianNumber::format($variant->wholesale_price) . ' تومان' : 'ثبت نشده' }} <span aria-hidden="true">·</span> موجودی: {{ \App\Support\PersianNumber::format($variant->stock) }}</small>
                                 </span>
                             </label>
-                            <label class="wholesale-pack-variant__quantity">
-                                <span>تعداد در پک</span>
-                                <input class="wholesale-pack-qty" type="number" min="1" max="100000" value="{{ $quantity }}" @disabled(!$isSelected) data-pack-quantity aria-label="تعداد {{ $variant->product?->name }}، {{ $variant->display_name }}">
-                            </label>
+                            <input type="hidden" value="{{ is_scalar($quantity) ? $quantity : '' }}" data-pack-quantity>
                         </article>
-                    @empty
-                        <div class="admin-empty">
-                            <h3 class="admin-empty__title">واریانت فعالی پیدا نشد</h3>
-                            <p class="admin-empty__text">اول محصول و رنگ/سایزهای آن را فعال کن و برای واریانت‌ها قیمت عمده بگذار.</p>
-                        </div>
-                    @endforelse
+                    @endforeach
                 </div>
                 <div class="admin-pagination" data-pack-variant-pages hidden></div>
-                <p class="wholesale-pack-editor__no-results" data-pack-no-results hidden>با این عبارت موردی پیدا نشد؛ نام محصول، برند، رنگ یا سایز دیگری را جستجو کن.</p>
+                <p class="wholesale-pack-editor__no-results" data-pack-no-results hidden>مدل فعالی با قیمت عمده پیدا نشد. عبارت دیگری را امتحان کن یا فیلتر موجودی را بردار.</p>
+
+                <section class="pack-selected" aria-labelledby="pack-selected-title">
+                    <h3 class="admin-card-title" id="pack-selected-title">اقلام انتخاب‌شده</h3>
+                    <p class="admin-help" data-pack-selection-empty>هنوز مدلی انتخاب نشده است.</p>
+                    <ul class="pack-selected__list" data-pack-selected-list></ul>
+                </section>
                 @error('items')<p class="wholesale-pack-editor__items-error" role="alert">{{ $message }}</p>@enderror
             </div>
         </section>

@@ -3917,3 +3917,87 @@ body.admin-nav-open {
     .nila-progress-value { font-size: 18px; }
     .nila-file-field { padding: 14px; }
 }
+
+.admin-form-errors ul {
+    margin: 6px 0 0;
+    padding-inline-start: 24px;
+}
+
+.admin-advanced-field > summary,
+.wholesale-pack-editor__slug > summary {
+    cursor: pointer;
+    font-weight: 700;
+}
+
+.admin-advanced-field[open] > summary,
+.wholesale-pack-editor__slug[open] > summary {
+    margin-bottom: 8px;
+}
+
+.wholesale-pack-editor .wholesale-pack-variant {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.wholesale-pack-editor .wholesale-pack-variant__copy > strong,
+.pack-selected__item strong {
+    font-size: 14px;
+}
+
+.wholesale-pack-editor .wholesale-pack-variant__copy small,
+.wholesale-pack-editor .wholesale-pack-variant__meta,
+.wholesale-pack-editor .wholesale-pack-variant__meta code,
+.pack-selected__item small,
+.pack-selected__item label {
+    font-size: 12px;
+}
+
+.pack-selected {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--admin-border);
+}
+
+.pack-selected__list {
+    display: grid;
+    gap: 8px;
+    margin: 10px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.pack-selected__item {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 110px auto;
+    align-items: center;
+    gap: 12px;
+    padding: 10px;
+    border: 1px solid var(--admin-border);
+    border-radius: 10px;
+}
+
+.pack-selected__item small {
+    display: block;
+    color: var(--admin-muted);
+    overflow-wrap: anywhere;
+}
+
+.pack-selected__item label input {
+    width: 100%;
+}
+
+@media (max-width: 520px) {
+    .pack-selected__item { grid-template-columns: minmax(0, 1fr) 80px; }
+    .pack-selected__item > button { justify-self: start; }
+}
+
+.pack-list-filters {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) auto auto;
+    align-items: end;
+    gap: 10px;
+}
+
+@media (max-width: 640px) {
+    .pack-list-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .pack-list-filters .admin-field { grid-column: 1 / -1; }
+}

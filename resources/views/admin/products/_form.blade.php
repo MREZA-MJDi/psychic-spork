@@ -88,7 +88,8 @@
 
             {{-- Slug --}}
 
-            <div class="admin-field">
+            <details class="admin-field admin-advanced-field" @if($errors->has('slug')) open @endif>
+                <summary>تنظیمات آدرس صفحه</summary>
 
                 <label for="slug">
                     آدرس محصول
@@ -120,7 +121,7 @@
                     لازم نیست خودتان چیزی وارد کنید.
                 </small>
 
-            </div>
+            </details>
 
 
             {{-- Category --}}
@@ -487,7 +488,7 @@
                 </div>
 
                 <small class="admin-help">
-                    لازم نیست کاربر کد کالا بلد باشد.
+                    اگر کد کالا نداری، این فیلد را خالی بگذار تا خودکار ساخته شود.
                 </small>
 
             </div>

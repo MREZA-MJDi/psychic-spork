@@ -1136,6 +1136,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const list = document.querySelector('[data-pack-variant-list]');
         const pager = document.querySelector('[data-pack-variant-pages]');
         const form = document.querySelector('[data-wholesale-pack-form]');
+        const selectedList = form?.querySelector('[data-pack-selected-list]');
+        const selectedEmpty = form?.querySelector('[data-pack-selection-empty]');
+        const searchStatus = form?.querySelector('[data-pack-search-status]');
+        const retrySearch = form?.querySelector('[data-pack-search-retry]');
+        const stockFilter = form?.querySelector('[data-pack-in-stock]');
         const rows = [...document.querySelectorAll('[data-variant-row]')];
         const selectedCount = document.querySelector('[data-pack-selected-count]');
         const unitCount = document.querySelector('[data-pack-unit-count]');
@@ -1166,13 +1171,64 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!list || !form) return;
 
         const selectedVariants = new Map();
+        const selectRow = (row, checkbox, quantity) => {
+            selectedVariants.set(checkbox.value, {
+                quantity: Number.parseInt(quantity?.value || '1', 10),
+                unitPrice: Number(row.dataset.wholesalePrice || 0),
+                name: row.querySelector('.wholesale-pack-variant__copy > strong')?.textContent.trim() || 'محصول',
+                detail: row.querySelector('.wholesale-pack-variant__meta')?.textContent.trim().replace(/\s+/g, ' ') || '',
+            });
+        };
+
         rows.forEach((row) => {
             const checkbox = row.querySelector('[data-pack-variant-toggle]');
-            const quantity = row.querySelector('[data-pack-quantity]');
-            if (checkbox?.checked) {
-                selectedVariants.set(checkbox.value, { quantity: Math.max(1, Number.parseInt(quantity?.value || '1', 10) || 1), unitPrice: Number(row.dataset.wholesalePrice || 0) });
-            }
+            if (checkbox?.checked) selectRow(row, checkbox, row.querySelector('[data-pack-quantity]'));
         });
+
+        const renderSelection = () => {
+            selectedList.replaceChildren();
+            selectedEmpty.hidden = selectedVariants.size > 0;
+
+            selectedVariants.forEach((item, id) => {
+                const entry = document.createElement('li');
+                entry.className = 'pack-selected__item';
+                const copy = document.createElement('div');
+                const name = document.createElement('strong');
+                const detail = document.createElement('small');
+                name.textContent = item.name;
+                detail.textContent = item.detail;
+                copy.append(name, detail);
+
+                const label = document.createElement('label');
+                label.textContent = 'تعداد در بسته';
+                const quantity = document.createElement('input');
+                quantity.type = 'number';
+                quantity.min = '1';
+                quantity.max = '100000';
+                quantity.required = true;
+                quantity.value = Number.isFinite(item.quantity) ? String(item.quantity) : '';
+                quantity.setAttribute('aria-label', `تعداد ${item.name}، ${item.detail}`);
+                quantity.addEventListener('input', () => {
+                    item.quantity = Number.parseInt(quantity.value, 10);
+                    refresh(false);
+                });
+                label.append(quantity);
+
+                const remove = document.createElement('button');
+                remove.type = 'button';
+                remove.className = 'admin-btn admin-btn--ghost admin-btn--sm';
+                remove.textContent = 'برداشتن';
+                remove.setAttribute('aria-label', `برداشتن ${item.name}، ${item.detail}`);
+                remove.addEventListener('click', () => {
+                    selectedVariants.delete(id);
+                    refresh();
+                    search.focus();
+                });
+
+                entry.append(copy, label, remove);
+                selectedList.append(entry);
+            });
+        };
 
         const renderRow = (variant) => {
             const id = String(variant.id);
@@ -1180,7 +1236,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const row = document.createElement('article');
             row.className = 'wholesale-pack-variant';
             row.dataset.variantRow = '';
-            row.dataset.search = [variant.name, variant.brand, variant.sku, variant.size, variant.color].join(' ').toLowerCase();
             row.dataset.wholesalePrice = variant.wholesale_price === null ? '' : String(variant.wholesale_price);
             const pick = document.createElement('label');
             pick.className = 'wholesale-pack-variant__pick';
@@ -1198,20 +1253,18 @@ document.addEventListener('DOMContentLoaded', () => {
             const detail = document.createElement('small');
             detail.textContent = `قیمت عمدهٔ تکی: ${variant.wholesale_price === null ? 'ثبت نشده' : `${new Intl.NumberFormat('fa-IR').format(Number(variant.wholesale_price))} تومان`} · موجودی: ${new Intl.NumberFormat('fa-IR').format(variant.stock)}`;
             copy.append(name, meta, detail); pick.append(checkbox, copy);
-            const qtyLabel = document.createElement('label'); qtyLabel.className = 'wholesale-pack-variant__quantity';
-            const qtyLabelText = document.createElement('span'); qtyLabelText.textContent = 'تعداد در پک';
-            const quantity = document.createElement('input'); quantity.className = 'wholesale-pack-qty'; quantity.type = 'number'; quantity.min = '1'; quantity.max = '100000'; quantity.value = String(selected?.quantity || 1); quantity.disabled = !selected || checkbox.disabled; quantity.dataset.packQuantity = '';
-            quantity.setAttribute('aria-label', `تعداد ${variant.name}، ${variant.display_name}`);
-            qtyLabel.append(qtyLabelText, quantity); row.append(pick, qtyLabel);
+            row.append(pick);
             checkbox.addEventListener('change', () => {
-                if (checkbox.checked) selectedVariants.set(id, { quantity: Math.max(1, Number.parseInt(quantity.value || '1', 10) || 1), unitPrice: Number(row.dataset.wholesalePrice || 0) });
-                else selectedVariants.delete(id);
-                quantity.disabled = !checkbox.checked;
-                if (checkbox.checked && Number(quantity.value || 0) < 1) quantity.value = '1';
-                refresh();
-            });
-            quantity.addEventListener('input', () => {
-                if (checkbox.checked) selectedVariants.set(id, { quantity: Math.max(1, Number.parseInt(quantity.value || '1', 10) || 1), unitPrice: Number(row.dataset.wholesalePrice || 0) });
+                if (checkbox.checked) {
+                    if (selectedVariants.size >= 60) {
+                        checkbox.checked = false;
+                        searchStatus.textContent = 'برای هر پک حداکثر ۶۰ مدل می‌توان انتخاب کرد.';
+                        return;
+                    }
+                    selectRow(row, checkbox);
+                } else {
+                    selectedVariants.delete(id);
+                }
                 refresh();
             });
             return row;
@@ -1222,38 +1275,60 @@ document.addEventListener('DOMContentLoaded', () => {
         let searchTimer;
         let searchController;
         const loadPage = async (next = false) => {
-            searchController?.abort(); searchController = new AbortController();
+            searchController?.abort();
+            const controller = new AbortController();
+            searchController = controller;
+            searchStatus.textContent = 'در حال جستجو…';
+            retrySearch.hidden = true;
+            if (pager) pager.hidden = true;
             const targetPage = next ? page + 1 : 1;
             const url = new URL(form.dataset.lookupUrl, window.location.origin);
             url.searchParams.set('q', search?.value.trim() || '');
             url.searchParams.set('page', String(targetPage));
+            if (stockFilter.checked) url.searchParams.set('in_stock', '1');
             try {
-                const response = await fetch(url, { headers: { Accept: 'application/json' }, signal: searchController.signal });
-                if (!response.ok) return;
+                const response = await fetch(url, { headers: { Accept: 'application/json' }, signal: controller.signal });
+                if (!response.ok) throw new Error('Lookup failed');
                 const payload = await response.json();
+                if (controller.signal.aborted) return;
                 if (!next) list.replaceChildren();
                 payload.data.forEach((variant) => list.append(renderRow(variant)));
                 page = targetPage; hasNext = Boolean(payload.next_page_url);
                 if (pager) {
                     pager.replaceChildren(); pager.hidden = !hasNext;
                     if (hasNext) {
-                        const button = document.createElement('button'); button.type = 'button'; button.className = 'admin-btn admin-btn--ghost admin-btn--sm'; button.textContent = 'واریانت‌های بعدی';
+                        const button = document.createElement('button'); button.type = 'button'; button.className = 'admin-btn admin-btn--ghost admin-btn--sm'; button.textContent = 'نمایش مدل‌های بیشتر';
                         button.addEventListener('click', () => loadPage(true)); pager.append(button);
                     }
                 }
-                refresh();
-            } catch (error) { if (error.name !== 'AbortError') console.error('Wholesale variant lookup failed', error); }
+                searchStatus.textContent = payload.data.length
+                    ? `${digits.format(list.querySelectorAll('[data-variant-row]').length)} مدل نمایش داده شده`
+                    : 'نتیجه‌ای پیدا نشد.';
+                refresh(false);
+            } catch (error) {
+                if (controller.signal.aborted || error.name === 'AbortError') return;
+                if (!next) list.replaceChildren();
+                searchStatus.textContent = 'دریافت پیشنهادها انجام نشد.';
+                retrySearch.hidden = false;
+                noResults.hidden = true;
+            }
         };
 
-        const refresh = () => {
+        const refresh = (updateSelection = true) => {
             let selected = selectedVariants.size;
-            let units = [...selectedVariants.values()].reduce((sum, item) => sum + item.quantity, 0);
-            let baseTotal = [...selectedVariants.values()].reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
+            let units = [...selectedVariants.values()].reduce((sum, item) => sum + (item.quantity || 0), 0);
+            let baseTotal = [...selectedVariants.values()].reduce((sum, item) => sum + ((item.quantity || 0) * item.unitPrice), 0);
             let requestedPackPrice = Number(normalizeMoney(packPriceInput?.value)) || 0;
             let discount = baseTotal - requestedPackPrice;
             let visible = 0;
 
-            list.querySelectorAll('[data-variant-row]').forEach((row) => { const checkbox = row.querySelector('[data-pack-variant-toggle]'); row.classList.toggle('is-selected', Boolean(checkbox?.checked)); visible += 1; });
+            list.querySelectorAll('[data-variant-row]').forEach((row) => {
+                const checkbox = row.querySelector('[data-pack-variant-toggle]');
+                checkbox.checked = selectedVariants.has(checkbox.value);
+                row.classList.toggle('is-selected', checkbox.checked);
+                visible++;
+            });
+            if (updateSelection) renderSelection();
 
             if (selectedCount) selectedCount.textContent = digits.format(selected);
             if (unitCount) unitCount.textContent = digits.format(units);
@@ -1279,37 +1354,31 @@ document.addEventListener('DOMContentLoaded', () => {
             if (noResults) noResults.hidden = visible !== 0;
         };
 
-        search?.addEventListener('input', () => { clearTimeout(searchTimer); searchTimer = setTimeout(() => loadPage(false), 250); });
-
-        document.querySelector('[data-pack-select-visible]')?.addEventListener('click', () => {
-            list.querySelectorAll('[data-variant-row]').forEach((row) => {
-                const checkbox = row.querySelector('[data-pack-variant-toggle]');
-                const quantity = row.querySelector('[data-pack-quantity]');
-                if (!checkbox || checkbox.disabled) return;
-                checkbox.checked = true;
-                selectedVariants.set(checkbox.value, { quantity: Math.max(1, Number.parseInt(quantity?.value || '1', 10) || 1), unitPrice: Number(row.dataset.wholesalePrice || 0) });
-                if (quantity) {
-                    quantity.disabled = false;
-                    if (Number(quantity.value || 0) < 1) quantity.value = '1';
-                }
-            });
-            refresh();
+        search.addEventListener('input', () => {
+            clearTimeout(searchTimer);
+            searchController?.abort();
+            if (pager) pager.hidden = true;
+            searchTimer = setTimeout(() => loadPage(false), 220);
         });
-
+        stockFilter.addEventListener('change', () => {
+            clearTimeout(searchTimer);
+            loadPage(false);
+        });
+        retrySearch.addEventListener('click', () => loadPage(false));
         document.querySelector('[data-pack-clear-all]')?.addEventListener('click', () => {
             selectedVariants.clear();
-            list.querySelectorAll('[data-variant-row]').forEach((row) => {
-                const checkbox = row.querySelector('[data-pack-variant-toggle]');
-                const quantity = row.querySelector('[data-pack-quantity]');
-                if (checkbox) checkbox.checked = false;
-                if (quantity) quantity.disabled = true;
-            });
             refresh();
         });
 
-        packPriceInput?.addEventListener('input', refresh);
+        packPriceInput?.addEventListener('input', () => refresh(false));
         form.addEventListener('submit', (event) => {
-            refresh();
+            refresh(false);
+            if (!selectedVariants.size) {
+                event.preventDefault();
+                searchStatus.textContent = 'دست‌کم یک مدل برای بسته انتخاب کن.';
+                search.focus();
+                return;
+            }
             if (packPriceInput?.validationMessage) {
                 event.preventDefault();
                 packPriceInput.reportValidity();

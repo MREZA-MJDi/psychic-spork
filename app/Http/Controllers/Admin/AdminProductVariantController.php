@@ -7,6 +7,7 @@ use App\Http\Requests\Admin\StoreProductVariantRequest;
 use App\Http\Requests\Admin\UpdateProductVariantRequest;
 use App\Models\Product;
 use App\Models\ProductVariant;
+use App\Support\NumericInput;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -19,25 +20,45 @@ class AdminProductVariantController extends Controller
 {
     public function lookup(Request $request): JsonResponse
     {
-        $term = trim((string) $request->query('q', ''));
+        $filters = $request->validate([
+            'q' => ['nullable', 'string', 'max:120'],
+            'in_stock' => ['sometimes', 'boolean'],
+        ]);
+        $term = trim($filters['q'] ?? '');
+        $normalizedSku = NumericInput::normalize($term);
+        $terms = preg_split('/[\s\x{200c}]+/u', $term, 8, PREG_SPLIT_NO_EMPTY);
+
 
         $variants = ProductVariant::query()
             ->with(['product:id,name,slug,brand_id', 'product.brand:id,name'])
             ->where('is_active', true)
             ->whereHas('product', fn ($query) => $query->where('is_active', true))
             ->when($request->boolean('wholesale'), fn ($query) => $query->whereNotNull('wholesale_price'))
-            ->when($term !== '', function ($query) use ($term): void {
-                $query->where(function ($query) use ($term): void {
-                    $query->where('sku', 'like', "%{$term}%")
-                        ->orWhere('color', 'like', "%{$term}%")
-                        ->orWhere('size', 'like', "%{$term}%")
-                        ->orWhereHas('product', function ($product) use ($term): void {
-                            $product->where('name', 'like', "%{$term}%")
-                                ->orWhere('slug', 'like', "%{$term}%")
-                                ->orWhereHas('brand', fn ($brand) => $brand->where('name', 'like', "%{$term}%"));
-                        });
-                });
+            ->when($request->boolean('in_stock'), fn ($query) => $query->where('stock', '>', 0))
+            ->when($terms, function ($query) use ($terms): void {
+                foreach ($terms as $word) {
+                    $spellings = array_unique([
+                        $word,
+                        strtr($word, ['ي' => 'ی', 'ك' => 'ک']),
+                        strtr($word, ['ی' => 'ي', 'ک' => 'ك']),
+                        NumericInput::normalize($word),
+                    ]);
+
+                    $query->where(function ($query) use ($spellings): void {
+                        foreach ($spellings as $spelling) {
+                            $match = "%{$spelling}%";
+                            $query->orWhere('sku', 'like', $match)
+                                ->orWhere('color', 'like', $match)
+                                ->orWhere('size', 'like', $match)
+                                ->orWhereHas('product', fn ($product) => $product
+                                    ->where('name', 'like', $match)
+                                    ->orWhere('slug', 'like', $match)
+                                    ->orWhereHas('brand', fn ($brand) => $brand->where('name', 'like', $match)));
+                        }
+                    });
+                }
             })
+            ->when($term !== '', fn ($query) => $query->orderByRaw('CASE WHEN sku = ? THEN 0 ELSE 1 END', [$normalizedSku]))
             ->orderBy('product_id')
             ->orderBy('sort_order')
             ->orderBy('id')
