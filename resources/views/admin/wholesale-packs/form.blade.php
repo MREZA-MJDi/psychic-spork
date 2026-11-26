@@ -24,7 +24,7 @@
 
 
 
-    <form class="wholesale-pack-editor__form" method="POST" enctype="multipart/form-data" action="{{ $editing ? route('admin.wholesale-packs.update', $pack) : route('admin.wholesale-packs.store') }}" data-wholesale-pack-form data-lookup-url="{{ route('admin.variant-lookup', ['wholesale' => 1]) }}">
+    <form class="wholesale-pack-editor__form" method="POST" enctype="multipart/form-data" action="{{ $editing ? route('admin.wholesale-packs.update', $pack) : route('admin.wholesale-packs.store') }}" data-wholesale-pack-form data-lookup-url="{{ route('admin.variant-lookup', ['pack' => 1]) }}">
         @csrf
         @if($editing) @method('PUT') @endif
 
@@ -162,7 +162,7 @@
                     @endforeach
                 </div>
                 <div class="admin-pagination" data-pack-variant-pages hidden></div>
-                <p class="wholesale-pack-editor__no-results" data-pack-no-results hidden>مدل فعالی با قیمت عمده پیدا نشد. عبارت دیگری را امتحان کن یا فیلتر موجودی را بردار.</p>
+                <p class="wholesale-pack-editor__no-results" data-pack-no-results hidden>مدلی با این عبارت پیدا نشد. بخشی از نام یا کد کالا را امتحان کن یا فیلتر موجودی را بردار.</p>
 
                 <section class="pack-selected" aria-labelledby="pack-selected-title">
                     <h3 class="admin-card-title" id="pack-selected-title">اقلام انتخاب‌شده</h3>

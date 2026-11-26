@@ -145,6 +145,13 @@ class AdminControlCenterTest extends TestCase
         $this->getJson(route('admin.variant-lookup', ['q' => 'JAN-LOOKUP-۱', 'wholesale' => 1]))
             ->assertOk()
             ->assertJsonPath('data.0.sku', 'JAN-LOOKUP-1');
+
+        $this->getJson(route('admin.variant-lookup', ['q' => 'ایزا', 'pack' => 1]))
+            ->assertOk()
+            ->assertJsonCount(20, 'data')
+            ->assertJsonPath('data.0.pack_block_reason', null)
+            ->assertJsonPath('data.1.pack_block_reason', 'قیمت عمده ثبت نشده است.')
+            ->assertJsonStructure(['data' => [['edit_url', 'product_edit_url']]]);
     }
 
     public function test_suspending_wholesale_profile_does_not_revoke_cheque_permission(): void

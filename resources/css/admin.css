@@ -4001,3 +4001,43 @@ body.admin-nav-open {
     .pack-list-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .pack-list-filters .admin-field { grid-column: 1 / -1; }
 }
+
+.pack-variant-block {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+    padding-inline-start: 28px;
+    font-size: 12px;
+    color: var(--admin-text-soft);
+}
+
+.pack-variant-block a {
+    font-weight: 700;
+    text-decoration: underline;
+}
+
+.wholesale-pack-price-summary {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px 16px;
+    margin-bottom: 16px;
+    padding: 12px 14px;
+    border: 1px solid var(--admin-border);
+    border-radius: 12px;
+    background: var(--admin-surface-soft);
+}
+
+.wholesale-pack-price-summary > div {
+    display: grid;
+    gap: 4px;
+    font-size: 13px;
+}
+
+.wholesale-pack-price-summary > p {
+    grid-column: 1 / -1;
+    margin: 0;
+    font-size: 12px;
+    color: var(--admin-muted);
+}
+
+.wholesale-pack-price-summary > p.is-error { color: var(--admin-danger); }

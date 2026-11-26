@@ -1242,7 +1242,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox'; checkbox.value = id; checkbox.dataset.packVariantToggle = '';
             checkbox.checked = Boolean(selected);
-            checkbox.disabled = variant.wholesale_price === null && !selected;
+            checkbox.disabled = Boolean(variant.pack_block_reason) || variant.wholesale_price === null;
             const copy = document.createElement('span'); copy.className = 'wholesale-pack-variant__copy';
             const name = document.createElement('strong'); name.textContent = variant.name;
             const meta = document.createElement('span'); meta.className = 'wholesale-pack-variant__meta';
@@ -1254,6 +1254,19 @@ document.addEventListener('DOMContentLoaded', () => {
             detail.textContent = `قیمت عمدهٔ تکی: ${variant.wholesale_price === null ? 'ثبت نشده' : `${new Intl.NumberFormat('fa-IR').format(Number(variant.wholesale_price))} تومان`} · موجودی: ${new Intl.NumberFormat('fa-IR').format(variant.stock)}`;
             copy.append(name, meta, detail); pick.append(checkbox, copy);
             row.append(pick);
+            if (variant.pack_block_reason) {
+                const note = document.createElement('div');
+                note.className = 'pack-variant-block';
+                const reason = document.createElement('span');
+                reason.textContent = variant.pack_block_reason;
+                const edit = document.createElement('a');
+                edit.href = variant.product_active ? variant.edit_url : variant.product_edit_url;
+                edit.target = '_blank';
+                edit.rel = 'noopener';
+                edit.textContent = variant.product_active ? 'ویرایش مدل' : 'ویرایش محصول';
+                note.append(reason, edit);
+                row.append(note);
+            }
             checkbox.addEventListener('change', () => {
                 if (checkbox.checked) {
                     if (selectedVariants.size >= 60) {
