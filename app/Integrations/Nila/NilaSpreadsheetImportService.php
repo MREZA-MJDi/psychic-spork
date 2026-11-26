@@ -106,6 +106,7 @@ final class NilaSpreadsheetImportService
                 $file = Storage::disk($state['disk'])->path($state['path']);
                 $parsed = $this->parser->parse($file);
             }
+            $priceUnit = SpreadsheetPriceUnit::forBatch($state['metadata']);
             $groups = $parsed['groups'];
             $totalGroups = count($groups);
             $offset = (int) $state['offset'];
@@ -155,7 +156,7 @@ final class NilaSpreadsheetImportService
                         fn (array $row) => new ExternalVariantData(
                             externalId: $row['holoo_code'],
                             sku: $row['holoo_code'],
-                            price: (float) $row['price'],
+                            price: $priceUnit->toToman((float) $row['price']),
                             stock: (int) $row['stock'],
                             color: $row['color_candidate'],
                             metadata: [

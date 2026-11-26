@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Integrations\Nila\NilaSpreadsheetParser;
+use App\Integrations\Nila\SpreadsheetPriceUnit;
 use App\Integrations\Nila\NilaImportPreviewService;
 use App\Jobs\RunNilaSpreadsheetImport;
 use App\Models\IntegrationMapping;
@@ -52,6 +53,7 @@ class AdminNilaController extends Controller
     {
         $validated = $request->validate([
             'file' => ['required', 'file', 'max:10240', 'mimes:xls,xlsx,csv,txt'],
+            'price_unit' => ['sometimes', 'required', 'in:rial,toman'],
         ], [], [
             'file' => 'فایل اکسل یا CSV',
         ]);
@@ -101,6 +103,7 @@ class AdminNilaController extends Controller
             'created_by' => $request->user()?->id,
             'metadata' => [
                 'extension' => $extension,
+                'price_unit' => $validated['price_unit'] ?? SpreadsheetPriceUnit::Toman->value,
                 'preview_only' => true,
             ],
         ]);
@@ -265,8 +268,18 @@ class AdminNilaController extends Controller
             'نسخه ذخیره‌شده پیش‌نمایش معتبر نیست.'
         );
 
+        $priceUnit = SpreadsheetPriceUnit::forBatch($metadata);
+        $parsed['rows'] = array_map(static function (array $row) use ($priceUnit): array {
+            if ($row['price'] !== null) {
+                $row['price'] = $priceUnit->toToman((float) $row['price']);
+            }
+
+            return $row;
+        }, $parsed['rows']);
+
         return view('admin.nila.preview', [
             'batch' => $batch,
+            'priceUnit' => $priceUnit,
             'groups' => $this->paginateArray($parsed['groups'], 50, 'groups_page', $request),
             'rows' => $this->paginateArray($parsed['rows'], 100, 'rows_page', $request),
             'failedProducts' => $batch->metadata['failed_products'] ?? [],

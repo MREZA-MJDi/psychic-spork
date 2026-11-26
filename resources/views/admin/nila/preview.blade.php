@@ -13,7 +13,7 @@
     <div>
         <span class="nila-step-label">گزارش و کنترل پایلوت</span>
         <h1 class="admin-page-head__title">گزارش بررسی فایل</h1>
-        <p class="admin-page-head__text">{{ $batch->original_name }}</p>
+        <p class="admin-page-head__text">{{ $batch->original_name }} · واحد قیمت فایل: {{ $priceUnit->value === 'rial' ? 'ریال' : 'تومان' }}</p>
     </div>
     <a class="admin-btn admin-btn--ghost" href="{{ route('admin.nila.index') }}">بازگشت به نیلا</a>
 </div>
@@ -237,7 +237,7 @@
                 <th>کد کامل هولو / SKU</th>
                 <th>نام اصلی در فایل</th>
                 <th>رنگ احتمالی</th>
-                <th>قیمت</th>
+                <th>قیمت نهایی (تومان)</th>
                 <th>موجودی</th>
                 <th>نتیجه بررسی</th>
             </tr>
@@ -249,7 +249,7 @@
                     <td>{{ $row['holoo_code'] }}</td>
                     <td>{{ $row['holoo_name'] }}</td>
                     <td>{{ $row['color_candidate'] ?: '—' }}</td>
-                    <td>{{ $row['price'] === null ? 'خالی / نامعتبر' : \App\Support\PersianNumber::format($row['price']) }}</td>
+                    <td>{{ $row['price'] === null ? 'خالی / نامعتبر' : \App\Support\PersianNumber::format($row['price'], floor($row['price']) === (float) $row['price'] ? 0 : 2) }}</td>
                     <td>{{ $row['stock'] === null ? 'نامعتبر' : \App\Support\PersianNumber::format($row['stock']) }}</td>
                     <td>
                         @if($row['is_valid'])

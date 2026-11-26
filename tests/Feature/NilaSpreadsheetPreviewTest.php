@@ -153,10 +153,14 @@ class NilaSpreadsheetPreviewTest extends TestCase
 
         $this->actingAs($admin)->post(
             route('admin.nila.imports.store'),
-            ['file' => UploadedFile::fake()->createWithContent('holoo.csv', $csv)]
+            ['file' => UploadedFile::fake()->createWithContent('holoo.csv', $csv), 'price_unit' => 'rial']
         )->assertRedirect();
 
         $batch = NilaImportBatch::query()->firstOrFail();
+
+        $this->get(route('admin.nila.imports.show', $batch))
+            ->assertOk()
+            ->assertSee('۲۱۵٬۰۰۰');
 
         $this->actingAs($admin)->post(
             route('admin.nila.imports.import', $batch),
@@ -178,7 +182,7 @@ class NilaSpreadsheetPreviewTest extends TestCase
             'product_id' => $product->id,
             'sku' => '0102001*1',
             'color' => 'بادمجونی',
-            'price' => 2150000,
+            'price' => 215000,
             'stock' => 4,
             'is_active' => false,
         ]);
@@ -187,7 +191,7 @@ class NilaSpreadsheetPreviewTest extends TestCase
             'product_id' => $product->id,
             'sku' => '0102001*2',
             'color' => 'طوسی',
-            'price' => 2150000,
+            'price' => 215000,
             'stock' => 0,
             'is_active' => false,
         ]);

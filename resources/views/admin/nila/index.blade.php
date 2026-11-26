@@ -62,6 +62,15 @@
                     <div class="alert error">{{ $message }}</div>
                 @enderror
             </div>
+            <div class="admin-field">
+                <label for="nila-price-unit">واحد قیمت فایل</label>
+                <select id="nila-price-unit" name="price_unit" required>
+                    <option value="rial" @selected(old('price_unit', 'rial') === 'rial')>ریال</option>
+                    <option value="toman" @selected(old('price_unit') === 'toman')>تومان</option>
+                </select>
+                <p class="admin-help">جانان قیمت نهایی را به تومان ذخیره و نمایش می‌دهد.</p>
+                @error('price_unit')<div class="alert error">{{ $message }}</div>@enderror
+            </div>
         </div>
         <div class="admin-form-actions nila-upload-actions">
             <span class="nila-safe-note">بارگذاری فایل فقط گزارش می‌سازد و هیچ محصولی را ثبت یا تغییر نمی‌دهد.</span>

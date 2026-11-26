@@ -107,7 +107,7 @@ after fixing the issue.
 ## Excel or CSV import
 
 1. Upload the XLS, XLSX, or CSV export at `/admin/nila`. The file is limited to 10 MiB and can omit product images. The preview groups inventory rows into products and identifies invalid rows before any catalog writes. Fill missing prices in Holoo or the export and upload it again. A group with an invalid variant is skipped in full.
-2. Review the grouping, SKU, price unit and stock. Treat the file's stock quantities as a snapshot. Import from a current export so that a stale quantity does not replace live stock.
+2. Select the price unit during upload. A rial amount is divided by 10 once before storage, and the preview shows the resulting toman amount. Existing batches keep their original interpretation. Review the grouping, SKU, price and stock. Treat the file's stock quantities as a snapshot. Import from a current export so that a stale quantity does not replace live stock.
 3. For a small pilot, use the admin controls with the database queue worker running. Set `DB_QUEUE_RETRY_AFTER=360` to allow the spreadsheet job's 300-second timeout to expire before another worker can reserve it.
 4. For a large catalog, use the same reviewed upload with the CLI. Replace `42` with the batch ID from the preview URL.
 
