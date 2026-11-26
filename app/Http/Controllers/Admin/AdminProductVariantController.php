@@ -23,17 +23,20 @@ class AdminProductVariantController extends Controller
         $filters = $request->validate([
             'q' => ['nullable', 'string', 'max:120'],
             'in_stock' => ['sometimes', 'boolean'],
+            'pack' => ['sometimes', 'boolean'],
         ]);
         $term = trim($filters['q'] ?? '');
+        $packLookup = $request->boolean('pack');
         $normalizedSku = NumericInput::normalize($term);
         $terms = preg_split('/[\s\x{200c}]+/u', $term, 8, PREG_SPLIT_NO_EMPTY);
 
 
         $variants = ProductVariant::query()
-            ->with(['product:id,name,slug,brand_id', 'product.brand:id,name'])
-            ->where('is_active', true)
-            ->whereHas('product', fn ($query) => $query->where('is_active', true))
-            ->when($request->boolean('wholesale'), fn ($query) => $query->whereNotNull('wholesale_price'))
+            ->with(['product:id,name,slug,brand_id,is_active', 'product.brand:id,name'])
+            ->whereHas('product')
+            ->when(!$packLookup, fn ($query) => $query->where('is_active', true)
+                ->whereHas('product', fn ($product) => $product->where('is_active', true)))
+            ->when(!$packLookup && $request->boolean('wholesale'), fn ($query) => $query->whereNotNull('wholesale_price'))
             ->when($request->boolean('in_stock'), fn ($query) => $query->where('stock', '>', 0))
             ->when($terms, function ($query) use ($terms): void {
                 foreach ($terms as $word) {
@@ -59,6 +62,7 @@ class AdminProductVariantController extends Controller
                 }
             })
             ->when($term !== '', fn ($query) => $query->orderByRaw('CASE WHEN sku = ? THEN 0 ELSE 1 END', [$normalizedSku]))
+            ->when($packLookup, fn ($query) => $query->orderByRaw('CASE WHEN is_active = 1 AND wholesale_price IS NOT NULL THEN 0 ELSE 1 END'))
             ->orderBy('product_id')
             ->orderBy('sort_order')
             ->orderBy('id')
@@ -66,7 +70,7 @@ class AdminProductVariantController extends Controller
             ->withQueryString();
 
         return response()->json([
-            'data' => $variants->getCollection()->map(fn (ProductVariant $variant): array => [
+            'data' => $variants->getCollection()->filter(fn (ProductVariant $variant) => $variant->product !== null)->map(fn (ProductVariant $variant): array => [
                 'id' => $variant->id,
                 'name' => $variant->product?->name ?? 'محصول',
                 'brand' => $variant->product?->brand?->name ?? 'بدون برند',
@@ -76,6 +80,17 @@ class AdminProductVariantController extends Controller
                 'display_name' => $variant->display_name,
                 'stock' => (int) $variant->stock,
                 'wholesale_price' => $variant->wholesale_price,
+                ...($packLookup ? [
+                    'pack_block_reason' => match (true) {
+                        !$variant->product->is_active => 'محصول غیرفعال است.',
+                        !$variant->is_active => 'این مدل غیرفعال است.',
+                        $variant->wholesale_price === null => 'قیمت عمده ثبت نشده است.',
+                        default => null,
+                    },
+                    'edit_url' => route('admin.products.variants.edit', [$variant->product, $variant]),
+                    'product_edit_url' => route('admin.products.edit', $variant->product),
+                    'product_active' => $variant->product->is_active,
+                ] : []),
             ])->values(),
             'next_page_url' => $variants->nextPageUrl(),
             'current_page' => $variants->currentPage(),
