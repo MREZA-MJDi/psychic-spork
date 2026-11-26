@@ -1,113 +1,40 @@
 @props([
-'categories',
-'titleId' => 'home-collections-title',
+    'categories',
+    'titleId' => 'home-collections-title',
 ])
 
 @php
     $visibleCategories = $categories->take(5);
 @endphp
 
-<section
-    class="home-collections"
-    aria-labelledby="{{ $titleId }}"
->
+<section class="home-collections" aria-labelledby="{{ $titleId }}">
     <div class="container">
-
         <div class="section-head home-section-head">
-
             <div class="home-section-head__copy">
-                <span class="eyebrow">
-                    COLLECTIONS / 02
-                </span>
-
-                <h2 id="{{ $titleId }}">
-                    دسته‌بندی را انتخاب کن.
-                </h2>
-
-                <p>
-                    چند مسیر برای رسیدن به انتخابی که دقیقاً حال تو را دارد.
-                </p>
+                <h2 id="{{ $titleId }}">دسته‌بندی‌ها</h2>
             </div>
-
-            <a
-                href="{{ route('categories.index') }}"
-                class="text-link"
-            >
-                همه دسته‌بندی‌ها
-                <span aria-hidden="true">↗</span>
-            </a>
-
+            <a href="{{ route('categories.index') }}" class="text-link">همه دسته‌بندی‌ها</a>
         </div>
 
         @if($visibleCategories->isNotEmpty())
-
-            <div class="home-category-rail">
-
+            <div class="home-category-grid">
                 @foreach($visibleCategories as $category)
-
-                    <a
-                        href="{{ route('categories.show', $category) }}"
-                        class="home-category-card {{ $loop->first ? 'is-featured' : '' }}"
-                    >
-
-                        <div class="home-category-card__media">
-
+                    <a href="{{ route('categories.show', $category) }}" class="home-collection-link">
+                        <div class="home-collection-link__art" aria-hidden="true">
                             <x-store.image
                                 :src="$category->coverMedia?->url"
-                                :alt="$category->name"
-                                fallback-class="card-image-placeholder"
-                                :fallback="$category->name"
+                                alt=""
+                                fallback-class="home-collection-link__fallback"
+                                fallback=""
                             />
-
-                            <span
-                                class="home-category-card__index"
-                                aria-hidden="true"
-                            >
-                                {{ sprintf('%02d', $loop->iteration) }}
-                            </span>
-
-                            <span
-                                class="home-category-card__veil"
-                                aria-hidden="true"
-                            ></span>
-
                         </div>
-
-                        <div class="home-category-card__body">
-
-                            <div class="home-category-card__meta">
-
-                                <small>
-                                    {{ \App\Support\PersianNumber::format($category->active_products_count) }}
-                                    ITEMS
-                                </small>
-
-                                <h3>
-                                    {{ $category->name }}
-                                </h3>
-
-                            </div>
-
-
-                        </div>
-
+                        <h3>{{ $category->name }}</h3>
+                        <span>{{ \App\Support\PersianNumber::format($category->active_products_count) }} محصول</span>
                     </a>
-
                 @endforeach
-
             </div>
-
         @else
-
-            <div class="empty-state">
-                <span class="eyebrow">COLLECTIONS / EMPTY</span>
-
-                <h2>
-                    هنوز دسته‌بندی فعالی ثبت نشده.
-                </h2>
-            </div>
-
+            <p class="empty-state">هنوز دسته‌بندی فعالی ثبت نشده.</p>
         @endif
-
     </div>
 </section>

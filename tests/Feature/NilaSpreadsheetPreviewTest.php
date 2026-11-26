@@ -148,6 +148,9 @@ class NilaSpreadsheetPreviewTest extends TestCase
         $this->artisan('nila:repair-rial-prices', $repair)
             ->expectsOutput('Would update: 2; already correct: 0; needs review: 1.')
             ->assertExitCode(0);
+        $this->artisan('nila:repair-rial-prices', $repair + ['--legacy-decimal-saves' => true])
+            ->expectsOutput('Would update: 3; already correct: 0; needs review: 0.')
+            ->assertExitCode(0);
         $this->assertEquals(2150000, $variant->fresh()->price);
 
         $this->artisan('nila:repair-rial-prices', $repair + ['--apply' => true])
@@ -159,8 +162,7 @@ class NilaSpreadsheetPreviewTest extends TestCase
 
         $this->artisan('nila:repair-rial-prices', $repair + [
             '--apply' => true,
-            '--sku' => $edited->sku,
-            '--expected-price' => '250000000',
+            '--legacy-decimal-saves' => true,
         ])->assertExitCode(0);
         $this->assertEquals(250000, $edited->fresh()->price);
         $this->artisan('nila:repair-rial-prices', $repair)

@@ -84,7 +84,7 @@
                 @auth
                     <a
                         class="button button--primary"
-                        href="{{ route('account') }}"
+                        href="{{ route('account') }}#account-orders"
                     >
                         حساب کاربری
                     </a>

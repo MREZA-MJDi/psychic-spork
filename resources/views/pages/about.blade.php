@@ -183,7 +183,7 @@
         </div>
     </section>
 
-    <section id="contact" class="store-page__section store-page__section--soft contact-page">
+    <section id="contact" class="store-page__section contact-page">
         <div class="container">
 
             @if(session('success'))
@@ -215,13 +215,11 @@
                 <section class="contact-form-card">
                     <div class="contact-form-card__head">
                         <div>
-                            <span class="eyebrow">JANAN / CONTACT</span>
-                            <h2>درباره ما را خواندی؛ حالا با ما در ارتباط باش.</h2>
+                            <h2>تماس با جانان</h2>
                             <p>
-                                سوالی درباره محصول یا سفارش داری؟ پیام را همین‌جا بفرست تا مستقیماً وارد سیستم پشتیبانی شود.
+                                برای پرسش دربارهٔ محصول، سفارش یا خرید عمده به پشتیبانی پیام بده.
                             </p>
                         </div>
-                        <span class="contact-form-card__count">۰۲</span>
                     </div>
 
                     <form method="POST" action="{{ route('contact.submit') }}" class="contact-form">
@@ -230,22 +228,22 @@
                         <div class="contact-form__grid">
                             <label class="contact-field">
                                 <span>نام و نام خانوادگی <b>*</b></span>
-                                <input type="text" name="name" value="{{ old('name', auth()->user()?->name) }}" autocomplete="name" required>
+                                <input type="text" name="name" value="{{ old('name', auth()->user()?->name) }}" autocomplete="name" maxlength="120" required>
                             </label>
 
                             <label class="contact-field">
                                 <span>ایمیل</span>
-                                <input type="email" name="email" value="{{ old('email', auth()->user()?->email) }}" autocomplete="email">
+                                <input type="email" name="email" value="{{ old('email', auth()->user()?->email) }}" autocomplete="email" maxlength="255">
                             </label>
 
                             <label class="contact-field">
                                 <span>شماره تماس</span>
-                                <input type="tel" name="phone" value="{{ old('phone', auth()->user()?->phone) }}" autocomplete="tel" dir="ltr">
+                                <input type="tel" name="phone" value="{{ old('phone', auth()->user()?->phone) }}" autocomplete="tel" maxlength="30" dir="ltr">
                             </label>
 
                             <label class="contact-field">
                                 <span>موضوع</span>
-                                <input type="text" name="subject" value="{{ old('subject') }}" autocomplete="off">
+                                <input type="text" name="subject" value="{{ old('subject') }}" autocomplete="off" maxlength="255">
                             </label>
 
                             <label class="contact-field contact-field--full">
@@ -265,16 +263,14 @@
 
                 <aside class="contact-info-card">
                     <div>
-                        <span class="eyebrow">JANAN / SUPPORT</span>
                         <h2>راه‌های ارتباط</h2>
                         <p>اگر تماس مستقیم برایت راحت‌تر است، از یکی از مسیرهای زیر استفاده کن.</p>
                     </div>
 
                     <div class="contact-info-list">
                         <div class="contact-info-item">
-                            <span>۰۱</span>
                             <div>
-                                <small>PHONE</small>
+                                <small>شماره تماس</small>
                                 @if($contactStore['phone'] ?? null)
                                     <a href="tel:{{ preg_replace('/\s+/', '', $contactStore['phone']) }}" dir="ltr">{{ $contactStore['phone'] }}</a>
                                 @else
@@ -284,9 +280,8 @@
                         </div>
 
                         <div class="contact-info-item">
-                            <span>۰۲</span>
                             <div>
-                                <small>EMAIL</small>
+                                <small>ایمیل</small>
                                 @if($contactStore['email'] ?? null)
                                     <a href="mailto:{{ $contactStore['email'] }}" dir="ltr">{{ $contactStore['email'] }}</a>
                                 @else
@@ -296,9 +291,8 @@
                         </div>
 
                         <div class="contact-info-item">
-                            <span>۰۳</span>
                             <div>
-                                <small>ADDRESS</small>
+                                <small>نشانی</small>
                                 @if($contactStore['address'] ?? null)
                                     <strong>{{ $contactStore['address'] }}</strong>
                                 @else
@@ -308,9 +302,8 @@
                         </div>
 
                         <div class="contact-info-item">
-                            <span>۰۴</span>
                             <div>
-                                <small>WORKING HOURS</small>
+                                <small>ساعت پاسخ‌گویی</small>
                                 <strong>{{ $contactStore['working_hours'] ?? 'ساعت کاری ثبت نشده' }}</strong>
                             </div>
                         </div>
