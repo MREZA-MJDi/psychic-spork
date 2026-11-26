@@ -1,0 +1,63 @@
+name: Storefront browser QA
+on:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  responsive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      APP_ENV: production
+      APP_DEBUG: 'false'
+      APP_URL: http://127.0.0.1:8000
+      DB_CONNECTION: sqlite
+      DB_DATABASE: ${{ github.workspace }}/database/ui-qa.sqlite
+      CACHE_STORE: array
+      SESSION_DRIVER: file
+      QUEUE_CONNECTION: sync
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: bcmath, ctype, curl, dom, fileinfo, gd, intl, mbstring, openssl, pdo, pdo_sqlite, simplexml, sqlite3, tokenizer, xml, zip
+          coverage: none
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install dependencies and build
+        run: |
+          mkdir -p database
+          touch "$DB_DATABASE"
+          composer install --prefer-dist --no-interaction --no-progress
+          npm ci --no-audit --no-fund
+          npm run build
+          npm install --no-save --package-lock=false playwright@1.51.1
+          npx playwright install --with-deps chromium
+      - name: Prepare isolated database
+        run: |
+          cp .env.example .env
+          php artisan key:generate --force
+          php artisan migrate --force
+          php artisan tinker --execute='$category = App\Models\Category::factory()->create(["slug" => "ui-qa-category", "name" => "دسته آزمایشی"]); $brand = App\Models\Brand::factory()->create(["slug" => "ui-qa-brand"]); $product = App\Models\Product::factory()->create(["slug" => "ui-qa-product", "name" => "محصول آزمایشی جانان", "category_id" => $category->id, "brand_id" => $brand->id, "is_hero" => true]); App\Models\ProductVariant::factory()->create(["product_id" => $product->id, "price" => 250000, "stock" => 5]);'
+      - name: Start isolated application
+        run: |
+          php artisan serve --host=127.0.0.1 --port=8000 > /tmp/janan-ui-server.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:8000/ > /dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/janan-ui-server.log
+          exit 1
+      - name: Check layouts in Chromium
+        run: node tests/browser/responsive-smoke.mjs
+      - name: Upload browser screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: storefront-responsive-screenshots
+          path: artifacts/ui-smoke/
+          if-no-files-found: ignore
