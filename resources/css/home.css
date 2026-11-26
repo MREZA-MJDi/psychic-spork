@@ -2537,3 +2537,74 @@ outline:
 @media (max-width: 600px) {
     .home-picks__grid { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* Curated category section. Shared card geometry remains in core.css so the
+   dashboard crop preview and public cards have exactly the same mask. */
+.home-page .home-collections--curated {
+    padding-block: clamp(30px, 5vw, 72px);
+    background: #f8f9fa;
+    overflow: visible;
+}
+.home-collections--curated::before { display: none; }
+.home-collections__panel {
+    position: relative;
+    isolation: isolate;
+    min-width: 0;
+    padding: clamp(20px, 3.5vw, 48px);
+    border: 1px solid #e4e8ea;
+    border-radius: 28px;
+    background: linear-gradient(145deg,#fff 0%,#fcfafb 62%,#f1f6f7 100%);
+    box-shadow: 0 16px 48px rgba(40,54,65,.055);
+}
+.home-collections__heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px 24px;
+    padding-bottom: clamp(16px, 2vw, 26px);
+    border-bottom: 1px solid rgba(57,65,74,.10);
+}
+.home-collections__intro { min-width: 0; max-width: 620px; }
+.home-collections__eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    color: #93475f; font-size: 12px; font-weight: 750;
+}
+.home-collections__eyebrow i { width: 22px; height: 2px; background: #c4869a; border-radius: 2px; }
+.home-collections__heading h2 { margin: 6px 0; color: var(--janan-ink-strong); font-size: clamp(24px,3vw,38px); line-height: 1.45; font-weight: 800; }
+.home-collections__heading p { margin: 0; color: #606b76; font-size: clamp(12px,1.15vw,14px); line-height: 1.9; }
+.home-collections__browse {
+    display: inline-flex; align-items: center; justify-content: center; gap: 12px;
+    padding: 10px 16px; min-height: 44px; border: 1px solid #e0e4e7;
+    border-radius: 12px; background: #fff; color: var(--janan-ink-strong);
+    font-size: 12px; font-weight: 750; transition: background .2s ease,border-color .2s ease;
+}
+.home-collections__browse svg { width: 18px; height: 18px; }
+.home-collections__browse:hover { border-color: #c4869a; background: #fbf2f5; }
+.home-collections__gallery { padding-block: clamp(18px,3vw,36px); min-width: 0; }
+.home-collections__gallery .janan-category-grid--home {
+    display: flex; flex-wrap: wrap; justify-content: center; align-items: stretch;
+    gap: clamp(12px,1.7vw,22px); width: 100%;
+}
+.home-collections__gallery .janan-category-grid--home > .janan-category-card {
+    flex: 0 1 calc((100% - 66px) / 4); max-width: 300px; min-width: 0;
+}
+.home-collections__gallery .janan-category-grid--home[data-category-count="1"] > .janan-category-card,
+.home-collections__gallery .janan-category-grid--home[data-category-count="2"] > .janan-category-card {
+    flex-basis: min(100%,300px);
+}
+.home-collections__gallery .janan-category-grid--home[data-category-count="3"] > .janan-category-card {
+    flex-basis: calc((100% - 44px) / 3);
+}
+.home-collections__gallery .janan-category-grid--home[data-category-count="5"] > .janan-category-card {
+    flex-basis: calc((100% - 88px) / 5);
+}
+.home-collections__foot {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px;
+    border-top: 1px solid rgba(57,65,74,.10); padding-top: 14px;
+    color: #606b76; font-size: 12px;
+}
+.home-collections__foot a { display: inline-flex; align-items: center; gap: 7px; min-height: 44px; font-weight: 700; color: #93475f; }
+.home-collections__empty { display: grid; justify-items: center; gap: 12px; padding-block: 28px; text-align: center; }
+.home-collections__browse:focus-visible,.home-collections__foot a:focus-visible { outline: 2px solid #93475f; outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) { .home-collections__browse { transition: none; } }
