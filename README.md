@@ -2,6 +2,15 @@
 
 Laravel storefront and administration platform for the Persian Jani / Janan store. Modules include products and variants, product media, categories, brands, customers, orders, inventory, accounting, cheque payment and wholesale workflows.
 
+**Live storefront** · [jananunderwear.com](https://jananunderwear.com/)
+
+## Technical highlights
+
+- Persian RTL storefront with size and color variants, customer accounts and retail and wholesale ordering.
+- Admin workflows for inventory, order fulfillment, cheque review and double-entry accounting.
+- Holoo / Nila catalog import with spreadsheet preview, validation and explicit approval before writing changes.
+- Production runbook and release scripts for Nginx and PHP-FPM deployment.
+
 ## Stack
 
 - PHP 8.2+ and Laravel 12
