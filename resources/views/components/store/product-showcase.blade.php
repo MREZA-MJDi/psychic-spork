@@ -86,7 +86,7 @@
                                 role="group"
                                 aria-label="محصول {{ $loop->iteration }} از {{ $products->count() }}"
                             >
-                                <x-store.product-card :product="$product" variant="home" />
+                                <x-store.home-product-card :product="$product" />
                             </div>
                         @endforeach
                     </div>
