@@ -57,7 +57,7 @@ export function initLocationFields() {
                 return;
             }
             options(city, [], 'در حال دریافت شهرها…');
-            switchField(city, cityManual, true);
+            switchField(city, cityManual, !preserve);
             feedback('در حال دریافت شهرها…');
             try {
                 const url = new URL(root.dataset.citiesUrl, window.location.origin);
@@ -65,12 +65,14 @@ export function initLocationFields() {
                 const rows = await request(url, signal);
                 if (token !== sequence) return;
                 options(city, rows, 'انتخاب شهر');
-                const previous = rows.find(row => normalize(row.name) === normalize(preserve));
-                if (preserve && !previous) {
+                const pendingCity = cityManual.value;
+                const previous = rows.find(row => normalize(row.name) === normalize(pendingCity));
+                if (pendingCity && !previous) {
                     switchField(city, cityManual, false);
                     feedback('شهر قبلی در فهرست یافت نشد؛ می‌توانید آن را دستی وارد کنید.', () => loadCities(cityManual.value));
                 } else {
                     city.value = previous?.name || '';
+                    switchField(city, cityManual, true);
                     feedback('');
                 }
             } catch (error) {
