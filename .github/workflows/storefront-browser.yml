@@ -6,7 +6,7 @@ permissions:
   contents: read
 jobs:
   responsive:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     env:
       APP_ENV: production
@@ -42,7 +42,7 @@ jobs:
           cp .env.example .env
           php artisan key:generate --force
           php artisan migrate --force
-          php artisan tinker --execute='$category = App\Models\Category::factory()->create(["slug" => "ui-qa-category", "name" => "دسته آزمایشی"]); $brand = App\Models\Brand::factory()->create(["slug" => "ui-qa-brand"]); $product = App\Models\Product::factory()->create(["slug" => "ui-qa-product", "name" => "محصول آزمایشی جانان", "category_id" => $category->id, "brand_id" => $brand->id, "is_hero" => true]); App\Models\ProductVariant::factory()->create(["product_id" => $product->id, "price" => 250000, "stock" => 5]);'
+          php artisan tinker --execute='$category = App\Models\Category::factory()->create(["slug" => "ui-qa-category", "name" => "دسته آزمایشی"]); $brand = App\Models\Brand::factory()->create(["slug" => "ui-qa-brand"]); $product = App\Models\Product::factory()->create(["slug" => "ui-qa-product", "name" => "محصول آزمایشی جانان", "category_id" => $category->id, "brand_id" => $brand->id, "is_hero" => true]); App\Models\ProductVariant::factory()->create(["product_id" => $product->id, "price" => 250000, "stock" => 5]); App\Models\User::factory()->create(["phone" => "09123456789", "is_admin" => true]);'
       - name: Start isolated application
         run: |
           php artisan serve --host=127.0.0.1 --port=8000 > /tmp/janan-ui-server.log 2>&1 &
@@ -52,7 +52,10 @@ jobs:
           done
           cat /tmp/janan-ui-server.log
           exit 1
+      - name: Test category crop and public display
+        run: node tests/browser/category-cover.mjs
       - name: Check layouts in Chromium
+        if: success() || failure()
         run: node tests/browser/responsive-smoke.mjs
       - name: Upload browser screenshots
         if: always()

@@ -68,4 +68,39 @@ class AdminMediaUploadTest extends TestCase
         $response->assertNotFound();
         $this->assertDatabaseHas('media', ['id' => $media->id]);
     }
+    public function test_category_cover_crop_contract_is_shared_by_admin_and_storefront(): void
+    {
+        Storage::fake('public');
+        $admin = User::factory()->create(['is_admin' => true]);
+        $category = Category::factory()->create(['is_active' => true]);
+        $data = ['name' => $category->name, 'slug' => $category->slug, 'is_active' => '1'];
+
+        $this->actingAs($admin)->get(route('admin.categories.edit', $category))
+            ->assertOk()->assertSee('data-media-ratio="4:3"', false)
+            ->assertSee('data-media-width="960"', false)
+            ->assertSee('janan-category-card--preview', false);
+
+        $this->put(route('admin.categories.update', $category), $data + [
+            'image_file' => UploadedFile::fake()->image('wrong.jpg', 800, 800),
+        ])->assertSessionHasErrors('image_file');
+
+        $this->put(route('admin.categories.update', $category), $data + [
+            'image_file' => UploadedFile::fake()->image('cover.jpg', 960, 720),
+        ])->assertSessionHasNoErrors()->assertRedirect();
+
+        $cover = $category->fresh()->coverMedia;
+        $this->assertNotNull($cover);
+        $this->assertSame(960, $cover->width);
+        $this->assertSame(720, $cover->height);
+        Storage::disk($cover->disk)->assertExists($cover->path);
+
+        $this->get(route('home'))->assertOk()->assertSee('janan-category-card__frame', false)->assertSee($cover->url, false);
+        $this->get(route('categories.index'))->assertOk()->assertSee('janan-category-card__frame', false)->assertSee($cover->url, false);
+        $this->get(route('admin.categories.edit', $category))->assertOk()->assertSee($cover->url, false);
+
+        $this->post(route('admin.media.store', ['type' => 'category', 'id' => $category->id]), [
+            'media_file' => UploadedFile::fake()->image('wrong.jpg', 800, 800),
+        ])->assertSessionHasErrors('media_file');
+        $this->assertSame($cover->id, $category->fresh()->coverMedia->id);
+    }
 }
