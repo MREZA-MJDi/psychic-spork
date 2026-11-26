@@ -6,7 +6,7 @@ server {
     index index.php;
     charset utf-8;
 
-    client_max_body_size 12m;
+    client_max_body_size 32m;
     server_tokens off;
 
     add_header X-Frame-Options "SAMEORIGIN" always;
@@ -27,7 +27,6 @@ server {
         try_files $uri =404;
         access_log off;
         expires 7d;
-        add_header Cache-Control "public, max-age=604800";
     }
 
     # Laravel streams uploaded product/category/variant images from storage/app/public.
@@ -35,11 +34,17 @@ server {
     location ^~ /media/ {
         try_files $uri /index.php?$query_string;
     }
-    location ~* \.(?:css|js|jpg|jpeg|png|gif|webp|avif|svg|woff2?)$ {
+    # Only versioned Vite assets receive a long browser cache lifetime.
+    location ~* "^/build/assets/[a-z0-9_.-]+-[a-z0-9_-]{8}\.(?:css|js|jpg|jpeg|png|gif|webp|avif|svg|woff2?)$" {
         try_files $uri =404;
         access_log off;
         expires 30d;
-        add_header Cache-Control "public, max-age=2592000, immutable";
+    }
+
+    location ~* \.(?:css|js|jpg|jpeg|png|gif|webp|avif|svg|woff2?)$ {
+        try_files $uri =404;
+        access_log off;
+        expires -1;
     }
 
     location = /index.php {

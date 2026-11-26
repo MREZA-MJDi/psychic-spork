@@ -78,7 +78,7 @@
                             <div class="home-category-card__meta">
 
                                 <small>
-                                    {{ number_format($category->active_products_count) }}
+                                    {{ \App\Support\PersianNumber::format($category->active_products_count) }}
                                     ITEMS
                                 </small>
 

@@ -255,7 +255,7 @@
                             <td>
 
                                 <div class="admin-price">
-                                    {{ number_format($stock) }}
+                                    {{ \App\Support\PersianNumber::format($stock) }}
                                 </div>
 
 
@@ -282,7 +282,7 @@
 
                                 <span class="admin-muted">
 
-                                    {{ number_format($threshold) }}
+                                    {{ \App\Support\PersianNumber::format($threshold) }}
 
                                 </span>
 
@@ -417,7 +417,7 @@
                         <select id="product_variant_id" name="product_variant_id" required data-inventory-variant aria-label="نتیجه‌های جستجوی واریانت">
                             <option value="">اول جستجو کن و یک واریانت انتخاب کن</option>
                             @if($selectedVariant)
-                                <option value="{{ $selectedVariant->id }}" data-stock="{{ (int) $selectedVariant->stock }}" selected>{{ $selectedVariant->product?->name ?? 'محصول' }} — {{ $selectedVariant->display_name }} — موجودی: {{ number_format((int) $selectedVariant->stock) }}</option>
+                                <option value="{{ $selectedVariant->id }}" data-stock="{{ (int) $selectedVariant->stock }}" selected>{{ $selectedVariant->product?->name ?? 'محصول' }} — {{ $selectedVariant->display_name }} — موجودی: {{ \App\Support\PersianNumber::format((int) $selectedVariant->stock) }}</option>
                             @endif
                         </select>
                         <button type="button" class="admin-btn admin-btn--ghost admin-btn--sm" data-inventory-next hidden>بارگذاری نتیجه‌های بعدی</button>
@@ -783,7 +783,7 @@
                                 <span class="admin-badge admin-badge--{{ $quantityClass }}">
 
                                     {{ $quantity > 0 ? '+' : '' }}
-                                    {{ number_format($quantity) }}
+                                    {{ \App\Support\PersianNumber::format($quantity) }}
 
                                 </span>
 
@@ -795,7 +795,7 @@
                                 <span class="admin-price">
 
                                     {{
-                                        number_format(
+                                        \App\Support\PersianNumber::format(
                                             (int) $movement->stock_after
                                         )
                                     }}

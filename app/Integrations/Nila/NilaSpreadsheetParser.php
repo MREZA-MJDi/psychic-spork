@@ -2,6 +2,8 @@
 
 namespace App\Integrations\Nila;
 
+use PhpOffice\PhpSpreadsheet\Reader\Exception as SpreadsheetReadException;
+use PhpOffice\PhpSpreadsheet\Reader\Xls;
 use RuntimeException;
 use SimpleXMLElement;
 use ZipArchive;
@@ -35,6 +37,7 @@ final class NilaSpreadsheetParser
         $rawRows = match ($extension) {
             'csv', 'txt' => $this->readCsv($path),
             'xlsx' => $this->readXlsx($path),
+            'xls' => $this->readXls($path),
             default => throw new RuntimeException('فرمت فایل پشتیبانی نمی‌شود.'),
         };
 
@@ -79,6 +82,31 @@ final class NilaSpreadsheetParser
             return $rows;
         } finally {
             fclose($handle);
+        }
+    }
+
+    private function readXls(string $path): array
+    {
+        $reader = new Xls();
+        $reader->setReadDataOnly(true);
+
+        try {
+            $sheet = $reader->listWorksheetInfo($path)[0] ?? null;
+
+            if (! $sheet || $sheet['totalRows'] > 30000 || $sheet['totalColumns'] > 64) {
+                throw new RuntimeException('شیت اول فایل XLS خالی یا بزرگ‌تر از محدودهٔ واردسازی است.');
+            }
+
+            $reader->setLoadSheetsOnly($sheet['worksheetName']);
+            $workbook = $reader->load($path);
+
+            try {
+                return $workbook->getSheet(0)->toArray(null, false, false);
+            } finally {
+                $workbook->disconnectWorksheets();
+            }
+        } catch (SpreadsheetReadException $exception) {
+            throw new RuntimeException('فایل XLS معتبر یا قابل خواندن نیست.', 0, $exception);
         }
     }
 

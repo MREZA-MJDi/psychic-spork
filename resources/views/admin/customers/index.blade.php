@@ -117,7 +117,7 @@
                 </h2>
 
                 <p class="admin-card-description">
-                    {{ number_format($customers->total()) }}
+                    {{ \App\Support\PersianNumber::format($customers->total()) }}
                     مشتری
                 </p>
 
@@ -280,7 +280,7 @@
                             <td>
 
                                 <span class="admin-price">
-                                    {{ number_format($ordersCount) }}
+                                    {{ \App\Support\PersianNumber::format($ordersCount) }}
                                 </span>
 
                             </td>
@@ -291,7 +291,7 @@
                             <td>
 
                                 <div class="admin-price">
-                                    {{ number_format($ordersTotal) }}
+                                    {{ \App\Support\PersianNumber::format($ordersTotal) }}
                                 </div>
 
                                 <div class="admin-muted">

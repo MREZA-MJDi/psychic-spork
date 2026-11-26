@@ -25,7 +25,7 @@
 
                 <p class="admin-muted" style="margin-top:8px;">
                     ظرفیت Hero صفحه اصلی:
-                    <strong>{{ number_format($heroCount ?? 0) }} از {{ number_format($heroLimit ?? 36) }}</strong>
+                    <strong>{{ \App\Support\PersianNumber::format($heroCount ?? 0) }} از {{ \App\Support\PersianNumber::format($heroLimit ?? 36) }}</strong>
                     محصول فعال
                 </p>
 
@@ -300,7 +300,7 @@
                     </h2>
 
                     <p class="admin-card-description">
-                        {{ number_format($products->total()) }}
+                        {{ \App\Support\PersianNumber::format($products->total()) }}
                         محصول
                     </p>
 
@@ -489,7 +489,7 @@
 
                                 <td>
                                     @if($product->brand)
-                                        <span class="admin-product-name">{{ $product->brand->name }}</span>
+                                        <span class="admin-product-name">{{ \App\Support\PersianNumber::digits($product->brand->name) }}</span>
                                     @else
                                         <span class="admin-muted">بدون برند</span>
                                     @endif
@@ -519,11 +519,11 @@
 
                                 <td>
                                     <div class="admin-price">
-                                        {{ number_format($product->variants_count) }}
+                                        {{ \App\Support\PersianNumber::format($product->variants_count) }}
                                         <span class="admin-muted">واریانت</span>
                                     </div>
                                     <div class="admin-muted">
-                                        {{ number_format($product->wholesale_variants_count) }} قیمت عمده
+                                        {{ \App\Support\PersianNumber::format($product->wholesale_variants_count) }} قیمت عمده
                                     </div>
                                 </td>
 
@@ -535,7 +535,7 @@
                                     @if($effectivePrice !== null)
 
                                         <div class="admin-price">
-                                            {{ number_format((float) $effectivePrice) }}
+                                            {{ \App\Support\PersianNumber::format((float) $effectivePrice) }}
                                         </div>
 
                                         @if(
@@ -545,7 +545,7 @@
                                         )
 
                                             <div class="admin-old-price">
-                                                {{ number_format((float) $price) }}
+                                                {{ \App\Support\PersianNumber::format((float) $price) }}
                                             </div>
 
                                         @endif
@@ -570,7 +570,7 @@
                                 <td>
 
                                     <div class="admin-price">
-                                        {{ number_format($stock) }}
+                                        {{ \App\Support\PersianNumber::format($stock) }}
                                     </div>
 
                                     @if($isLowStock)
@@ -583,7 +583,7 @@
 
                                         <span class="admin-muted">
                                                 حد هشدار:
-                                                {{ number_format($lowStockThreshold) }}
+                                                {{ \App\Support\PersianNumber::format($lowStockThreshold) }}
                                             </span>
 
                                     @endif

@@ -160,7 +160,7 @@
                 </h2>
 
                 <p class="admin-card-description">
-                    {{ number_format($categories->total()) }}
+                    {{ \App\Support\PersianNumber::format($categories->total()) }}
                     دسته‌بندی
                 </p>
 
@@ -283,7 +283,7 @@
                             <td>
 
                                 <span class="admin-price">
-                                    {{ number_format($category->products_count ?? 0) }}
+                                    {{ \App\Support\PersianNumber::format($category->products_count ?? 0) }}
                                 </span>
 
                             </td>
@@ -294,7 +294,7 @@
                             <td>
 
                                 <span class="admin-muted">
-                                    {{ number_format($category->sort_order ?? 0) }}
+                                    {{ \App\Support\PersianNumber::format($category->sort_order ?? 0) }}
                                 </span>
 
                             </td>

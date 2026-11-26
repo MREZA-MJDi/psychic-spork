@@ -7,37 +7,71 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Throwable;
 
 final class MediaService
 {
-    public function storeUploaded(
-        UploadedFile $file,
-        string $directory
-    ): string {
-        abort_unless(
-            $file->isValid(),
-            422,
-            'فایل تصویر معتبر نیست.'
-        );
+    public function __construct(private readonly ImageUploadOptimizer $optimizer)
+    {
+    }
+
+    private function storeUpload(UploadedFile $file, string $directory): array
+    {
+        abort_unless($file->isValid(), 422, 'فایل تصویر معتبر نیست.');
 
         $directory = trim($directory, '/');
+        abort_if($directory === '', 422, 'مسیر ذخیره‌سازی تصویر معتبر نیست.');
 
-        abort_if(
-            $directory === '',
-            422,
-            'مسیر ذخیره‌سازی تصویر معتبر نیست.'
-        );
+        $disk = Storage::disk('public');
+        $reserve = (int) config('filesystems.media_min_free_mib') * 1024 * 1024;
+        if ($reserve > 0 && config('filesystems.disks.public.driver') === 'local') {
+            $free = @disk_free_space($disk->path(''));
+            abort_if(
+                $free !== false && $free < $reserve + $file->getSize(),
+                507,
+                'فضای کافی برای ذخیرهٔ رسانه وجود ندارد. لطفاً با پشتیبانی تماس بگیرید.'
+            );
+        }
 
-        $path = $file->store($directory, 'public');
+        $mime = $file->getMimeType();
+        $size = $file->getSize();
+        $dimensions = @getimagesize($file->getPathname());
+        $width = $dimensions[0] ?? null;
+        $height = $dimensions[1] ?? null;
+        $optimized = $dimensions
+            ? $this->optimizer->optimize($file, $mime ?? '', $width, $height)
+            : null;
 
-        abort_if(
-            ! $path,
-            500,
-            'ذخیره تصویر انجام نشد.'
-        );
+        if ($optimized === null) {
+            $path = $file->store($directory, 'public');
+            abort_unless($path, 500, 'ذخیره تصویر انجام نشد.');
 
-        return $path;
+            return [$path, $mime, $size, $width, $height];
+        }
+
+        try {
+            $temporaryPath = stream_get_meta_data($optimized)['uri'];
+            $storedDimensions = getimagesize($temporaryPath);
+            $storedBytes = fstat($optimized)['size'];
+            $path = $directory . '/' . Str::uuid() . '.webp';
+
+            abort_unless(
+                $storedDimensions && $disk->put($path, $optimized),
+                500,
+                'ذخیره تصویر انجام نشد.'
+            );
+
+            return [
+                $path,
+                'image/webp',
+                $storedBytes,
+                $storedDimensions[0],
+                $storedDimensions[1],
+            ];
+        } finally {
+            fclose($optimized);
+        }
     }
 
     public function attach(
@@ -48,9 +82,7 @@ final class MediaService
         ?string $altText = null,
         int $sortOrder = 0
     ): Media {
-        $path = $this->storeUploaded($file, $directory);
-
-        [$width, $height] = $this->dimensions($file);
+        [$path, $mime, $size, $width, $height] = $this->storeUpload($file, $directory);
 
         try {
             return $model->media()->create([
@@ -58,8 +90,8 @@ final class MediaService
                 'disk' => 'public',
                 'path' => $path,
                 'original_name' => $file->getClientOriginalName(),
-                'mime_type' => $file->getMimeType(),
-                'size' => $file->getSize(),
+                'mime_type' => $mime,
+                'size' => $size,
                 'width' => $width,
                 'height' => $height,
                 'alt_text' => $altText,
@@ -158,16 +190,6 @@ final class MediaService
                 Storage::disk($disk)->delete($path);
             });
         }
-    }
-
-    private function dimensions(UploadedFile $file): array
-    {
-        $size = @getimagesize($file->getRealPath());
-
-        return [
-            $size[0] ?? null,
-            $size[1] ?? null,
-        ];
     }
 
     public function delete(?string $path): void

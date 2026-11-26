@@ -16,12 +16,12 @@
 <div class="admin-dashboard-stats">
     <div class="admin-stat-card">
         <div class="admin-stat-card__label">محصولات متصل به نیلا</div>
-        <div class="admin-stat-card__value">{{ number_format($products) }}</div>
+        <div class="admin-stat-card__value">{{ \App\Support\PersianNumber::format($products) }}</div>
         <div class="admin-stat-card__meta">Product mappings</div>
     </div>
     <div class="admin-stat-card">
         <div class="admin-stat-card__label">تنوع‌های متصل به نیلا</div>
-        <div class="admin-stat-card__value">{{ number_format($variants) }}</div>
+        <div class="admin-stat-card__value">{{ \App\Support\PersianNumber::format($variants) }}</div>
         <div class="admin-stat-card__meta">Variant mappings</div>
     </div>
     <div class="admin-stat-card">
@@ -54,13 +54,22 @@
                     id="nila-import-file"
                     type="file"
                     name="file"
-                    accept=".xlsx,.csv,.txt"
+                    accept=".xls,.xlsx,.csv,.txt"
                     required
                 >
-                <p class="admin-muted nila-file-hint">فرمت مجاز: XLSX یا CSV · حداکثر ۱۰ مگابایت · فقط شیت اول XLSX بررسی می‌شود.</p>
+                <p class="admin-muted nila-file-hint">فرمت مجاز: XLS، XLSX یا CSV · حداکثر ۱۰ مگابایت · فقط شیت اول اکسل بررسی می‌شود.</p>
                 @error('file')
                     <div class="alert error">{{ $message }}</div>
                 @enderror
+            </div>
+            <div class="admin-field">
+                <label for="nila-price-unit">واحد قیمت فایل</label>
+                <select id="nila-price-unit" name="price_unit" required>
+                    <option value="rial" @selected(old('price_unit', 'rial') === 'rial')>ریال</option>
+                    <option value="toman" @selected(old('price_unit') === 'toman')>تومان</option>
+                </select>
+                <p class="admin-help">جانان قیمت نهایی را به تومان ذخیره و نمایش می‌دهد.</p>
+                @error('price_unit')<div class="alert error">{{ $message }}</div>@enderror
             </div>
         </div>
         <div class="admin-form-actions nila-upload-actions">
@@ -100,12 +109,12 @@
                 @foreach($batches as $batch)
                     <tr>
                         <td>{{ $batch->original_name }}</td>
-                        <td>{{ number_format($batch->total_rows) }}</td>
-                        <td>{{ number_format($batch->valid_rows) }}</td>
-                        <td>{{ number_format($batch->invalid_rows) }}</td>
-                        <td>{{ number_format($batch->product_groups) }}</td>
-                        <td>{{ number_format($batch->imported_groups) }}</td>
-                        <td>{{ number_format($batch->failed_groups) }}</td>
+                        <td>{{ \App\Support\PersianNumber::format($batch->total_rows) }}</td>
+                        <td>{{ \App\Support\PersianNumber::format($batch->valid_rows) }}</td>
+                        <td>{{ \App\Support\PersianNumber::format($batch->invalid_rows) }}</td>
+                        <td>{{ \App\Support\PersianNumber::format($batch->product_groups) }}</td>
+                        <td>{{ \App\Support\PersianNumber::format($batch->imported_groups) }}</td>
+                        <td>{{ \App\Support\PersianNumber::format($batch->failed_groups) }}</td>
                         <td>
                             @if($batch->status === 'completed')
                                 تکمیل‌شده

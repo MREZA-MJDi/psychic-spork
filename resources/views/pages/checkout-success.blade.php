@@ -67,7 +67,7 @@
             <div class="checkout-success__meta">
                 <span>مبلغ پرداختی</span>
                 <strong>
-                    {{ number_format($total) }} تومان
+                    {{ \App\Support\PersianNumber::format($total) }} تومان
                 </strong>
             </div>
 

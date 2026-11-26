@@ -92,10 +92,10 @@ class StorePageController extends Controller
                 'brands' => Brand::query()->active()->count(),
             ],
             'contactStore' => [
-                'phone' => $settings->get('contact.phone', env('JANAN_STORE_PHONE')),
-                'email' => $settings->get('contact.email', env('JANAN_STORE_EMAIL')),
-                'address' => $settings->get('contact.address', env('JANAN_STORE_ADDRESS')),
-                'working_hours' => $settings->get('contact.working_hours', env('JANAN_STORE_WORKING_HOURS')),
+                'phone' => $settings->get('contact.phone', config('app.store_contact.phone')),
+                'email' => $settings->get('contact.email', config('app.store_contact.email')),
+                'address' => $settings->get('contact.address', config('app.store_contact.address')),
+                'working_hours' => $settings->get('contact.working_hours', config('app.store_contact.working_hours')),
             ],
         ]);
     }
@@ -134,9 +134,10 @@ class StorePageController extends Controller
         }
     }
 
-    public function club(SeoService $seo): View
+    public function club(Request $request, SeoService $seo): View
     {
         return view('pages.club', [
+            'isCustomer' => $request->user()?->isCustomer() ?? false,
             'seo' => $seo->page(
                 'DrClubz — باشگاه مشتریان ' . config('app.store_name', 'Janan'),
                 'باشگاه مشتریان DrClubz؛ مسیر اختصاصی اعضای جانان برای خرید، پیگیری سفارش و دسترسی به مزایای مشتریان.',

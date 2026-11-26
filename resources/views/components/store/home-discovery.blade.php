@@ -27,7 +27,7 @@
         : 0;
 
     $price = $variant?->effective_price
-        ? number_format($variant->effective_price) . ' تومان'
+        ? \App\Support\PersianNumber::format($variant->effective_price) . ' تومان'
         : 'قیمت در دسترس نیست';
 
     $availability = match (true) {
@@ -85,7 +85,7 @@
                 <div class="discovery-card__overlay" aria-hidden="true"></div>
 
                 <div class="discovery-card__top">
-                    <span>01</span>
+                    <span>۰۱</span>
                     <span>LIVE CATALOG</span>
                 </div>
 
@@ -133,7 +133,7 @@
                 <div class="discovery-card__overlay" aria-hidden="true"></div>
 
                 <div class="discovery-card__top">
-                    <span>02</span>
+                    <span>۰۲</span>
                     <span>NEXT PICK</span>
                 </div>
 

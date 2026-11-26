@@ -14,7 +14,7 @@
             </div>
 
             <div class="page-hero__stat">
-                <b>03</b>
+                <b>۰۳</b>
                 <span>RETURN FLOW</span>
             </div>
         </div>
@@ -35,7 +35,7 @@
 
             <div class="store-page__steps">
                 <article class="store-page__step">
-                    <b>01</b>
+                    <b>۰۱</b>
                     <div>
                         <strong>منبع سیاست</strong>
                         <p>قوانین واقعی باید از تنظیمات یا محتوای مدیریتی فروشگاه تامین شوند.</p>
@@ -43,7 +43,7 @@
                 </article>
 
                 <article class="store-page__step">
-                    <b>02</b>
+                    <b>۰۲</b>
                     <div>
                         <strong>شرایط پذیرش</strong>
                         <p>جزئیات واجد شرایط بودن سفارش‌ها هنوز در سیستم تعریف نشده است.</p>
@@ -51,7 +51,7 @@
                 </article>
 
                 <article class="store-page__step">
-                    <b>03</b>
+                    <b>۰۳</b>
                     <div>
                         <strong>فرآیند پیگیری</strong>
                         <p>پس از ثبت سیاست واقعی، مراحل درخواست و پیگیری سفارش در همین ساختار نمایش داده می‌شوند.</p>

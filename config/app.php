@@ -19,6 +19,13 @@ return [
     'store_name_fa' => env('JANAN_STORE_NAME_FA', 'جانه جانان'),
     'store_name_latin' => env('JANAN_STORE_NAME_LATIN', 'Jane Janan'),
 
+    'store_contact' => [
+        'phone' => env('JANAN_STORE_PHONE'),
+        'email' => env('JANAN_STORE_EMAIL'),
+        'address' => env('JANAN_STORE_ADDRESS'),
+        'working_hours' => env('JANAN_STORE_WORKING_HOURS'),
+    ],
+
     'admin' => [
         'phone' => env(
             'JANAN_ADMIN_PHONE',

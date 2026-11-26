@@ -17,6 +17,6 @@ final class NumericInput
             '٥' => '5', '٦' => '6', '٧' => '7', '٨' => '8', '٩' => '9',
         ]);
 
-        return preg_replace('/[,٬،\s]/u', '', $value);
+        return preg_replace('/[,٬،\s]/u', '', str_replace('٫', '.', $value));
     }
 }

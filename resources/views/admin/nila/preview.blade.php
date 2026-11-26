@@ -13,29 +13,35 @@
     <div>
         <span class="nila-step-label">گزارش و کنترل پایلوت</span>
         <h1 class="admin-page-head__title">گزارش بررسی فایل</h1>
-        <p class="admin-page-head__text">{{ $batch->original_name }}</p>
+        <p class="admin-page-head__text">{{ $batch->original_name }} · واحد قیمت فایل: {{ $priceUnit->value === 'rial' ? 'ریال' : 'تومان' }}</p>
     </div>
     <a class="admin-btn admin-btn--ghost" href="{{ route('admin.nila.index') }}">بازگشت به نیلا</a>
 </div>
 
-<div class="admin-dashboard-stats">
+<div class="admin-dashboard-stats" aria-label="وضعیت داده‌های فایل">
     <div class="admin-stat-card">
-        <div class="admin-stat-card__label">کل ردیف‌ها</div>
-        <div class="admin-stat-card__value">{{ number_format($batch->total_rows) }}</div>
+        <div class="admin-stat-card__label">کل گروه‌های محصول</div>
+        <div class="admin-stat-card__value">{{ \App\Support\PersianNumber::format($batch->product_groups) }}</div>
+        <div class="admin-stat-card__meta">{{ \App\Support\PersianNumber::format($batch->total_rows) }} ردیف تنوع در فایل</div>
     </div>
     <div class="admin-stat-card">
-        <div class="admin-stat-card__label">ردیف‌های معتبر</div>
-        <div class="admin-stat-card__value">{{ number_format($batch->valid_rows) }}</div>
+        <div class="admin-stat-card__label">گروه‌های معتبر در فایل</div>
+        <div class="admin-stat-card__value">{{ \App\Support\PersianNumber::format($comparison['valid_groups']) }}</div>
+        <div class="admin-stat-card__meta">{{ \App\Support\PersianNumber::format($batch->imported_groups) }} گروه تاکنون ثبت شده</div>
     </div>
     <div class="admin-stat-card">
-        <div class="admin-stat-card__label">ردیف‌های دارای خطا</div>
-        <div class="admin-stat-card__value">{{ number_format($batch->invalid_rows) }}</div>
+        <div class="admin-stat-card__label">گروه‌های نیازمند اصلاح فایل</div>
+        <div class="admin-stat-card__value">{{ \App\Support\PersianNumber::format($comparison['blocked_groups']) }}</div>
+        <div class="admin-stat-card__meta">{{ \App\Support\PersianNumber::format($batch->invalid_rows) }} ردیف دارای خطا</div>
     </div>
     <div class="admin-stat-card">
-        <div class="admin-stat-card__label">گروه محصول</div>
-        <div class="admin-stat-card__value">{{ number_format($batch->product_groups) }}</div>
+        <div class="admin-stat-card__label">ردیف‌های دارای قیمت خالی یا نامعتبر</div>
+        <div class="admin-stat-card__value">{{ \App\Support\PersianNumber::format($comparison['invalid_price_rows']) }}</div>
+        <div class="admin-stat-card__meta">
+            {{ \App\Support\PersianNumber::format($comparison['invalid_stock_rows']) }} ردیف با موجودی نامعتبر
+            · {{ \App\Support\PersianNumber::format($comparison['name_conflict_groups']) }} گروه با نام ناسازگار
+        </div>
     </div>
-
 </div>
 
 <div class="admin-card nila-panel nila-panel--comparison">
@@ -50,38 +56,38 @@
     <div class="admin-dashboard-stats">
         <div class="admin-stat-card">
             <div class="admin-stat-card__label">محصول جدید</div>
-            <div class="admin-stat-card__value">{{ number_format($comparison['new_products']) }}</div>
+            <div class="admin-stat-card__value">{{ \App\Support\PersianNumber::format($comparison['new_products']) }}</div>
         </div>
         <div class="admin-stat-card">
             <div class="admin-stat-card__label">محصول موجود و شناسایی‌شده</div>
-            <div class="admin-stat-card__value">{{ number_format($comparison['existing_products']) }}</div>
+            <div class="admin-stat-card__value">{{ \App\Support\PersianNumber::format($comparison['existing_products']) }}</div>
         </div>
         <div class="admin-stat-card">
             <div class="admin-stat-card__label">تنوع جدید</div>
-            <div class="admin-stat-card__value">{{ number_format($comparison['new_variants']) }}</div>
+            <div class="admin-stat-card__value">{{ \App\Support\PersianNumber::format($comparison['new_variants']) }}</div>
         </div>
         <div class="admin-stat-card">
             <div class="admin-stat-card__label">موجودی نیازمند تطبیق</div>
-            <div class="admin-stat-card__value">{{ number_format($comparison['stock_change_count']) }}</div>
+            <div class="admin-stat-card__value">{{ \App\Support\PersianNumber::format($comparison['stock_change_count']) }}</div>
         </div>
     </div>
 
     <div class="nila-info-grid">
         <div class="nila-info-card">
             <strong>قیمت متفاوت</strong>
-            <p class="admin-muted">{{ number_format($comparison['price_change_count']) }} تنوع قیمت متفاوت با فایل نیلا دارد.</p>
+            <p class="admin-muted">{{ \App\Support\PersianNumber::format($comparison['price_change_count']) }} تنوع قیمت متفاوت با فایل نیلا دارد.</p>
         </div>
         <div class="nila-info-card">
             <strong>نام محصول تغییر کرده</strong>
-            <p class="admin-muted">{{ number_format($comparison['renamed_products']) }} نام محصول در فایل با نام فعلی جانان تفاوت دارد.</p>
+            <p class="admin-muted">{{ \App\Support\PersianNumber::format($comparison['renamed_products']) }} نام محصول در فایل با نام فعلی جانان تفاوت دارد.</p>
         </div>
         <div class="nila-info-card">
             <strong>گروه دارای خطا</strong>
-            <p class="admin-muted">{{ number_format($comparison['blocked_groups']) }} گروه به‌دلیل خطای حداقل یک ردیف وارد نمی‌شود.</p>
+            <p class="admin-muted">{{ \App\Support\PersianNumber::format($comparison['blocked_groups']) }} گروه به‌دلیل خطای حداقل یک ردیف وارد نمی‌شود.</p>
         </div>
         <div class="nila-info-card">
             <strong>کد کالا با تعارض</strong>
-            <p class="admin-muted">{{ number_format($comparison['sku_conflict_count']) }} کد از قبل در جانان وجود دارد اما اتصال نیلا ندارد.</p>
+            <p class="admin-muted">{{ \App\Support\PersianNumber::format($comparison['sku_conflict_count']) }} کد از قبل در جانان وجود دارد اما اتصال نیلا ندارد.</p>
         </div>
     </div>
 
@@ -98,9 +104,9 @@
                 @foreach($comparison['stock_changes'] as $change)
                     <tr>
                         <td dir="ltr">{{ $change['sku'] }}</td>
-                        <td>{{ number_format($change['current']) }}</td>
-                        <td>{{ number_format($change['incoming']) }}</td>
-                        <td>{{ $change['difference'] > 0 ? '+' : '' }}{{ number_format($change['difference']) }}</td>
+                        <td>{{ \App\Support\PersianNumber::format($change['current']) }}</td>
+                        <td>{{ \App\Support\PersianNumber::format($change['incoming']) }}</td>
+                        <td>{{ $change['difference'] > 0 ? '+' : '' }}{{ \App\Support\PersianNumber::format($change['difference']) }}</td>
                     </tr>
                 @endforeach
                 </tbody>
@@ -130,16 +136,16 @@
             <span class="nila-step-label">مرحله بعد</span>
             <h2 class="admin-card-title">تأیید و همگام‌سازی</h2>
         </div>
-        <strong class="nila-progress-value">{{ number_format($pilotProgress) }}٪</strong>
+        <strong class="nila-progress-value">{{ \App\Support\PersianNumber::format($pilotProgress) }}٪</strong>
     </div>
     <div class="nila-progress-track" role="progressbar" aria-label="پیشرفت Import" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ $pilotProgress }}">
         <span style="width: {{ $pilotProgress }}%"></span>
     </div>
     <p class="admin-card-description">
         وضعیت: {{ $batch->status === 'completed' ? 'تکمیل‌شده' : ($batch->status === 'queued' ? 'در صف اجرا' : ($batch->status === 'processing' ? 'در حال پردازش' : ($batch->status === 'ready' ? 'آماده ادامه' : 'آماده شروع'))) }}
-        — پیشرفت گروه‌ها: {{ number_format($batch->next_group_offset) }} از {{ number_format($batch->product_groups) }}
-        — ثبت موفق: {{ number_format($batch->imported_groups) }}
-        — کنار گذاشته‌شده: {{ number_format($batch->failed_groups) }}
+        — پیشرفت گروه‌ها: {{ \App\Support\PersianNumber::format($batch->next_group_offset) }} از {{ \App\Support\PersianNumber::format($batch->product_groups) }}
+        — ثبت موفق: {{ \App\Support\PersianNumber::format($batch->imported_groups) }}
+        — کنار گذاشته‌شده: {{ \App\Support\PersianNumber::format($batch->failed_groups) }}
     </p>
 
     @if($batch->status === 'completed')
@@ -196,9 +202,9 @@
                 <tr>
                     <td>{{ $group['product_code'] }}</td>
                     <td>{{ $group['product_name_candidate'] }}</td>
-                    <td>{{ number_format($group['rows']) }}</td>
-                    <td>{{ number_format($group['valid_rows']) }}</td>
-                    <td>{{ number_format($group['invalid_rows']) }}</td>
+                    <td>{{ \App\Support\PersianNumber::format($group['rows']) }}</td>
+                    <td>{{ \App\Support\PersianNumber::format($group['valid_rows']) }}</td>
+                    <td>{{ \App\Support\PersianNumber::format($group['invalid_rows']) }}</td>
                     <td>{{ $group['name_conflict'] ? 'تعارض نام؛ نیازمند بررسی' : 'یکسان' }}</td>
                 </tr>
             @empty
@@ -231,7 +237,7 @@
                 <th>کد کامل هولو / SKU</th>
                 <th>نام اصلی در فایل</th>
                 <th>رنگ احتمالی</th>
-                <th>قیمت</th>
+                <th>قیمت نهایی (تومان)</th>
                 <th>موجودی</th>
                 <th>نتیجه بررسی</th>
             </tr>
@@ -243,8 +249,8 @@
                     <td>{{ $row['holoo_code'] }}</td>
                     <td>{{ $row['holoo_name'] }}</td>
                     <td>{{ $row['color_candidate'] ?: '—' }}</td>
-                    <td>{{ $row['price'] === null ? 'خالی / نامعتبر' : number_format($row['price']) }}</td>
-                    <td>{{ $row['stock'] === null ? 'نامعتبر' : number_format($row['stock']) }}</td>
+                    <td>{{ $row['price'] === null ? 'خالی / نامعتبر' : \App\Support\PersianNumber::format($row['price'], floor($row['price']) === (float) $row['price'] ? 0 : 2) }}</td>
+                    <td>{{ $row['stock'] === null ? 'نامعتبر' : \App\Support\PersianNumber::format($row['stock']) }}</td>
                     <td>
                         @if($row['is_valid'])
                             معتبر

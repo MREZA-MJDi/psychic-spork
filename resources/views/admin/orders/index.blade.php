@@ -210,7 +210,7 @@
                 </h2>
 
                 <p class="admin-card-description">
-                    {{ number_format($orders->total()) }}
+                    {{ \App\Support\PersianNumber::format($orders->total()) }}
                     سفارش
                 </p>
 
@@ -320,7 +320,7 @@
                                 </div>
 
                                 <div class="admin-product-meta">
-                                    {{ number_format($order->items_count ?? 0) }}
+                                    {{ \App\Support\PersianNumber::format($order->items_count ?? 0) }}
                                     قلم
                                 </div>
 
@@ -373,7 +373,7 @@
 
                                 <div class="admin-price">
 
-                                    {{ number_format(
+                                    {{ \App\Support\PersianNumber::format(
                                         (float) $order->total
                                     ) }}
 

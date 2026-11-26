@@ -77,10 +77,10 @@ class AdminSiteContentController extends Controller
             ->withQueryString();
 
         $contact = [
-            'phone' => SiteSetting::getValue('contact.phone', env('JANAN_STORE_PHONE')),
-            'email' => SiteSetting::getValue('contact.email', env('JANAN_STORE_EMAIL')),
-            'address' => SiteSetting::getValue('contact.address', env('JANAN_STORE_ADDRESS')),
-            'working_hours' => SiteSetting::getValue('contact.working_hours', env('JANAN_STORE_WORKING_HOURS')),
+            'phone' => SiteSetting::getValue('contact.phone', config('app.store_contact.phone')),
+            'email' => SiteSetting::getValue('contact.email', config('app.store_contact.email')),
+            'address' => SiteSetting::getValue('contact.address', config('app.store_contact.address')),
+            'working_hours' => SiteSetting::getValue('contact.working_hours', config('app.store_contact.working_hours')),
         ];
 
         return view('admin.contact.index', compact('messages', 'contact'));

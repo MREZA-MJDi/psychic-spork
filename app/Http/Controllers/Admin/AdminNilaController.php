@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Integrations\Nila\NilaSpreadsheetParser;
+use App\Integrations\Nila\SpreadsheetPriceUnit;
 use App\Integrations\Nila\NilaImportPreviewService;
 use App\Jobs\RunNilaSpreadsheetImport;
 use App\Models\IntegrationMapping;
@@ -51,7 +52,8 @@ class AdminNilaController extends Controller
     public function upload(Request $request, NilaSpreadsheetParser $parser): RedirectResponse
     {
         $validated = $request->validate([
-            'file' => ['required', 'file', 'max:10240', 'mimes:xlsx,csv,txt'],
+            'file' => ['required', 'file', 'max:10240', 'mimes:xls,xlsx,csv,txt'],
+            'price_unit' => ['sometimes', 'required', 'in:rial,toman'],
         ], [], [
             'file' => 'فایل اکسل یا CSV',
         ]);
@@ -59,13 +61,13 @@ class AdminNilaController extends Controller
         $file = $validated['file'];
         $extension = strtolower($file->getClientOriginalExtension());
 
-        if (! in_array($extension, ['xlsx', 'csv', 'txt'], true)) {
+        if (! in_array($extension, ['xls', 'xlsx', 'csv', 'txt'], true)) {
             return back()->withErrors([
-                'file' => 'فقط فایل XLSX یا CSV مجاز است.',
+                'file' => 'فقط فایل XLS، XLSX یا CSV مجاز است.',
             ]);
         }
 
-        $path = $file->store('nila/imports', 'local');
+        $path = $file->storeAs('nila/imports', Str::uuid() . '.' . $extension, 'local');
 
         if (! $path) {
             return back()->with('error', 'ذخیره امن فایل انجام نشد.');
@@ -101,6 +103,7 @@ class AdminNilaController extends Controller
             'created_by' => $request->user()?->id,
             'metadata' => [
                 'extension' => $extension,
+                'price_unit' => $validated['price_unit'] ?? SpreadsheetPriceUnit::Toman->value,
                 'preview_only' => true,
             ],
         ]);
@@ -265,8 +268,18 @@ class AdminNilaController extends Controller
             'نسخه ذخیره‌شده پیش‌نمایش معتبر نیست.'
         );
 
+        $priceUnit = SpreadsheetPriceUnit::forBatch($metadata);
+        $parsed['rows'] = array_map(static function (array $row) use ($priceUnit): array {
+            if ($row['price'] !== null) {
+                $row['price'] = $priceUnit->toToman((float) $row['price']);
+            }
+
+            return $row;
+        }, $parsed['rows']);
+
         return view('admin.nila.preview', [
             'batch' => $batch,
+            'priceUnit' => $priceUnit,
             'groups' => $this->paginateArray($parsed['groups'], 50, 'groups_page', $request),
             'rows' => $this->paginateArray($parsed['rows'], 100, 'rows_page', $request),
             'failedProducts' => $batch->metadata['failed_products'] ?? [],

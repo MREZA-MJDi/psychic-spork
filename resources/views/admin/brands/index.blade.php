@@ -160,7 +160,7 @@
                 </h2>
 
                 <p class="admin-card-description">
-                    {{ number_format($brands->total()) }}
+                    {{ \App\Support\PersianNumber::format($brands->total()) }}
                     برند
                 </p>
 
@@ -292,7 +292,7 @@
                             <td>
 
                                 <span class="admin-price">
-                                    {{ number_format($brand->products_count ?? 0) }}
+                                    {{ \App\Support\PersianNumber::format($brand->products_count ?? 0) }}
                                 </span>
 
                             </td>

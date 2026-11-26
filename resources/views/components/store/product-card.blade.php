@@ -53,10 +53,10 @@
         && $stock <= (int) ($productVariant?->low_stock_threshold ?? 0);
 
     $variantFacts = array_values(array_filter([
-        $colorCount > 1 ? number_format($colorCount).' رنگ' : null,
-        $sizeCount > 1 ? number_format($sizeCount).' سایز' : null,
+        $colorCount > 1 ? \App\Support\PersianNumber::format($colorCount).' رنگ' : null,
+        $sizeCount > 1 ? \App\Support\PersianNumber::format($sizeCount).' سایز' : null,
         $colorCount === 0 && $sizeCount === 0 && $variantCount > 1
-            ? number_format($variantCount).' گزینه'
+            ? \App\Support\PersianNumber::format($variantCount).' گزینه'
             : null,
     ]));
 
@@ -101,10 +101,10 @@
 
         <div class="product-card__topline">
             @if($product->brand?->name)
-                <span class="product-card__brand">{{ $product->brand->name }}</span>
+                <span class="product-card__brand">{{ \App\Support\PersianNumber::digits($product->brand->name) }}</span>
             @endif
             @if($product->category?->name)
-                <span class="product-card__category">{{ $product->category->name }}</span>
+                <span class="product-card__category">{{ \App\Support\PersianNumber::digits($product->category->name) }}</span>
             @endif
         </div>
 
@@ -130,14 +130,14 @@
                     @if($priceVaries)
                         <span class="product-price__prefix">از</span>
                     @endif
-                    {{ number_format($minimumPrice) }}
+                    {{ \App\Support\PersianNumber::format($minimumPrice) }}
                 </strong>
 
                 <span>تومان</span>
 
                 @if($isOnSale && !$priceVaries)
                     <del>
-                        {{ number_format($productVariant->price) }}
+                        {{ \App\Support\PersianNumber::format($productVariant->price) }}
                     </del>
                 @endif
             </div>

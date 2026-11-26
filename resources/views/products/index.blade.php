@@ -9,7 +9,7 @@
             <div class="catalog-masthead__top">
                 <span class="eyebrow">{{ $siteBrandNameLatin }} / CATALOG</span>
                 <div class="catalog-masthead__stat">
-                    <strong>{{ number_format($products->total()) }}</strong>
+                    <strong>{{ \App\Support\PersianNumber::format($products->total()) }}</strong>
                     <span>محصول فعال</span>
                 </div>
             </div>
@@ -34,12 +34,10 @@
                         <circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/>
                     </svg>
                     <span class="sr-only">جستجوی محصولات</span>
-                    <input type="search" name="q" value="{{ request('q') }}" placeholder="نام محصول، مدل یا کد کالا…" autocomplete="off" data-search-input minlength="2">
-                    <button type="button" class="catalog-search__clear" data-search-clear aria-label="پاک کردن" @if(!request('q')) hidden @endif>×</button>
+                    <input type="search" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="نام محصول، مدل یا کد کالا…" autocomplete="off" data-search-input minlength="2" maxlength="120">
+                    <button type="button" class="catalog-search__clear" data-search-clear aria-label="پاک کردن" @if(empty($filters['q'])) hidden @endif>×</button>
                 </label>
-                @if(request('category'))<input type="hidden" name="category" value="{{ request('category') }}">@endif
-                @if(request('brand'))<input type="hidden" name="brand" value="{{ request('brand') }}">@endif
-                @if(request('sort'))<input type="hidden" name="sort" value="{{ request('sort') }}">@endif
+                <x-store.catalog-filter-inputs :filters="$filters" exclude="q" />
                 <button class="button button--primary" type="submit">جستجوی محصول</button>
             </form>
         </div>
@@ -53,15 +51,16 @@
                     <h2>دسته‌بندی</h2>
                 </div>
                 <nav class="catalog-category-list">
-                    <a href="{{ route('products.index', request()->except(['category', 'page'])) }}"
-                       class="{{ request()->filled('category') ? '' : 'is-active' }}">
+                    <a href="{{ route('products.index', Arr::except($filters, 'category')) }}"
+                       class="{{ empty($filters['category']) ? 'is-active' : '' }}"
+                       @if(empty($filters['category'])) aria-current="page" @endif>
                         <span>همه محصولات</span>
                     </a>
                     @foreach($categories as $category)
-                        <a href="{{ route('products.index', array_merge(request()->except('page'), ['category' => $category->slug])) }}"
-                           class="{{ request('category') === $category->slug ? 'is-active' : '' }}"
-                           @if(request('category') === $category->slug) aria-current="page" @endif>
-                            <span>{{ $category->name }}</span>
+                        <a href="{{ route('products.index', array_merge($filters, ['category' => $category->slug])) }}"
+                           class="{{ ($filters['category'] ?? null) === $category->slug ? 'is-active' : '' }}"
+                           @if(($filters['category'] ?? null) === $category->slug) aria-current="page" @endif>
+                            <span>{{ \App\Support\PersianNumber::digits($category->name) }}</span>
                         </a>
                     @endforeach
                 </nav>
@@ -90,54 +89,50 @@
                         </div>
                         <label class="catalog-brand-filter__search">
                             <span class="sr-only">نام برند</span>
-                            <input type="search" name="brand" value="{{ request('brand') }}" placeholder="نام برند را بنویس…" autocomplete="off">
+                            <input type="search" name="brand" value="{{ $filters['brand'] ?? '' }}" maxlength="160" placeholder="نام برند را بنویس…" autocomplete="off">
                             <button type="submit" aria-label="جستجوی برند">⌕</button>
                         </label>
                     </div>
-                    @foreach(request()->except(['brand', 'page']) as $key => $value)
-                        @if(is_scalar($value) && $value !== '')
-                            <input type="hidden" name="{{ $key }}" value="{{ $value }}">
-                        @endif
-                    @endforeach
+                    <x-store.catalog-filter-inputs :filters="$filters" exclude="brand" />
                     <div class="catalog-brand-rail" aria-label="انتخاب سریع برند">
                         @foreach($brands as $brand)
-                            <a href="{{ route('products.index', array_merge(request()->except('page'), ['brand' => $brand->slug])) }}"
-                               class="catalog-brand-chip {{ request('brand') === $brand->slug ? 'is-active' : '' }}"
-                               title="فیلتر محصولات {{ $brand->name }}">
+                            <a href="{{ route('products.index', array_merge($filters, ['brand' => $brand->slug])) }}"
+                               class="catalog-brand-chip {{ ($filters['brand'] ?? null) === $brand->slug ? 'is-active' : '' }}"
+                               title="فیلتر محصولات {{ $brand->name }}"
+                               @if(($filters['brand'] ?? null) === $brand->slug) aria-current="page" @endif>
                                 <span class="catalog-brand-chip__shape" aria-hidden="true">{{ mb_substr($brand->name, 0, 1) }}</span>
-                                <span>{{ $brand->name }}</span>
+                                <span>{{ \App\Support\PersianNumber::digits($brand->name) }}</span>
                             </a>
                         @endforeach
                     </div>
-                    @if(request()->filled('brand'))
-                        <a class="catalog-brand-filter__clear" href="{{ route('products.index', request()->except(['brand', 'page'])) }}">حذف فیلتر برند ×</a>
+                    @if(!empty($filters['brand']))
+                        <a class="catalog-brand-filter__clear" href="{{ route('products.index', Arr::except($filters, 'brand')) }}">حذف فیلتر برند ×</a>
                     @endif
                 </form>
 
                 <header class="catalog-results__head catalog-results__head--compact">
                     <div class="catalog-results__title">
                         <span class="eyebrow">{{ $siteBrandNameLatin }} / CATALOG</span>
-                        <h2>{{ request('q') ? 'نتیجه جستجوی «'.request('q').'»' : 'محصولات جانان' }}</h2>
-                        <p>{{ number_format($products->total()) }} محصول مطابق انتخاب‌های شما</p>
+                        <h2>{{ isset($filters['q']) ? 'نتیجه جستجوی «'.$filters['q'].'»' : 'محصولات جانان' }}</h2>
+                        <p>{{ \App\Support\PersianNumber::format($products->total()) }} محصول مطابق انتخاب‌های شما</p>
                     </div>
                     <form class="catalog-inline-sort" method="GET" action="{{ route('products.index') }}">
-                        @foreach(request()->except(['sort', 'page']) as $key => $value)
-                            @if(is_scalar($value) && $value !== '')
-                                <input type="hidden" name="{{ $key }}" value="{{ $value }}">
-                            @endif
-                        @endforeach
+                        <x-store.catalog-filter-inputs :filters="$filters" exclude="sort" />
                         <label><span>مرتب‌سازی</span>
                             <select name="sort" onchange="this.form.submit()">
-                                <option value="newest" @selected(request('sort', 'newest') === 'newest')>جدیدترین</option>
-                                <option value="price_asc" @selected(request('sort') === 'price_asc')>ارزان‌ترین</option>
-                                <option value="price_desc" @selected(request('sort') === 'price_desc')>گران‌ترین</option>
-                                <option value="name_asc" @selected(request('sort') === 'name_asc')>الفبایی</option>
+                                <option value="newest" @selected($sort === 'newest')>جدیدترین</option>
+                                <option value="oldest" @selected($sort === 'oldest')>قدیمی‌ترین</option>
+                                <option value="price_asc" @selected($sort === 'price_asc')>ارزان‌ترین</option>
+                                <option value="price_desc" @selected($sort === 'price_desc')>گران‌ترین</option>
+                                <option value="name_asc" @selected($sort === 'name_asc')>الفبایی</option>
+                                <option value="name_desc" @selected($sort === 'name_desc')>الفبایی معکوس</option>
                             </select>
                         </label>
+                        <noscript><button class="button button--ghost" type="submit">مرتب‌سازی</button></noscript>
                     </form>
                     <div class="catalog-results__meta" aria-live="polite">
-                        <span>نمایش {{ number_format($products->firstItem() ?? 0) }} تا {{ number_format($products->lastItem() ?? 0) }} از {{ number_format($products->total()) }} محصول</span>
-                        <span>صفحه {{ number_format($products->currentPage()) }} از {{ number_format($products->lastPage()) }}</span>
+                        <span>نمایش {{ \App\Support\PersianNumber::format($products->firstItem() ?? 0) }} تا {{ \App\Support\PersianNumber::format($products->lastItem() ?? 0) }} از {{ \App\Support\PersianNumber::format($products->total()) }} محصول</span>
+                        <span>صفحه {{ \App\Support\PersianNumber::format($products->currentPage()) }} از {{ \App\Support\PersianNumber::format($products->lastPage()) }}</span>
                     </div>
                 </header>
 

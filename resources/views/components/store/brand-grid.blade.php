@@ -70,7 +70,7 @@
                                 </strong>
 
                                 <span>
-                                    {{ number_format($brand->active_products_count) }}
+                                    {{ \App\Support\PersianNumber::format($brand->active_products_count) }}
                                     محصول
                                 </span>
                             </div>

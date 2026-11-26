@@ -14,9 +14,9 @@
             @if (is_array($element))
                 @foreach ($element as $page => $url)
                     @if ($page == $paginator->currentPage())
-                        <span class="store-pagination__number is-current" aria-current="page" aria-label="صفحه {{ $page }}">{{ $page }}</span>
+                        <span class="store-pagination__number is-current" aria-current="page" aria-label="صفحه {{ $page }}">{{ \App\Support\PersianNumber::digits($page) }}</span>
                     @else
-                        <a class="store-pagination__number" href="{{ $url }}" aria-label="رفتن به صفحه {{ $page }}">{{ $page }}</a>
+                        <a class="store-pagination__number" href="{{ $url }}" aria-label="رفتن به صفحه {{ $page }}">{{ \App\Support\PersianNumber::digits($page) }}</a>
                     @endif
                 @endforeach
             @endif

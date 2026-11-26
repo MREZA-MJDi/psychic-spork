@@ -1,3 +1,4 @@
+import { persianDigits } from './persian-digits.js';
 (() => {
     const root = document.querySelector('[data-product-carousel]');
     if (!root) return;
@@ -44,7 +45,7 @@
     const updateStatus = () => {
         if (status) {
             status.textContent =
-                `${String(index + 1).padStart(2, '0')} / ${String(cards.length).padStart(2, '0')}`;
+                `${persianDigits(String(index + 1).padStart(2, '0'))} / ${persianDigits(String(cards.length).padStart(2, '0'))}`;
         }
     };
 

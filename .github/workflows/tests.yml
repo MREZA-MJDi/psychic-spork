@@ -30,7 +30,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
-          extensions: bcmath, ctype, curl, dom, fileinfo, intl, mbstring, openssl, pdo, pdo_sqlite, simplexml, sqlite3, tokenizer, xml, zip
+          extensions: bcmath, ctype, curl, dom, fileinfo, exif, gd, intl, mbstring, openssl, pdo, pdo_sqlite, simplexml, sqlite3, tokenizer, xml, zip
           coverage: none
 
       - name: Prepare SQLite for Composer scripts
@@ -103,7 +103,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
-          extensions: bcmath, ctype, curl, dom, fileinfo, intl, mbstring, openssl, pdo, pdo_mysql, simplexml, tokenizer, xml, zip
+          extensions: bcmath, ctype, curl, dom, fileinfo, exif, gd, intl, mbstring, openssl, pdo, pdo_mysql, simplexml, tokenizer, xml, zip
           coverage: none
 
       - name: Validate Composer configuration

@@ -55,7 +55,7 @@
             'resources/js/store-search.js',
         ];
 
-        if (request()->routeIs('wholesale.show', 'club')) {
+        if (request()->routeIs('wholesale.show', 'wholesale.catalog', 'club')) {
             $storeAssets[] = 'resources/css/wholesale.css';
         }
 

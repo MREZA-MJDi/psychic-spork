@@ -27,7 +27,7 @@
 
     <div class="immersive-title-overlay" id="immersiveTitleOverlay">
         <div class="immersive-title-overlay__number">
-            <span id="immersiveSlideNumber">01</span>
+            <span id="immersiveSlideNumber">۰۱</span>
         </div>
         <div class="immersive-title-overlay__title">
             <h1 id="immersiveSlideTitle">کالکشن منتخب جانان</h1>
@@ -55,7 +55,7 @@
     </button>
 
     <div class="immersive-controls" id="immersiveControls">
-        <div class="immersive-percentage" id="immersivePercentage">60%</div>
+        <div class="immersive-percentage" id="immersivePercentage">۶۰٪</div>
 
         <div class="immersive-switch" id="immersiveSwitch">
             <button type="button" class="immersive-switch__button immersive-switch__button--current" data-zoom="0.3">

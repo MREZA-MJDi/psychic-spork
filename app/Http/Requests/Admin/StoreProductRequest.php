@@ -236,10 +236,10 @@ class StoreProductRequest extends FormRequest
 
             'image_file' => [
                 'nullable',
-                'image',
-                'mimes:jpeg,jpg,png,webp',
-                'max:2048',
-                'dimensions:max_width=1600,max_height=2000',
+                'file',
+                'mimes:jpeg,jpg,png,webp,avif',
+                'max:10240',
+                'dimensions:min_width=1,min_height=1',
             ],
         ];
     }

@@ -16,7 +16,7 @@
                     COLLECTION / {{ strtoupper($category->slug) }}
                 </span>
 
-                <h1>{{ $category->name }}</h1>
+                <h1>{{ \App\Support\PersianNumber::digits($category->name) }}</h1>
 
                 <p>
                     {{ $category->description ?: 'منتخب محصولات این دسته‌بندی را ببینید.' }}
@@ -39,7 +39,7 @@
                     </small>
 
                     <strong>
-                        {{ number_format($products->total()) }} انتخاب در این کالکشن
+                        {{ \App\Support\PersianNumber::format($products->total()) }} انتخاب در این کالکشن
                     </strong>
                 </div>
 
@@ -63,7 +63,7 @@
             <div class="catalog-toolbar">
                 <div>
                     <span class="eyebrow">CURATED PRODUCTS</span>
-                    <strong>{{ number_format($products->total()) }} محصول</strong>
+                    <strong>{{ \App\Support\PersianNumber::format($products->total()) }} محصول</strong>
                 </div>
 
                 <div class="catalog-toolbar__actions">

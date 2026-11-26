@@ -1,4 +1,4 @@
-import { initMoneyInputs } from './money-input.js';
+import { formatMoney, initMoneyInputs, normalizeMoney } from './money-input.js';
 
 initMoneyInputs();
 
@@ -414,27 +414,13 @@ document.addEventListener('DOMContentLoaded', () => {
         'amount_toman',
     ]);
 
-    const faNumber = new Intl.NumberFormat('fa-IR');
-
     const normalizeDigits = (value) => String(value ?? '')
         .replace(/[۰-۹]/g, (digit) => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(digit)))
         .replace(/[٠-٩]/g, (digit) => String('٠١٢٣٤٥٦٧٨٩'.indexOf(digit)));
 
-    const rawMoney = (value) => normalizeDigits(value)
-        .replace(/[٬,،\s]/g, '')
-        .replace(/[^0-9.-]/g, '');
-
-    const formatMoney = (value) => {
-        const raw = rawMoney(value);
-        if (!raw || raw === '-') return '';
-        const number = Number(raw);
-        if (!Number.isFinite(number)) return '';
-        return faNumber.format(Math.max(0, Math.round(number)));
-    };
-
     const isMoneyInput = (input) => {
         const name = input.getAttribute('name') || '';
-        return input.hasAttribute('data-money-input') || MONEY_NAMES.has(name);
+        return !input.hasAttribute('data-money-input') && MONEY_NAMES.has(name);
     };
 
     const enhanceMoneyInput = (input) => {
@@ -450,7 +436,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const visible = document.createElement('input');
         visible.type = 'text';
         visible.className = 'admin-money-input';
-        visible.inputMode = 'numeric';
+        visible.inputMode = 'decimal';
         visible.autocomplete = 'off';
         visible.name = originalName + '_display';
         visible.value = formatMoney(input.value);
@@ -461,12 +447,12 @@ document.addEventListener('DOMContentLoaded', () => {
         input.parentNode.insertBefore(visible, input);
 
         const sync = () => {
-            input.value = rawMoney(visible.value);
+            input.value = normalizeMoney(visible.value);
             visible.value = formatMoney(input.value);
         };
 
         visible.addEventListener('input', () => {
-            input.value = rawMoney(visible.value);
+            input.value = normalizeMoney(visible.value);
         });
 
         visible.addEventListener('blur', sync);
@@ -605,7 +591,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const visible = document.createElement('input');
         visible.type = 'text';
         visible.className = 'admin-jalali-input';
-        visible.inputMode = 'numeric';
+        visible.inputMode = 'decimal';
         visible.autocomplete = 'off';
         visible.name = input.name + '_jalali';
         visible.placeholder = '۱۴۰۵/۰۷/۰۶';
@@ -908,8 +894,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const normalizeSalePrice = () => {
             if (!priceInput || !salePriceInput) return;
-            const price = Number(priceInput.value);
-            const sale = Number(salePriceInput.value);
+            const price = Number(normalizeMoney(priceInput.value));
+            const sale = Number(normalizeMoney(salePriceInput.value));
             if (Number.isFinite(price) && Number.isFinite(sale) && sale >= price) {
                 salePriceInput.value = '';
             }
@@ -1024,16 +1010,10 @@ document.addEventListener('DOMContentLoaded', () => {
         colorInput?.addEventListener('input', updateColorLabel);
         updateColorLabel();
 
-        const normalize = (value) => Number(
-            String(value ?? '')
-                .replace(/[۰-۹]/g, (digit) => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(digit)))
-                .replace(/[,\u066C،\s]/g, '')
-        );
-
         const syncSale = () => {
             if (!priceInput || !salePriceInput) return;
-            const price = normalize(priceInput.value);
-            const sale = normalize(salePriceInput.value);
+            const price = Number(normalizeMoney(priceInput.value));
+            const sale = Number(normalizeMoney(salePriceInput.value));
             if (Number.isFinite(price) && price > 0 && Number.isFinite(sale) && sale >= price) {
                 salePriceInput.value = '';
             }
@@ -1167,13 +1147,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const packBasePrice = document.querySelector('[data-pack-base-price]');
         const packDiscount = document.querySelector('[data-pack-discount]');
         const packPriceStatus = document.querySelector('[data-pack-price-status]');
-        const normalizeMoney = (value) => {
-            const normalized = String(value ?? '')
-                .replace(/[۰-۹]/g, (digit) => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(digit)))
-                .replace(/[٠-٩]/g, (digit) => String('٠١٢٣٤٥٦٧٨٩'.indexOf(digit)));
-            return Number(normalized.replace(/[^0-9.-]/g, '')) || 0;
-        };
-
         imageInput?.addEventListener('change', () => {
             const file = imageInput.files?.[0];
             if (!file || !imagePreview) return;
@@ -1276,7 +1249,7 @@ document.addEventListener('DOMContentLoaded', () => {
             let selected = selectedVariants.size;
             let units = [...selectedVariants.values()].reduce((sum, item) => sum + item.quantity, 0);
             let baseTotal = [...selectedVariants.values()].reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
-            let requestedPackPrice = normalizeMoney(packPriceInput?.value);
+            let requestedPackPrice = Number(normalizeMoney(packPriceInput?.value)) || 0;
             let discount = baseTotal - requestedPackPrice;
             let visible = 0;
 

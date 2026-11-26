@@ -11,24 +11,14 @@ Laravel storefront and administration platform for the Persian Jani / Janan stor
 
 ## Windows / XAMPP setup
 
-### 1. Get the Holoo integration branch
-
-Until PR [#52](https://github.com/MREZA-MJDi/psychic-spork/pull/52) is merged, the integration code is on its own branch.
-
-For a fresh clone:
+### 1. Clone the current storefront
 
 ```bat
-git clone --branch feat/nila-holoo-webservice-sync-2026-10-25 --single-branch https://github.com/MREZA-MJDi/psychic-spork.git jani
+git clone https://github.com/MREZA-MJDi/psychic-spork.git jani
 cd jani
 ```
 
-If the repository is already cloned in `C:\\xampp2\\htdocs\\jani`, keep that copy and run:
-
-```bat
-cd /d C:\\xampp2\\htdocs\\jani
-git fetch origin
-git switch --track origin/feat/nila-holoo-webservice-sync-2026-10-25
-```
+The Holoo integration is included in `main`.
 
 ### 2. Create the private local env
 
@@ -117,3 +107,14 @@ Holoo feature tests mock HTTP responses. They verify the expected request/respon
 ## Security and operations
 
 Do not commit `.env` or real service/payment credentials. Keep the Holoo web-service port behind a trusted LAN/VPN rather than exposing it publicly. Do not use production payment credentials in development. Check both authorized and unauthorized access to administrative routes before deployment.
+
+## Production deployment
+
+1. Back up the database, preserve the existing `.env` and `storage/app/public`, and make the repository's `public` directory the domain's document root. Configure HTTPS on the origin. The Nginx example in `deploy/nginx/jani.conf.example` needs the real server names, document root, PHP-FPM socket and TLS configuration.
+2. For a fresh install, populate a private `.env` from `.env.production.example` and generate the application key once. Set `APP_URL` to the canonical HTTPS URL, configure the production database and credentials, and verify the session domain. Run `bash deploy/deploy.sh` from the checked-out release.
+3. Keep shared CDN caching limited to versioned static assets. Bypass the cache for HTML, session responses, search, account, cart, checkout and payment callbacks. Preserve older Vite fingerprints through the rollback window so already-open pages can load their assets.
+4. Check `/up` and verify that the homepage actually belongs to Janan. Check `/products`, `/drclubz`, `/wholesale`, and `/wholesale/catalog`, then verify login, cart and a controlled payment callback against the configured gateway.
+
+On a VPS shared with other sites, use a dedicated application user and database. For Debian or Ubuntu, `deploy/php-fpm/janan.conf.example` defines a dedicated PHP-FPM pool and socket. Install it in the selected PHP version's `fpm/pool.d`, validate it with that version's `php-fpm -t`, and point Janan's Nginx virtual host at `/run/php/janan.sock`. Adjust the pool user, Nginx worker group, and working directory if they differ on the host.
+
+Product and variant uploads accept common image files up to 10 MiB each, with a 32 MiB request limit and a 32-megapixel decoding limit. Large images are resized without cropping and stored as WebP, up to 1,600 pixels on the longest edge and 512 KiB. Enable GD with WebP support and EXIF in PHP CLI and FPM. Existing media URLs remain valid; new uploads are compressed on the server. The production example reserves 2 GiB of free local disk space for co-hosted applications. For a hard Janan-only storage quota, use a filesystem quota or a dedicated volume for `storage/app/public`.

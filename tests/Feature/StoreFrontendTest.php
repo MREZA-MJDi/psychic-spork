@@ -40,7 +40,7 @@ class StoreFrontendTest extends TestCase
     {
         $this->get(route('login'))
             ->assertOk()
-            ->assertSee('خوش برگشتی.')
+            ->assertSee('ورود به حساب')
             ->assertSee('شماره موبایل')
             ->assertSee('رمز عبور')
             ->assertSee('ورود به حساب');
@@ -103,7 +103,7 @@ class StoreFrontendTest extends TestCase
 
             $this->get(route('products.index', ['per_page' => 6]))
                 ->assertOk()
-                ->assertSee('نمایش 1 تا 6', false)
+                ->assertSee('نمایش ۱ تا ۶', false)
                 ->assertSee('store-pagination__inner', false)
                 ->assertSee('صفحه بعدی')
                 ->assertDontSee('Showing');
@@ -384,7 +384,7 @@ class StoreFrontendTest extends TestCase
                 ->assertSee('product-detail-v2__layout', false)
                 ->assertSee('product-detail-v2__purchase', false)
                 ->assertSee('محصول جزئیات تست')
-                ->assertSee('125,000', false)
+                ->assertSee('۱۲۵٬۰۰۰', false)
                 ->assertSee('DETAIL-', false)
                 ->assertSee('افزودن به سبد خرید');
         } finally {

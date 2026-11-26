@@ -68,7 +68,7 @@
         <header class="admin-card-header">
             <div>
                 <h2 class="admin-card-title">Inbox پیام‌ها</h2>
-                <p class="admin-card-description">{{ number_format($messages->total()) }} پیام ثبت شده است.</p>
+                <p class="admin-card-description">{{ \App\Support\PersianNumber::format($messages->total()) }} پیام ثبت شده است.</p>
             </div>
         </header>
 
@@ -110,7 +110,7 @@
                     @foreach($messages as $message)
                         <tr>
                             <td>
-                                <div class="admin-product-name">{{ $message->name }}</div>
+                                <div class="admin-product-name">{{ \App\Support\PersianNumber::digits($message->name) }}</div>
                                 <div class="admin-product-meta">{{ $message->email ?: ($message->phone ?: 'بدون اطلاعات تماس') }}</div>
                             </td>
                             <td>{{ $message->subject ?: 'بدون موضوع' }}</td>
