@@ -43,7 +43,7 @@
 
                     <i aria-hidden="true"></i>
 
-                    <span>JANAN SELECT</span>
+
                 </div>
 
                 <div class="brand-hero__actions">
@@ -70,7 +70,7 @@
     <div class="container customer-action-wrap">
         <div class="customer-action-strip">
             <div class="customer-action-strip__copy">
-                <small>BRAND / SHOPPING PATH</small>
+
                 <strong>محصولات {{ $brand->name }} را مستقیم مرور کن.</strong>
             </div>
             <div class="customer-action-strip__actions">
@@ -114,7 +114,7 @@
         <div class="container">
 
             <div class="brand-profile__intro">
-                <span class="eyebrow">BRAND / OVERVIEW</span>
+
 
                 <h2>
                     {{ $brand->name }} دقیقاً چه هویتی دارد؟
@@ -137,7 +137,7 @@
 
             <header class="section-head">
                 <div>
-                    <span class="eyebrow">WHAT STANDS OUT</span>
+
 
                     <h2>
                         ویژگی‌هایی که موقع انتخاب باید ببینی.
@@ -178,7 +178,7 @@
             <div class="brand-profile__comparison">
 
                 <div class="brand-profile__comparison-intro">
-                    <span class="eyebrow">BEFORE YOU BUY</span>
+
 
                     <h2>
                         نقاطی که باید با دقت بیشتری بررسی شوند.
@@ -219,7 +219,7 @@
 
             <div class="brand-profile__market-head">
                 <div>
-                    <span class="eyebrow">MARKET / CONTEXT</span>
+
 
                     <h2>
                         {{ $brandProfile['market']['title'] }}
@@ -245,9 +245,7 @@
             </div>
 
             <div class="brand-profile__market-note">
-                <span class="brand-profile__market-note-label">
-                    JANAN EDITORIAL NOTE
-                </span>
+
 
                 <p>
                     برای مقایسه برندها، به‌جای رتبه‌بندی کلی، بهتر است محصول مشخص،
@@ -267,7 +265,7 @@
 
             <header class="section-head">
                 <div>
-                    <span class="eyebrow">JANAN / CATALOG</span>
+
 
                     <h2>
                         محصولات {{ $brand->name }}
@@ -308,7 +306,7 @@
             @else
 
                 <div class="empty-state">
-                    <span class="eyebrow">NO ACTIVE PRODUCTS</span>
+
 
                     <h2>
                         در حال حاضر محصول فعالی از این برند موجود نیست.

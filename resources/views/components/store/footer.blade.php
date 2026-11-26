@@ -1,311 +1,85 @@
+@php
+    $brandName = $siteBrandNameFa ?? 'جانه جانان';
+    $trust = config('app.trust', []);
+@endphp
+
 <footer class="store-footer">
-
-    <div class="container footer-top">
-
-        {{-- =====================================================
-             BRAND
-        ====================================================== --}}
-
-        <div class="footer-brand">
-
-            <a
-                href="{{ route('home') }}"
-                class="brand brand--footer"
-                aria-label="{{ $siteBrandNameLatin ?? 'Janan' }}"
-            >
-                <span class="brand__latin">
-                    {{ $siteBrandNameLatin ?? 'Jane Janan' }}
-                </span>
-
-                <span class="brand__fa">
-                    {{ $siteBrandNameFa ?? 'جانه جانان' }}
-                </span>
-            </a>
-
-            <p class="footer-brand__text">
-                {{ $siteFooterText ?: "فروشگاه آنلاین {$siteBrandNameLatin}؛ ترکیبی از کیفیت، زیبایی و انتخابی که برای شما طراحی شده است." }}            </p>
-
-            <div
-                class="footer-social"
-                aria-label="دسترسی سریع"
-            >
-                <a href="{{ route('categories.index') }}">
-                    <span>دسته‌ها</span>
-                    <b aria-hidden="true">↗</b>
-                </a>
-
-                <a href="{{ route('cart') }}" aria-label="سبد خرید">
-                    <x-store.icon name="basket" />
-                </a>
-
-                <a href="{{ route('about') }}#contact">
-                    <span>درباره و تماس</span>
-                    <b aria-hidden="true">↗</b>
-                </a>
-
-                <a href="{{ route('wholesale.show') }}">
-                    <span>خرید عمده</span>
-                    <b aria-hidden="true">↗</b>
-                </a>
-            </div>
-
-        </div>
-
-
-        {{-- =====================================================
-             QUICK ACCESS
-        ====================================================== --}}
-
-        <div class="footer-col">
-
-            <span class="footer-col__index">
-                ۰۱
-            </span>
-
-            <h3>
-                دسترسی سریع
-            </h3>
-
-            <nav aria-label="دسترسی سریع">
-
-                <a href="{{ route('home') }}">
-                    خانه
-                </a>
-
-                <a href="{{ route('products.index') }}">
-                    محصولات
-                </a>
-
-                <a href="{{ route('categories.index') }}">
-                    دسته‌بندی‌ها
-                </a>
-
-
-            </nav>
-
-        </div>
-
-
-        {{-- =====================================================
-             CUSTOMER SERVICE
-        ====================================================== --}}
-
-        <div class="footer-col">
-
-            <span class="footer-col__index">
-                ۰۲
-            </span>
-
-            <h3>
-                خدمات مشتری
-            </h3>
-
-            <nav aria-label="خدمات مشتری">
-
-                <a href="{{ route('shipping') }}">
-                    روش‌های ارسال
-                </a>
-
-                <a href="{{ route('returns') }}">
-                    شرایط مرجوعی
-                </a>
-
-                <a href="{{ route('faq') }}">
-                    سوالات متداول
-                </a>
-
-                <a href="{{ route('about') }}#contact">
-                    درباره و تماس
-                </a>
-
-                <a href="{{ route('wholesale.show') }}">
-                    خرید عمده
-                </a>
-
-            </nav>
-
-        </div>
-
-
-        {{-- =====================================================
-             STORE CONTACT
-        ====================================================== --}}
-
-        <div class="footer-newsletter">
-
-            <span class="footer-col__index">
-                ۰۳
-            </span>
-
-            <h3>
-                ارتباط با جانان
-            </h3>
-
-            <div class="footer-contact-list">
-
-                @if(filled($siteStorePhone))
-                    <a class="store-icon-link" href="tel:{{ preg_replace('/\s+/', '', $siteStorePhone) }}" aria-label="تماس تلفنی با جانان">
-                        <x-store.icon name="phone" />
-                    </a>
-                @else
-                    <span class="store-icon-link"><x-store.icon name="phone" /></span>
+    <div class="container">
+        <div class="store-footer__main">
+            <div class="store-footer__identity">
+                <a href="{{ route('home') }}" class="store-footer__wordmark">{{ $brandName }}</a>
+                @if(filled($siteFooterText ?? null))
+                    <p>{{ $siteFooterText }}</p>
                 @endif
-
-                <a href="{{ route('about') }}#contact" class="footer-contact-line">فرم تماس با پشتیبانی</a>
-
-                @if($siteStoreEmail)
-                    <a
-                        href="mailto:{{ $siteStoreEmail }}"
-                        class="footer-contact-line"
-                        dir="ltr"
-                    >
-                        <small>ایمیل</small>
-                        <span>{{ $siteStoreEmail }}</span>
-                    </a>
-                @endif
-
-                @if($siteStoreAddress)
-                    <span class="footer-contact-line">
-                        <small>نشانی</small>
-                        <span>{{ $siteStoreAddress }}</span>
-                    </span>
-                @endif
-
-            </div>
-
-            <a
-                href="{{ auth()->check() ? route('account') : route('login') }}"
-                class="footer-account-link"
-            >
-                <span>
-                    {{ auth()->check() ? 'حساب جانان' : 'ورود به حساب' }}
-                </span>
-
-                <b aria-hidden="true">
-                    ↗
-                </b>
-            </a>
-
-        </div>
-
-    </div>
-
-
-    {{-- =====================================================
-         TRUST / LEGAL
-    ====================================================== --}}
-
-    @php
-        $trust = config('app.trust', []);
-    @endphp
-
-    <div class="container footer-trust">
-        <div class="footer-trust__head">
-            <div>
-                <span class="footer-col__index">۰۴</span>
-                <h3>راهنمای سفارش و اطلاعات فروشگاه</h3>
-            </div>
-
-            <p>
-                قبل از خرید، شرایط ارسال و بازگشت را بخوانید. برای پیگیری خرید، به حساب کاربری بروید.
-            </p>
-        </div>
-
-        <div class="footer-trust__grid">
-
-            @if(!empty($trust['enamad_url']))
-                <a
-                    href="{{ $trust['enamad_url'] }}"
-                    class="footer-trust__item"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    <span class="footer-trust__label">VERIFIED TRUST</span>
-
-                    @if(!empty($trust['enamad_image']))
-                        <img
-                            src="{{ $trust['enamad_image'] }}"
-                            alt="نماد اعتماد الکترونیکی"
-                            loading="lazy"
-                        >
+                <div class="store-footer__actions">
+                    <x-store.icon-link
+                        :href="auth()->check() ? route('account') : route('login')"
+                        :icon="auth()->check() ? 'user' : 'login'"
+                        :label="auth()->check() ? 'حساب کاربری' : 'ورود به حساب'"
+                    />
+                    <x-store.icon-link :href="route('cart')" icon="basket" label="سبد خرید" />
+                    @if(filled($siteStorePhone ?? null))
+                        <x-store.icon-link :href="'tel:' . preg_replace('/\s+/', '', $siteStorePhone)" icon="phone" label="تماس تلفنی با جانان" />
                     @endif
-
-                    <strong>نماد اعتماد الکترونیکی</strong>
-                    <span>مشاهده اطلاعات رسمی</span>
-                </a>
-            @else
-                <a href="{{ route('shipping') }}" class="footer-trust__item">
-                    <strong>راهنمای ارسال</strong>
-                    <span>روش‌های ارسال و اطلاعات تحویل سفارش</span>
-                </a>
-            @endif
-
-            @if(!empty($trust['license_url']))
-                <a
-                    href="{{ $trust['license_url'] }}"
-                    class="footer-trust__item"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    <span class="footer-trust__label">LEGAL</span>
-                    <strong>مجوزها و اطلاعات قانونی</strong>
-                    <span>مشاهده جزئیات رسمی</span>
-                </a>
-            @else
-                <a href="{{ route('returns') }}" class="footer-trust__item">
-                    <strong>راهنمای بازگشت کالا</strong>
-                    <span>شرایط و مراحل درخواست بازگشت کالا</span>
-                </a>
-            @endif
-
-            <div class="footer-trust__item">
-
-                <strong>پرداخت آنلاین</strong>
-                <span>مبلغ نهایی سفارش را پیش از پرداخت در مرحله تسویه‌حساب بررسی کنید.</span>
+                </div>
             </div>
 
-            <div class="footer-trust__item">
-                <strong>پشتیبانی جانان</strong>
+            <nav aria-labelledby="footer-shop-heading">
+                <h2 id="footer-shop-heading">خرید از جانان</h2>
+                <ul class="store-footer__icons">
+                    <li><x-store.icon-link :href="route('products.index')" icon="bag" label="محصولات" /></li>
+                    <li><x-store.icon-link :href="route('categories.index')" icon="grid" label="دسته‌بندی‌ها" /></li>
+                    <li><x-store.icon-link :href="route('wholesale.show')" icon="layers" label="خرید عمده" /></li>
+                </ul>
+            </nav>
 
-                <span>
+            <nav aria-labelledby="footer-help-heading">
+                <h2 id="footer-help-heading">راهنمای سفارش</h2>
+                <ul class="store-footer__icons">
+                    <li><x-store.icon-link :href="route('shipping')" icon="truck" label="روش‌های ارسال" /></li>
+                    <li><x-store.icon-link :href="route('returns')" icon="return" label="شرایط مرجوعی" /></li>
+                    <li><x-store.icon-link :href="route('faq')" icon="help" label="سؤالات متداول" /></li>
+                </ul>
+            </nav>
+
+            <section aria-labelledby="footer-contact-heading">
+                <h2 id="footer-contact-heading">ارتباط با جانان</h2>
+                <ul class="store-footer__icons">
+                    <li><x-store.icon-link :href="route('about') . '#contact'" icon="message" label="فرم تماس با پشتیبانی" /></li>
+                    @if(filled($siteStoreEmail ?? null))
+                        <li><x-store.icon-link :href="'mailto:' . $siteStoreEmail" icon="mail" label="ایمیل پشتیبانی" /></li>
+                    @endif
                     @if(!empty($trust['social_instagram']))
-                        <a href="{{ $trust['social_instagram'] }}" target="_blank" rel="noopener noreferrer">Instagram</a>
+                        <li><x-store.icon-link :href="$trust['social_instagram']" icon="instagram" label="اینستاگرام" target="_blank" rel="noopener noreferrer" /></li>
                     @endif
-
-                    @if(!empty($trust['social_instagram']) && !empty($trust['social_telegram']))
-                        ·
-                    @endif
-
                     @if(!empty($trust['social_telegram']))
-                        <a href="{{ $trust['social_telegram'] }}" target="_blank" rel="noopener noreferrer">Telegram</a>
+                        <li><x-store.icon-link :href="$trust['social_telegram']" icon="telegram" label="تلگرام" target="_blank" rel="noopener noreferrer" /></li>
                     @endif
+                </ul>
+                @if(filled($siteStoreAddress ?? null))
+                    <p class="store-footer__address">{{ $siteStoreAddress }}</p>
+                @endif
+            </section>
+        </div>
 
-                    @if(empty($trust['social_instagram']) && empty($trust['social_telegram']))
-                        <a href="{{ route('faq') }}">پاسخ پرسش‌های متداول خرید و سفارش</a>
+        <div class="store-footer__bottom">
+            <p>© {{ \App\Support\PersianNumber::digits(date('Y')) }} {{ $brandName }}. تمامی حقوق محفوظ است.</p>
+            @if(!empty($trust['enamad_url']) || !empty($trust['license_url']))
+                <div class="store-footer__credentials">
+                    @if(!empty($trust['enamad_url']))
+                        @if(!empty($trust['enamad_image']))
+                            <a href="{{ $trust['enamad_url'] }}" target="_blank" rel="noopener noreferrer">
+                                <img src="{{ $trust['enamad_image'] }}" alt="نماد اعتماد الکترونیکی" loading="lazy">
+                            </a>
+                        @else
+                            <x-store.icon-link :href="$trust['enamad_url']" icon="shield" label="نماد اعتماد الکترونیکی" target="_blank" rel="noopener noreferrer" />
+                        @endif
                     @endif
-                </span>
-            </div>
-
+                    @if(!empty($trust['license_url']))
+                        <x-store.icon-link :href="$trust['license_url']" icon="document" label="مجوزهای فروشگاه" target="_blank" rel="noopener noreferrer" />
+                    @endif
+                </div>
+            @endif
         </div>
     </div>
-
-
-    {{-- =====================================================
-         FOOTER BOTTOM
-    ====================================================== --}}
-
-    <div class="container footer-bottom">
-
-        <span>
-            © {{ date('Y') }}
-            {{ $siteBrandNameLatin ?? 'Jane Janan' }}
-            · تمامی حقوق محفوظ است.
-        </span>
-
-        <span class="footer-bottom__signature">
-            JANAN / ONLINE STORE
-        </span>
-
-    </div>
-
 </footer>

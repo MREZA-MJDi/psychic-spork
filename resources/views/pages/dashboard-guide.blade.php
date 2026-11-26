@@ -5,7 +5,7 @@
     <section class="page-hero page-hero--premium">
         <div class="container page-hero__layout">
             <div>
-                <span class="eyebrow">JANAN / DASHBOARD GUIDE</span>
+
                 <h1>راهنمای کار با<br><em>پنل جانان.</em></h1>
                 <p>راهنمای ساده‌ی فیلدها و کارهای روزمره‌ی پنل؛ برای اینکه بدانید هر تغییر کجا دیده می‌شود و هر سفارش چطور جلو می‌رود.</p>
             </div>

@@ -1,6 +1,6 @@
 <div class="janan-trust">
     <div class="janan-trust__intro">
-        <span class="janan-trust__eyebrow">JANAN / TRUST / 02</span>
+
 
         <strong>
             تجربه‌ای دقیق،
@@ -28,7 +28,7 @@
                 <span>محصولات ثبت‌شده در فروشگاه</span>
             </div>
 
-            
+
         </div>
 
 
@@ -47,7 +47,7 @@
                 <span>قیمت و موجودی به‌روز</span>
             </div>
 
-            
+
         </div>
 
 
@@ -66,7 +66,7 @@
                 <span>مسیر ساده برای پشتیبانی</span>
             </div>
 
-            
+
         </div>
 
 
@@ -86,7 +86,7 @@
                 <span>شرایط، مرجوعی و سیاست‌ها</span>
             </div>
 
-            
+
         </div>
 
     </div>

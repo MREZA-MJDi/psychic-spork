@@ -20,7 +20,7 @@
                     @endphp
                     <a class="home-picks__card" href="{{ route('products.show', $product) }}">
                         <div class="home-picks__image" aria-hidden="true">
-                            <x-store.image :src="$image" alt="" fallback="JANAN" />
+                            <x-store.image :src="$image" alt="" fallback="جانان" />
                         </div>
                         <div class="home-picks__details">
                             <h3>{{ \App\Support\PersianNumber::digits($product->name) }}</h3>

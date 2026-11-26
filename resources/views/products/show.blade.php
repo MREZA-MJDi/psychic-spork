@@ -1,6 +1,6 @@
 @extends('layouts.store')
 
-@section('title', $product->name . ' — ' . ($siteBrandNameLatin ?? 'Janan'))
+@section('title', $product->name . ' — ' . ($siteBrandNameFa ?? 'جانان'))
 
 @section('content')
 @php
@@ -73,9 +73,7 @@
                         <div class="product-gallery-v2__stage">
 
                             <div class="product-gallery-v2__stage-meta">
-                                <span class="product-gallery-v2__kicker">
-                                    JANAN / VISUAL
-                                </span>
+
 
                                 <span class="product-gallery-v2__index">
                                     <span data-gallery-current>۰۱</span>
@@ -91,7 +89,7 @@
                                     loading="eager"
                                     fetchpriority="high"
                                     fallback-class="product-gallery__placeholder"
-                                    fallback="JANAN"
+                                    fallback="جانان"
                                     class="product-gallery-v2__main-image"
                                 />
 
@@ -139,7 +137,7 @@
                                             alt=""
                                             loading="{{ $loop->first ? 'eager' : 'lazy' }}"
                                             decoding="async"
-                                            data-store-image-fallback="JANAN"
+                                            data-store-image-fallback="جانان"
                                             data-store-image-fallback-class="product-gallery__thumb-fallback"
                                         >
                                     </button>
@@ -178,16 +176,14 @@
                                             data-product-variant
                                             data-variant-action="{{ route('cart.store', $variantOption) }}"
                                             data-variant-price="{{ $variantOption->effective_price }}"
-                                            data-variant-wholesale="{{ $variantOption->wholesale_price !== null ? $variantOption->wholesale_price : '' }}"
                                             data-variant-regular="{{ $variantOption->price }}"
                                             data-variant-sale="{{ $variantOption->is_on_sale ? '1' : '0' }}"
                                             data-variant-stock="{{ $variantOption->stock }}"
                                             data-variant-low-stock="{{ $variantOption->is_low_stock ? '1' : '0' }}"
-                                            data-variant-label="{{ $variantOption->display_name }}"
-                                            data-variant-sku="{{ $variantOption->sku }}"
+                                            data-variant-label="{{ $variantOption->customer_label }}"
                                             data-variant-index="{{ $loop->iteration }}"
                                             data-variant-image="{{ $variantImage ?? '' }}"
-                                            data-variant-image-alt="{{ $product->name }} — {{ $variantOption->display_name }}"
+                                            data-variant-image-alt="{{ $product->name }} — {{ $variantOption->customer_label }}"
                                             aria-pressed="{{ $variantOption->id === $variant?->id ? 'true' : 'false' }}"
                                             @disabled($variantOption->stock < 1)
                                         >
@@ -198,7 +194,7 @@
                                                         alt=""
                                                         fallback-tag="span"
                                                         fallback-class="product-variant-visual__fallback"
-                                                        :fallback="mb_substr($variantOption->display_name ?: 'V', 0, 1)"
+                                                        :fallback="mb_substr($variantOption->customer_label ?: 'م', 0, 1)"
                                                     />
                                                 @elseif($variantSafeColor)
                                                     <i
@@ -208,13 +204,13 @@
                                                     ></i>
                                                 @else
                                                     <span class="product-variant-visual__fallback" aria-hidden="true">
-                                                        {{ mb_substr($variantOption->display_name ?: 'V', 0, 1) }}
+                                                        {{ mb_substr($variantOption->customer_label ?: 'م', 0, 1) }}
                                                     </span>
                                                 @endif
                                             </span>
 
                                             <span class="product-variant-visual__copy">
-                                                <strong>{{ $variantOption->display_name }}</strong>
+                                                <strong>{{ $variantOption->customer_label }}</strong>
                                                 <small>
                                                     {{ $variantOption->stock > 0 ? 'موجود' : 'ناموجود' }}
                                                     ·
@@ -250,20 +246,14 @@
                                 </a>
                             @endif
                         </div>
-
-                        @if($variant?->sku)
-                            <span class="product-detail-v2__sku" data-product-sku>
-                                SKU / {{ $variant->sku }}
-                            </span>
-                        @endif
                     </div>
 
                     <div class="product-detail-v2__title">
                         <h1 id="product-title">{{ \App\Support\PersianNumber::digits($product->name) }}</h1>
 
-                        <p>
-                            {{ $product->short_description ?: 'جزئیات محصول را بررسی کن و انتخابت را برای خرید کامل کن.' }}
-                        </p>
+                        @if(filled($product->short_description))
+                            <p>{{ $product->short_description }}</p>
+                        @endif
                     </div>
 
                     <div class="product-detail-v2__purchase-block product-detail-v2__price-block">
@@ -271,7 +261,7 @@
                             <span>قیمت و موجودی</span>
                             <small>
                                 مدل منتخب:
-                                <b data-product-variant-label>{{ $variant?->display_name ?: 'انتخاب نشده' }}</b>
+                                <b data-product-variant-label>{{ $variant?->customer_label ?: 'انتخاب نشده' }}</b>
                             </small>
                         </div>
 
@@ -282,15 +272,6 @@
                                 </strong>
                                 <span>تومان</span>
 
-                                <span
-                                    class="product-wholesale-price"
-                                    data-product-wholesale-price
-                                    @if($variant?->wholesale_price === null) hidden @endif
-                                >
-                                    @if($variant?->wholesale_price !== null)
-                                        عمده: {{ \App\Support\PersianNumber::format($variant->wholesale_price) }} تومان
-                                    @endif
-                                </span>
 
                                 <del
                                     data-product-regular-price
@@ -360,14 +341,11 @@
                                     </button>
                                 </div>
 
-                                <p class="product-purchase-form__hint">
-                                    انتخابت را اضافه کن؛ سبد خرید بدون ترک کردن صفحه به‌روزرسانی می‌شود.
-                                </p>
                             </form>
                         </div>
                     @else
                         <div class="product-unavailable">
-                            <strong>این محصول فعلاً Variant فعالی ندارد.</strong>
+                            <strong>این محصول فعلاً قابل سفارش نیست.</strong>
                             <span>وقتی مدل فعال شود، خرید از همین صفحه در دسترس خواهد بود.</span>
                         </div>
                     @endif
@@ -378,118 +356,44 @@
         </div>
     </section>
 
-    <div class="container customer-action-wrap customer-product-action">
-        <div class="customer-action-strip">
-            <div class="customer-action-strip__copy">
-                <small>JANAN / PRODUCT PATH</small>
-                <strong>مدل را انتخاب کن، قیمت و موجودی را ببین و همان‌جا به سبد اضافه کن.</strong>
-            </div>
-            <div class="customer-action-strip__actions">
-                @if($product->category)
-                    <a class="button button--ghost" href="{{ route('categories.show', $product->category) }}">این دسته</a>
+    @if(filled($product->description) || $variant || $attributes->isNotEmpty())
+        <section class="container product-information" aria-labelledby="product-information-title">
+            <div class="product-information__accordions">
+                <h2 id="product-information-title">دربارهٔ محصول</h2>
+
+                @if(filled($product->description))
+                    <details open>
+                        <summary>توضیحات محصول <b aria-hidden="true">+</b></summary>
+                        <div class="product-information__content">
+                            {!! nl2br(e($product->description)) !!}
+                        </div>
+                    </details>
                 @endif
-                @if($product->brand)
-                    <a class="button button--primary" href="{{ route('brands.show', $product->brand) }}">این برند</a>
-                @endif
-            </div>
-        </div>
-    </div>
 
-    <section class="product-information product-information--v2">
-        <div class="container">
-            <div class="product-information__grid">
-
-                <div class="product-information__intro">
-                    <span class="eyebrow">JANAN / DETAILS</span>
-
-                    <h2>قبل از خرید، محصول را کامل بشناس.</h2>
-
-                    <p>
-                        اطلاعاتی که برای انتخاب لازم است، پایین همین صفحه در دسترس است.
-                    </p>
-                </div>
-
-                <div class="product-information__accordions">
-
-                    @if($product->description)
-                        <details open>
-                            <summary>
-                                <span>توضیحات محصول</span>
-                                <b>+</b>
-                            </summary>
-
-                            <div class="product-information__content">
-                                {!! nl2br(e($product->description)) !!}
-                            </div>
-                        </details>
-                    @endif
-
-                    <details {{ !$product->description ? 'open' : '' }}>
-                        <summary>
-                            <span>مشخصات محصول</span>
-                            <b>+</b>
-                        </summary>
-
+                @if($variant || $attributes->isNotEmpty())
+                    <details @if(!filled($product->description)) open @endif>
+                        <summary>مشخصات محصول <b aria-hidden="true">+</b></summary>
                         <div class="product-information__content">
                             <dl class="product-spec-list">
-                                @if($variant?->sku)
+                                @if($variant)
                                     <div>
-                                        <dt>SKU</dt>
-                                        <dd data-product-sku>{{ $variant->sku }}</dd>
+                                        <dt>مدل منتخب</dt>
+                                        <dd data-product-variant-label>{{ $variant->customer_label }}</dd>
                                     </div>
                                 @endif
-
-                                @if($variant?->size)
-                                    <div>
-                                        <dt>سایز</dt>
-                                        <dd>{{ $variant->size }}</dd>
-                                    </div>
-                                @endif
-
-                                @if($variant?->color)
-                                    <div>
-                                        <dt>رنگ</dt>
-                                        <dd>{{ $variant->color }}</dd>
-                                    </div>
-                                @endif
-
                                 @foreach($attributes as $attribute)
                                     <div>
                                         <dt>ویژگی</dt>
-                                        <dd>
-                                            {{ is_array($attribute) ? implode(' · ', $attribute) : $attribute }}
-                                        </dd>
+                                        <dd>{{ is_array($attribute) ? implode(' · ', $attribute) : $attribute }}</dd>
                                     </div>
                                 @endforeach
-
-                                @if(!$variant?->sku && !$variant?->size && !$variant?->color && $attributes->isEmpty())
-                                    <div>
-                                        <dt>وضعیت</dt>
-                                        <dd>اطلاعات تکمیلی برای این محصول ثبت نشده است.</dd>
-                                    </div>
-                                @endif
                             </dl>
                         </div>
                     </details>
-
-                    <details>
-                        <summary>
-                            <span>راهنمای سفارش</span>
-                            <b>+</b>
-                        </summary>
-
-                        <div class="product-information__content">
-                            <p>
-                                مدل موردنظر را انتخاب کن، تعداد را مشخص کن و محصول را به سبد اضافه کن.
-                                اگر موجودی یک مدل تمام شده باشد، همان مدل برای خرید غیرفعال می‌شود.
-                            </p>
-                        </div>
-                    </details>
-
-                </div>
+                @endif
             </div>
-        </div>
-    </section>
+        </section>
+    @endif
 
     @if($relatedProducts->isNotEmpty())
         <section class="product-detail__related product-detail__related--v2">
@@ -497,7 +401,7 @@
 
                 <header class="product-detail__related-head">
                     <div>
-                        <span class="eyebrow">JANAN / RELATED</span>
+
                         <h2>انتخاب‌های نزدیک</h2>
                         <p>چند محصول نزدیک برای ادامه‌ی کشف و خرید.</p>
                     </div>

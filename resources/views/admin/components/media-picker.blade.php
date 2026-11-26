@@ -7,7 +7,6 @@
     'currentAlt' => '',
     'ratio' => '1:1',
     'categoryCard' => false,
-    'categoryName' => '',
     'outputWidth' => null,
     'outputHeight' => null,
 ])
@@ -22,8 +21,9 @@
     style="--media-ratio: {{ str_replace(':', ' / ', $ratio) }};"
 >
     <div class="admin-media-picker__stage">
-        @if($categoryCard)<div class="janan-category-card janan-category-card--preview" style="--category-cover-ratio: {{ \App\Support\CategoryCover::CSS_RATIO }}">@endif
-        <div class="{{ $categoryCard ? 'janan-category-card__frame' : 'admin-media-picker__preview' }}" data-media-preview>
+        <div class="{{ $categoryCard ? 'janan-category-card__frame' : 'admin-media-picker__preview' }}" data-media-preview
+            @if($categoryCard) style="--category-cover-ratio: {{ \App\Support\CategoryCover::CSS_RATIO }}" @endif
+        >
             @if($currentUrl)
                 <img
                     src="{{ $currentUrl }}"
@@ -39,13 +39,6 @@
             @endif
         </div>
 
-        @if($categoryCard)
-            <div class="janan-category-card__body">
-                <div><h3 data-category-preview-name>{{ $categoryName ?: 'نام دسته‌بندی' }}</h3><span class="janan-category-card__count">پیش‌نمایش کارت فروشگاه</span></div>
-                <div class="janan-category-card__arrow" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M19 12H5m6 6-6-6 6-6"/></svg></div>
-            </div>
-        </div>
-        @endif
         <div class="admin-media-picker__meta">
             <strong data-media-file-name>{{ $currentUrl ? 'تصویر فعلی' : 'آماده انتخاب تصویر' }}</strong>
             <small>{{ $help }}</small>

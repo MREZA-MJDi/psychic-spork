@@ -85,7 +85,7 @@ const showQuickPreview = (payload, fallbackForm = null) => {
             quickPreviewImage.appendChild(img);
         } else {
             const placeholder = document.createElement('span');
-            placeholder.textContent = 'JANAN';
+            placeholder.textContent = 'جانان';
             quickPreviewImage.appendChild(placeholder);
         }
     }
@@ -164,7 +164,7 @@ const animateProductToCart = (form = null) => {
         clone.appendChild(img);
     } else {
         const placeholder = document.createElement('div');
-        placeholder.textContent = 'JANAN';
+        placeholder.textContent = 'جانان';
         clone.appendChild(placeholder);
     }
 
@@ -301,7 +301,7 @@ const renderCart = (payload) => {
             } else {
                 const placeholder = document.createElement('div');
                 placeholder.className = 'cart-drawer__item-placeholder';
-                placeholder.textContent = 'JANAN';
+                placeholder.textContent = 'جانان';
                 article.appendChild(placeholder);
             }
 

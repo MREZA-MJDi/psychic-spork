@@ -16,7 +16,7 @@
 
         <header class="home-signals__head">
             <div>
-                <span class="eyebrow">JANAN / STORE PULSE / 05</span>
+
                 <h2 id="home-signals-title">آنچه همین حالا در فروشگاه جریان دارد.</h2>
                 <p>تازه‌های کاتالوگ و خریدهای ثبت‌شده در ۳۰ روز اخیر.</p>
             </div>
@@ -63,12 +63,12 @@
                                         :alt="$product->name"
                                         fallback-tag="span"
                                         fallback-class="home-signal-item__fallback"
-                                        fallback="JANAN"
+                                        fallback="جانان"
                                     />
                                 </span>
 
                                 <span class="home-signal-item__copy">
-                                    <small>{{ $product->brand?->name ?? $product->category?->name ?? 'JANAN' }}</small>
+                                    <small>{{ $product->brand?->name ?? $product->category?->name ?? 'جانان' }}</small>
                                     <strong>{{ \App\Support\PersianNumber::digits($product->name) }}</strong>
 
                                     @if($variant?->effective_price)
@@ -116,12 +116,12 @@
                                         :alt="$product->name"
                                         fallback-tag="span"
                                         fallback-class="home-signal-item__fallback"
-                                        fallback="JANAN"
+                                        fallback="جانان"
                                     />
                                 </span>
 
                                 <span class="home-signal-item__copy">
-                                    <small>{{ $product->category?->name ?? 'JANAN COLLECTION' }}</small>
+                                    <small>{{ $product->category?->name ?? 'محصولات جانان' }}</small>
                                     <strong>{{ \App\Support\PersianNumber::digits($product->name) }}</strong>
 
                                     <span>

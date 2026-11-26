@@ -35,17 +35,17 @@ try {
       return canvas.toDataURL('image/png').split(',')[1];
     });
     await picker.locator('input[type=file]').setInputFiles({name:'qa.png',mimeType:'image/png',buffer:Buffer.from(data,'base64')});
-    const live = picker.locator('[data-media-preview] canvas');
-    await live.waitFor();
-    await picker.locator('[data-media-zoom]').fill('1.5');
     const editor = picker.locator('[data-media-canvas]');
+    await editor.waitFor();
+    assert.equal(await picker.locator('[data-media-preview]').isVisible(), false);
+    await picker.locator('[data-media-zoom]').fill('1.5');
     await editor.scrollIntoViewIfNeeded();
     const bounds = await editor.boundingBox();
     await page.mouse.move(bounds.x + bounds.width/2, bounds.y + bounds.height/2);
     await page.mouse.down();
     await page.mouse.move(bounds.x + bounds.width/2 + 20, bounds.y + bounds.height/2 + 10);
     await page.mouse.up();
-    const geometry = await live.evaluate(el => ({mask:getComputedStyle(el).clipPath,width:el.width,height:el.height}));
+    const geometry = await editor.evaluate(el => ({mask:getComputedStyle(el).clipPath,width:el.width,height:el.height}));
     assert.equal(geometry.width,960);
     assert.equal(geometry.height,720);
     assert.notEqual(geometry.mask,'none');
@@ -67,11 +67,25 @@ try {
       const image = page.locator('.janan-category-card[href$="/categories/ui-qa-category"] .janan-category-card__frame img');
       await image.waitFor();
       await image.evaluate(el => el.decode());
-      const rendered = await image.evaluate(el => ({mask:getComputedStyle(el).clipPath,width:el.naturalWidth,height:el.naturalHeight,ratio:el.parentElement.getBoundingClientRect().width/el.parentElement.getBoundingClientRect().height}));
+      const rendered = await image.evaluate(el => ({mask:getComputedStyle(el.parentElement).clipPath,width:el.naturalWidth,height:el.naturalHeight,ratio:el.parentElement.getBoundingClientRect().width/el.parentElement.getBoundingClientRect().height}));
       assert.equal(rendered.mask,geometry.mask);
       assert.equal(rendered.width,960);
       assert.equal(rendered.height,720);
       assert.ok(Math.abs(rendered.ratio-4/3)<0.02);
+      if (path === '/') {
+        const grid = page.locator('.janan-category-grid--home');
+        const cards = await grid.locator('.janan-category-card').evaluateAll(elements =>
+          elements.map(element => {
+            const { x, y, width } = element.getBoundingClientRect();
+            return { x, y, width };
+          })
+        );
+        assert.equal(cards.length, 3);
+        assert.ok(Math.abs(cards[0].y - cards[1].y) < 1);
+        assert.ok(cards[2].y > cards[0].y);
+        assert.ok(Math.abs(cards[2].x - (cards[0].x + cards[1].x) / 2) < 1);
+        assert.equal(await grid.getByRole('link', { name: 'همه دسته‌بندی‌ها' }).count(), 1);
+      }
       await image.scrollIntoViewIfNeeded();
       await page.screenshot({path:'artifacts/ui-smoke/'+width+'-category-'+(path==='/'?'home':'directory')+'.png'});
     }

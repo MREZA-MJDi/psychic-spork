@@ -299,107 +299,6 @@
    Keep the storefront header, navigation and global palette
    owned by the existing store layout.
 ========================================================= */
-.club-landing {
-    padding-block: clamp(28px, 5vw, 64px) clamp(56px, 7vw, 88px);
-    background:
-        radial-gradient(circle at 92% 5%, color-mix(in srgb, var(--janan-sky-100) 72%, transparent), transparent 26rem),
-        radial-gradient(circle at 4% 32%, color-mix(in srgb, var(--janan-pink-100) 68%, transparent), transparent 24rem);
-}
-.club-landing__hero {
-    display:grid;
-    grid-template-columns:minmax(0,1.45fr) minmax(260px,.55fr);
-    gap:14px;
-}
-.club-landing__intro,.club-landing__member,.club-feature,.club-landing__rewards {
-    border:1px solid var(--janan-line);
-    background:var(--janan-surface, #fff);
-    box-shadow:var(--janan-shadow-xs);
-}
-.club-landing__intro {
-    min-height:350px;
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    align-items:flex-start;
-    padding:clamp(28px,5vw,68px);
-    border-radius:26px;
-    overflow:hidden;
-}
-.club-landing__intro h1 {
-    margin:16px 0 12px;
-    color:var(--janan-ink-strong);
-    font-size:clamp(38px,6vw,72px);
-    line-height:1.08;
-    letter-spacing:-.055em;
-}
-.club-landing__intro h1 em { color:var(--janan-pink-ink); font-style:normal; }
-.club-landing__intro p,.club-landing__rewards p {
-    max-width:62ch;
-    margin:0;
-    color:var(--janan-muted);
-    font-size:11px;
-    line-height:2.1;
-}
-.club-landing__actions { display:flex; flex-wrap:wrap; gap:9px; margin-top:24px; }
-.club-landing__member {
-    display:flex;
-    flex-direction:column;
-    align-items:flex-start;
-    justify-content:center;
-    padding:clamp(22px,3vw,34px);
-    border-radius:26px;
-    background:linear-gradient(145deg,var(--janan-sky-100),var(--janan-pink-100));
-}
-.club-landing__member-kicker { color:var(--janan-muted); font-size:8px; font-weight:800; letter-spacing:.14em; }
-.club-landing__member-icon {
-    display:grid; place-items:center;
-    width:48px; height:48px; margin:20px 0 12px;
-    border-radius:50%;
-    color:var(--janan-blue-ink);
-    background:rgba(255,255,255,.72);
-    font-size:22px;
-}
-.club-landing__member strong { color:var(--janan-ink-strong); font-size:17px; }
-.club-landing__member p { margin:7px 0 18px; color:var(--janan-muted); font-size:10px; line-height:2; }
-.club-landing__member a { color:var(--janan-pink-ink); font-size:10px; font-weight:800; }
-.club-landing__features {
-    display:grid;
-    grid-template-columns:repeat(3,minmax(0,1fr));
-    gap:10px;
-    margin-top:12px;
-}
-.club-feature {
-    display:grid;
-    grid-template-columns:32px minmax(0,1fr);
-    gap:12px;
-    min-height:116px;
-    padding:20px;
-    border-radius:18px;
-}
-.club-feature>span { color:var(--janan-pink-ink); font:italic 17px var(--janan-display); }
-.club-feature strong { color:var(--janan-ink-strong); font-size:11px; }
-.club-feature p { margin:5px 0 0; color:var(--janan-muted); font-size:9px; line-height:1.9; }
-.club-landing__rewards {
-    display:grid;
-    grid-template-columns:minmax(0,1.2fr) minmax(250px,.8fr);
-    gap:24px;
-    align-items:center;
-    margin-top:clamp(30px,5vw,58px);
-    padding:clamp(22px,4vw,38px);
-    border-radius:24px;
-}
-.club-landing__rewards h2 { margin:9px 0; color:var(--janan-ink-strong); font-size:clamp(21px,3vw,32px); }
-.club-landing__rewards-status {
-    display:grid;
-    gap:8px;
-    padding:20px;
-    border:1px solid var(--janan-line);
-    border-radius:16px;
-    background:var(--janan-soft, #f7fafb);
-}
-.club-landing__rewards-status>span { color:var(--janan-pink-ink); font-size:24px; }
-.club-landing__rewards-status strong { color:var(--janan-ink-strong); font-size:11px; }
-.club-landing__rewards-status small { color:var(--janan-muted); font-size:9px; line-height:1.8; }
 
 .wholesale-page {
     background:
@@ -446,11 +345,6 @@
     .wholesale-content { grid-template-columns:1fr; }
 }
 @media (max-width: 700px) {
-    .club-landing__hero,.club-landing__rewards { grid-template-columns:1fr; }
-    .club-landing__intro { min-height:0; padding:28px 22px; }
-    .club-landing__member { border-radius:20px; }
-    .club-landing__features { grid-template-columns:1fr; }
-    .club-feature { min-height:0; }
     .wholesale-hero { grid-template-columns:1fr; }
     .wholesale-hero__main { min-height:0; padding:28px 22px; border-radius:22px; }
     .wholesale-hero__main h1 { font-size:clamp(32px,10vw,48px); }
@@ -541,4 +435,86 @@
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
+}
+
+.club-page {
+    background: #faf7f4;
+    padding-block: clamp(20px, 5vw, 66px);
+}
+
+.club-page__layout { display: grid; gap: clamp(26px, 4vw, 48px); }
+
+.club-page__welcome {
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) minmax(220px, 1fr);
+    gap: 22px clamp(24px, 5vw, 70px);
+    align-items: center;
+    padding: clamp(18px, 5vw, 60px);
+    border-radius: 24px;
+    color: #fff9fb;
+    background: radial-gradient(ellipse at 0 0, #81516a, transparent 70%), #452c3a;
+}
+
+.club-page__welcome h1 {
+    margin: 0;
+    color: inherit;
+    font-size: clamp(27px, 4.8vw, 55px);
+    line-height: 1.42;
+    font-weight: 800;
+}
+
+.club-page__welcome p {
+    max-width: 44ch;
+    margin: 12px 0 0;
+    color: #f0dfe7;
+    font-size: clamp(14px, 1.4vw, 17px);
+    line-height: 1.9;
+}
+
+.club-page__account {
+    display: grid;
+    gap: 14px;
+    padding: clamp(14px, 3vw, 28px);
+    border: 1px solid #fff3;
+    border-radius: 17px;
+    background: #ffffff12;
+}
+
+.club-page__account h2 { margin: 0; color: inherit; font-size: 17px; }
+.club-page__account-actions { display: flex; flex-wrap: wrap; gap: 12px 24px; }
+.club-page__account-actions > div { display: grid; gap: 5px; justify-items: center; }
+.club-page__account-actions span { color: #f0dfe7; font-size: 12px; }
+.club-page .store-action-icon:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
+.club-page__account .store-action-icon:focus-visible { outline-color: #fff; }
+.club-page__account .store-action-icon { width: 50px; height: 50px; }
+
+.club-page__services h2 {
+    margin: 0 0 12px;
+    color: #3b2935;
+    font-size: clamp(19px, 2vw, 24px);
+}
+
+.club-page__service-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.club-page__service {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: start;
+    gap: 12px;
+    padding: clamp(12px, 2vw, 21px);
+    border: 1px solid #e8dce0;
+    border-radius: 14px;
+    background: #fffdfd;
+}
+
+.club-page__service h3 { margin: 0; color: #3b2935; font-size: 15px; }
+.club-page__service p { margin: 4px 0 0; color: #64515c; font-size: 13px; line-height: 1.85; }
+
+@media (max-width: 700px) {
+    .club-page__welcome, .club-page__service-grid { grid-template-columns: minmax(0, 1fr); }
+    .club-page__welcome { border-radius: 17px; }
 }

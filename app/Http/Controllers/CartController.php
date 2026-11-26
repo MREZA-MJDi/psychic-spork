@@ -228,7 +228,7 @@ class CartController extends Controller
                 return [
                     'id' => $item['id'],
                     'name' => $item['product']->name,
-                    'variant_name' => $item['variant']->display_name,
+                    'variant_name' => $item['variant']->customer_label,
                     'quantity' => (int) $item['quantity'],
                     'stock' => (int) $item['variant']->stock,
                     'unit_price' => (float) $item['unit_price'],

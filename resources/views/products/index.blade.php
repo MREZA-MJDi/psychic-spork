@@ -1,13 +1,13 @@
 @extends('layouts.store')
 
-@section('title', 'محصولات — '.($siteBrandNameLatin ?? 'Janan'))
+@section('title', 'محصولات — '.($siteBrandNameFa ?? 'جانان'))
 
 @section('content')
 <div class="catalog-page catalog-page--products catalog-discovery-layout">
     <section class="catalog-masthead catalog-masthead--products">
         <div class="container">
             <div class="catalog-masthead__top">
-                <span class="eyebrow">{{ $siteBrandNameLatin }} / CATALOG</span>
+
                 <div class="catalog-masthead__stat">
                     <strong>{{ \App\Support\PersianNumber::format($products->total()) }}</strong>
                     <span>محصول فعال</span>
@@ -47,7 +47,7 @@
         <div class="container catalog-discovery-shell">
             <aside class="catalog-category-sidebar" aria-label="فیلتر دسته‌بندی محصولات">
                 <div class="catalog-category-sidebar__head">
-                    <span class="eyebrow">CATEGORIES</span>
+
                     <h2>دسته‌بندی</h2>
                 </div>
                 <nav class="catalog-category-list">
@@ -70,7 +70,7 @@
                 @if($featuredBanner)
                     <article class="catalog-feature-banner">
                         <a class="catalog-feature-banner__image" href="{{ $featuredBanner['url'] }}" aria-label="مشاهده {{ $featuredBanner['title'] }}">
-                            <x-store.image :src="$featuredBanner['image']" :alt="$featuredBanner['title']" fallback-class="product-image-placeholder" fallback="JANAN" />
+                            <x-store.image :src="$featuredBanner['image']" :alt="$featuredBanner['title']" fallback-class="product-image-placeholder" fallback="جانان" />
                         </a>
                         <div class="catalog-feature-banner__content">
                             <span class="eyebrow">منتخب جانان · {{ $featuredBanner['brand'] }}</span>
@@ -84,7 +84,7 @@
                 <form class="catalog-brand-filter" method="GET" action="{{ route('products.index') }}">
                     <div class="catalog-brand-filter__top">
                         <div>
-                            <span class="eyebrow">FIND A BRAND</span>
+
                             <h2>جستجو بر اساس برند</h2>
                         </div>
                         <label class="catalog-brand-filter__search">
@@ -112,7 +112,7 @@
 
                 <header class="catalog-results__head catalog-results__head--compact">
                     <div class="catalog-results__title">
-                        <span class="eyebrow">{{ $siteBrandNameLatin }} / CATALOG</span>
+
                         <h2>{{ isset($filters['q']) ? 'نتیجه جستجوی «'.$filters['q'].'»' : 'محصولات جانان' }}</h2>
                         <p>{{ \App\Support\PersianNumber::format($products->total()) }} محصول مطابق انتخاب‌های شما</p>
                     </div>
@@ -149,7 +149,7 @@
                     @endif
                 @else
                     <div class="empty-state empty-state--search catalog-empty">
-                        <span class="eyebrow">NO RESULT</span>
+
                         <h2>محصولی با این مشخصات پیدا نشد.</h2>
                         <p>عبارت جستجو یا فیلترها را تغییر بده.</p>
                         <a class="button button--primary" href="{{ route('products.index') }}">نمایش همه محصولات</a>

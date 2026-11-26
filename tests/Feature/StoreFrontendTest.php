@@ -385,7 +385,9 @@ class StoreFrontendTest extends TestCase
                 ->assertSee('product-detail-v2__purchase', false)
                 ->assertSee('محصول جزئیات تست')
                 ->assertSee('۱۲۵٬۰۰۰', false)
-                ->assertSee('DETAIL-', false)
+                ->assertDontSee('DETAIL-', false)
+                ->assertSee('دربارهٔ محصول')
+                ->assertSee('مدل اصلی')
                 ->assertSee('افزودن به سبد خرید');
         } finally {
             Model::preventLazyLoading(false);
@@ -414,6 +416,8 @@ class StoreFrontendTest extends TestCase
         $variant = ProductVariant::create([
             'product_id' => $product->id,
             'sku' => 'VAR-MEDIA-' . strtoupper(uniqid()),
+            'size' => '75',
+            'color' => 'مشکی',
             'price' => 180000,
             'sale_price' => null,
             'stock' => 4,
@@ -443,7 +447,8 @@ class StoreFrontendTest extends TestCase
                     'data-variant-image="' . route('store.media', ['path' => 'variants/test-variant.webp']) . '"',
                     false
                 )
-                ->assertSee($variant->display_name);
+                ->assertSee('75 / مشکی')
+                ->assertDontSee($variant->sku, false);
         } finally {
             Model::preventLazyLoading(false);
         }

@@ -128,7 +128,7 @@ import { initLocationFields } from './location-fields.js';
             fallback.dataset.storeImageFallbackApplied = '1';
 
             const label = document.createElement('span');
-            label.textContent = image.dataset.storeImageFallback || 'JANAN';
+            label.textContent = image.dataset.storeImageFallback || 'جانان';
             fallback.appendChild(label);
             image.replaceWith(fallback);
         };

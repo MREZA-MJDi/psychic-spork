@@ -34,7 +34,7 @@
                 <strong>{{ \App\Support\PersianNumber::format($count) }}</strong>
                 <span>محصول فعال</span>
                 <i aria-hidden="true"></i>
-                <span>JANAN SELECT</span>
+
             </div>
 
             <div class="editorial-collection-hero__actions">
@@ -60,13 +60,13 @@
                             :alt="$tile->name"
                             :loading="$loop->first ? 'eager' : 'lazy'"
                             :fetchpriority="$loop->first ? 'high' : 'auto'"
-                            fallback="JANAN"
+                            fallback="جانان"
                         />
                     </a>
                 @endforeach
             @elseif($fallbackImage)
                 <div class="editorial-collection-hero__tile editorial-collection-hero__tile--fallback">
-                    <x-store.image :src="$fallbackImage" :alt="$title" loading="eager" fetchpriority="high" fallback="JANAN" />
+                    <x-store.image :src="$fallbackImage" :alt="$title" loading="eager" fetchpriority="high" fallback="جانان" />
                 </div>
             @else
                 <div class="editorial-collection-hero__empty" aria-hidden="true">{{ $mark ?: 'J' }}</div>
@@ -74,10 +74,10 @@
 
             @if($logo)
                 <span class="editorial-collection-hero__logo" aria-label="لوگوی {{ $title }}">
-                    <x-store.image :src="$logo" :alt="'لوگوی ' . $title" loading="lazy" fallback="JANAN" />
+                    <x-store.image :src="$logo" :alt="'لوگوی ' . $title" loading="lazy" fallback="جانان" />
                 </span>
             @endif
-            <span class="editorial-collection-hero__stamp" aria-hidden="true">JANAN / EDITION</span>
+
         </div>
     </div>
 </section>

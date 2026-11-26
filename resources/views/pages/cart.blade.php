@@ -1,6 +1,6 @@
 @extends('layouts.store')
 
-@section('title', 'سبد خرید — ' . ($siteBrandNameLatin ?? 'Janan'))
+@section('title', 'سبد خرید — ' . ($siteBrandNameFa ?? 'جانان'))
 
 @section('content')
 <div class="cart-page">
@@ -31,7 +31,7 @@
     <section class="cart-wholesale-packs">
         <div class="section-head">
             <div>
-                <span class="eyebrow">WHOLESALE PACKS</span>
+
                 <h2>پک‌های عمدهٔ انتخاب‌شده</h2>
             </div>
         </div>
@@ -45,7 +45,7 @@
             @endphp
             <article class="cart-item cart-item--wholesale-pack">
                 <div class="cart-item__media">
-                    <x-store.image :src="$packImage" :alt="$pack?->name ?? 'پک عمده'" fallback-class="product-image-placeholder" fallback="JANAN" />
+                    <x-store.image :src="$packImage" :alt="$pack?->name ?? 'پک عمده'" fallback-class="product-image-placeholder" fallback="جانان" />
                 </div>
                 <div class="cart-item__body">
                     <span class="eyebrow">پک آمادهٔ عمده</span>
@@ -84,9 +84,9 @@
             />
         </a>
         <div class="cart-item__body">
-            <span class="eyebrow">{{ $item['product']->category?->name ?: 'JANAN' }}</span>
+            <span class="eyebrow">{{ $item['product']->category?->name ?: 'جانان' }}</span>
             <a href="{{ route('products.show',$item['product']) }}" class="cart-item__title">{{ $item['product']->name }}</a>
-            <small>{{ $item['variant']->sku }}</small>
+            <small>{{ $item['variant']->customer_label }}</small>
             <div class="cart-item__meta">
                 <span>{{ \App\Support\PersianNumber::format($item['unit_price']) }} تومان</span>
                 <form method="POST" action="{{ route('cart.update',$item['item']) }}" class="cart-quantity-form">
@@ -102,7 +102,7 @@
 @endforeach
 </div>
 <aside class="cart-summary reveal-up">
-<span class="eyebrow">ORDER SUMMARY</span><h2>جمع سبد</h2>
+<h2>جمع سبد</h2>
 <div class="cart-summary__row"><span>تعداد اقلام</span><strong>{{ \App\Support\PersianNumber::format($items->sum('quantity') + $packLines->sum(fn ($line) => (int) ($line->pack?->pack_quantity ?? 0) * (int) $line->quantity)) }}</strong></div>
 <div class="cart-summary__row"><span>مبلغ قابل پرداخت (با احتساب پک‌ها)</span><strong>{{ \App\Support\PersianNumber::format($total) }} تومان</strong></div>
 <div class="cart-summary__actions">

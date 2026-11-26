@@ -5,7 +5,7 @@ const base = process.env.UI_BASE_URL || 'http://127.0.0.1:8000';
 const widths = [320, 360, 390, 543, 768, 1024, 1440];
 const paths = ['/', '/products', '/categories', '/categories/ui-qa-category',
   '/products/ui-qa-product', '/brands', '/brands/ui-qa-brand', '/cart',
-  '/about', '/faq', '/shipping', '/returns', '/login'];
+  '/about', '/faq', '/shipping', '/returns', '/login', '/drclubz'];
 const failures = [];
 await mkdir('artifacts/ui-smoke', { recursive: true });
 const browser = await chromium.launch({ headless: true });
@@ -47,6 +47,41 @@ try {
           if (!(await map.getAttribute('src')).includes('maps.google.com')) throw new Error('Contact map missing');
           const bounds = await map.boundingBox();
           if (!bounds || bounds.x < -2 || bounds.x + bounds.width > width + 2) throw new Error('Contact map outside viewport');
+        }
+        if (path === '/products/ui-qa-product') {
+          const details = page.locator('.product-information');
+          if (await details.getByRole('heading', { name: 'دربارهٔ محصول' }).count() !== 1) {
+            throw new Error('Missing product information widget');
+          }
+          if (await page.locator('[data-product-sku], [data-variant-sku]').count()) {
+            throw new Error('Internal SKU sent to product page');
+          }
+          const specs = details.locator('details').filter({ hasText: 'مشخصات محصول' });
+          if (!await specs.evaluate(element => element.open)) {
+            await specs.locator('summary').click();
+          }
+          if (!await specs.getByText('مدل منتخب', { exact: true }).isVisible()) {
+            throw new Error('Product specifications did not open');
+          }
+        }
+        if (path === '/drclubz') {
+          const footer = page.locator('.store-footer');
+          if (await page.locator('.store-header .brand__latin').count()) throw new Error('Unexpected Latin header wordmark');
+          for (const label of ['محصولات', 'روش‌های ارسال', 'شرایط مرجوعی', 'فرم تماس با پشتیبانی', 'ورود به حساب', 'سبد خرید']) {
+            if (await footer.getByRole('link', { name: label, exact: true }).count() !== 1) {
+              throw new Error('Expected one footer link for ' + label);
+            }
+          }
+          const textActions = await footer.locator('.store-action-icon').evaluateAll(links =>
+            links.some(link => link.textContent.trim() || !link.querySelector('svg') || !link.getAttribute('aria-label'))
+          );
+          if (textActions) throw new Error('Footer actions must show a named icon without visible button text');
+          const club = page.locator('.club-page');
+          if (await club.locator('.club-page__service').count() !== 3 ||
+              await club.getByRole('link', { name: 'ساخت حساب', exact: true }).count() !== 1) {
+            throw new Error('Missing customer club services or guest actions');
+          }
+          await footer.screenshot({ path: 'artifacts/ui-smoke/' + width + '-footer.png', animations: 'disabled' });
         }
         await page.screenshot({ path: 'artifacts/ui-smoke/' + width + '-' + name + '.png', fullPage: true, animations: 'disabled' });
         if (path === '/') {

@@ -84,7 +84,7 @@
         <a
             class="{{ request()->routeIs('club') ? 'is-active' : '' }}"
             href="{{ route('club') }}"
-            aria-label="باشگاه مشتریان DrClubz"
+            aria-label="باشگاه مشتریان"
         >
             <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M12 21s-7-4.35-9-8.4C1.4 9.4 3.5 6 7 6c2 0 3.4 1.1 5 2.9C13.6 7.1 15 6 17 6c3.5 0 5.6 3.4 4 6.6-2 4.05-9 8.4-9 8.4Z"/>

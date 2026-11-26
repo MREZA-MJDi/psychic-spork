@@ -1,6 +1,6 @@
 @extends('layouts.store')
 
-@section('title', $category->name . ' — ' . ($siteBrandNameLatin ?? 'Janan'))
+@section('title', $category->name . ' — ' . ($siteBrandNameFa ?? 'جانان'))
 
 @section('content')
 @php

@@ -1,6 +1,6 @@
 @extends('layouts.store')
 
-@section('title', 'تکمیل سفارش — ' . ($siteBrandNameLatin ?? 'Janan'))
+@section('title', 'تکمیل سفارش — ' . ($siteBrandNameFa ?? 'جانان'))
 
 @section('content')
 @php
@@ -13,7 +13,7 @@
 
 <section class="page-hero page-hero--motion page-hero--checkout">
     <div class="container">
-        <span class="eyebrow">JANAN / CHECKOUT</span>
+
         <h1>پرداخت و ثبت سفارش</h1>
         <p>نوع خرید و روش پرداخت را انتخاب کن، اطلاعات ارسال را بررسی کن و سفارش را ثبت کن.</p>
     </div>
@@ -25,7 +25,7 @@
         <section class="checkout-card">
             <div class="section-head">
                 <div>
-                    <span class="eyebrow">ORDER & PAYMENT</span>
+
                     <h2>نوع خرید و پرداخت</h2>
                 </div>
             </div>
@@ -52,7 +52,7 @@
 
                 <fieldset class="checkout-choice-group">
                     <legend>
-                        <span class="eyebrow">ORDER TYPE</span>
+
                         <strong>نوع خرید</strong>
                     </legend>
 
@@ -108,7 +108,7 @@
 
                 <fieldset class="checkout-choice-group" id="payment-options">
                     <legend>
-                        <span class="eyebrow">PAYMENT</span>
+
                         <strong>روش پرداخت</strong>
                     </legend>
 
@@ -228,7 +228,7 @@
 
                 <div class="checkout-delivery-divider">
                     <div>
-                        <span class="eyebrow">DELIVERY DETAILS</span>
+
                         <h2>اطلاعات گیرنده</h2>
                     </div>
                 </div>
@@ -314,7 +314,7 @@
         <aside class="checkout-card checkout-card--summary">
             <div class="section-head">
                 <div>
-                    <span class="eyebrow">YOUR BAG</span>
+
                     <h2>خلاصه سفارش</h2>
                 </div>
             </div>
@@ -326,7 +326,7 @@
                             @if($line->pack?->image_path)
                                 <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($line->pack->image_path) }}" alt="{{ $line->pack->name }}" loading="lazy">
                             @else
-                                <span class="product-image-placeholder">JANAN</span>
+                                <span class="product-image-placeholder">جانان</span>
                             @endif
                         </div>
                         <div>
@@ -343,7 +343,7 @@
                                 :src="$item['image']"
                                 :alt="$item['product']->name"
                                 fallback-class="product-image-placeholder"
-                                fallback="JANAN"
+                                fallback="جانان"
                             />
                         </div>
 

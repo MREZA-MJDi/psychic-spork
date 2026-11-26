@@ -91,7 +91,7 @@
                 :src="$image"
                 :alt="$product->name"
                 fallback-class="product-image-placeholder"
-                fallback="JANE JANAN"
+                fallback="جانه جانان"
             />
         </a>
 

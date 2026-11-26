@@ -15,7 +15,6 @@ class StoreNavigationTest extends TestCase
         $response = $this->get(route('club'));
 
         $response->assertOk();
-        $response->assertSee('DrClubz');
         $response->assertSee('باشگاه مشتریان');
 
         // Categories remain a valid discovery route, but are no longer a
@@ -26,7 +25,6 @@ class StoreNavigationTest extends TestCase
         );
 
         $response->assertSee('href="' . route('club') . '"', false);
-        $response->assertSee('DrClubz');
         $this->assertMatchesRegularExpression(
             '/href="' . preg_quote(route('club'), '/') . '"\\s+class="store-nav__link(?:\\s+is-active)?"/',
             $response->getContent()
@@ -35,8 +33,11 @@ class StoreNavigationTest extends TestCase
         // The mobile storefront bar keeps the same customer-focused five-item
         // contract and must not silently fall back to the wholesale link.
         $response->assertSee('mobile-bottom-nav--store');
-        $response->assertSee('aria-label="باشگاه مشتریان DrClubz"', false);
-        $response->assertDontSee('aria-label="خرید عمده"', false);
+        $response->assertSee('aria-label="باشگاه مشتریان"', false);
+        $this->assertDoesNotMatchRegularExpression(
+            '/<nav[^>]+mobile-bottom-nav--store[^>]*>(?:(?!<\/nav>).)*aria-label="خرید عمده"/s',
+            $response->getContent()
+        );
     }
     public function test_brand_names_filter_products_instead_of_opening_a_standalone_brand_directory(): void
     {

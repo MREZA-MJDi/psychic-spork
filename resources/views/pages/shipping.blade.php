@@ -6,7 +6,7 @@
     <section class="page-hero page-hero--premium">
         <div class="container page-hero__layout">
             <div>
-                <span class="eyebrow">JANAN / SHIPPING</span>
+
                 <h1>روش‌های<br><em>ارسال.</em></h1>
                 <p>
                     جزئیات ارسال باید از تنظیمات واقعی فروشگاه تامین شود؛ بنابراین قبل از پیکربندی، عدد یا زمان ساختگی نمایش داده نمی‌شود.
@@ -15,7 +15,7 @@
 
             <div class="page-hero__stat">
                 <b>۰۱</b>
-                <span>DELIVERY SYSTEM</span>
+
             </div>
         </div>
     </section>
@@ -24,7 +24,7 @@
         <div class="container">
 
             <div class="store-page__intro">
-                <span class="eyebrow">DELIVERY / POLICY</span>
+
                 <h2>اطلاعات ارسال را از منبع واقعی بخوان.</h2>
             </div>
 
@@ -56,7 +56,7 @@
 
             <div class="page-cta-panel customer-page-cta">
                 <div>
-                    <span class="eyebrow">NEED HELP?</span>
+
                     <h2>سوالی درباره ارسال داری؟</h2>
                     <p>برای اطلاعات واقعی فروشگاه با پشتیبانی در تماس باش.</p>
                 </div>

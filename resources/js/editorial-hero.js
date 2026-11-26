@@ -210,14 +210,14 @@ import { Flip } from 'gsap/Flip';
                             image.decoding = 'async';
                             image.fetchPriority = index === 0 ? 'high' : 'auto';
                             image.draggable = false;
-                            image.dataset.storeImageFallback = 'JANAN';
+                            image.dataset.storeImageFallback = 'جانان';
                             image.dataset.storeImageFallbackClass =
                                 'immersive-grid-placeholder';
                             item.appendChild(image);
                         } else {
                             const placeholder = document.createElement('span');
                             placeholder.className = 'immersive-grid-placeholder';
-                            placeholder.textContent = 'JANAN';
+                            placeholder.textContent = 'جانان';
                             item.appendChild(placeholder);
                         }
 
@@ -452,7 +452,7 @@ import { Flip } from 'gsap/Flip';
                     number.textContent = persianDigits(String(
                         slide.number || model.index + 1
                     ).padStart(2, '0'));
-                    title.textContent = persianDigits(slide.title || 'JANAN');
+                    title.textContent = persianDigits(slide.title || 'جانان');
                     if (productMeta) {
                         productMeta.replaceChildren();
                         [slide.brand, slide.category, slide.availability, ...(Array.isArray(slide.facts) ? slide.facts : [])]
@@ -500,14 +500,14 @@ import { Flip } from 'gsap/Flip';
                         image.loading = 'eager';
                         image.decoding = 'async';
                         image.draggable = false;
-                        image.dataset.storeImageFallback = 'JANAN';
+                        image.dataset.storeImageFallback = 'جانان';
                         image.dataset.storeImageFallbackClass =
                             'immersive-overlay-placeholder';
                         anchor.appendChild(image);
                     } else {
                         const placeholder = document.createElement('span');
                         placeholder.className = 'immersive-overlay-placeholder';
-                        placeholder.textContent = 'JANAN';
+                        placeholder.textContent = 'جانان';
                         anchor.appendChild(placeholder);
                     }
 

@@ -5,7 +5,7 @@
             :alt="$product->name"
             fallback-tag="span"
             fallback-class=""
-            fallback="JANAN"
+            fallback="جانان"
         />
     </a>
     <div class="wholesale-product-card__body">

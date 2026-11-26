@@ -1,6 +1,6 @@
 @extends('layouts.store')
 
-@section('title', 'وضعیت سفارش — ' . ($siteBrandNameLatin ?? 'Janan'))
+@section('title', 'وضعیت سفارش — ' . ($siteBrandNameFa ?? 'جانان'))
 
 @section('content')
 <section class="section-block checkout-success-section">
@@ -14,9 +14,7 @@
             </span>
 
             @if(($paymentMethod ?? 'online') === 'cheque')
-                <span class="eyebrow">
-                    JANAN / CHEQUE SUBMITTED
-                </span>
+
 
                 <h1>درخواست پرداخت چکی ثبت شد.</h1>
 
@@ -25,9 +23,7 @@
                     تا زمان تأیید و تسویه چک، پرداخت قطعی محسوب نمی‌شود.
                 </p>
             @elseif(($paymentStatus ?? 'pending') !== 'paid')
-                <span class="eyebrow">
-                    JANAN / PAYMENT PENDING
-                </span>
+
 
                 <h1>وضعیت پرداخت در انتظار تأیید است.</h1>
 
@@ -41,9 +37,7 @@
                     در صورت تأیید مجدد درگاه، وضعیت سفارش به‌روزرسانی خواهد شد.
                 </p>
             @else
-                <span class="eyebrow">
-                    JANAN / PAYMENT CONFIRMED
-                </span>
+
 
                 <h1>پرداخت توسط درگاه تأیید شد.</h1>
 
