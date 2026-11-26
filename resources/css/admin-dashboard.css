@@ -107,8 +107,8 @@
     border-top: 1px solid var(--overview-line);
 }
 
-.janan-overview__queue-list a { grid-template-columns: minmax(0, 1fr) auto 1rem; }
-.janan-overview__order-list a { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr) auto 1rem; }
+.janan-overview__queue-list a { grid-template-columns: minmax(0, 1fr) auto; }
+.janan-overview__order-list a { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr) auto; }
 .janan-overview__compact-list > li { grid-template-columns: minmax(0, 1fr) auto; }
 .janan-overview :is(.janan-overview__queue-list, .janan-overview__order-list) a:hover { background: #f4f4eb; }
 
@@ -117,7 +117,6 @@
     overflow-wrap: anywhere;
 }
 
-.janan-overview__arrow { color: var(--overview-green); }
 .janan-overview__count {
     min-width: 2.2em;
     padding: 1px 7px;
@@ -197,7 +196,7 @@
     .janan-overview { gap: 15px; }
     .janan-overview__work { gap: 15px; }
     .janan-overview__metrics { grid-template-columns: minmax(0, 1fr); }
-    .janan-overview__order-list a { grid-template-columns: minmax(0, 1fr) auto 1rem; }
+    .janan-overview__order-list a { grid-template-columns: minmax(0, 1fr) auto; }
     .janan-overview__order-status { grid-row: 2; grid-column: 1 / -1; }
     .janan-overview__order-status :is(strong, small) { display: inline; padding-inline-end: 5px; }
 }
