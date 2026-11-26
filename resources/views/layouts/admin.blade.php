@@ -144,7 +144,7 @@
                 class="admin-link {{ request()->routeIs('admin.nila.*') ? 'active' : '' }}"
             >
                 <span class="admin-link-icon">N</span>
-                <span>نیلا</span>
+                <span>ورود از هلو</span>
             </a>
 
             <a

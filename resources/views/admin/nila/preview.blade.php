@@ -5,32 +5,44 @@
 
 @section('content')
 @php
+    $remainingGroups = max(0, $batch->product_groups - $batch->next_group_offset);
     $pilotProgress = $batch->product_groups > 0
         ? min(100, (int) round(($batch->next_group_offset / $batch->product_groups) * 100))
         : 0;
 @endphp
 <div class="admin-page-head nila-preview-head">
     <div>
-        <span class="nila-step-label">گزارش و کنترل پایلوت</span>
-        <h1 class="admin-page-head__title">گزارش بررسی فایل</h1>
+        <h1 class="admin-page-head__title">نتیجهٔ بررسی فایل هلو</h1>
         <p class="admin-page-head__text">{{ $batch->original_name }} · واحد قیمت فایل: {{ $priceUnit->value === 'rial' ? 'ریال' : 'تومان' }}</p>
     </div>
-    <a class="admin-btn admin-btn--ghost" href="{{ route('admin.nila.index') }}">بازگشت به نیلا</a>
+    <a class="admin-btn admin-btn--ghost" href="{{ route('admin.nila.index') }}">فایل‌های هلو</a>
 </div>
+
+<section class="admin-card nila-panel" aria-labelledby="nila-file-summary">
+    <h2 class="admin-card-title" id="nila-file-summary">ردیف‌های این فایل به چند محصول تبدیل می‌شوند؟</h2>
+    <p class="admin-card-description">از {{ \App\Support\PersianNumber::format($batch->total_rows) }} ردیف فایل، {{ \App\Support\PersianNumber::format($batch->product_groups) }} مدل با کد پایه شناسایی شد. ردیف‌های سایز یا رنگ یک مدل زیر همان محصول جمع می‌شوند.</p>
+    @if($comparison['blocked_groups'] > 0 || $batch->invalid_rows > 0)
+        <p>{{ \App\Support\PersianNumber::format($batch->invalid_rows) }} ردیف خطا دارد و {{ \App\Support\PersianNumber::format($comparison['blocked_groups']) }} مدل نیاز به اصلاح دارد. <a href="#nila-file-rows">ردیف‌ها و علت خطا را ببینید</a>.</p>
+    @endif
+    @if($batch->next_group_offset === 0)
+        <p>ثبت اطلاعات این فایل هنوز شروع نشده است.</p>
+    @endif
+    <a href="#nila-import-progress">وضعیت و مرحله بعد</a>
+</section>
 
 <div class="admin-dashboard-stats" aria-label="وضعیت داده‌های فایل">
     <div class="admin-stat-card">
-        <div class="admin-stat-card__label">کل گروه‌های محصول</div>
+        <div class="admin-stat-card__label">مدل‌های شناسایی‌شده</div>
         <div class="admin-stat-card__value">{{ \App\Support\PersianNumber::format($batch->product_groups) }}</div>
-        <div class="admin-stat-card__meta">{{ \App\Support\PersianNumber::format($batch->total_rows) }} ردیف تنوع در فایل</div>
+        <div class="admin-stat-card__meta">{{ \App\Support\PersianNumber::format($batch->total_rows) }} ردیف خوانده‌شده از فایل</div>
     </div>
     <div class="admin-stat-card">
-        <div class="admin-stat-card__label">گروه‌های معتبر در فایل</div>
+        <div class="admin-stat-card__label">مدل‌های قابل ثبت</div>
         <div class="admin-stat-card__value">{{ \App\Support\PersianNumber::format($comparison['valid_groups']) }}</div>
-        <div class="admin-stat-card__meta">{{ \App\Support\PersianNumber::format($batch->imported_groups) }} گروه تاکنون ثبت شده</div>
+        <div class="admin-stat-card__meta">{{ \App\Support\PersianNumber::format($batch->imported_groups) }} مدل ثبت یا به‌روزرسانی شده</div>
     </div>
     <div class="admin-stat-card">
-        <div class="admin-stat-card__label">گروه‌های نیازمند اصلاح فایل</div>
+        <div class="admin-stat-card__label">مدل‌های نیازمند اصلاح فایل</div>
         <div class="admin-stat-card__value">{{ \App\Support\PersianNumber::format($comparison['blocked_groups']) }}</div>
         <div class="admin-stat-card__meta">{{ \App\Support\PersianNumber::format($batch->invalid_rows) }} ردیف دارای خطا</div>
     </div>
@@ -63,7 +75,7 @@
             <div class="admin-stat-card__value">{{ \App\Support\PersianNumber::format($comparison['existing_products']) }}</div>
         </div>
         <div class="admin-stat-card">
-            <div class="admin-stat-card__label">تنوع جدید</div>
+            <div class="admin-stat-card__label">گزینهٔ جدیدِ سایز یا رنگ</div>
             <div class="admin-stat-card__value">{{ \App\Support\PersianNumber::format($comparison['new_variants']) }}</div>
         </div>
         <div class="admin-stat-card">
@@ -83,7 +95,7 @@
         </div>
         <div class="nila-info-card">
             <strong>گروه دارای خطا</strong>
-            <p class="admin-muted">{{ \App\Support\PersianNumber::format($comparison['blocked_groups']) }} گروه به‌دلیل خطای حداقل یک ردیف وارد نمی‌شود.</p>
+            <p class="admin-muted">{{ \App\Support\PersianNumber::format($comparison['blocked_groups']) }} مدل به‌دلیل خطای ردیف‌ها یا ناسازگاری نام ثبت نمی‌شود.</p>
         </div>
         <div class="nila-info-card">
             <strong>کد کالا با تعارض</strong>
@@ -92,7 +104,7 @@
     </div>
 
     <div class="alert">
-        مقدار ستون «موجودی» در فایل، موجودی نهایی آن تنوع در نیلا فرض می‌شود؛ جانان فقط اختلاف با موجودی فعلی را به‌عنوان گردش اصلاحی ثبت می‌کند. این مقدار به موجودی فعلی اضافه نمی‌شود.
+        مقدار ستون «موجودی» در فایل، موجودی نهایی همان کد کالا در نیلا فرض می‌شود؛ جانان فقط اختلاف با موجودی فعلی را به‌عنوان گردش اصلاحی ثبت می‌کند. این مقدار به موجودی فعلی اضافه نمی‌شود.
     </div>
 
     @if($comparison['stock_changes'])
@@ -130,22 +142,22 @@
     @endif
 </div>
 
-<div class="admin-card nila-panel nila-panel--progress">
+<div class="admin-card nila-panel nila-panel--progress" id="nila-import-progress">
     <div class="nila-progress-heading">
         <div>
             <span class="nila-step-label">مرحله بعد</span>
-            <h2 class="admin-card-title">تأیید و همگام‌سازی</h2>
+            <h2 class="admin-card-title">ثبت اطلاعات و پیگیری نتیجه</h2>
         </div>
         <strong class="nila-progress-value">{{ \App\Support\PersianNumber::format($pilotProgress) }}٪</strong>
     </div>
-    <div class="nila-progress-track" role="progressbar" aria-label="پیشرفت Import" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ $pilotProgress }}">
+    <div class="nila-progress-track" role="progressbar" aria-label="پیشرفت ثبت اطلاعات" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ $pilotProgress }}">
         <span style="width: {{ $pilotProgress }}%"></span>
     </div>
     <p class="admin-card-description">
         وضعیت: {{ $batch->status === 'completed' ? 'تکمیل‌شده' : ($batch->status === 'queued' ? 'در صف اجرا' : ($batch->status === 'processing' ? 'در حال پردازش' : ($batch->status === 'ready' ? 'آماده ادامه' : 'آماده شروع'))) }}
-        — پیشرفت گروه‌ها: {{ \App\Support\PersianNumber::format($batch->next_group_offset) }} از {{ \App\Support\PersianNumber::format($batch->product_groups) }}
-        — ثبت موفق: {{ \App\Support\PersianNumber::format($batch->imported_groups) }}
-        — کنار گذاشته‌شده: {{ \App\Support\PersianNumber::format($batch->failed_groups) }}
+        · ثبت یا به‌روزرسانی‌شده: {{ \App\Support\PersianNumber::format($batch->imported_groups) }}
+        · ثبت‌نشده در نوبت‌های انجام‌شده: {{ \App\Support\PersianNumber::format($batch->failed_groups) }}
+        · در انتظار بررسی: {{ \App\Support\PersianNumber::format($remainingGroups) }}
     </p>
 
     @if($batch->status === 'completed')
@@ -159,12 +171,12 @@
             @csrf
             <div class="admin-form-grid">
                 <div class="admin-field">
-                    <label for="batch_size">تعداد گروه محصول در هر نوبت</label>
+                    <label for="batch_size">تعداد مدل‌ها در هر نوبت</label>
                     <select id="batch_size" name="batch_size">
-                        <option value="25" selected>۲۵ گروه محصول (پیشنهادی)</option>
-                        <option value="50">۵۰ گروه محصول (حداکثر هر نوبت)</option>
+                        <option value="25" selected>۲۵ مدل (پیشنهادی)</option>
+                        <option value="50">۵۰ مدل (حداکثر هر نوبت)</option>
                     </select>
-                    <small class="admin-help">هر گروه شامل یک محصول اصلی و تمام تنوع‌های همان کد پایه است. در صورت نیاز می‌توانی اجرا را در چند نوبت ادامه بدهی.</small>
+                    <small class="admin-help">هر نوبت همین تعداد مدل را همراه با کدهای سایز و رنگشان بررسی می‌کند. اگر مدلی باقی بماند، دکمهٔ ادامه در همین گزارش نمایش داده می‌شود.</small>
                 </div>
             </div>
             <label class="admin-checkbox" style="margin-top:12px;">
@@ -172,19 +184,39 @@
                 <span><strong>متوجه‌ام:</strong> موجودی فایل، مقدار نهایی موجودی در نیلاست و اختلاف آن در جانان ثبت می‌شود.</span>
             </label>
             <div class="admin-form-actions nila-pilot-actions">
-                <span class="nila-safe-note">محصول جدید غیرفعال می‌ماند؛ برند، دسته و تصویر دستی جانان بازنویسی نمی‌شوند.</span>
+                <span class="nila-safe-note">مدل‌های جدید ابتدا غیرفعال‌اند. برای نمایششان در فروشگاه، آن‌ها را از فهرست محصولات فعال کنید.</span>
                 <button type="submit" class="admin-btn admin-btn--secondary">
-                    {{ $batch->next_group_offset > 0 ? 'ادامه Import' : 'شروع Import مرحله‌ای' }}
+                    {{ $batch->next_group_offset > 0 ? 'ادامه ثبت اطلاعات' : 'شروع ثبت اطلاعات' }}
                 </button>
             </div>
         </form>
     @endif
 </div>
 
+@if(!empty($failedProducts))
+<div class="admin-card">
+    <h2 class="admin-card-title">علت ثبت‌نشدن مدل‌ها</h2>
+    <p class="admin-card-description">برای جلوگیری از ثبت ناقص، هر گروهی که یکی از تنوع‌هایش خطا داشته باشد به‌صورت کامل کنار گذاشته می‌شود.</p>
+    <div class="admin-table-wrap">
+        <table class="admin-table">
+            <thead><tr><th>کد پایه هولو</th><th>دلیل</th></tr></thead>
+            <tbody>
+            @foreach($failedProducts as $failure)
+                <tr>
+                    <td>{{ $failure['product_code'] ?? '—' }}</td>
+                    <td>{{ $failure['reason'] ?? 'نیازمند بررسی' }}</td>
+                </tr>
+            @endforeach
+            </tbody>
+        </table>
+    </div>
+</div>
+@endif
+
 <div class="admin-card nila-panel nila-panel--groups">
     <span class="nila-step-label">مرحله ۲ · کنترل گروه‌ها</span>
     <h2 class="admin-card-title">گروه‌بندی محصولات</h2>
-    <p class="admin-card-description">کد قبل از ستاره، گروه محصول را مشخص می‌کند. کد کامل هر ردیف برای SKU تنوع نگهداری می‌شود.</p>
+    <p class="admin-card-description">بخش قبل از ستاره، کد مدل است. هر ردیف با کد کامل خودش زیر همان مدل نگهداری می‌شود.</p>
     <div class="admin-table-wrap">
         <table class="admin-table">
             <thead>
@@ -218,9 +250,9 @@
     @endif
 </div>
 
-<div class="admin-card nila-panel nila-panel--rows">
+<div class="admin-card nila-panel nila-panel--rows" id="nila-file-rows">
     <span class="nila-step-label">جزئیات داده‌های ورودی</span>
-    <h2 class="admin-card-title">نمونه ردیف‌های فایل</h2>
+    <h2 class="admin-card-title">ردیف‌های فایل و خطاها</h2>
     <p class="admin-card-description">ردیف‌ها به‌صورت صفحه‌بندی‌شده نمایش داده می‌شوند. قیمت خالی خطا محسوب می‌شود و هرگز به صفر تبدیل نمی‌شود.</p>
     @if($batch->imported_groups > 0)
         <p class="admin-muted">نتیجه Import در این گزارش نگهداری می‌شود و گروه‌های موفق در جدول‌های اصلی کاتالوگ ثبت شده‌اند.</p>
@@ -275,33 +307,14 @@
 </div>
 
 <div class="admin-card nila-panel nila-panel--rules">
-    <h2 class="admin-card-title">محدودیت‌های این مرحله</h2>
+    <h2 class="admin-card-title">قواعد ثبت اطلاعات فایل</h2>
     <ul>
-        <li>این گزارش فقط پیش‌نمایش است؛ تا تأیید مدیر هیچ محصول، تنوع، قیمت یا موجودی تغییر نمی‌کند.</li>
-        <li>محصول و تنوع تکراری با کد پایدار نیلا شناسایی می‌شوند و دوباره ساخته نمی‌شوند.</li>
-        <li>رنگ فقط به‌عنوان پیشنهاد استخراج‌شده از بخش بعد از آخرین خط تیره نمایش داده می‌شود و هنوز ذخیره نمی‌شود.</li>
+        <li>ثبت تغییرات قیمت و موجودی پس از تأیید شما شروع می‌شود.</li>
+        <li>کد هلو تعیین می‌کند که کالا جدید است یا اطلاعات کالای موجود باید به‌روزرسانی شود.</li>
         <li>دسته‌بندی و برند از فایل فعلی قابل تعیین نیستند و باید با داده‌های تأییدشده جانان تطبیق داده شوند.</li>
-        <li>ردیف بدون قیمت قابل Import نیست؛ مقدار خالی به قیمت صفر تبدیل نمی‌شود.</li>
+        <li>برای ثبت کالا، قیمت هر ردیف را در فایل وارد کنید.</li>
     </ul>
-@if(!empty($failedProducts))
-<div class="admin-card">
-    <h2 class="admin-card-title">گروه‌های ناموفق در Import</h2>
-    <p class="admin-card-description">برای جلوگیری از ثبت ناقص، هر گروهی که یکی از تنوع‌هایش خطا داشته باشد به‌صورت کامل کنار گذاشته می‌شود.</p>
-    <div class="admin-table-wrap">
-        <table class="admin-table">
-            <thead><tr><th>کد پایه هولو</th><th>دلیل</th></tr></thead>
-            <tbody>
-            @foreach($failedProducts as $failure)
-                <tr>
-                    <td>{{ $failure['product_code'] ?? '—' }}</td>
-                    <td>{{ $failure['reason'] ?? 'نیازمند بررسی' }}</td>
-                </tr>
-            @endforeach
-            </tbody>
-        </table>
-    </div>
-</div>
-@endif
+
 
 </div>
 @endsection

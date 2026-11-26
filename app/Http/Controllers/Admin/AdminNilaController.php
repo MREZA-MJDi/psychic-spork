@@ -27,8 +27,16 @@ class AdminNilaController extends Controller
     {
         $base = IntegrationMapping::query()->where('integration', 'nila');
 
-        $products = (clone $base)->where('entity_type', Product::class)->count();
-        $variants = (clone $base)->where('entity_type', ProductVariant::class)->count();
+        $linkedProducts = Product::query()->whereIn(
+            'id',
+            (clone $base)->where('entity_type', Product::class)->select('entity_id')
+        );
+        $products = (clone $linkedProducts)->count();
+        $activeProducts = (clone $linkedProducts)->active()->count();
+        $variants = ProductVariant::query()
+            ->whereIn('product_id', (clone $linkedProducts)->select('id'))
+            ->whereIn('id', (clone $base)->where('entity_type', ProductVariant::class)->select('entity_id'))
+            ->count();
 
         $mappings = (clone $base)
             ->latest('updated_at')
@@ -36,13 +44,12 @@ class AdminNilaController extends Controller
             ->limit(20)
             ->get();
 
-        $latest = $mappings->first();
-
         return view('admin.nila.index', [
             'products' => $products,
+            'activeProducts' => $activeProducts,
             'variants' => $variants,
             'mappings' => $mappings,
-            'latestSyncAt' => $latest?->updated_at,
+            'latestBatch' => NilaImportBatch::query()->latest('id')->first(),
             'batches' => NilaImportBatch::query()
                 ->latest('id')
                 ->paginate(10, ['*'], 'batches_page'),
@@ -133,7 +140,7 @@ class AdminNilaController extends Controller
 
         return redirect()
             ->route('admin.nila.imports.show', $batch)
-            ->with('success', 'فایل با موفقیت بررسی اولیه شد؛ هنوز هیچ محصولی وارد دیتابیس نشده است.');
+            ->with('success', 'فایل بررسی شد. گزارش را ببینید و در صورت تأیید، ورود اطلاعات را شروع کنید.');
     }
 
     public function importNext(
@@ -155,7 +162,7 @@ class AdminNilaController extends Controller
                     ->findOrFail($batch->id);
 
                 if ($locked->status === 'completed') {
-                    throw new RuntimeException('این فایل قبلاً به پایان رسیده است.');
+                    throw new RuntimeException('پردازش این فایل قبلاً به پایان رسیده است.');
                 }
 
                 if (
@@ -206,13 +213,13 @@ class AdminNilaController extends Controller
                 'error',
                 $exception instanceof RuntimeException
                     ? $exception->getMessage()
-                    : 'قرار دادن مرحله Import در صف انجام نشد؛ فایل برای تلاش دوباره آماده شد.'
+                    : 'شروع ورود اطلاعات ممکن نشد. می‌توانید دوباره تلاش کنید.'
             );
         }
 
         return back()->with(
             'success',
-            'مرحله Import در صف اجرا قرار گرفت. نتیجه در همین گزارش قابل پیگیری است.'
+            'این نوبت در صف اجرا قرار گرفت. وضعیت و نتیجه در همین گزارش نمایش داده می‌شود.'
         );
     }
 

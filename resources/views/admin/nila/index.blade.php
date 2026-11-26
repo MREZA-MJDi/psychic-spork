@@ -1,45 +1,53 @@
 @extends('layouts.admin')
 
-@section('title', 'Nila / Holoo')
-@section('page-title', 'Nila / Holoo')
+@section('title', 'ورود محصولات از هلو')
+@section('page-title', 'نیلا و هلو')
 
 @section('content')
 <div class="admin-page-head">
     <div>
-        <h1 class="admin-page-head__title">مرکز کنترل نیلا / Holoo</h1>
-        <p class="admin-page-head__text">
-            دریافت امن فایل کاتالوگ، بررسی ساختار و آماده‌سازی ورود مرحله‌ای محصولات.
-        </p>
+        <h1 class="admin-page-head__title">ورود محصولات و موجودی از هلو</h1>
+        <p class="admin-page-head__text">فایل خروجی هلو را بفرستید، تعداد مدل‌ها و خطاها را بررسی کنید و بعد قیمت و موجودی را در جانان ثبت کنید.</p>
+    </div>
+    <a class="admin-btn admin-btn--ghost" href="{{ route('admin.products.index') }}">فهرست محصولات جانان</a>
+</div>
+
+<div class="admin-dashboard-stats" aria-label="محصولات هلو در جانان">
+    <div class="admin-stat-card">
+        <div class="admin-stat-card__label">مدل‌های ثبت‌شده از هلو</div>
+        <div class="admin-stat-card__value">{{ \App\Support\PersianNumber::format($products) }}</div>
+        <div class="admin-stat-card__meta">کل محصولات متصل، شامل محصولات غیرفعال</div>
+    </div>
+    <div class="admin-stat-card">
+        <div class="admin-stat-card__label">مدل‌های فعال</div>
+        <div class="admin-stat-card__value">{{ \App\Support\PersianNumber::format($activeProducts) }}</div>
+        <div class="admin-stat-card__meta">{{ \App\Support\PersianNumber::format($products - $activeProducts) }} مدل متصل غیرفعال است</div>
+    </div>
+    <div class="admin-stat-card">
+        <div class="admin-stat-card__label">گزینه‌های دارای کد کالا</div>
+        <div class="admin-stat-card__value">{{ \App\Support\PersianNumber::format($variants) }}</div>
+        <div class="admin-stat-card__meta">مثل سایزها و رنگ‌های یک مدل</div>
     </div>
 </div>
 
-<div class="admin-dashboard-stats">
-    <div class="admin-stat-card">
-        <div class="admin-stat-card__label">محصولات متصل به نیلا</div>
-        <div class="admin-stat-card__value">{{ \App\Support\PersianNumber::format($products) }}</div>
-        <div class="admin-stat-card__meta">Product mappings</div>
-    </div>
-    <div class="admin-stat-card">
-        <div class="admin-stat-card__label">تنوع‌های متصل به نیلا</div>
-        <div class="admin-stat-card__value">{{ \App\Support\PersianNumber::format($variants) }}</div>
-        <div class="admin-stat-card__meta">Variant mappings</div>
-    </div>
-    <div class="admin-stat-card">
-        <div class="admin-stat-card__label">آخرین تغییر اتصال</div>
-        <div class="admin-stat-card__value" style="font-size:1.15rem;">
-            {{ $latestSyncAt?->format('Y/m/d H:i') ?? '—' }}
-        </div>
-        <div class="admin-stat-card__meta">زمان سرور</div>
-    </div>
-</div>
+<section class="admin-card nila-panel" aria-labelledby="nila-counts-title">
+    <h2 class="admin-card-title" id="nila-counts-title">چرا تعداد ردیف‌های فایل از تعداد محصولات بیشتر است؟</h2>
+    <p class="admin-card-description">در هلو، سایزها یا رنگ‌های یک مدل می‌توانند کد جداگانه داشته باشند. جانان ردیف‌هایی را که کد پایهٔ مشترک دارند زیر یک مدل جمع می‌کند. مثلاً سه سایز از یک سوتین می‌تواند سه ردیف در فایل و یک محصول با سه گزینه در جانان باشد.</p>
+    @if($latestBatch)
+        <p>آخرین فایل، <strong>{{ $latestBatch->original_name }}</strong>، {{ \App\Support\PersianNumber::format($latestBatch->total_rows) }} ردیف و {{ \App\Support\PersianNumber::format($latestBatch->product_groups) }} مدل شناسایی‌شده دارد.</p>
+        <a href="{{ route('admin.nila.imports.show', $latestBatch) }}">گزارش آخرین فایل و علت موارد ثبت‌نشده</a>
+    @else
+        <p>بعد از بررسی اولین فایل، تعداد ردیف‌ها، مدل‌های شناسایی‌شده و خطاها در گزارش همان فایل نمایش داده می‌شود.</p>
+    @endif
+</section>
 
 <div class="admin-card nila-panel nila-panel--upload">
     <div class="admin-card-header">
         <div>
-            <span class="nila-step-label">ورود ماهانه اطلاعات نیلا · مرحله ۱</span>
-            <h2 class="admin-card-title">۱. بررسی فایل اکسل هولو</h2>
+            <span class="nila-step-label">مرحله ۱</span>
+            <h2 class="admin-card-title">بررسی فایل خروجی هلو</h2>
             <p class="admin-card-description">
-                فایل در فضای خصوصی سرور ذخیره می‌شود. در این مرحله فقط ساختار و داده‌ها خوانده می‌شوند و هیچ محصول، تنوع، دسته یا برندی در کاتالوگ ساخته یا ویرایش نمی‌شود.
+                ابتدا گزارش تعداد مدل‌ها، خطاها و تغییرات قیمت و موجودی را ببینید. ثبت اطلاعات نیاز به تأیید شما در صفحهٔ گزارش دارد.
             </p>
         </div>
     </div>
@@ -48,8 +56,8 @@
         @csrf
         <div class="admin-form-grid">
             <div class="admin-field nila-file-field">
-                <label for="nila-import-file">فایل خروجی نیلا / هلو</label>
-                <div class="nila-file-help">فایل خروجی را انتخاب کن تا فقط پیش‌نمایش و اعتبارسنجی انجام شود.</div>
+                <label for="nila-import-file">فایل خروجی هلو</label>
+                <div class="nila-file-help">فایل ماهانه یا خروجی جدید هلو را انتخاب کنید.</div>
                 <input
                     id="nila-import-file"
                     type="file"
@@ -68,13 +76,12 @@
                     <option value="rial" @selected(old('price_unit') === 'rial')>ریال</option>
                     <option value="toman" @selected(old('price_unit', 'toman') === 'toman')>تومان</option>
                 </select>
-                <p class="admin-help">برای حفظ عدد فایل، تومان را انتخاب کن. جانان قیمت را با رقم فارسی و جداکنندهٔ هزارگان نمایش می‌دهد.</p>
+                <p class="admin-help">واحد ستون قیمت را از فایل هلو انتخاب کنید. هر ۱۰ ریال در جانان به ۱ تومان تبدیل می‌شود.</p>
                 @error('price_unit')<div class="alert error">{{ $message }}</div>@enderror
             </div>
         </div>
         <div class="admin-form-actions nila-upload-actions">
-            <span class="nila-safe-note">بارگذاری فایل فقط گزارش می‌سازد و هیچ محصولی را ثبت یا تغییر نمی‌دهد.</span>
-            <button type="submit" class="admin-btn admin-btn--secondary">بارگذاری و ساخت پیش‌نمایش</button>
+            <button type="submit" class="admin-btn admin-btn--primary">بررسی فایل</button>
         </div>
     </form>
 </div>
@@ -82,9 +89,8 @@
 <div class="admin-card nila-panel nila-panel--history">
     <div class="admin-card-header">
         <div>
-            <span class="nila-step-label">مرحله ۲ · پیگیری فایل‌ها</span>
-            <h2 class="admin-card-title">۲. تاریخچه بررسی فایل‌ها</h2>
-            <p class="admin-card-description">هر فایل یک شناسه مستقل دارد تا بررسی‌ها قابل پیگیری باشند.</p>
+            <h2 class="admin-card-title">گزارش فایل‌های قبلی</h2>
+            <p class="admin-card-description">برای دیدن خطاها یا ادامه ثبت اطلاعات، گزارش همان فایل را باز کنید.</p>
         </div>
     </div>
 
@@ -95,11 +101,11 @@
                 <tr>
                     <th>نام فایل</th>
                     <th>ردیف‌ها</th>
-                    <th>قابل بررسی</th>
+                    <th>ردیف معتبر</th>
                     <th>دارای خطا</th>
-                    <th>گروه محصول</th>
-                    <th>ثبت‌شده</th>
-                    <th>ناموفق</th>
+                    <th>مدل شناسایی‌شده</th>
+                    <th>مدل ثبت یا به‌روزشده</th>
+                    <th>مدل ثبت‌نشده</th>
                     <th>وضعیت</th>
                     <th>تاریخ</th>
                     <th>جزئیات</th>
@@ -146,36 +152,9 @@
     @endif
 </div>
 
-<div class="admin-card nila-panel nila-panel--ownership">
-    <div class="admin-card-header">
-        <div>
-            <span class="nila-step-label">قواعد همگام‌سازی</span>
-            <h2 class="admin-card-title">جانان چه چیزی را تغییر می‌دهد؟</h2>
-            <p class="admin-card-description">
-                اطلاعات کاتالوگ و موجودی از نیلا / هلو می‌آیند؛ تصاویر، محتوای نمایشی، توضیحات تکمیلی و انتشار محصول در جانان مدیریت می‌شوند.
-            </p>
-        </div>
-    </div>
-    <div class="nila-info-grid">
-        <div class="nila-info-card">
-            <strong>ساختار کاتالوگ</strong>
-            <p class="admin-muted">ورود نهایی فقط از جدول‌های فعلی products و product_variants استفاده می‌کند. کد کامل هولو شناسه تنوع و SKU خواهد بود و کد پایه برای گروه‌بندی محصول به کار می‌رود.</p>
-        </div>
-        <div class="nila-info-card">
-            <strong>اطلاعاتی که از فایل فعلی قابل استخراج نیست</strong>
-            <p class="admin-muted">فایل فعلی ستون دسته‌بندی و برند ندارد؛ بنابراین هیچ دسته یا برندی از روی حدس ساخته نمی‌شود. holooCustomerCode نیز فعلاً فقط به‌عنوان داده مرجع نگهداری می‌شود.</p>
-        </div>
-    </div>
-</div>
-
-<div class="admin-card nila-panel nila-panel--mappings">
-    <div class="admin-card-header">
-        <div>
-            <span class="nila-step-label">شناسه‌های متصل‌شده</span>
-            <h2 class="admin-card-title">آخرین Mappingهای ثبت‌شده</h2>
-            <p class="admin-card-description">این جدول ارتباط شناسه‌های خارجی با رکوردهای فعلی کاتالوگ را نشان می‌دهد.</p>
-        </div>
-    </div>
+<details class="admin-card nila-panel nila-panel--mappings">
+    <summary>جزئیات فنی اتصال کالاها</summary>
+    <p class="admin-card-description">آخرین اتصال‌های ثبت‌شده بین کدهای هلو و جانان، برای بررسی مغایرت کد کالا.</p>
 
     @if($mappings->isNotEmpty())
         <div class="admin-table-wrap">
@@ -183,16 +162,16 @@
                 <thead>
                 <tr>
                     <th>نوع</th>
-                    <th>ID داخلی</th>
-                    <th>ID خارجی</th>
-                    <th>SKU خارجی</th>
+                    <th>شناسه جانان</th>
+                    <th>کد هلو</th>
+                    <th>کد کامل کالا</th>
                     <th>آخرین تغییر</th>
                 </tr>
                 </thead>
                 <tbody>
                 @foreach($mappings as $mapping)
                     <tr>
-                        <td>{{ class_basename($mapping->entity_type) }}</td>
+                        <td>{{ class_basename($mapping->entity_type) === 'Product' ? 'مدل' : 'گزینهٔ کالا' }}</td>
                         <td>{{ $mapping->entity_id }}</td>
                         <td>{{ $mapping->external_id }}</td>
                         <td>{{ $mapping->external_sku ?: '—' }}</td>
@@ -204,9 +183,9 @@
         </div>
     @else
         <div class="admin-empty">
-            <h3 class="admin-empty__title">هنوز Mapping ثبت نشده</h3>
-            <p class="admin-empty__text">پس از اجرای Import تأییدشده، ارتباط محصول و تنوع با شناسه‌های هولو اینجا نمایش داده می‌شود.</p>
+            <h3 class="admin-empty__title">هنوز اتصال کالایی ثبت نشده</h3>
+            <p class="admin-empty__text">پس از ثبت اطلاعات، کدهای متصل در این بخش نمایش داده می‌شوند.</p>
         </div>
     @endif
-</div>
+</details>
 @endsection
