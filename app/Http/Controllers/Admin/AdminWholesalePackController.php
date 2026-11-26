@@ -7,6 +7,7 @@ use App\Models\ProductVariant;
 use App\Models\WholesalePack;
 use App\Support\NumericInput;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Collection;
@@ -58,7 +59,7 @@ class AdminWholesalePackController extends Controller
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request): RedirectResponse|JsonResponse
     {
         $data = $this->validated($request);
         $image = $data['image'] ?? null;
@@ -77,6 +78,13 @@ class AdminWholesalePackController extends Controller
 
             return $pack;
         });
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'پک عمده ذخیره شد.',
+                'edit_url' => route('admin.wholesale-packs.edit', $pack),
+            ], 201);
+        }
 
         return redirect()
             ->route('admin.wholesale-packs.edit', $pack)
@@ -147,7 +155,7 @@ class AdminWholesalePackController extends Controller
             'description' => ['nullable', 'string', 'max:5000'],
             'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'remove_image' => ['nullable', 'boolean'],
-            'pack_price' => ['required', 'numeric', 'min:1'],
+            'pack_price' => [$request->isMethod('post') ? 'nullable' : 'required', 'numeric', 'min:1'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
             'is_active' => ['nullable', 'boolean'],
             'items' => ['required', 'array', 'min:1', 'max:60'],
@@ -186,8 +194,11 @@ class AdminWholesalePackController extends Controller
                 * (int) $item['quantity']
         );
 
-        if ((float) $data['pack_price'] > $packBasePrice) {
-            throw ValidationException::withMessages(['pack_price' => 'قیمت پک نمی‌تواند از جمع قیمت عمدهٔ اقلام بیشتر باشد.']);
+        $packBasePrice = round($packBasePrice, 2);
+        $data['pack_price'] = $data['pack_price'] ?? $packBasePrice;
+
+        if ((float) $data['pack_price'] < 1 || (float) $data['pack_price'] > $packBasePrice) {
+            throw ValidationException::withMessages(['pack_price' => 'قیمت پک باید مثبت و حداکثر برابر جمع قیمت عمدهٔ اقلام باشد.']);
         }
 
         $data['slug'] = filled($data['slug'] ?? null)

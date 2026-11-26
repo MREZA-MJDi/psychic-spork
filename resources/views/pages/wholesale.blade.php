@@ -9,9 +9,8 @@
         <div class="container">
             <div class="wholesale-hero wholesale-hero--reference">
                 <div class="wholesale-hero__main">
-                    <span class="eyebrow">JANAN / WHOLESALE</span>
                     <h1>پک‌های عمدهٔ جانان</h1>
-                    <p>پک‌های آماده با ترکیب اقلام و قیمت ثبت‌شده در فروشگاه؛ انتخاب کن، موجودی را بررسی کن و مستقیم به سبد خرید اضافه کن.</p>
+                    <p>محتویات و قیمت هر بسته را ببین و پک مناسب را به سبد خرید اضافه کن.</p>
                     <div class="wholesale-hero__actions">
                         <a class="wholesale-button" href="#packs">مشاهدهٔ پک‌ها</a>
                         <a class="wholesale-button wholesale-button--soft" href="#cheque-application">شرایط خرید چکی</a>
@@ -25,12 +24,6 @@
                 </aside>
             </div>
 
-            <div class="wholesale-benefit-grid">
-                <article class="wholesale-benefit"><b>پک‌های واقعی</b><span>اطلاعات هر بسته از پنل مدیریت و دیتابیس خوانده می‌شود.</span></article>
-                <article class="wholesale-benefit"><b>قیمت شفاف</b><span>قیمت ثبت‌شدهٔ همان پک نمایش داده می‌شود؛ بدون تخفیف ساختگی.</span></article>
-                <article class="wholesale-benefit"><b>موجودی قابل بررسی</b><span>افزودن پک فقط وقتی فعال است که اقلام آن موجودی کافی داشته باشند.</span></article>
-                <article class="wholesale-benefit"><b>پرداخت چکی با مجوز</b><span>درخواست اعتبار ثبت می‌شود و پس از بررسی مدیر وضعیت آن مشخص خواهد شد.</span></article>
-            </div>
         </div>
     </section>
 
@@ -38,9 +31,8 @@
         <div class="container">
             <header class="wholesale-catalog__head">
                 <div>
-                    <span class="eyebrow">JANAN / WHOLESALE CATALOG</span>
                     <h2>پک‌های آمادهٔ عمده</h2>
-                    <p>بسته‌هایی که در مدیریت ثبت شده‌اند، همراه با تصویر، اقلام، تعداد و قیمت واقعی.</p>
+                    <p>تعداد هر مدل و مبلغ کل بسته روی کارت مشخص است.</p>
                 </div>
                 <a class="button button--ghost" href="{{ route('wholesale.catalog') }}">مشاهده کاتالوگ محصولات عمده</a>
             </header>

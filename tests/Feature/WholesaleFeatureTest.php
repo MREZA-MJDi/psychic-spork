@@ -26,6 +26,40 @@ class WholesaleFeatureTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_admin_can_build_a_hidden_pack_from_the_catalog_with_server_calculated_price(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        [$product, $variant] = $this->makeProduct(stock: 20, wholesalePrice: 250000);
+        [, $other] = $this->makeProduct(stock: 20, wholesalePrice: 100000);
+
+        $this->actingAs($admin)->get(route('admin.products.index'))
+            ->assertOk()->assertSee('data-pack-product="' . $product->id . '"', false)
+            ->assertSee('data-catalog-pack-dialog', false);
+
+        $this->getJson(route('admin.variant-lookup', ['pack' => 1, 'product_id' => $product->id]))
+            ->assertOk()->assertJsonCount(1, 'data')->assertJsonPath('data.0.id', $variant->id);
+
+        $input = [
+            'name' => 'بسته انتخابی',
+            'is_active' => 0,
+            'items' => [
+                ['variant_id' => $variant->id, 'quantity' => 2],
+                ['variant_id' => $other->id, 'quantity' => 1],
+            ],
+        ];
+        $this->postJson(route('admin.wholesale-packs.store'), $input + ['pack_price' => 900000])
+            ->assertUnprocessable()->assertJsonValidationErrors('pack_price');
+        $this->assertDatabaseCount('wholesale_packs', 0);
+
+        $this->postJson(route('admin.wholesale-packs.store'), $input)
+            ->assertCreated()->assertJsonStructure(['message', 'edit_url']);
+        $pack = WholesalePack::query()->firstOrFail();
+        $this->assertFalse($pack->is_active);
+        $this->assertEquals(600000, $pack->pack_price);
+        $this->assertEquals(3, $pack->pack_quantity);
+        $this->assertEquals(20, $variant->fresh()->stock);
+    }
+
     public function test_admin_can_add_a_cover_image_to_a_wholesale_pack_and_customers_see_it(): void
     {
         Storage::fake('public');
