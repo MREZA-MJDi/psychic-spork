@@ -324,8 +324,8 @@ a.janan-category-card:focus-visible { outline: 2px solid var(--janan-pink-ink); 
     text-decoration:none; box-shadow:none;
 }
 .janan-pagination a.janan-pagination__button:hover { color:#93475f; border-color:#c4869a; background:#fcf5f7; }
-.janan-pagination .is-current { background:#33434c; color:#fff; border-color:#33434c; font-weight:800; }
-.janan-pagination .is-disabled { color:#77828a; background:#f4f6f7; border-color:#e4e8ea; cursor:default; }
+.janan-pagination .janan-pagination__button.is-current { background:#33434c; color:#fff; border-color:#33434c; font-weight:800; }
+.janan-pagination .janan-pagination__button.is-disabled { color:#77828a; background:#f4f6f7; border-color:#e4e8ea; cursor:default; }
 .janan-pagination .janan-pagination__dots { padding-inline:3px; color:var(--janan-ink-soft); font-size:14px; }
 .janan-pagination a:focus-visible { outline:2px solid #93475f; outline-offset:3px; }
 @media(max-width:700px) {

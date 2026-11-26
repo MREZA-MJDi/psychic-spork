@@ -778,3 +778,5 @@ body.home-page-layout .store-header--immersive.is-over-content .mobile-menu-togg
 .home-page .immersive-grid-hero .immersive-title-overlay__link { justify-content: space-between; display: flex; min-height: 42px; padding: 8px 12px; background: #fff; color: #24262a; border-radius: 10px; font-weight: 700; border: 0; }
 .immersive-grid-hero .immersive-title-overlay__link[hidden] { display: none; }
 .immersive-grid-hero .immersive-title-overlay__link:focus-visible { outline: 2px solid #efb9cc; outline-offset: 3px; }
+
+.immersive-grid-hero.is-zoomed .immersive-product-price { display:block; visibility:visible; opacity:1; line-height:1.6; }

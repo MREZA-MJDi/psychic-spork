@@ -17,6 +17,7 @@ try {
       reducedMotion: 'reduce', deviceScaleFactor: 1,
     });
     const page = await context.newPage();
+    await page.route('https://maps.google.com/**', route => route.fulfill({contentType:'text/html',body:'<html><body>Map preview (test)</body></html>'}));
     for (const path of paths) {
       const name = path === '/' ? 'home' : path.slice(1).replaceAll('/', '-');
       try {
@@ -31,6 +32,22 @@ try {
         }));
         if (layout.scroll > layout.viewport + 2) throw new Error('Horizontal document overflow: ' + JSON.stringify(layout));
         if (!layout.font.includes('IRANYekanX') || !layout.fontLoaded) throw new Error('Unexpected or unloaded body font: ' + layout.font);
+        if (path === '/products') {
+          const pager = page.locator('.janan-pagination').first();
+          await pager.waitFor();
+          const next = pager.locator('a[rel="next"]');
+          if (!await next.isVisible()) throw new Error('Missing next-page control');
+          const bounds = await pager.boundingBox();
+          if (!bounds || bounds.x < -2 || bounds.x + bounds.width > width + 2) throw new Error('Pagination outside viewport');
+          if ((await pager.innerText()).includes('Showing')) throw new Error('Untranslated pagination');
+        }
+        if (path === '/about') {
+          await page.locator('.contact-map-card iframe').waitFor();
+          const map = page.locator('.contact-map-card iframe');
+          if (!(await map.getAttribute('src')).includes('maps.google.com')) throw new Error('Contact map missing');
+          const bounds = await map.boundingBox();
+          if (!bounds || bounds.x < -2 || bounds.x + bounds.width > width + 2) throw new Error('Contact map outside viewport');
+        }
         await page.screenshot({ path: 'artifacts/ui-smoke/' + width + '-' + name + '.png', fullPage: true, animations: 'disabled' });
         if (path === '/') {
           const hero = page.locator('[data-immersive-gallery]');
@@ -41,7 +58,12 @@ try {
           const panel = hero.locator('#immersiveTitleOverlay');
           const bounds = await panel.boundingBox();
           if (!bounds || bounds.x < -2 || bounds.x + bounds.width > width + 2) throw new Error('Hero inspector outside viewport');
-          if (!(await hero.locator('#immersiveProductPrice').innerText()).includes('تومان')) throw new Error('Missing hero price');
+          const expectedPrice = await hero.locator('#immersiveHeroData').evaluate(el => JSON.parse(el.textContent)[0].price);
+          if (!expectedPrice || !expectedPrice.includes('تومان')) throw new Error('Fixture hero price missing');
+          await page.waitForFunction(expected => {
+            const price = document.querySelector('#immersiveProductPrice');
+            return price?.textContent.trim() === expected && price.getBoundingClientRect().height > 0 && getComputedStyle(price).visibility === 'visible';
+          }, expectedPrice, {timeout: 5000});
           await page.screenshot({ path: 'artifacts/ui-smoke/' + width + '-hero-open.png', animations: 'disabled' });
           await hero.locator('#immersiveCloseButton').click();
           await hero.locator('.immersive-title-overlay.is-active').waitFor({ state: 'hidden' });

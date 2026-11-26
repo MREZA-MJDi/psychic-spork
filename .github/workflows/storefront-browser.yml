@@ -42,7 +42,7 @@ jobs:
           cp .env.example .env
           php artisan key:generate --force
           php artisan migrate --force
-          php artisan tinker --execute='$category = App\Models\Category::factory()->create(["slug" => "ui-qa-category", "name" => "دسته آزمایشی"]); $brand = App\Models\Brand::factory()->create(["slug" => "ui-qa-brand"]); $product = App\Models\Product::factory()->create(["slug" => "ui-qa-product", "name" => "محصول آزمایشی جانان", "category_id" => $category->id, "brand_id" => $brand->id, "is_hero" => true]); App\Models\ProductVariant::factory()->create(["product_id" => $product->id, "price" => 250000, "stock" => 5]); App\Models\User::factory()->create(["phone" => "09123456789", "is_admin" => true]);'
+          php artisan tinker --execute='$category = App\Models\Category::factory()->create(["slug" => "ui-qa-category", "name" => "دسته آزمایشی"]); $brand = App\Models\Brand::factory()->create(["slug" => "ui-qa-brand"]); $product = App\Models\Product::factory()->create(["slug" => "ui-qa-product", "name" => "محصول آزمایشی جانان", "category_id" => $category->id, "brand_id" => $brand->id, "is_hero" => true]); App\Models\ProductVariant::factory()->create(["product_id" => $product->id, "price" => 250000, "stock" => 5]); App\Models\User::factory()->create(["phone" => "09123456789", "is_admin" => true]); App\Models\Product::factory()->count(25)->create(["category_id" => $category->id, "brand_id" => $brand->id, "is_hero" => false]); App\Models\SiteSetting::setValue("contact.address", "تهران، نشانی آزمایشی");'
       - name: Start isolated application
         run: |
           php artisan serve --host=127.0.0.1 --port=8000 > /tmp/janan-ui-server.log 2>&1 &
