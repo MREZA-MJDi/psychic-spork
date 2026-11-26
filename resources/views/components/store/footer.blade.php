@@ -203,7 +203,7 @@
         <div class="footer-trust__head">
             <div>
                 <span class="footer-col__index">۰۴</span>
-                <h3>اعتبار، اطلاعات و مسیرهای رسمی</h3>
+                <h3>راهنمای سفارش و اطلاعات فروشگاه</h3>
             </div>
 
             <p>

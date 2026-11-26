@@ -764,7 +764,7 @@ body.home-page-layout .store-header--immersive.is-over-content .mobile-menu-togg
   border: 1px solid rgba(255,255,255,.17); border-radius: 18px;
   background: rgba(20,22,25,.94); box-shadow: 0 16px 45px rgba(0,0,0,.25);
   direction: rtl; text-align: start; overflow: auto;
-  visibility: hidden; pointer-events: none; scrollbar-width: thin;
+  visibility: hidden; pointer-events: none; scrollbar-width: thin; transition: none;
 }
 .immersive-grid-hero.is-zoomed .immersive-title-overlay { visibility: visible; pointer-events: auto; }
 .immersive-grid-hero .immersive-title-overlay__number { width: auto; height: auto; margin-bottom: 5px; color: #efb9cc; }

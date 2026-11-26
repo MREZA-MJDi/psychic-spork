@@ -8316,7 +8316,7 @@ outline:
 
 .about-stat-grid {
     display: grid;
-    grid-template-columns: repeat(4,minmax(0,1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr));
     gap: 10px;
     margin-top: 34px;
 }
@@ -8333,7 +8333,6 @@ outline:
     box-shadow: var(--janan-shadow-xs);
 }
 
-.about-stat-card small,
 .about-live__product-label {
     color: var(--janan-faint);
     font-size: 6.5px;
@@ -8348,25 +8347,8 @@ outline:
 
 .about-stat-card span {
     color: var(--janan-muted);
-    font-size: 8px;
+    font-size: 0.875rem;
     line-height: 1.7;
-}
-
-.about-stat-card--dark {
-    color: #fff;
-    border-color: transparent;
-    background:
-        radial-gradient(circle at 88% 18%, rgba(159,212,234,.16), transparent 9rem),
-        linear-gradient(145deg,#35434c,#27343c);
-}
-
-.about-stat-card--dark small,
-.about-stat-card--dark span {
-    color: rgba(255,255,255,.58);
-}
-
-.about-stat-card--dark strong {
-    color: #fff;
 }
 
 .about-principles {
@@ -10082,6 +10064,7 @@ body.store-body :where(a, button, input, select, textarea):focus-visible {
     width: 2.75rem;
     height: 2.75rem;
     place-items: center;
+    color: var(--janan-ink-soft);
 }
 
 .contact-info-item > .store-icon-link {

@@ -20,4 +20,20 @@ class ContactPresentationTest extends TestCase
             ->assertSee(route('shipping'), false)
             ->assertSee(route('returns'), false);
     }
+
+    public function test_about_fills_blank_copy_and_renders_a_phone_icon_link(): void
+    {
+        SiteSetting::setValue('about.hero_title', '');
+        SiteSetting::setValue('about.story_title', 'عنوان سفارشی فروشگاه');
+        SiteSetting::setValue('contact.phone', '021 12345678');
+        SiteSetting::setValue('contact.working_hours', '');
+
+        $this->get(route('about'))->assertOk()
+            ->assertSee('درباره فروشگاه لباس زیر جانان')
+            ->assertSee('عنوان سفارشی فروشگاه')
+            ->assertSee('href="tel:02112345678"', false)
+            ->assertSee('aria-label="تماس تلفنی با جانان"', false)
+            ->assertDontSee('021 12345678')
+            ->assertDontSee('ساعت پاسخ‌گویی');
+    }
 }
