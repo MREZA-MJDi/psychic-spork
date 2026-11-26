@@ -41,6 +41,8 @@ maintenance=1
 php artisan migrate --force
 php artisan storage:link --force
 php artisan optimize
+# A Vite development marker takes precedence over the production manifest.
+rm -f public/hot
 mv "$build_dir/manifest.json" public/build/manifest.json
 php artisan queue:restart
 php artisan up
