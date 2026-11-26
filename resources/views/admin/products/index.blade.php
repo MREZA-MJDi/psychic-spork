@@ -679,6 +679,10 @@
                                         </a>
 
 
+                                        <button type="button" class="admin-btn admin-btn--ghost admin-btn--sm"
+                                            data-pack-product="{{ $product->id }}" data-pack-product-name="{{ $product->name }}"
+                                            aria-haspopup="dialog">افزودن به پک</button>
+
                                         <form
                                             method="POST"
                                             action="{{ route('admin.products.destroy', $product) }}"
@@ -799,5 +803,27 @@
         </div>
 
     </div>
+
+    <p class="alert success catalog-pack-notice" data-catalog-pack-status role="status" hidden></p>
+    <button type="button" class="admin-btn admin-btn--secondary catalog-pack-resume" data-pack-resume aria-haspopup="dialog" hidden>
+        ادامه ساخت پک
+    </button>
+    <dialog class="catalog-pack-dialog" data-catalog-pack-dialog aria-labelledby="catalog-pack-title"
+        data-draft-key="janan.catalog-pack.{{ auth()->id() }}">
+        <div class="wholesale-pack-editor catalog-pack-editor">
+            <header class="catalog-pack-dialog__head">
+                <div>
+                    <h2 id="catalog-pack-title">ساخت پک عمده</h2>
+                    <p>مدل‌ها را انتخاب کن. برای افزودن محصول دیگر به فهرست برگرد.</p>
+                </div>
+                <button type="button" class="admin-btn admin-btn--ghost" data-pack-close>بستن</button>
+            </header>
+            @include('admin.wholesale-packs.fields', [
+                'embedded' => true,
+                'pack' => new \App\Models\WholesalePack(),
+                'variants' => collect(),
+            ])
+        </div>
+    </dialog>
 
 @endsection

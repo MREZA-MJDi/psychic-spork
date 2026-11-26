@@ -4041,3 +4041,63 @@ body.admin-nav-open {
 }
 
 .wholesale-pack-price-summary > p.is-error { color: var(--admin-danger); }
+
+.catalog-pack-dialog {
+    width: min(960px, calc(100% - 24px));
+    max-height: calc(100dvh - 28px);
+    padding: clamp(14px, 3vw, 26px);
+    border: 1px solid var(--admin-border);
+    border-radius: 16px;
+    background: #fff;
+    color: var(--admin-text);
+}
+
+.catalog-pack-dialog::backdrop { background: #18161980; }
+
+.catalog-pack-dialog__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 14px;
+}
+
+.catalog-pack-dialog__head h2 { margin: 0; font-size: 22px; }
+.catalog-pack-dialog__head p { margin: 4px 0 0; color: var(--admin-muted); }
+.catalog-pack-editor .wholesale-pack-variant-list { max-height: 18rem; overflow: auto; }
+
+.catalog-pack-resume {
+    position: fixed;
+    inset-inline-end: 20px;
+    bottom: calc(24px + env(safe-area-inset-bottom));
+    z-index: 20;
+}
+
+.catalog-pack-notice:not([hidden]) {
+    position: fixed;
+    inset-inline-end: 20px;
+    bottom: calc(80px + env(safe-area-inset-bottom));
+    z-index: 20;
+}
+
+.catalog-pack-resume[hidden],
+.catalog-pack-editor [data-pack-save-error][hidden] { display: none; }
+
+.catalog-pack-optional {
+    grid-column: 1 / -1;
+    padding: 12px;
+    border: 1px solid var(--admin-border);
+    border-radius: 10px;
+}
+
+.catalog-pack-optional > summary {
+    cursor: pointer;
+    font-weight: 700;
+}
+
+.catalog-pack-optional[open] > summary { margin-bottom: 14px; }
+
+@media (max-width: 900px) {
+    .catalog-pack-resume { bottom: calc(92px + env(safe-area-inset-bottom)); }
+    .catalog-pack-notice:not([hidden]) { bottom: calc(146px + env(safe-area-inset-bottom)); }
+}

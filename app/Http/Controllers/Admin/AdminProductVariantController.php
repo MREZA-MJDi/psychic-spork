@@ -24,6 +24,7 @@ class AdminProductVariantController extends Controller
             'q' => ['nullable', 'string', 'max:120'],
             'in_stock' => ['sometimes', 'boolean'],
             'pack' => ['sometimes', 'boolean'],
+            'product_id' => ['sometimes', 'integer', 'min:1'],
         ]);
         $term = trim($filters['q'] ?? '');
         $packLookup = $request->boolean('pack');
@@ -34,6 +35,7 @@ class AdminProductVariantController extends Controller
         $variants = ProductVariant::query()
             ->with(['product:id,name,slug,brand_id,is_active', 'product.brand:id,name'])
             ->whereHas('product')
+            ->when(isset($filters['product_id']), fn ($query) => $query->where('product_id', $filters['product_id']))
             ->when(!$packLookup, fn ($query) => $query->where('is_active', true)
                 ->whereHas('product', fn ($product) => $product->where('is_active', true)))
             ->when(!$packLookup && $request->boolean('wholesale'), fn ($query) => $query->whereNotNull('wholesale_price'))

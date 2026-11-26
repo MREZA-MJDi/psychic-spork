@@ -1141,6 +1141,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const searchStatus = form?.querySelector('[data-pack-search-status]');
         const retrySearch = form?.querySelector('[data-pack-search-retry]');
         const stockFilter = form?.querySelector('[data-pack-in-stock]');
+        const dialog = form?.closest('[data-catalog-pack-dialog]');
+        const resume = document.querySelector('[data-pack-resume]');
+        const catalogStatus = document.querySelector('[data-catalog-pack-status]');
+        const saveError = form?.querySelector('[data-pack-save-error]');
+        let productId = '';
         const rows = [...document.querySelectorAll('[data-variant-row]')];
         const selectedCount = document.querySelector('[data-pack-selected-count]');
         const unitCount = document.querySelector('[data-pack-unit-count]');
@@ -1171,6 +1176,38 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!list || !form) return;
 
         const selectedVariants = new Map();
+        const draftFields = ['name', 'pack_price', 'description', 'slug', 'sort_order'];
+        const activeInput = form.querySelector('input[type="checkbox"][name="is_active"]');
+
+        if (dialog) {
+            try {
+                const draft = JSON.parse(sessionStorage.getItem(dialog.dataset.draftKey) || 'null');
+                if (draft) {
+                    draftFields.forEach((name) => { form.elements[name].value = draft[name] ?? ''; });
+                    activeInput.checked = draft.active === true;
+                    for (const [id, item] of draft.items || []) selectedVariants.set(id, item);
+                }
+            } catch {
+                // The builder still works when browser storage is unavailable.
+            }
+        }
+
+        const saveDraft = () => {
+            if (!dialog) return;
+            const fields = Object.fromEntries(draftFields.map(name => [name, form.elements[name].value]));
+            resume.hidden = !selectedVariants.size && !fields.name;
+            resume.textContent = selectedVariants.size
+                ? `ادامه ساخت پک (${digits.format(selectedVariants.size)} مدل)`
+                : 'ادامه ساخت پک';
+            try {
+                sessionStorage.setItem(dialog.dataset.draftKey, JSON.stringify({
+                    ...fields, active: activeInput.checked, items: [...selectedVariants],
+                }));
+            } catch {
+                // Selection remains available on the current page.
+            }
+        };
+
         const selectRow = (row, checkbox, quantity) => {
             selectedVariants.set(checkbox.value, {
                 quantity: Number.parseInt(quantity?.value || '1', 10),
@@ -1299,6 +1336,7 @@ document.addEventListener('DOMContentLoaded', () => {
             url.searchParams.set('q', search?.value.trim() || '');
             url.searchParams.set('page', String(targetPage));
             if (stockFilter.checked) url.searchParams.set('in_stock', '1');
+            if (productId) url.searchParams.set('product_id', productId);
             try {
                 const response = await fetch(url, { headers: { Accept: 'application/json' }, signal: controller.signal });
                 if (!response.ok) throw new Error('Lookup failed');
@@ -1331,7 +1369,9 @@ document.addEventListener('DOMContentLoaded', () => {
             let selected = selectedVariants.size;
             let units = [...selectedVariants.values()].reduce((sum, item) => sum + (item.quantity || 0), 0);
             let baseTotal = [...selectedVariants.values()].reduce((sum, item) => sum + ((item.quantity || 0) * item.unitPrice), 0);
-            let requestedPackPrice = Number(normalizeMoney(packPriceInput?.value)) || 0;
+            const priceText = normalizeMoney(packPriceInput?.value);
+            const usesBasePrice = Boolean(dialog && priceText === '');
+            const requestedPackPrice = usesBasePrice ? baseTotal : Number(priceText);
             let discount = baseTotal - requestedPackPrice;
             let visible = 0;
 
@@ -1348,14 +1388,14 @@ document.addEventListener('DOMContentLoaded', () => {
             if (packBasePrice) packBasePrice.textContent = digits.format(Math.round(baseTotal));
             if (packDiscount) packDiscount.textContent = digits.format(Math.round(Math.max(0, discount)));
             const priceTooHigh = selected > 0 && requestedPackPrice > baseTotal;
-            const invalidPackPrice = selected > 0 && requestedPackPrice <= 0;
+            const invalidPackPrice = selected > 0 && (!Number.isFinite(requestedPackPrice) || requestedPackPrice < 1);
             if (packPriceStatus) {
                 packPriceStatus.textContent = priceTooHigh
                     ? 'قیمت پک از جمع قیمت عمده اقلام بیشتر است؛ قیمت را کاهش بده.'
                     : invalidPackPrice
                         ? 'قیمت پک را وارد کن.'
                         : selected > 0
-                            ? 'قیمت مناسب است؛ تخفیف نسبت به خرید جداگانه محاسبه شد.'
+                            ? (usesBasePrice ? 'جمع قیمت اقلام به‌عنوان قیمت پک ثبت می‌شود.' : 'قیمت پک و تخفیف محاسبه شدند.')
                             : 'بعد از انتخاب اقلام، جمع قیمت و تخفیف اینجا نمایش داده می‌شود.';
                 packPriceStatus.classList.toggle('is-error', priceTooHigh || invalidPackPrice);
                 packPriceStatus.classList.toggle('is-success', selected > 0 && !priceTooHigh && !invalidPackPrice);
@@ -1365,6 +1405,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     invalidPackPrice ? 'قیمت پک باید بیشتر از صفر باشد.' : ''
             );
             if (noResults) noResults.hidden = visible !== 0;
+            saveDraft();
         };
 
         search.addEventListener('input', () => {
@@ -1384,7 +1425,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         packPriceInput?.addEventListener('input', () => refresh(false));
-        form.addEventListener('submit', (event) => {
+        form.addEventListener('submit', async (event) => {
             refresh(false);
             if (!selectedVariants.size) {
                 event.preventDefault();
@@ -1403,10 +1444,75 @@ document.addEventListener('DOMContentLoaded', () => {
                 const qtyInput = document.createElement('input'); qtyInput.type = 'hidden'; qtyInput.name = `items[${id}][quantity]`; qtyInput.value = String(item.quantity); qtyInput.dataset.packSubmittedItem = '';
                 form.append(idInput, qtyInput);
             });
+            if (!dialog) return;
+
+            event.preventDefault();
+            const submit = form.querySelector('button[type="submit"]');
+            submit.disabled = true;
+            saveError.hidden = true;
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: new FormData(form),
+                    headers: { Accept: 'application/json' },
+                });
+                const result = await response.json();
+                if (!response.ok) {
+                    saveError.textContent = Object.values(result.errors || {}).flat().join(' ')
+                        || result.message || 'ذخیره انجام نشد.';
+                    saveError.hidden = false;
+                    saveError.scrollIntoView({ block: 'nearest' });
+                    return;
+                }
+
+                selectedVariants.clear();
+                form.reset();
+                draftFields.forEach((name) => { form.elements[name].value = ''; });
+                form.querySelectorAll('[data-pack-submitted-item]').forEach(input => input.remove());
+                form.querySelector('[data-pack-image-preview] img')?.remove();
+                refresh();
+                dialog.close();
+                const edit = document.createElement('a');
+                edit.href = result.edit_url;
+                edit.textContent = 'ویرایش پک';
+                catalogStatus.replaceChildren(result.message + ' ', edit);
+                catalogStatus.hidden = false;
+            } catch {
+                saveError.textContent = 'ارتباط برای ذخیرهٔ پک کامل نشد. وضعیت را در فهرست پک‌ها بررسی کن.';
+                saveError.hidden = false;
+                saveError.scrollIntoView({ block: 'nearest' });
+            } finally {
+                submit.disabled = false;
+            }
         });
 
+        if (dialog) {
+            form.querySelector('[data-pack-items]').after(form.querySelector('[data-pack-details]'));
+            const open = (id = '', name = '') => {
+                clearTimeout(searchTimer);
+                productId = id;
+                search.value = '';
+                stockFilter.checked = false;
+                if (name && !form.elements.name.value) form.elements.name.value = `پک ${name}`.slice(0, 180);
+                dialog.querySelector('[data-pack-product-label]').textContent = name || 'جستجو در همهٔ محصولات';
+                saveError.hidden = true;
+                dialog.showModal();
+                list.replaceChildren();
+                refresh(false);
+                loadPage(false);
+                search.focus();
+            };
+            document.querySelectorAll('[data-pack-product]').forEach(button =>
+                button.addEventListener('click', () => open(button.dataset.packProduct, button.dataset.packProductName)));
+            resume.addEventListener('click', () => open());
+            dialog.querySelectorAll('[data-pack-close]').forEach(button =>
+                button.addEventListener('click', () => dialog.close()));
+            form.addEventListener('input', saveDraft);
+            form.addEventListener('change', saveDraft);
+        }
+
         refresh();
-        loadPage(false);
+        if (!dialog) loadPage(false);
     };
 
     initProductForm();
