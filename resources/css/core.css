@@ -300,3 +300,5 @@ a.janan-category-card:focus-visible { outline: 2px solid var(--janan-pink-ink); 
     .janan-category-card__arrow { flex-basis: 29px; width: 29px; height: 29px; font-size: 15px; }
 }
 @media (prefers-reduced-motion: reduce) { .janan-category-card { transition: none; } a.janan-category-card:hover { transform: none; } }
+
+.janan-category-card__arrow svg { width: 18px; height: 18px; }

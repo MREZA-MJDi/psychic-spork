@@ -42,7 +42,7 @@
         @if($categoryCard)
             <div class="janan-category-card__body">
                 <div><h3 data-category-preview-name>{{ $categoryName ?: 'نام دسته‌بندی' }}</h3><span class="janan-category-card__count">پیش‌نمایش کارت فروشگاه</span></div>
-                <span class="janan-category-card__arrow" aria-hidden="true">←</span>
+                <div class="janan-category-card__arrow" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M19 12H5m6 6-6-6 6-6"/></svg></div>
             </div>
         </div>
         @endif

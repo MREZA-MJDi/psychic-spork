@@ -9,6 +9,6 @@
             <h3>{{ \App\Support\PersianNumber::digits($category->name) }}</h3>
             <span class="janan-category-card__count">{{ \App\Support\PersianNumber::format($category->active_products_count) }} محصول</span>
         </div>
-        <span class="janan-category-card__arrow" aria-hidden="true">←</span>
+        <div class="janan-category-card__arrow" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M19 12H5m6 6-6-6 6-6"/></svg></div>
     </div>
 </a>

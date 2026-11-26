@@ -13,7 +13,7 @@ try {
     await page.locator('input[name="phone"]').fill('09123456789');
     await page.locator('input[name="password"]').fill('password');
     await page.locator('form.auth-form button[type="submit"]').click();
-    await page.waitForURL('**/admin/**');
+    await page.waitForURL(url => /^\/admin\/?$/.test(url.pathname));
     await page.goto(base + '/admin/categories/1/edit');
     const picker = page.locator('[data-category-cover]');
     await picker.waitFor();
@@ -30,6 +30,7 @@ try {
     await live.waitFor();
     await picker.locator('[data-media-zoom]').fill('1.5');
     const editor = picker.locator('[data-media-canvas]');
+    await editor.scrollIntoViewIfNeeded();
     const bounds = await editor.boundingBox();
     await page.mouse.move(bounds.x + bounds.width/2, bounds.y + bounds.height/2);
     await page.mouse.down();
