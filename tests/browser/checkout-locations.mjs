@@ -5,13 +5,13 @@ const browser = await chromium.launch();
 try {
   for (const width of [390, 1440]) {
     const page = await browser.newPage({ viewport: { width, height: 900 } });
-    await page.goto(base + '/cart');
-    const token = await page.locator('meta[name="csrf-token"]').getAttribute('content');
-    const added = await page.request.post(base + '/cart/1', {
-      headers: { Accept: 'application/json', 'X-CSRF-TOKEN': token },
-      data: { quantity: 1 },
-    });
-    assert.ok(added.ok(), 'Fixture product should be added to cart');
+    await page.goto(base + '/');
+    const fixtureCard = page.locator('.home-product-card').filter({ hasText: 'محصول آزمایشی جانان' });
+    const added = page.waitForResponse(response =>
+      new URL(response.url()).pathname === '/cart/1' && response.request().method() === 'POST'
+    );
+    await fixtureCard.getByRole('button', { name: 'افزودن به سبد' }).click();
+    assert.ok((await added).ok(), 'Fixture product should be added from the home card');
     let offline = false;
     await page.route('**/locations/provinces', route => offline
       ? route.fulfill({status: 503, json: {}})

@@ -98,6 +98,9 @@ class StoreFrontendTest extends TestCase
                 ->assertSee('دیدن بیشتر محصولات')
                 ->assertSee('محصول تست 1')
                 ->assertSee('محصول تست 12')
+                ->assertSee('class="home-product-card"', false)
+                ->assertSee('۱۰۱٬۰۰۰ تومان')
+                ->assertDontSee('product-card--home', false)
                 ->assertDontSee('رنگ نامشخص')
                 ->assertDontSee('سایز نامشخص');
 
@@ -105,6 +108,7 @@ class StoreFrontendTest extends TestCase
                 ->assertOk()
                 ->assertSee('نمایش ۱ تا ۶', false)
                 ->assertSee('store-pagination__inner', false)
+                ->assertDontSee('class="home-product-card"', false)
                 ->assertSee('صفحه بعدی')
                 ->assertDontSee('Showing');
         } finally {

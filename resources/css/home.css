@@ -1737,9 +1737,96 @@ outline:
     scroll-snap-align: start;
 }
 
-.home-product-slide .product-card {
+.home-product-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     height: 100%;
 }
+
+.home-product-card__image {
+    display: block;
+    width: 100%;
+    height: 256px;
+    overflow: hidden;
+    border-radius: 10px;
+    background: #e7e6e5;
+    box-shadow: 0 4px 12px #25212a14;
+}
+
+.home-product-card__image img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
+.home-product-card__placeholder {
+    display: grid;
+    height: 100%;
+    place-items: center;
+    color: #795768;
+}
+
+.home-product-card__panel {
+    position: relative;
+    width: min(calc(100% - 20px), 256px);
+    margin-top: -40px;
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: 0 6px 16px #25212a20;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.home-product-card__panel h3 {
+    margin: 0;
+    padding: 9px 12px;
+    color: #2b282f;
+    text-align: center;
+    font-size: 14px;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+}
+
+.home-product-card__panel h3 a { color: inherit; }
+.home-product-card__panel h3 a:hover { text-decoration: underline; }
+
+.home-product-card__purchase {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 6px 8px;
+    margin-top: auto;
+    padding: 8px 10px;
+    background: #eeecef;
+    font-size: 12px;
+}
+
+.home-product-card__price { color: #2b282f; font-weight: 750; }
+.home-product-card__unavailable { color: #68515b; }
+
+.home-product-card__action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 5px 9px;
+    border: 0;
+    border-radius: 5px;
+    color: #fff;
+    background: #3d343f;
+    font: inherit;
+    font-weight: 700;
+}
+
+.home-product-card__action:hover:not(:disabled) { background: #563c4e; }
+.home-product-card__action:disabled { opacity: .7; }
+.home-product-card :is(a, button):focus-visible { outline: 2px solid #995570; outline-offset: -2px; }
 
 .home-product-section__footer {
     display: flex;
