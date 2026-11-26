@@ -38,9 +38,9 @@ class AdminControlCenterTest extends TestCase
         $this->actingAs($admin)
             ->get(route('admin.nila.index'))
             ->assertOk()
-            ->assertSee('ورود ماهانه اطلاعات نیلا')
-            ->assertSee('فایل خروجی نیلا')
-            ->assertSee('جانان چه چیزی را تغییر می‌دهد؟');
+            ->assertSee('ورود محصولات و موجودی از هلو')
+            ->assertSee('فایل خروجی هلو')
+            ->assertSee('چرا تعداد ردیف‌های فایل از تعداد محصولات بیشتر است؟');
     }
 
     public function test_admin_can_approve_a_pending_cheque_request_without_wholesale_approval(): void
