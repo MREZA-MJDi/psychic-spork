@@ -364,6 +364,9 @@ Route::prefix('admin')
         Route::get('cheques', [AdminChequeController::class, 'index'])
             ->name('cheques.index');
 
+        Route::get('cheques/alerts', [AdminChequeController::class, 'alerts'])
+            ->middleware('throttle:60,1')->name('cheques.alerts');
+
         Route::get('cheques/{chequePayment}/image', [AdminChequeController::class, 'image'])
             ->name('cheques.image');
 
