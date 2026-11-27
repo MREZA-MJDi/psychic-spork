@@ -9,7 +9,7 @@
     <div class="container">
         <header class="home-collections__heading">
             <h2 id="{{ $titleId }}">دسته‌بندی‌ها</h2>
-            <a href="{{ route('categories.index') }}" class="home-collections__browse">همه دسته‌بندی‌ها</a>
+            <a href="{{ route('categories.index') }}" class="home-collections__browse janan-widget-link">همه دسته‌بندی‌ها</a>
         </header>
 
         @if($visibleCategories->isNotEmpty())
