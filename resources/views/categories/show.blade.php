@@ -27,7 +27,7 @@
                 </div>
                 <div class="category-collection__actions">
                     <a class="button button--primary" href="#category-products">مشاهده محصولات <span aria-hidden="true">↓</span></a>
-                    <a class="button button--ghost" href="{{ route('categories.index') }}">همه دسته‌ها</a>
+                    <a class="janan-widget-link" href="{{ route('categories.index') }}">همه دسته‌ها</a>
                 </div>
             </div>
             <div class="category-collection__visual">
@@ -63,7 +63,7 @@
                         <p>نمایش {{ \App\Support\PersianNumber::format($products->firstItem()) }} تا {{ \App\Support\PersianNumber::format($products->lastItem()) }} از {{ \App\Support\PersianNumber::format($products->total()) }} محصول</p>
                     @endif
                 </div>
-                <a class="button button--ghost" href="{{ route('products.index', ['category' => $category->slug]) }}">فیلترهای بیشتر <span aria-hidden="true">←</span></a>
+                <a class="janan-widget-link" href="{{ route('products.index', ['category' => $category->slug]) }}">فیلترهای بیشتر</a>
             </header>
             <div class="category-collection__toolbar">
                 <x-store.catalog-sort :sort="$sort" :per-page="$perPage" />
