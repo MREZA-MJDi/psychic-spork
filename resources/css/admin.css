@@ -3123,3 +3123,61 @@ body.admin-nav-open {
 .cheque-alert-banner { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; margin:12px 0; padding:12px 16px; border:1px solid #ead0a3; background:#fff8e9; color:#71470b; border-radius:10px; font-size:13px; text-decoration:none; }
 .cheque-alert-banner[hidden], [data-cheque-count][hidden] { display:none !important; }
 @media(max-width:600px) { .cheque-hub-panel { padding:10px; } .cheque-hub-tabs a { flex:1 1 auto; justify-content:center; padding:10px; } .cheque-hub-filter input[type=search] { flex-basis:100%; } }
+
+/* Wholesale account terms: one list, one editor, no nested cards per customer. */
+.wholesale-admin { display:grid; gap:16px; min-width:0; color:var(--admin-text); font-size:14px; }
+.wholesale-admin__head,.wholesale-admin__section-head { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; }
+.wholesale-admin__head h1 { margin:0 0 5px; font-size:clamp(22px,2.4vw,28px); line-height:1.5; }
+.wholesale-admin__head p,.wholesale-admin__section-head p { margin:0; color:var(--admin-text-soft); font-size:13px; line-height:1.8; }
+.wholesale-admin__hint { margin:0; padding:12px 16px; background:var(--admin-info-bg); color:#395875; border-radius:10px; font-size:13px; line-height:1.9; }
+.wholesale-admin__hint a { color:inherit; font-weight:700; text-decoration:underline; text-underline-offset:3px; }
+.wholesale-admin__list,.wholesale-admin__editor { min-width:0; background:var(--admin-surface); border:1px solid var(--admin-border); border-radius:14px; box-shadow:var(--admin-shadow-xs); overflow:hidden; }
+.wholesale-admin__section-head { padding:16px 20px; }
+.wholesale-admin__section-head h2 { margin:0 0 3px; font-size:17px; line-height:1.6; }
+.wholesale-admin__filters { display:grid; grid-template-columns:minmax(180px,1fr) minmax(150px,220px) auto auto; align-items:end; gap:10px; padding:0 20px 16px; }
+.wholesale-admin .admin-field { min-width:0; margin:0; }
+.wholesale-admin .admin-field label { font-size:13px; color:var(--admin-text-soft); }
+.wholesale-admin .admin-field input,.wholesale-admin .admin-field select,.wholesale-admin .admin-field textarea { display:block; width:100%; min-height:42px; box-sizing:border-box; border:1px solid var(--admin-border-strong); border-radius:8px; padding:9px 12px; background:var(--admin-surface); color:var(--admin-text); font:inherit; }
+.wholesale-admin .admin-field textarea { resize:vertical; }
+.wholesale-admin .admin-field small { color:var(--admin-muted); font-size:12px; }
+.wholesale-admin .admin-btn { min-height:42px; font-size:13px; white-space:nowrap; }
+.wholesale-admin .admin-btn--sm { min-height:36px; }
+.wholesale-admin__table-wrap { overflow-x:auto; }
+.wholesale-admin__table { width:100%; border-collapse:collapse; text-align:start; }
+.wholesale-admin__table th { padding:11px 16px; background:var(--admin-surface-soft); color:var(--admin-text-soft); font-size:12px; text-align:start; font-weight:600; white-space:nowrap; border-block:1px solid var(--admin-border); }
+.wholesale-admin__table td { padding:14px 16px; border-bottom:1px solid var(--admin-border); font-size:13px; text-align:start; vertical-align:middle; }
+.wholesale-admin__table tr:last-child td { border-bottom:0; }
+.wholesale-admin__table td strong,.wholesale-admin__table td small { display:block; }
+.wholesale-admin__table td strong { font-size:14px; margin-bottom:4px; }
+.wholesale-admin__table td small { font-size:12px; color:var(--admin-text-soft); text-align:right; overflow-wrap:anywhere; }
+.wholesale-admin__status { display:inline-block; padding:4px 9px; border-radius:6px; background:var(--admin-neutral-bg); color:var(--admin-neutral); font-size:12px; white-space:nowrap; }
+.wholesale-admin__status--approved { background:var(--admin-success-bg); color:var(--admin-success); }
+.wholesale-admin__status--pending { background:var(--admin-warning-bg); color:var(--admin-warning); }
+.wholesale-admin__selected { background:var(--admin-info-bg); }
+.wholesale-admin__empty td { text-align:center; padding:32px 16px; color:var(--admin-text-soft); }
+.wholesale-admin__editor { scroll-margin-top:16px; }
+.wholesale-admin__form { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); align-items:start; gap:14px; padding:0 20px 18px; }
+.wholesale-admin__note,.wholesale-admin__save { grid-column:1/-1; }
+.wholesale-admin__save,.wholesale-admin__actions { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+.wholesale-admin__legacy { border-top:1px solid var(--admin-border); padding:14px 20px; color:var(--admin-text-soft); font-size:13px; }
+.wholesale-admin__legacy summary { cursor:pointer; font-weight:600; }
+.wholesale-admin__legacy p { margin:8px 0; line-height:1.8; }
+.wholesale-admin__list .admin-pagination { padding:12px 16px; border-top:1px solid var(--admin-border); }
+@media (max-width:900px) { .wholesale-admin__filters { grid-template-columns:minmax(0,1fr) minmax(0,1fr); } }
+@media (max-width:600px) {
+    .wholesale-admin__head,.wholesale-admin__section-head { align-items:flex-start; }
+    .wholesale-admin__head>a { width:100%; }
+    .wholesale-admin__section-head,.wholesale-admin__filters,.wholesale-admin__form,.wholesale-admin__legacy { padding-inline:12px; }
+    .wholesale-admin__filters,.wholesale-admin__form { gap:10px; }
+    .wholesale-admin__filters .admin-field:first-child,.wholesale-admin__filters .admin-field:nth-child(2) { grid-column:1/-1; }
+    .wholesale-admin__form { grid-template-columns:1fr; }
+    .wholesale-admin__table { min-width:0; display:block; }
+    .wholesale-admin__table thead { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }
+    .wholesale-admin__table tbody,.wholesale-admin__table tr { display:block; }
+    .wholesale-admin__table tr { border-top:1px solid var(--admin-border); padding:12px; }
+    .wholesale-admin__table td { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:5px 0; border:0; }
+    .wholesale-admin__table td[data-label]:not(:first-child)::before { content:attr(data-label); font-size:12px; color:var(--admin-text-soft); }
+    .wholesale-admin__table td:first-child { display:block; padding-bottom:10px; }
+    .wholesale-admin__table td:last-child a { flex:1; }
+    .wholesale-admin__empty td { text-align:center; }
+}
