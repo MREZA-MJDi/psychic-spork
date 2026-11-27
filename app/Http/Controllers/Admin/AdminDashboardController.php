@@ -323,9 +323,8 @@ class AdminDashboardController extends Controller
             ->count();
 
         $pendingChequePermissions = ChequePermission::query()
-            ->where('enabled', false)
-            ->whereNotNull('requested_at')
-            ->whereNull('disabled_at')
+            ->pending()
+            ->whereHas('user', fn ($query) => $query->customers())
             ->count();
 
         /*
