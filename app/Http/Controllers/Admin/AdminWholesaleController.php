@@ -17,8 +17,19 @@ class AdminWholesaleController extends Controller
 {
     public function index(Request $request): View
     {
+        $filters = $request->validate([
+            'q' => ['nullable', 'string', 'max:120'],
+            'status' => ['nullable', 'in:' . implode(',', WholesaleProfile::STATUSES)],
+            'edit' => ['nullable', 'integer', 'min:1'],
+        ]);
+
+        $editing = isset($filters['edit'])
+            ? WholesaleProfile::query()->with('user')->whereHas('user', fn ($query) => $query->customers())->findOrFail($filters['edit'])
+            : null;
+
         $profiles = WholesaleProfile::query()
             ->with('user')
+            ->whereHas('user', fn ($query) => $query->customers())
             ->when($request->filled('q'), function ($query) use ($request): void {
                 $term = $request->string('q')->toString();
 
@@ -37,10 +48,11 @@ class AdminWholesaleController extends Controller
             )
             ->latest('updated_at')
             ->paginate(20)
-            ->withQueryString();
+            ->appends($request->only('q', 'status'));
 
         return view('admin.wholesale.index', [
             'profiles' => $profiles,
+            'editing' => $editing,
             'statuses' => WholesaleProfile::STATUSES,
         ]);
     }
