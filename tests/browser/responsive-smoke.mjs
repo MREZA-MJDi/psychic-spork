@@ -5,7 +5,7 @@ const base = process.env.UI_BASE_URL || 'http://127.0.0.1:8000';
 const widths = [320, 360, 390, 543, 768, 1024, 1440];
 const paths = ['/', '/products', '/categories', '/categories/ui-qa-category',
   '/products/ui-qa-product', '/brands', '/brands/ui-qa-brand', '/cart',
-  '/about', '/faq', '/shipping', '/returns', '/login', '/drclubz'];
+  '/about', '/faq', '/shipping', '/returns', '/login', '/drclubz', '/wholesale', '/wholesale/catalog'];
 const failures = [];
 await mkdir('artifacts/ui-smoke', { recursive: true });
 const browser = await chromium.launch({ headless: true });
@@ -32,6 +32,25 @@ try {
         }));
         if (layout.scroll > layout.viewport + 2) throw new Error('Horizontal document overflow: ' + JSON.stringify(layout));
         if (!layout.font.includes('IRANYekanX') || !layout.fontLoaded) throw new Error('Unexpected or unloaded body font: ' + layout.font);
+        for (const link of await page.locator('a.janan-widget-link').all()) {
+          const style = await link.evaluate(el => {
+            const css = getComputedStyle(el);
+            return { color: css.color, fontSize: css.fontSize, weight: css.fontWeight, minHeight: css.minHeight,
+              inverse: el.classList.contains('janan-widget-link--inverse'), href: el.getAttribute('href') };
+          });
+          if (style.color !== (style.inverse ? 'rgb(255, 255, 255)' : 'rgb(147, 71, 95)') ||
+              style.fontSize !== '13px' || style.weight !== '750' || style.minHeight !== '44px' || !style.href) {
+            throw new Error('Inconsistent widget navigation: ' + JSON.stringify(style));
+          }
+        }
+        if (path === '/') {
+          const reference = page.locator('.home-collections__browse.janan-widget-link');
+          if (await reference.count() !== 1) throw new Error('Missing shared collections browse link');
+          await reference.hover();
+          if (await reference.evaluate(el => getComputedStyle(el).textDecorationLine) !== 'underline') {
+            throw new Error('Widget link hover state missing');
+          }
+        }
         if (path === '/products') {
           const pager = page.locator('.janan-pagination').first();
           await pager.waitFor();
