@@ -44,6 +44,14 @@ try {
           }
         }
         if (path === '/') {
+          const brands = page.locator('.home-brand-shop');
+          const brandCards = brands.locator('.home-brand-shop__card');
+          if (await brandCards.count() < 1 || await brandCards.count() > 8) throw new Error('Unexpected brand shopping card count');
+          const columns = await brands.locator('.home-brand-shop__grid').evaluate(el => getComputedStyle(el).gridTemplateColumns.split(' ').length);
+          if (columns !== (width <= 640 ? 2 : width <= 1000 ? 3 : 4)) throw new Error('Incorrect responsive brand grid columns');
+          const links = await brandCards.evaluateAll(elements => elements.map(el => new URL(el.href).searchParams.get('brand')));
+          if (!links.includes('ui-qa-brand') || links.some(slug => !slug)) throw new Error('Brand shopping destinations missing');
+          if (await brands.locator('.home-brand-shop__card.is-featured').count()) throw new Error('Asymmetric legacy featured card remains');
           const reference = page.locator('.home-collections__browse.janan-widget-link');
           if (await reference.count() !== 1) throw new Error('Missing shared collections browse link');
           await reference.hover();
