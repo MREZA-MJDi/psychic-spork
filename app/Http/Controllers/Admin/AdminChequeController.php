@@ -65,38 +65,39 @@ class AdminChequeController extends Controller
                 ->paginate(20)
                 ->withQueryString();
         } else {
-        $cheques = ChequePayment::query()
-            ->with([
-                'order.user',
-                'payment',
-                'reviewedBy',
-            ])
-            ->when(! empty($filters['status']), function ($query) use ($filters): void {
-                $query->where('status', $filters['status']);
-            })
-            ->when(! empty($filters['q']), function ($query) use ($filters): void {
-                $term = trim($filters['q']);
-
-                $query->where(function ($search) use ($term): void {
-                    $search
-                        ->where('sayad_id', 'like', "%{$term}%")
-                        ->orWhere('cheque_number', 'like', "%{$term}%")
-                        ->orWhere('bank_name', 'like', "%{$term}%")
-                        ->orWhereHas('order.user', function ($userQuery) use ($term): void {
-                            $userQuery
-                                ->where('name', 'like', "%{$term}%")
-                                ->orWhere('phone', 'like', "%{$term}%")
-                                ->orWhere('email', 'like', "%{$term}%");
-                        });
-                });
-            })
-            ->latest('id')
-            ->paginate(20)
-            ->withQueryString();
+            $cheques = ChequePayment::query()
+                ->with([
+                    'order.user',
+                    'payment',
+                    'reviewedBy',
+                ])
+                ->when(! empty($filters['status']), function ($query) use ($filters): void {
+                    $query->where('status', $filters['status']);
+                })
+                ->when(! empty($filters['q']), function ($query) use ($filters): void {
+                    $term = trim($filters['q']);
+    
+                    $query->where(function ($search) use ($term): void {
+                        $search
+                            ->where('sayad_id', 'like', "%{$term}%")
+                            ->orWhere('cheque_number', 'like', "%{$term}%")
+                            ->orWhere('bank_name', 'like', "%{$term}%")
+                            ->orWhereHas('order.user', function ($userQuery) use ($term): void {
+                                $userQuery
+                                    ->where('name', 'like', "%{$term}%")
+                                    ->orWhere('phone', 'like', "%{$term}%")
+                                    ->orWhere('email', 'like', "%{$term}%");
+                            });
+                    });
+                })
+                ->latest('id')
+                ->paginate(20)
+                ->withQueryString();
 
         }
 
         return view('admin.cheques.index', [
+            'chequeAlerts' => self::pendingCounts(),
             'tab' => $tab,
             'access' => $access,
             'customers' => $customers,
