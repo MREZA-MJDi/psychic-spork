@@ -94,7 +94,7 @@
                 class="admin-link {{ request()->routeIs('admin.wholesale.*') || request()->routeIs('admin.customers.wholesale.*') ? 'active' : '' }}"
             >
                 <span class="admin-link-icon">ع</span>
-                <span>عمده‌فروشی</span>
+                <span>شرایط خرید عمده</span>
             </a>
 
             <a
