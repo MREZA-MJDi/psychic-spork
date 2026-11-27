@@ -372,7 +372,7 @@
 .wholesale-hero__status{display:flex;flex-direction:column;justify-content:center;gap:12px;padding:24px;border:1px solid var(--wh-line);border-radius:8px;background:var(--wh-bg);box-shadow:none}
 .wholesale-hero__status strong{color:var(--wh-ink);font-size:17px}
 .wholesale-hero__status p{margin:0;color:var(--wh-muted);font-size:12px;line-height:2}
-.wholesale-hero__status>a{color:#bd6687;font-size:12px;font-weight:800}
+
 .wholesale-benefit-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:16px}
 .wholesale-benefit{display:flex;flex-direction:column;gap:5px;min-height:94px;padding:16px;border:1px solid var(--wh-line);border-radius:7px;background:var(--wh-bg)}
 .wholesale-benefit b{color:var(--wh-ink);font-size:13px}
