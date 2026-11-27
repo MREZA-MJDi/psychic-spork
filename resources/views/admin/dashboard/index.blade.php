@@ -15,7 +15,7 @@
         ['موجودی در محدودهٔ هشدار', $lowStock, route('admin.inventory.index'), 'کدهای فعال کالا'],
         ['پیام‌های خوانده‌نشده', $unreadContactMessages, route('admin.contact.index'), 'پیام‌های پشتیبانی'],
         ['چک‌های نیازمند پیگیری', $chequesAwaitingReview, route('admin.cheques.index'), $number($chequesAwaitingReviewAmount) . ' تومان در مرحلهٔ بررسی'],
-        ['درخواست‌های خرید عمده', $pendingWholesaleApplications, route('admin.wholesale.index', ['status' => 'pending']), 'در انتظار تصمیم'],
+        ['پرونده‌های عمده در انتظار', $pendingWholesaleApplications, route('admin.wholesale.index', ['status' => 'pending']), 'وضعیت پرونده؛ مستقل از امکان خرید آنلاین'],
         ['درخواست‌های خرید چکی', $pendingChequePermissions ?? 0, route('admin.cheques.index', ['tab' => 'requests']), 'در انتظار تأیید مدیر'],
     ];
     $qualityItems = [
