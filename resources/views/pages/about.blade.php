@@ -162,7 +162,7 @@
                             @endif
                         </div>
 
-                        <a href="{{ route('products.show', $latestProduct) }}" class="text-link">
+                        <a href="{{ route('products.show', $latestProduct) }}" class="janan-widget-link janan-widget-link--inverse">
                             مشاهده محصول
                             <span aria-hidden="true">↗</span>
                         </a>
@@ -180,7 +180,7 @@
         <div class="container">
             <header class="contact-intro">
                 <div><small>پشتیبانی جانان</small><h2 id="contact-title">تماس با جانان</h2><p>برای راهنمایی خرید، پیگیری سفارش یا همکاری، از مسیر مناسب با ما در ارتباط باشید.</p></div>
-                <a class="button button--ghost" href="{{ route('faq') }}">سوالات متداول</a>
+                <a class="janan-widget-link" href="{{ route('faq') }}">سوالات متداول</a>
             </header>
 
             @if(session('success'))
@@ -301,7 +301,7 @@
                     <section class="contact-map-card" aria-labelledby="contact-map-title">
                         <div><h3 id="contact-map-title">موقعیت فروشگاه</h3><p>{{ $contactStore['address'] }}</p></div>
                         <iframe title="نقشه نشانی جانان" src="https://maps.google.com/maps?q={{ $mapQuery }}&amp;output=embed" loading="lazy" referrerpolicy="no-referrer" allowfullscreen></iframe>
-                        <a class="button button--ghost" href="https://www.google.com/maps/search/?api=1&amp;query={{ $mapQuery }}" target="_blank" rel="noopener noreferrer">مشاهده نشانی در گوگل مپ</a>
+                        <a class="janan-widget-link" href="https://www.google.com/maps/search/?api=1&amp;query={{ $mapQuery }}" target="_blank" rel="noopener noreferrer">مشاهده نشانی در گوگل مپ</a>
                     </section>
                 @endif
                 </aside>
