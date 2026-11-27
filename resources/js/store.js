@@ -1,4 +1,6 @@
 import { initLocationFields } from './location-fields.js';
+import { initJalaliDates } from './jalali-date.js';
+import '../css/jalali-date.css';
 (() => {
     if (window.__JANAN_STORE_CUSTOMER_UI_INITIALIZED__) return;
     window.__JANAN_STORE_CUSTOMER_UI_INITIALIZED__ = true;
@@ -208,6 +210,7 @@ import { initLocationFields } from './location-fields.js';
         initHeroNavbar();
         syncCheckoutChoices();
         initLocationFields();
+        initJalaliDates();
 
         document.addEventListener('change', (event) => {
             if (

@@ -1,0 +1,17 @@
+.jalali-date { min-width: 0; align-self: start; display: grid; gap: 7px; }
+.jalali-date [hidden] { display: none !important; }
+.jalali-date__toggle, .jalali-date__panel button {
+    font: inherit; color: inherit; background: #fff; border: 1px solid var(--store-line, #ddd);
+    border-radius: 9px; min-height: 36px; cursor: pointer;
+}
+.jalali-date__toggle { justify-self: start; padding: 5px 12px; font-size: 12px; }
+.jalali-date__panel { border: 1px solid var(--store-line, #ddd); padding: 10px; border-radius: 14px; background: #fff; min-width: 0; }
+.jalali-date__head { display: flex; align-items: center; justify-content: space-between; gap: 5px; margin-bottom: 9px; font-size: 13px; }
+.jalali-date__head button { min-width: 36px; font-size: 20px; }
+.jalali-date__grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 3px; text-align: center; font-size: 12px; }
+.jalali-date__grid span { line-height: 28px; }
+.jalali-date__grid button { min-width: 0; padding: 0; }
+.jalali-date__panel button:disabled { opacity: .38; cursor: not-allowed; }
+.jalali-date__grid button[aria-pressed="true"] { background: #a34869; color: #fff; border-color: #a34869; }
+.jalali-date__grid button[aria-current="date"]:not([aria-pressed="true"]) { border-color: #a34869; }
+.jalali-date button:focus-visible { outline: 2px solid #a34869; outline-offset: 2px; }

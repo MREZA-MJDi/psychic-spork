@@ -203,7 +203,7 @@
 
                             <label>
                                 تاریخ سررسید
-                                <input type="date" name="due_date" value="{{ old('due_date') }}" required>
+                                <input type="date" id="cheque-due-date" name="due_date" value="{{ old('due_date') }}" min="{{ now()->toDateString() }}" data-jalali-date required>
                             </label>
 
                             <label>
