@@ -164,7 +164,6 @@
 
                         <a href="{{ route('products.show', $latestProduct) }}" class="janan-widget-link janan-widget-link--inverse">
                             مشاهده محصول
-                            <span aria-hidden="true">↗</span>
                         </a>
                     @else
                         <span class="about-live__product-label">موجودی فروشگاه</span>
