@@ -54,6 +54,9 @@ jobs:
           exit 1
       - name: Test checkout location selectors
         run: node tests/browser/checkout-locations.mjs
+      - name: Test Jalali cheque date
+        if: success() || failure()
+        run: node tests/browser/checkout-jalali-date.mjs
       - name: Test category crop and public display
         if: success() || failure()
         run: node tests/browser/category-cover.mjs
