@@ -222,6 +222,8 @@
                             >
                             موجودی کم
                             </option>
+                            <option value="out" @selected(request('stock') === 'out')>ناموجود</option>
+                            <option value="in_stock" @selected(request('stock') === 'in_stock')>موجود</option>
 
                         </select>
 
