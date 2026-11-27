@@ -333,3 +333,39 @@ a.janan-category-card:focus-visible { outline: 2px solid var(--janan-pink-ink); 
     .janan-pagination__numbers { grid-column:1/-1; grid-row:1; }
     .janan-pagination__direction { width:100%; }
 }
+
+/* Shared secondary widget navigation. The home collections link is the reference. */
+a.janan-widget-link,
+a.home-collections__browse,
+a.text-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    max-width: 100%;
+    gap: 6px;
+    color: var(--janan-widget-link-color, #93475f);
+    font-size: 13px;
+    font-weight: 750;
+    line-height: 1.6;
+    text-decoration: none;
+    text-underline-offset: 4px;
+    overflow-wrap: anywhere;
+}
+
+a.janan-widget-link:hover,
+a.home-collections__browse:hover,
+a.text-link:hover {
+    color: var(--janan-widget-link-color, #93475f);
+    text-decoration: underline;
+}
+
+a.janan-widget-link:focus-visible,
+a.home-collections__browse:focus-visible,
+a.text-link:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 3px;
+    border-radius: 3px;
+}
+
+/* The about-page product widget has a dark background. */
+a.janan-widget-link--inverse { --janan-widget-link-color: #fff; }
