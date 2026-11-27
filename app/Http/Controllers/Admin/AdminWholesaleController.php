@@ -17,15 +17,8 @@ class AdminWholesaleController extends Controller
 {
     public function index(Request $request): View
     {
-        $chequePermissions = ChequePermission::query()
-            ->with('user')
-            ->whereHas('user', fn ($query) => $query->customers())
-            ->latest('requested_at')
-            ->paginate(20, ['*'], 'cheques_page')
-            ->withQueryString();
-
         $profiles = WholesaleProfile::query()
-            ->with(['user.chequePermission'])
+            ->with('user')
             ->when($request->filled('q'), function ($query) use ($request): void {
                 $term = $request->string('q')->toString();
 
@@ -48,7 +41,6 @@ class AdminWholesaleController extends Controller
 
         return view('admin.wholesale.index', [
             'profiles' => $profiles,
-            'chequePermissions' => $chequePermissions,
             'statuses' => WholesaleProfile::STATUSES,
         ]);
     }
