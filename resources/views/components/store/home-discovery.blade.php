@@ -9,7 +9,7 @@
         <div class="container">
             <header class="home-picks__header">
                 <h2 id="home-discovery-title">پیشنهاد جانان</h2>
-                <a class="text-link" href="{{ route('products.index') }}">همهٔ محصولات</a>
+                <a class="janan-widget-link" href="{{ route('products.index') }}">همهٔ محصولات</a>
             </header>
 
             <div class="home-picks__grid">
