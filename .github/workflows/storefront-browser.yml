@@ -66,6 +66,13 @@ jobs:
       - name: Test admin product filters and cheque hub
         if: success() || failure()
         run: node tests/browser/admin-filters-cheque-hub.mjs
+      - name: Seed wholesale workspace accounts
+        if: success() || failure()
+        run: |
+          php artisan tinker --execute='$a = App\Models\User::factory()->create(["name" => "Wholesale QA Alpha"]); $b = App\Models\User::factory()->create(["name" => "Wholesale QA Beta"]); App\Models\WholesaleProfile::create(["user_id" => $a->id, "status" => "approved", "minimum_order_amount" => 3000000, "minimum_order_quantity" => 6]); App\Models\WholesaleProfile::create(["user_id" => $b->id, "status" => "pending"]);'
+      - name: Test wholesale admin workspace
+        if: success() || failure()
+        run: node tests/browser/admin-wholesale-workspace.mjs
       - name: Check layouts in Chromium
         if: success() || failure()
         run: node tests/browser/responsive-smoke.mjs
