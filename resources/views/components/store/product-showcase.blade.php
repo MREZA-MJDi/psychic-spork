@@ -27,10 +27,9 @@
 
             <a
                 href="{{ route('products.index') }}"
-                class="text-link"
+                class="janan-widget-link"
             >
                 مشاهده همه محصولات
-                <span aria-hidden="true">↗</span>
             </a>
         </header>
 
@@ -95,10 +94,9 @@
                 <div class="home-product-section__footer">
                     <a
                         href="{{ route('products.index') }}"
-                        class="button button--ghost"
+                        class="janan-widget-link"
                     >
                         دیدن بیشتر محصولات
-                        <span aria-hidden="true">↗</span>
                     </a>
                 </div>
             </div>
