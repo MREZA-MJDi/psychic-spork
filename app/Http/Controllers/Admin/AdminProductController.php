@@ -45,6 +45,14 @@ class AdminProductController extends Controller
             ? (int) $request->query('per_page', 15)
             : 15;
 
+        $filters = $request->validate([
+            'q' => ['nullable', 'string', 'max:180'],
+            'category_id' => ['nullable', 'integer', 'min:1'],
+            'brand_id' => ['nullable', 'integer', 'min:1'],
+            'status' => ['nullable', 'in:active,inactive,featured'],
+            'stock' => ['nullable', 'in:low,out,in_stock'],
+        ]);
+
         $stockSubquery = ProductVariant::query()
             ->selectRaw('COALESCE(stock, 0)')
             ->whereColumn('product_id', 'products.id')
@@ -65,8 +73,8 @@ class AdminProductController extends Controller
                 'variants as wholesale_variants_count' => fn ($query) =>
                     $query->whereNotNull('wholesale_price'),
             ])
-            ->when($request->filled('q'), function ($query) use ($request) {
-                $search = trim((string) $request->input('q'));
+            ->when(filled($filters['q'] ?? null), function ($query) use ($filters) {
+                $search = trim($filters['q']);
 
                 $query->where(function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
@@ -81,23 +89,27 @@ class AdminProductController extends Controller
                 });
             })
             ->when(
-                $request->filled('category_id'),
+                isset($filters['category_id']),
                 fn ($query) => $query->where(
                     'category_id',
-                    $request->input('category_id')
+                    $filters['category_id']
                 )
             )
             ->when(
-                $request->filled('brand_id'),
+                isset($filters['brand_id']),
                 fn ($query) => $query->where(
                     'brand_id',
-                    $request->input('brand_id')
+                    $filters['brand_id']
                 )
             )
             ->when(
-                $request->input('stock') === 'low',
+                ($filters['stock'] ?? null) === 'low',
                 fn ($query) => $query->lowStock()
             )
+            ->when(($filters['stock'] ?? null) === 'out', fn ($query) => $query
+                ->whereDoesntHave('activeVariants', fn ($variant) => $variant->where('stock', '>', 0)))
+            ->when(($filters['stock'] ?? null) === 'in_stock', fn ($query) => $query
+                ->whereHas('activeVariants', fn ($variant) => $variant->where('stock', '>', 0)))
             ->when($quality === 'missing-seo', fn ($query) => $query
                 ->where('is_active', true)
                 ->where(fn ($seo) => $seo
@@ -111,9 +123,9 @@ class AdminProductController extends Controller
                 ->where('is_active', true)
                 ->whereDoesntHave('activeVariants'))
             ->when(
-                $request->filled('status'),
-                function ($query) use ($request) {
-                    match ($request->input('status')) {
+                isset($filters['status']),
+                function ($query) use ($filters) {
+                    match ($filters['status']) {
                         'active' => $query->where('is_active', true),
 
                         'inactive' => $query->where('is_active', false),
@@ -144,8 +156,8 @@ class AdminProductController extends Controller
             'perPage' => $perPage,
             'heroCount' => Product::query()->where('is_active', true)->where('is_hero', true)->count(),
             'heroLimit' => HeroService::MAX_SLIDES,
-            'categories' => $this->categories(),
-            'brands' => $this->brands(),
+            'categories' => Category::query()->orderBy('sort_order')->orderBy('name')->get(),
+            'brands' => Brand::query()->orderBy('name')->get(),
         ]);
     }
 
