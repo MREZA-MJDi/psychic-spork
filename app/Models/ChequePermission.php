@@ -50,6 +50,18 @@ class ChequePermission extends Model
         return $this->belongsTo(User::class, 'disabled_by');
     }
 
+    public function scopePending($query)
+    {
+        return $query->where('enabled', false)
+            ->whereNotNull('requested_at')
+            ->whereNull('disabled_at');
+    }
+
+    public function scopeApproved($query)
+    {
+        return $query->where('enabled', true)->whereNotNull('approved_at');
+    }
+
     public function allows(float $amount): bool
     {
         return $this->isApproved()
