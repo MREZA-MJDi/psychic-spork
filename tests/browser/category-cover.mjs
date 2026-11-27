@@ -17,6 +17,15 @@ try {
     const dashboard = page.locator('.janan-overview');
     await dashboard.getByRole('heading', { name: 'نمای کلی فروشگاه' }).waitFor();
     assert.equal(await dashboard.getByRole('link', { name: 'ورود فایل هلو', exact: true }).count(), 1);
+    const widgetLinks = dashboard.locator('a.janan-widget-link');
+    assert.ok(await widgetLinks.count() >= 4);
+    for (const link of await widgetLinks.all()) {
+      const style = await link.evaluate(el => {
+        const css = getComputedStyle(el);
+        return [css.color, css.fontSize, css.fontWeight, css.minHeight];
+      });
+      assert.deepEqual(style, ['rgb(147, 71, 95)', '13px', '750', '44px']);
+    }
     assert.equal(await dashboard.evaluate(el => el.scrollWidth <= el.clientWidth + 2), true);
     await page.screenshot({ path: 'artifacts/ui-smoke/' + width + '-admin-dashboard.png', fullPage: true });
     await dashboard.getByLabel('بازهٔ گزارش').selectOption('7');
