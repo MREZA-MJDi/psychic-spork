@@ -91,8 +91,8 @@
 }
 
 .janan-overview__section-head p { font-size: 12px; }
-.janan-overview__section-head a,
-.janan-overview__catalog-link a,
+.janan-overview__section-head a:not(.janan-widget-link),
+.janan-overview__catalog-link a:not(.janan-widget-link),
 .janan-overview__compact-list a { color: var(--overview-green); font-weight: 750; }
 
 .janan-overview__queue-list a,
