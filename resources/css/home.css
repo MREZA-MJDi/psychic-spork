@@ -1784,8 +1784,7 @@ position:
 .home-collections,
 .home-product-section,
 .home-discovery-section,
-.home-signals-section,
-.home-brands {
+.home-signals-section{
     min-width: 0;
     max-width: 100%;
 }
@@ -1793,8 +1792,7 @@ position:
 .home-collections,
 .home-product-section,
 .home-discovery-section,
-.home-signals-section,
-.home-brands {
+.home-signals-section{
     padding-block: clamp(60px, 6vw, 84px);
 }
 
@@ -1802,14 +1800,12 @@ position:
 .home-collections .container,
 .home-product-section .container,
 .home-discovery-section .container,
-.home-signals-section .container,
-.home-brands .container {
+.home-signals-section .container{
     min-width: 0;
 }
 
 .home-category-rail,
 .home-signals__grid,
-.home-brand-rail,
 .home-discovery__grid {
     width: 100%;
     max-width: 100%;
@@ -1818,7 +1814,6 @@ position:
 
 .home-category-rail > *,
 .home-signals__grid > *,
-.home-brand-rail > *,
 .home-discovery__grid > * {
     min-width: 0;
 }
@@ -1826,8 +1821,7 @@ position:
 .home-section-head,
 .home-product-section__head,
 .home-discovery__head,
-.home-signals__head,
-.home-brands__head {
+.home-signals__head{
     min-width: 0;
     margin-bottom: 24px;
 }
@@ -1835,8 +1829,7 @@ position:
 .home-section-head > *,
 .home-product-section__head > *,
 .home-discovery__head > *,
-.home-signals__head > *,
-.home-brands__head > * {
+.home-signals__head > *{
     min-width: 0;
     max-width: 100%;
 }
