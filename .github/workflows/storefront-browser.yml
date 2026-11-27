@@ -73,6 +73,13 @@ jobs:
       - name: Test wholesale admin workspace
         if: success() || failure()
         run: node tests/browser/admin-wholesale-workspace.mjs
+      - name: Seed cheque workspace fixture
+        if: success() || failure()
+        run: |
+          php artisan tinker --execute='$u = App\Models\User::factory()->create(["name" => "Cheque Workspace QA"]); App\Models\ChequePermission::create(["user_id" => $u->id, "enabled" => true, "approved_at" => now(), "max_order_amount" => 200000]); $o = App\Models\Order::create(["user_id" => $u->id, "order_number" => "QA-WORKSPACE-ORDER", "customer_name" => $u->name, "customer_phone" => "09120000000", "shipping_address" => "QA address", "status" => "pending", "payment_status" => "pending", "payment_method" => "cheque", "order_type" => "wholesale", "subtotal" => 100000, "discount" => 0, "shipping_cost" => 0, "total" => 100000, "placed_at" => now()]); app(App\Services\ChequePaymentService::class)->submit($o, $u, ["sayad_id" => "1234567890123456", "cheque_number" => "QA-WORKSPACE-001", "bank_name" => "QA Bank", "due_date" => "2026-12-22"]); app(App\Services\ChequePaymentService::class)->moveToReview($o->fresh()->chequePayment, App\Models\User::query()->admins()->firstOrFail());'
+      - name: Test cheque workspace
+        if: success() || failure()
+        run: node tests/browser/admin-cheque-workspace.mjs
       - name: Check layouts in Chromium
         if: success() || failure()
         run: node tests/browser/responsive-smoke.mjs

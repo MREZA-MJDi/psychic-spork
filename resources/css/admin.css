@@ -3106,23 +3106,76 @@ body.admin-nav-open {
 }
 @media (max-width:700px) { .admin-media-picker[data-category-cover] .admin-media-picker__stage { grid-template-columns: minmax(0,1fr); } }
 
-/* Cheque management: one flat workspace and actionable pending work. */
-.cheque-hub-tabs { display:flex; flex-wrap:wrap; gap:8px; margin:0 0 16px; }
-.cheque-hub-tabs a { display:inline-flex; align-items:center; gap:8px; padding:11px 16px; border:1px solid var(--admin-border); border-radius:10px; font-size:13px; font-weight:700; color:inherit; text-decoration:none; }
-.cheque-hub-tabs a[aria-current="page"] { background:#233544; color:#fff; border-color:#233544; }
-.cheque-hub-panel { min-width:0; padding:16px; }
-.cheque-hub-filter { display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-bottom:16px; }
-.cheque-hub-filter input,.cheque-hub-filter select,.cheque-limit-form input { min-width:0; min-height:42px; border:1px solid var(--admin-border); border-radius:8px; padding:8px 12px; font:inherit; color:inherit; background:var(--admin-surface, #fff); }
-.cheque-hub-filter input[type=search] { flex:1 1 240px; }
-.cheque-limit-form { display:grid; grid-template-columns:minmax(110px,1fr) auto; align-items:center; gap:6px; min-width:230px; }
-.cheque-limit-form label { grid-column:1/-1; font-size:12px; }
-.cheque-secondary-action { margin-top:6px; }
+/* Cheque workspace: one list and one selected editor. */
+.cheque-workspace { display:grid; gap:16px; min-width:0; color:var(--admin-text); font-size:14px; }
+.cheque-workspace .admin-page-head { margin:0; }
+.cheque-hub-tabs { display:flex; flex-wrap:wrap; gap:6px; margin:0; padding:5px; width:fit-content; max-width:100%; background:var(--admin-surface-muted); border:1px solid var(--admin-border); border-radius:12px; }
+.cheque-hub-tabs a { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:44px; padding:8px 14px; border:1px solid transparent; border-radius:8px; font-size:13px; font-weight:700; color:var(--admin-text-soft); text-decoration:none; }
+.cheque-hub-tabs a[aria-current="page"] { background:var(--admin-surface); color:var(--admin-text); border-color:var(--admin-border); box-shadow:var(--admin-shadow-xs); }
+.cheque-hub-tabs a:focus-visible,.cheque-detail-link:focus-visible { outline:2px solid #93475f; outline-offset:3px; }
+.cheque-hub-panel { min-width:0; margin:0; background:var(--admin-surface); border:1px solid var(--admin-border); border-radius:14px; box-shadow:var(--admin-shadow-xs); overflow:hidden; }
+.cheque-section-head { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; padding:16px 20px; }
+.cheque-section-head h2 { margin:0 0 3px; font-size:17px; line-height:1.65; }
+.cheque-section-head p { margin:0; color:var(--admin-text-soft); font-size:13px; }
+.cheque-hub-filter { display:grid; grid-template-columns:minmax(150px,1fr) minmax(140px,230px) auto auto; align-items:end; gap:10px; padding:0 20px 16px; margin:0; }
+.cheque-workspace .admin-field { min-width:0; margin:0; }
+.cheque-workspace .admin-field label { font-size:13px; color:var(--admin-text-soft); }
+.cheque-workspace .admin-field input,.cheque-workspace .admin-field select,.cheque-workspace .admin-field textarea { display:block; width:100%; min-width:0; min-height:42px; border:1px solid var(--admin-border-strong); border-radius:8px; padding:9px 12px; font:inherit; color:var(--admin-text); background:var(--admin-surface); }
+.cheque-workspace .admin-field textarea { resize:vertical; }
+.cheque-workspace .admin-btn { min-height:42px; font-size:13px; white-space:normal; text-align:center; }
+.cheque-workspace .admin-btn--sm { min-height:36px; }
+.cheque-table-wrap { min-width:0; overflow-x:auto; }
+.cheque-table { width:100%; border-collapse:collapse; text-align:start; }
+.cheque-table th { padding:11px 14px; border-block:1px solid var(--admin-border); text-align:start; background:var(--admin-surface-soft); color:var(--admin-text-soft); font-size:12px; font-weight:600; white-space:nowrap; }
+.cheque-table td { padding:14px; border-bottom:1px solid var(--admin-border); text-align:start; vertical-align:middle; font-size:13px; overflow-wrap:anywhere; }
+.cheque-table tr:last-child td { border-bottom:0; }
+.cheque-table td strong,.cheque-table td small { display:block; }
+.cheque-table td strong { font-size:14px; }
+.cheque-table td small { font-size:12px; color:var(--admin-text-soft); line-height:1.7; }
+.cheque-table .cheque-selected { background:var(--admin-info-bg); }
+.cheque-table .cheque-empty td { padding:32px 16px; text-align:center; color:var(--admin-text-soft); }
+.cheque-status { display:inline-block; padding:5px 9px; border-radius:6px; font-size:12px; font-weight:700; line-height:1.5; color:var(--admin-neutral); background:var(--admin-neutral-bg); }
+.cheque-status--warning { color:var(--admin-warning); background:var(--admin-warning-bg); }
+.cheque-status--success { color:var(--admin-success); background:var(--admin-success-bg); }
+.cheque-status--danger { color:var(--admin-danger); background:var(--admin-danger-bg); }
+.cheque-status--info { color:var(--admin-info); background:var(--admin-info-bg); }
+.cheque-detail { scroll-margin-top:16px; }
+.cheque-inline-actions { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+.cheque-facts { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:0; padding:0 20px; margin:0; }
+.cheque-facts>div { min-width:0; padding:12px 0; border-top:1px solid var(--admin-border); padding-inline-end:14px; }
+.cheque-facts dt { color:var(--admin-text-soft); font-size:12px; }
+.cheque-facts dd { margin:4px 0 0; font-size:14px; font-weight:700; overflow-wrap:anywhere; }
+.cheque-detail-body { display:grid; justify-items:start; gap:10px; padding:16px 20px 20px; border-top:1px solid var(--admin-border); }
+.cheque-detail-body h3 { margin:8px 0 0; font-size:16px; }
+.cheque-detail-body p { margin:0; font-size:13px; line-height:1.9; color:var(--admin-text-soft); }
+.cheque-note { width:100%; padding:10px 12px; background:var(--admin-surface-soft); border-radius:8px; white-space:pre-wrap; overflow-wrap:anywhere; }
+.cheque-note strong { font-size:13px; }
+.cheque-detail-link { display:inline-flex; align-items:center; min-height:44px; color:#93475f; font-size:13px; font-weight:750; }
+.cheque-detail-link:hover { text-decoration:underline; }
+.cheque-option { width:100%; border-top:1px solid var(--admin-border); padding:10px 0 0; }
+.cheque-option summary { cursor:pointer; color:var(--admin-text-soft); font-size:13px; font-weight:700; padding:5px 0; }
+.cheque-action-form { display:grid; gap:10px; width:min(100%,560px); justify-items:start; margin-top:8px; }
+.cheque-action-form .admin-field { width:100%; }
+.cheque-hub-panel .admin-pagination { padding:12px 16px; border-top:1px solid var(--admin-border); }
+@media(max-width:1100px) { .cheque-hub-filter { grid-template-columns:repeat(2,minmax(0,1fr)); } .cheque-facts { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media(max-width:800px) {
+    .cheque-table { display:block; }
+    .cheque-table thead { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }
+    .cheque-table tbody,.cheque-table tr { display:block; }
+    .cheque-table tr { border-top:1px solid var(--admin-border); padding:12px; }
+    .cheque-table td { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:5px 0; border:0; }
+    .cheque-table td[data-label]:not(:first-child)::before { content:attr(data-label); font-size:12px; color:var(--admin-text-soft); flex-shrink:0; }
+    .cheque-table td:first-child { display:block; padding-bottom:10px; }
+    .cheque-table td:last-child a { flex:1; }
+    .cheque-table .cheque-empty td { display:block; }
+}
+@media(max-width:600px) { .cheque-hub-tabs { width:100%; } .cheque-hub-tabs a { flex:1 1 auto; padding:7px 8px; } .cheque-section-head,.cheque-hub-filter,.cheque-facts,.cheque-detail-body { padding-inline:12px; } .cheque-hub-filter .admin-field { grid-column:1/-1; } .cheque-filter-spacer { display:none; } }
 .cheque-alert-link { display:inline-flex; position:relative; align-items:center; justify-content:center; width:42px; height:42px; border:1px solid var(--admin-border); border-radius:11px; color:inherit; flex-shrink:0; }
 .cheque-alert-count,.cheque-hub-tabs [data-cheque-count] { display:inline-flex; align-items:center; justify-content:center; min-width:22px; min-height:22px; padding:2px 5px; font-size:11px; line-height:1; font-weight:700; background:#b54362; color:#fff; border-radius:999px; }
 .cheque-alert-link .cheque-alert-count { position:absolute; top:-7px; left:-6px; }
 .cheque-alert-banner { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; margin:12px 0; padding:12px 16px; border:1px solid #ead0a3; background:#fff8e9; color:#71470b; border-radius:10px; font-size:13px; text-decoration:none; }
 .cheque-alert-banner[hidden], [data-cheque-count][hidden] { display:none !important; }
-@media(max-width:600px) { .cheque-hub-panel { padding:10px; } .cheque-hub-tabs a { flex:1 1 auto; justify-content:center; padding:10px; } .cheque-hub-filter input[type=search] { flex-basis:100%; } }
+
 
 /* Wholesale account terms: one list, one editor, no nested cards per customer. */
 .wholesale-admin { display:grid; gap:16px; min-width:0; color:var(--admin-text); font-size:14px; }
