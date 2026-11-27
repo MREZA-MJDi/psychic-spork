@@ -16,7 +16,7 @@
         ['پیام‌های خوانده‌نشده', $unreadContactMessages, route('admin.contact.index'), 'پیام‌های پشتیبانی'],
         ['چک‌های نیازمند پیگیری', $chequesAwaitingReview, route('admin.cheques.index'), $number($chequesAwaitingReviewAmount) . ' تومان در مرحلهٔ بررسی'],
         ['درخواست‌های خرید عمده', $pendingWholesaleApplications, route('admin.wholesale.index', ['status' => 'pending']), 'در انتظار تصمیم'],
-        ['درخواست‌های خرید چکی', $pendingChequePermissions ?? 0, route('admin.wholesale.index') . '#cheque-permission-requests', 'در انتظار تأیید مدیر'],
+        ['درخواست‌های خرید چکی', $pendingChequePermissions ?? 0, route('admin.cheques.index', ['tab' => 'requests']), 'در انتظار تأیید مدیر'],
     ];
     $qualityItems = [
         ['محصول فعال بدون عکس', $productsMissingImage, route('admin.products.index', ['quality' => 'missing-image'])],
