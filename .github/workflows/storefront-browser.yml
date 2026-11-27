@@ -63,6 +63,9 @@ jobs:
       - name: Test interactive hero actions
         if: success() || failure()
         run: node tests/browser/hero-interactions.mjs
+      - name: Test admin product filters and cheque hub
+        if: success() || failure()
+        run: node tests/browser/admin-filters-cheque-hub.mjs
       - name: Check layouts in Chromium
         if: success() || failure()
         run: node tests/browser/responsive-smoke.mjs

@@ -66,6 +66,7 @@
 
 
             <form
+                id="admin-product-filters"
                 method="GET"
                 action="{{ route('admin.products.index') }}"
             >
@@ -83,7 +84,7 @@
                             type="search"
                             name="q"
                             value="{{ request('q') }}"
-                            placeholder="نام محصول یا کد کالا..."
+                            placeholder="نام محصول یا کد کالا..." maxlength="180"
                         >
 
                     </div>
@@ -114,7 +115,7 @@
                                 (string) $category->id
                                 )
                                 >
-                                {{ $category->name }}
+                                {{ $category->name }}{{ $category->is_active ? '' : ' (غیرفعال)' }}
                                 </option>
 
                             @endforeach
@@ -149,7 +150,7 @@
                                 (string) $brand->id
                                 )
                                 >
-                                {{ $brand->name }}
+                                {{ $brand->name }}{{ $brand->is_active ? '' : ' (غیرفعال)' }}
                                 </option>
 
                             @endforeach
@@ -221,6 +222,8 @@
                             >
                             موجودی کم
                             </option>
+                            <option value="out" @selected(request('stock') === 'out')>ناموجود</option>
+                            <option value="in_stock" @selected(request('stock') === 'in_stock')>موجود</option>
 
                         </select>
 
@@ -264,6 +267,7 @@
 
                         <button
                             type="submit"
+                            form="admin-product-filters"
                             class="admin-btn admin-btn--secondary"
                         >
                             اعمال فیلتر
@@ -301,7 +305,7 @@
 
                     <p class="admin-card-description">
                         {{ \App\Support\PersianNumber::format($products->total()) }}
-                        محصول
+                        محصول مطابق فیلترهای فعلی
                     </p>
 
                 </div>
@@ -400,7 +404,7 @@
                             @endphp
 
 
-                            <tr>
+                            <tr data-admin-product-id="{{ $product->id }}">
 
                                 {{-- Product --}}
 

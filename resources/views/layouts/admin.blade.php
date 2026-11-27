@@ -91,10 +91,10 @@
 
             <a
                 href="{{ route('admin.wholesale.index') }}"
-                class="admin-link {{ request()->routeIs('admin.wholesale.*') || request()->routeIs('admin.customers.wholesale.*') || request()->routeIs('admin.customers.cheque.*') ? 'active' : '' }}"
+                class="admin-link {{ request()->routeIs('admin.wholesale.*') || request()->routeIs('admin.customers.wholesale.*') ? 'active' : '' }}"
             >
                 <span class="admin-link-icon">ع</span>
-                <span>عمده و مجوز چک</span>
+                <span>عمده‌فروشی</span>
             </a>
 
             <a
@@ -110,7 +110,8 @@
                 class="admin-link {{ request()->routeIs('admin.cheques.*') ? 'active' : '' }}"
             >
                 <span class="admin-link-icon">▣</span>
-                <span>پرداخت‌های چکی</span>
+                <span>مدیریت چک‌ها</span>
+                <span class="cheque-alert-count" data-cheque-count="total" @if(!array_sum($chequeAlerts)) hidden @endif>{{ \App\Support\PersianNumber::format(array_sum($chequeAlerts)) }}</span>
             </a>
 
             <a
@@ -223,6 +224,10 @@
             </div>
 
             <div class="admin-header__left">
+                <a class="cheque-alert-link" data-cheque-alerts="{{ route('admin.cheques.alerts') }}" data-request-url="{{ route('admin.cheques.index', ['tab' => 'requests']) }}" data-payment-url="{{ route('admin.cheques.index', ['tab' => 'payments', 'status' => 'submitted']) }}" href="{{ $chequeAlerts['requests'] ? route('admin.cheques.index', ['tab' => 'requests']) : route('admin.cheques.index', ['tab' => 'payments', 'status' => 'submitted']) }}" aria-label="اعلان‌های چک: {{ array_sum($chequeAlerts) }} مورد">
+                    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg>
+                    <span class="cheque-alert-count" data-cheque-count="total" @if(!array_sum($chequeAlerts)) hidden @endif>{{ \App\Support\PersianNumber::format(array_sum($chequeAlerts)) }}</span>
+                </a>
                 <a href="{{ route('home') }}" class="admin-header-link">
                     فروشگاه
                     <span aria-hidden="true">↗</span>
@@ -269,6 +274,11 @@
                 </ul>
             </div>
         @endif
+
+        <a class="cheque-alert-banner" data-cheque-banner href="{{ $chequeAlerts['requests'] ? route('admin.cheques.index', ['tab' => 'requests']) : route('admin.cheques.index', ['tab' => 'payments', 'status' => 'submitted']) }}" @if(!array_sum($chequeAlerts)) hidden @endif>
+            <span role="status" data-cheque-alert-message>{{ \App\Support\PersianNumber::format($chequeAlerts['requests']) }} درخواست مجوز و {{ \App\Support\PersianNumber::format($chequeAlerts['payments']) }} چک جدید منتظر بررسی است.</span>
+            <strong>بررسی ←</strong>
+        </a>
 
         <section class="admin-content">
             @yield('content')

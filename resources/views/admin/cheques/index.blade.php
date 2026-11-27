@@ -2,26 +2,39 @@
 
 @section('title', 'مدیریت چک‌ها')
 
+@section('page-title', 'مدیریت چک‌ها')
+
 @section('content')
 <div class="admin-page">
-    <div class="admin-page__header">
-        <div>
-            <span class="eyebrow">PAYMENTS / CHEQUES</span>
-            <h1>مدیریت چک‌ها</h1>
-            <p>تصویر و مشخصات چک را بررسی کن؛ اگر اصل چک لازم است، قبل از آزاد کردن سفارش از مشتری بخواه آن را ارسال کند.</p>
-        </div>
-    </div>
-
-    <form method="GET" class="admin-filter-bar">
-        <input type="search" name="q" value="{{ request('q') }}" placeholder="شماره چک، صیاد، بانک، نام یا موبایل مشتری">
-        <select name="status">
+    <header class="admin-page-head">
+        <div><h1 class="admin-page-head__title">مدیریت چک‌ها</h1>
+        <p class="admin-page-head__text">درخواست اعتبار، مشتریان مجاز و پرداخت‌های چکی در یکجا.</p></div>
+    </header>
+    <nav class="cheque-hub-tabs" aria-label="بخش‌های مدیریت چک">
+        @foreach(['requests' => 'درخواست‌ها', 'customers' => 'مشتریان مجاز', 'payments' => 'چک‌های ثبت‌شده'] as $key => $label)
+            <a href="{{ route('admin.cheques.index', ['tab' => $key]) }}" @if($tab === $key) aria-current="page" @endif>
+                {{ $label }}
+                @if($key === 'requests' || $key === 'payments')
+                    <span data-cheque-count="{{ $key }}" @if(!($chequeAlerts[$key] ?? 0)) hidden @endif>{{ \App\Support\PersianNumber::format($chequeAlerts[$key] ?? 0) }}</span>
+                @endif
+            </a>
+        @endforeach
+    </nav>
+    @if($tab !== 'payments')
+        @include('admin.cheques.customers')
+    @else
+    <section class="admin-card cheque-hub-panel">
+    <form method="GET" action="{{ route('admin.cheques.index') }}" class="admin-filter-bar cheque-hub-filter">
+        <input type="hidden" name="tab" value="payments">
+        <input aria-label="جستجوی چک" type="search" name="q" value="{{ request('q') }}" placeholder="شماره چک، صیاد، بانک، نام یا موبایل مشتری">
+        <select name="status" aria-label="وضعیت چک">
             <option value="">همه وضعیت‌ها</option>
             @foreach($statusNames as $status => $label)
                 <option value="{{ $status }}" @selected(request('status') === $status)>{{ $label }}</option>
             @endforeach
         </select>
-        <button type="submit" class="button button--primary">فیلتر</button>
-        <a href="{{ route('admin.cheques.index') }}" class="button button--ghost">پاک کردن</a>
+        <button type="submit" class="admin-btn admin-btn--secondary">فیلتر</button>
+        <a href="{{ route('admin.cheques.index') }}" class="admin-btn admin-btn--ghost">پاک کردن</a>
     </form>
 
     <div class="admin-table-wrap">
@@ -109,6 +122,8 @@
         </table>
     </div>
 
-    <div class="store-pagination">{{ $cheques->links() }}</div>
+    <div class="admin-pagination">{{ $cheques->links() }}</div>
+    </section>
+    @endif
 </div>
 @endsection

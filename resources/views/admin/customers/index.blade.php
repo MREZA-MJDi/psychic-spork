@@ -307,38 +307,15 @@
                                 @php
                                     $chequePermission = $customer->chequePermission;
                                     $chequeEnabled = $chequePermission?->isApproved() ?? false;
-                                    $chequeLimit = $chequePermission?->max_order_amount
-                                        ?? $chequePermission?->requested_amount;
                                 @endphp
-                                <div class="admin-customer-cheque" data-cheque-permission>
-                                    @if($chequeEnabled)
-                                        <span class="admin-badge admin-badge--success">فعال</span>
-                                    @elseif($chequePermission?->isPending())
-                                        <span class="admin-badge admin-badge--warning">درخواست مشتری در انتظار بررسی</span>
-                                        <div class="admin-muted">سقف پیشنهادی مشتری را می‌توانید تغییر دهید.</div>
-                                    @else
-                                        <span class="admin-badge admin-badge--neutral">غیرفعال</span>
-                                        <div class="admin-muted">مدیر می‌تواند بدون درخواست مشتری هم مجوز بدهد.</div>
-                                    @endif
-
-                                    <form method="POST" action="{{ route('admin.customers.cheque.enable', $customer) }}" class="admin-customer-cheque__form">
-                                        @csrf
-                                        @method('PATCH')
-                                        <input type="hidden" name="enabled" value="0">
-                                        <label class="admin-customer-cheque__toggle">
-                                            <input type="checkbox" name="enabled" value="1" data-cheque-toggle @checked($chequeEnabled)>
-                                            <span>خرید چکی مجاز باشد</span>
-                                        </label>
-                                        <div class="admin-customer-cheque__limit" data-cheque-limit @if(!$chequeEnabled) hidden @endif>
-                                            <label for="cheque-limit-{{ $customer->id }}">سقف هر سفارش (تومان)</label>
-                                            <input id="cheque-limit-{{ $customer->id }}" type="text" name="max_order_amount" inputmode="numeric" data-money-input value="{{ old('max_order_amount', $chequeLimit) }}" @required($chequeEnabled)>
-                                        </div>
-                                        <button type="submit" class="admin-btn admin-btn--secondary admin-btn--sm">ذخیره</button>
-                                    </form>
-                                    @if($chequePermission?->requested_at)
-                                        <a class="admin-link" href="{{ route('admin.wholesale.index') }}#cheque-permission-requests">مشاهده درخواست مشتری</a>
-                                    @endif
-                                </div>
+                                @if($chequeEnabled)
+                                    <span class="admin-badge admin-badge--success">فعال</span>
+                                @elseif($chequePermission?->isPending())
+                                    <span class="admin-badge admin-badge--warning">در انتظار بررسی</span>
+                                @else
+                                    <span class="admin-badge admin-badge--neutral">غیرفعال</span>
+                                @endif
+                                <a class="admin-btn admin-btn--ghost admin-btn--sm" href="{{ route('admin.cheques.index', ['tab' => 'customers', 'access' => 'all', 'customer_id' => $customer->id]) }}">مدیریت مجوز</a>
                             </td>
 
                             {{-- CREATED AT --}}

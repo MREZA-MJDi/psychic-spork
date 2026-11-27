@@ -78,6 +78,10 @@ class AppServiceProvider extends ServiceProvider
             'siteStoreWorkingHours' => $contactSettings['contact.working_hours'] ?? config('app.store_contact.working_hours'),
         ]);
 
+        View::composer('layouts.admin', function ($view): void {
+            $view->with('chequeAlerts', \App\Http\Controllers\Admin\AdminChequeController::pendingCounts());
+        });
+
         View::composer('layouts.store', function ($view): void {
             $cart = auth()->check()
                 ? auth()->user()->cart

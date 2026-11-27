@@ -24,6 +24,10 @@ class EnsureAdmin
             'این بخش فقط برای مدیر فروشگاه است.'
         );
 
-        return $next($request);
+        $response = $next($request);
+        // Authenticated admin HTML and filter results must never be shared by a CDN.
+        $response->headers->set('Cache-Control', 'private, no-store, max-age=0');
+
+        return $response;
     }
 }

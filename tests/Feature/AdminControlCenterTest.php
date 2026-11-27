@@ -97,17 +97,26 @@ class AdminControlCenterTest extends TestCase
         ]);
     }
 
-    public function test_customer_list_does_not_offer_cheque_approval_before_a_customer_request(): void
+    public function test_customer_list_links_to_centralized_cheque_permission_controls(): void
     {
         $admin = User::factory()->create(['is_admin' => true]);
-        User::factory()->create(['is_admin' => false]);
+        $customer = User::factory()->create(['is_admin' => false]);
+        $hubUrl = route('admin.cheques.index', [
+            'tab' => 'customers', 'access' => 'all', 'customer_id' => $customer->id,
+        ]);
 
         $this->actingAs($admin)
             ->get(route('admin.customers.index'))
             ->assertOk()
-            ->assertSee('خرید چکی مجاز باشد')
-            ->assertSee('مدیر می‌تواند بدون درخواست مشتری هم مجوز بدهد.')
-            ->assertSee('سقف هر سفارش (تومان)');
+            ->assertSee('مدیریت مجوز')
+            ->assertSee($hubUrl)
+            ->assertDontSee('name="max_order_amount"', false);
+
+        $this->get($hubUrl)
+            ->assertOk()
+            ->assertSee('تأیید مجوز')
+            ->assertSee('سقف هر سفارش (تومان)')
+            ->assertSee(route('admin.customers.cheque.enable', $customer));
     }
 
     public function test_admin_variant_lookup_is_searchable_and_returns_a_bounded_page(): void
