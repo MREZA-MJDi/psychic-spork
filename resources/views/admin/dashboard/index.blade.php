@@ -61,7 +61,7 @@
         <section class="janan-overview__card janan-overview__orders" aria-labelledby="orders-title">
             <header class="janan-overview__section-head">
                 <div><h2 id="orders-title">آخرین سفارش‌ها</h2><p>بر اساس زمان ثبت</p></div>
-                <a href="{{ route('admin.orders.index') }}">همهٔ سفارش‌ها</a>
+                <a class="janan-widget-link" href="{{ route('admin.orders.index') }}">همهٔ سفارش‌ها</a>
             </header>
             @if($recentOrders->isEmpty())
                 <div class="janan-overview__empty">هنوز سفارشی ثبت نشده است.</div>
@@ -156,7 +156,7 @@
         <section class="janan-overview__card" aria-labelledby="catalog-title">
             <header class="janan-overview__section-head">
                 <div><h2 id="catalog-title">محصولات و گزینه‌ها</h2><p>هر مدل می‌تواند چند گزینهٔ سایز یا رنگ داشته باشد.</p></div>
-                <a href="{{ route('admin.products.index') }}">فهرست محصولات</a>
+                <a class="janan-widget-link" href="{{ route('admin.products.index') }}">فهرست محصولات</a>
             </header>
             <dl class="janan-overview__facts">
                 <div><dt>مدل ثبت‌شده</dt><dd>{{ $number($catalogProducts) }}</dd></div>
@@ -167,7 +167,7 @@
                 <div><dt>حساب مشتری</dt><dd>{{ $number($customers) }}</dd></div>
             </dl>
             <div class="janan-overview__catalog-link">
-                <a href="{{ route('admin.nila.index') }}">بررسی فایل هلو و تفاوت ردیف‌ها با مدل‌ها</a>
+                <a class="janan-widget-link" href="{{ route('admin.nila.index') }}">بررسی فایل هلو و تفاوت ردیف‌ها با مدل‌ها</a>
             </div>
         </section>
 
@@ -191,7 +191,7 @@
         <section class="janan-overview__card" aria-labelledby="stock-title">
             <header class="janan-overview__section-head">
                 <div><h2 id="stock-title">کمترین موجودی</h2><p>ارزش برآوردی موجودی به قیمت فروش {{ $number($inventoryValue) }} تومان</p></div>
-                <a href="{{ route('admin.inventory.index') }}">انبار</a>
+                <a class="janan-widget-link" href="{{ route('admin.inventory.index') }}">انبار</a>
             </header>
             <ul class="janan-overview__compact-list">
                 @forelse($lowStockVariants as $variant)
@@ -217,7 +217,7 @@
     <section class="janan-overview__card" aria-labelledby="recent-products-title">
         <header class="janan-overview__section-head">
             <div><h2 id="recent-products-title">آخرین مدل‌های ثبت‌شده</h2><p>مدل‌های تازه و وضعیت نمایش آن‌ها در فروشگاه</p></div>
-            <a href="{{ route('admin.products.index') }}">همهٔ محصولات</a>
+            <a class="janan-widget-link" href="{{ route('admin.products.index') }}">همهٔ محصولات</a>
         </header>
         <ul class="janan-overview__compact-list">
             @forelse($recentProducts as $product)
