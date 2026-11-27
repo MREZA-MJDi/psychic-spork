@@ -23,10 +23,9 @@
 
             <a
                 href="{{ route('products.index') }}"
-                class="text-link"
+                class="janan-widget-link"
             >
                 همه محصولات
-                <span aria-hidden="true">↗</span>
             </a>
         </header>
 
