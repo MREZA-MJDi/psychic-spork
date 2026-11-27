@@ -1837,10 +1837,6 @@ outline:
     margin-top: 18px;
 }
 
-.home-product-section__footer .button {
-    min-width: 190px;
-}
-
 .home-product-carousel:hover .home-product-section__footer {
     opacity: 1;
 }
