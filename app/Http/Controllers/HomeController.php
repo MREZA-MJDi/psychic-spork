@@ -26,15 +26,18 @@ class HomeController extends Controller
             ->take(8)
             ->get();
 
+        // Homepage brand discovery should lead to a non-empty catalog.
         $brands = Brand::query()
             ->active()
+            ->whereHas('products', fn ($query) => $query->active())
             ->with('logoMedia')
             ->withCount([
-                'products as active_products_count' => fn ($query) =>
-                $query->where('is_active', true),
+                'products as active_products_count' => fn ($query) => $query->active(),
             ])
+            ->orderByDesc('active_products_count')
             ->orderBy('name')
-            ->take(8)
+            ->orderBy('id')
+            ->limit(8)
             ->get();
 
         $productsQuery = Product::query()
