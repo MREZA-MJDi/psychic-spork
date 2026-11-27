@@ -1554,3 +1554,42 @@ document.addEventListener('DOMContentLoaded', () => {
     initInventoryForm();
     initWholesalePackForm();
 });
+
+// Poll unresolved cheque work only while an admin page is visible.
+(() => {
+    const boot = () => {
+        const bell = document.querySelector('[data-cheque-alerts]');
+        if (!bell) return;
+        const banner = document.querySelector('[data-cheque-banner]');
+        const message = document.querySelector('[data-cheque-alert-message]');
+        const digits = new Intl.NumberFormat('fa-IR');
+        let busy = false;
+        const refresh = async () => {
+            if (busy || document.hidden) return;
+            busy = true;
+            try {
+                const response = await fetch(bell.dataset.chequeAlerts, { headers: { Accept: 'application/json' }, cache: 'no-store' });
+                if (!response.ok) return;
+                const data = await response.json();
+                if (!Number.isInteger(data.requests) || !Number.isInteger(data.payments) || data.requests < 0 || data.payments < 0) return;
+                const counts = { ...data, total: data.requests + data.payments };
+                document.querySelectorAll('[data-cheque-count]').forEach(node => {
+                    const count = counts[node.dataset.chequeCount] ?? 0;
+                    node.textContent = digits.format(count);
+                    node.hidden = !count;
+                });
+                const url = data.requests ? bell.dataset.requestUrl : bell.dataset.paymentUrl;
+                bell.href = url;
+                bell.setAttribute('aria-label', 'اعلان‌های چک: ' + digits.format(counts.total) + ' مورد');
+                if (banner) { banner.hidden = !counts.total; banner.href = url; }
+                const label = digits.format(data.requests) + ' درخواست مجوز و ' + digits.format(data.payments) + ' چک جدید منتظر بررسی است.';
+                if (message && message.textContent.trim() !== label) message.textContent = label;
+            } catch { /* Keep the last known count on a transient failure. */ }
+            finally { busy = false; }
+        };
+        window.setInterval(refresh, 30000);
+        document.addEventListener('visibilitychange', refresh);
+    };
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
+    else boot();
+})();
