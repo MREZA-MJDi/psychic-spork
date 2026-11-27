@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\ChequePayment;
+use App\Models\ChequePermission;
+use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use App\Services\ChequePaymentService;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -29,10 +32,39 @@ class AdminChequeController extends Controller
         ];
 
         $filters = $request->validate([
+            'tab' => ['nullable', 'in:payments,requests,customers'],
+            'access' => ['nullable', 'in:approved,all,disabled'],
+            'customer_id' => ['nullable', 'integer', 'min:1'],
             'status' => ['nullable', 'string', 'in:' . implode(',', array_keys($statusNames))],
             'q' => ['nullable', 'string', 'max:120'],
         ]);
 
+        $tab = $filters['tab'] ?? 'payments';
+        $access = $filters['access'] ?? 'approved';
+        $customers = null;
+        $cheques = null;
+
+        if ($tab !== 'payments') {
+            $customers = User::query()
+                ->customers()
+                ->with('chequePermission')
+                ->when($tab === 'requests', fn ($query) => $query->whereHas('chequePermission', fn ($permission) => $permission->pending()))
+                ->when($tab === 'customers' && $access === 'approved', fn ($query) => $query->whereHas('chequePermission', fn ($permission) => $permission->approved()))
+                ->when($tab === 'customers' && $access === 'disabled', fn ($query) => $query->whereHas('chequePermission', fn ($permission) => $permission->where('enabled', false)->whereNotNull('disabled_at')))
+                ->when(isset($filters['customer_id']), fn ($query) => $query->whereKey($filters['customer_id']))
+                ->when(! empty($filters['q']), function ($query) use ($filters): void {
+                    $term = trim($filters['q']);
+                    $query->where(fn ($search) => $search->where('name', 'like', "%{$term}%")
+                        ->orWhere('phone', 'like', "%{$term}%")
+                        ->orWhere('email', 'like', "%{$term}%"));
+                })
+                ->when($tab === 'requests', fn ($query) => $query->orderByDesc(
+                    ChequePermission::query()->select('requested_at')->whereColumn('user_id', 'users.id')->limit(1)
+                ))
+                ->orderByDesc('id')
+                ->paginate(20)
+                ->withQueryString();
+        } else {
         $cheques = ChequePayment::query()
             ->with([
                 'order.user',
@@ -62,10 +94,29 @@ class AdminChequeController extends Controller
             ->paginate(20)
             ->withQueryString();
 
+        }
+
         return view('admin.cheques.index', [
+            'tab' => $tab,
+            'access' => $access,
+            'customers' => $customers,
             'cheques' => $cheques,
             'statusNames' => $statusNames,
         ]);
+    }
+
+    public static function pendingCounts(): array
+    {
+        return [
+            'requests' => ChequePermission::query()->pending()
+                ->whereHas('user', fn ($query) => $query->customers())->count(),
+            'payments' => ChequePayment::query()->where('status', 'submitted')->count(),
+        ];
+    }
+
+    public function alerts(): JsonResponse
+    {
+        return response()->json(self::pendingCounts())->header('Cache-Control', 'private, no-store');
     }
 
     public function image(ChequePayment $chequePayment): BinaryFileResponse
