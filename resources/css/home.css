@@ -2652,17 +2652,6 @@ outline:
     color: var(--janan-ink-strong);
 }
 
-.home-collections__browse {
-    display: inline-flex;
-    align-items: center;
-    min-height: 44px;
-    color: #93475f;
-    font-size: 13px;
-    font-weight: 750;
-}
-
-.home-collections__browse:hover { text-decoration: underline; }
-
 .home-collections .janan-category-grid--home {
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr));
     max-width: 1050px;
