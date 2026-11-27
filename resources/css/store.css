@@ -259,79 +259,6 @@ max-width:
         2;
 }
 
-.text-link {
-position: relative;
-
-    display: inline-flex;
-    align-items: center;
-
-    gap: 10px;
-
-    color:
-        var(--janan-ink-soft);
-
-    font-size:
-        10px;
-
-    font-weight:
-        750;
-
-    transition:
-        color var(--janan-base) ease;
-}
-
-.text-link::after {
-content: "";
-
-    position: absolute;
-
-    right:
-        0;
-
-    left:
-        20px;
-
-    bottom:
-        -5px;
-
-    height:
-        1px;
-
-    background:
-        linear-gradient(
-            90deg,
-            var(--janan-sky-500),
-            var(--janan-pink-400)
-        );
-
-    transform:
-        scaleX(0);
-
-    transform-origin:
-        right;
-
-    transition:
-        transform var(--janan-base) var(--janan-ease);
-}
-
-.text-link:hover {
-color:
-        var(--janan-pink-ink);
-}
-
-.text-link:hover::after {
-transform:
-        scaleX(1);
-}
-
-.text-link span {
-color:
-        var(--janan-sky-600);
-
-    font-size:
-        16px;
-}
-
 .button {
 min-height:
         46px;
@@ -2162,10 +2089,7 @@ color:
         650;
 }
 
-.catalog-toolbar .text-link {
-color:
-        #7b8992;
-}
+
 
 .collection-grid {
 display:
@@ -8070,13 +7994,7 @@ outline:
     font-size: 6.5px;
 }
 
-.about-live__product .text-link {
-    color: rgba(255,255,255,.80);
-}
 
-.about-live__product .text-link:hover {
-    color: #fff;
-}
 
 .about-live__product > p {
     margin: 0;

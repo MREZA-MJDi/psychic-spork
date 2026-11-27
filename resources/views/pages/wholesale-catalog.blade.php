@@ -12,7 +12,7 @@
                     <h1>کاتالوگ محصولات عمده</h1>
                     <p>محصول را جستجو کن؛ تعداد تنوع‌های دارای قیمت عمده و بازه قیمت هر محصول را ببین.</p>
                 </div>
-                <a class="button button--ghost" href="{{ route('wholesale.show') }}">بازگشت به پک‌های آماده</a>
+                <a class="janan-widget-link" href="{{ route('wholesale.show') }}">بازگشت به پک‌های آماده</a>
             </header>
 
             <form method="GET" action="{{ route('wholesale.catalog') }}" class="customer-surface wholesale-catalog__filters">

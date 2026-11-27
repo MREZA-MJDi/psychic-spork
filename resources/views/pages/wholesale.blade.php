@@ -20,7 +20,7 @@
                     <span class="wholesale-status__label">وضعیت خرید</span>
                     <strong>خرید آنلاین عمده فعال است</strong>
                     <p>برای سفارش آنلاین نیازی به تأیید قبلی حساب نیست. پرداخت چکی فقط با مجوز فعال مدیر امکان‌پذیر است.</p>
-                    <a href="{{ route('wholesale.catalog') }}">مشاهدهٔ کاتالوگ محصولات عمده</a>
+                    <a class="janan-widget-link" href="{{ route('wholesale.catalog') }}">مشاهدهٔ کاتالوگ محصولات عمده</a>
                 </aside>
             </div>
 
@@ -34,7 +34,7 @@
                     <h2>پک‌های آمادهٔ عمده</h2>
                     <p>تعداد هر مدل و مبلغ کل بسته روی کارت مشخص است.</p>
                 </div>
-                <a class="button button--ghost" href="{{ route('wholesale.catalog') }}">مشاهده کاتالوگ محصولات عمده</a>
+                <a class="janan-widget-link" href="{{ route('wholesale.catalog') }}">مشاهده کاتالوگ محصولات عمده</a>
             </header>
 
             @if($packs->isNotEmpty())
@@ -94,7 +94,7 @@
                     <div class="customer-inline-status" role="status">
                         <strong>درخواستت در انتظار بررسی مدیر است.</strong>
                         <p>مبلغ درخواستی: {{ \App\Support\PersianNumber::format((float) $chequePermission->requested_amount) }} تومان.</p>
-                        <a href="{{ route('account') }}#account-cheque-title">پیگیری در حساب کاربری</a>
+                        <a class="janan-widget-link" href="{{ route('account') }}#account-cheque-title">پیگیری در حساب کاربری</a>
                     </div>
                 @elseif($isCustomer)
                     <form method="POST" action="{{ route('wholesale.cheque.request') }}" class="checkout-form cheque-request-form">
