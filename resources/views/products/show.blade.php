@@ -406,8 +406,8 @@
                         <p>چند محصول نزدیک برای ادامه‌ی کشف و خرید.</p>
                     </div>
 
-                    <a class="text-link" href="{{ route('products.index') }}">
-                        همه محصولات <span aria-hidden="true">↗</span>
+                    <a class="janan-widget-link" href="{{ route('products.index') }}">
+                        همه محصولات
                     </a>
                 </header>
 
