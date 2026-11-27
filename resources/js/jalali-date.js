@@ -148,7 +148,9 @@ export function initJalaliDates() {
         wrapper.addEventListener('keydown', event => {
             if (event.key === 'Escape' && !panel.hidden) { event.preventDefault(); close(true); }
         });
-        document.addEventListener('click', event => { if (!wrapper.contains(event.target)) close(); });
+        // Month navigation replaces the clicked button during event dispatch.
+        // The original event path still identifies clicks inside this picker.
+        document.addEventListener('click', event => { if (!event.composedPath().includes(wrapper)) close(); });
         native.dataset.jalaliReady = 'true';
         sync();
     });
