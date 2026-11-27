@@ -62,6 +62,7 @@ class AdminProductController extends Controller
             ->limit(1);
 
         $products = Product::query()
+            ->when(in_array($sort, ['price_asc', 'price_desc'], true), fn ($query) => $query->withCatalogMetrics())
             ->with([
                 'category:id,name',
                 'brand:id,name',
