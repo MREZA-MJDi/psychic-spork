@@ -35,6 +35,8 @@ class AdminChequeController extends Controller
             'tab' => ['nullable', 'in:payments,requests,customers'],
             'access' => ['nullable', 'in:approved,all,disabled'],
             'customer_id' => ['nullable', 'integer', 'min:1'],
+            'edit_customer' => ['nullable', 'integer', 'min:1'],
+            'cheque_id' => ['nullable', 'integer', 'min:1'],
             'status' => ['nullable', 'string', 'in:' . implode(',', array_keys($statusNames))],
             'q' => ['nullable', 'string', 'max:120'],
         ]);
@@ -43,6 +45,8 @@ class AdminChequeController extends Controller
         $access = $filters['access'] ?? 'approved';
         $customers = null;
         $cheques = null;
+        $selectedCheque = null;
+        $selectedCustomer = null;
 
         if ($tab !== 'payments') {
             $customers = User::query()
@@ -63,7 +67,12 @@ class AdminChequeController extends Controller
                 ))
                 ->orderByDesc('id')
                 ->paginate(20)
-                ->withQueryString();
+                ->appends($request->except('edit_customer', 'cheque_id'));
+
+            $selectedId = $filters['edit_customer'] ?? $filters['customer_id'] ?? null;
+            if ($selectedId) {
+                $selectedCustomer = User::query()->customers()->with('chequePermission')->findOrFail($selectedId);
+            }
         } else {
             $cheques = ChequePayment::query()
                 ->with([
@@ -92,8 +101,11 @@ class AdminChequeController extends Controller
                 })
                 ->latest('id')
                 ->paginate(20)
-                ->withQueryString();
+                ->appends($request->except('cheque_id', 'edit_customer'));
 
+            if (isset($filters['cheque_id'])) {
+                $selectedCheque = ChequePayment::query()->with(['order.user', 'payment', 'reviewedBy'])->findOrFail($filters['cheque_id']);
+            }
         }
 
         return view('admin.cheques.index', [
@@ -102,6 +114,8 @@ class AdminChequeController extends Controller
             'access' => $access,
             'customers' => $customers,
             'cheques' => $cheques,
+            'selectedCheque' => $selectedCheque,
+            'selectedCustomer' => $selectedCustomer,
             'statusNames' => $statusNames,
         ]);
     }
